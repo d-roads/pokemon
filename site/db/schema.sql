@@ -1,2 +1,8 @@
 CREATE TABLE IF NOT EXISTS watchlist (user_id TEXT NOT NULL, card_id TEXT NOT NULL, grade TEXT NOT NULL, target REAL, created_at TEXT NOT NULL, PRIMARY KEY (user_id,card_id,grade));
 CREATE TABLE IF NOT EXISTS market_cache (card_id TEXT PRIMARY KEY NOT NULL, payload TEXT NOT NULL, fetched_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS collection (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, card_id TEXT NOT NULL, grade TEXT NOT NULL, quantity INTEGER NOT NULL DEFAULT 1, purchase_price REAL, purchase_date TEXT, notes TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS collection_user ON collection (user_id, card_id);
+CREATE TABLE IF NOT EXISTS alert_settings (user_id TEXT PRIMARY KEY NOT NULL, payload TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS alerts (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, card_id TEXT NOT NULL, grade TEXT NOT NULL, listing_id TEXT NOT NULL, title TEXT NOT NULL, price REAL NOT NULL, shipping REAL, total REAL NOT NULL, currency TEXT NOT NULL DEFAULT 'USD', url TEXT NOT NULL, image TEXT, buying_option TEXT, limit_price REAL NOT NULL, limit_source TEXT, market_price REAL, seller TEXT, listed_at TEXT, found_at TEXT NOT NULL, seen INTEGER NOT NULL DEFAULT 0, dismissed INTEGER NOT NULL DEFAULT 0, UNIQUE (user_id, listing_id, card_id, grade));
+CREATE INDEX IF NOT EXISTS alerts_user ON alerts (user_id, dismissed, found_at);
+CREATE TABLE IF NOT EXISTS alert_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, started_at TEXT NOT NULL, finished_at TEXT, checked INTEGER NOT NULL DEFAULT 0, found INTEGER NOT NULL DEFAULT 0, error TEXT);

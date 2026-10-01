@@ -3,8 +3,9 @@ import gradedSnapshots from './xy-graded-market.json' with {type:'json'};
 import promoSnapshots from './promo-market.json' with {type:'json'};
 import researched from './researched-sales.json' with {type:'json'};
 import {mergeMarket} from '../lib/sales.mjs';
+import {expandCapture,mergeCapture} from '../lib/capture.mjs';
 import {cards} from './catalog.mjs';
-import {readFileSync,readdirSync} from 'node:fs';
+import {readFileSync,readdirSync,existsSync} from 'node:fs';
 // Source observations collected September 30, 2026. No invented transactions.
 export const observedAt='2026-10-01T00:10:00Z';
 const guides={
@@ -27,4 +28,11 @@ const baselines={...extraSnapshots,...gradedSnapshots,...promoSnapshots,...prima
 for(const [id,m]of Object.entries(baselines))m.guideSources=Object.fromEntries(Object.entries(m.guide).filter(([,v])=>v>0).map(([key])=>[key,{name:m.source,url:m.sourceUrl||cards.find(c=>c.id===id)?.source,observedAt:m.observedAt}]));
 const observations={...researched},batches=new URL('./sales-batches/',import.meta.url);
 for(const name of readdirSync(batches).filter(n=>n.endsWith('.json')).sort())for(const [id,m]of Object.entries(JSON.parse(readFileSync(new URL(name,batches),'utf8'))))observations[id]=mergeMarket(observations[id],m);
-export const snapshots=Object.fromEntries(Object.keys({...baselines,...observations}).map(id=>[id,mergeMarket(baselines[id],observations[id])]));
+const legacy=Object.fromEntries(Object.keys({...baselines,...observations}).map(id=>[id,mergeMarket(baselines[id],observations[id])]));
+// Full page captures (data/pricecharting/<set>.json) supersede the excerpt-based batches above.
+const captureDir=new URL('./pricecharting/',import.meta.url),captures={};
+if(existsSync(captureDir))for(const name of readdirSync(captureDir).filter(n=>n.endsWith('.json')).sort())Object.assign(captures,JSON.parse(readFileSync(new URL(name,captureDir),'utf8')));
+const cardById=new Map(cards.map(c=>[c.id,c]));
+export const snapshots={...legacy};
+for(const [id,record] of Object.entries(captures)){const card=cardById.get(id);if(card)snapshots[id]=mergeCapture(legacy[id],expandCapture(record,card));}
+export const captureCount=Object.keys(captures).length;

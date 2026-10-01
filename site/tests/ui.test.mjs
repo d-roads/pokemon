@@ -5,6 +5,7 @@ import vm from 'node:vm';
 import {cards,sets} from '../data/catalog.mjs';
 import {snapshots} from '../data/market.mjs';
 import {analyze,gradeNames} from '../lib/analysis.mjs';
+import {summarize,portfolioSeries,priceHistory,entryValue} from '../lib/portfolio.mjs';
 
 // Exercise the UI's controls and rendered output without a browser runtime.
 function workspace(){
@@ -13,14 +14,15 @@ function workspace(){
   constructor(){this.hidden=false;this.disabled=false;this.value='';this.textContent='';this.dataset={};this.classList={toggle(){}};}
   set innerHTML(html){this.html=html;for(const m of html.matchAll(/id="([^"]+)"/g))if(!elements.has('#'+m[1]))elements.set('#'+m[1],new Element());}
   get innerHTML(){return this.html||'';}
-  setAttribute(){} querySelectorAll(){return [];} showModal(){} close(){}
+  setAttribute(){} querySelectorAll(){return [];} querySelector(){return null;} addEventListener(){} showModal(){} close(){}
  }
  const html=readFileSync(new URL('../public/index.html',import.meta.url),'utf8');
  for(const m of html.matchAll(/id="([^"]+)"/g))elements.set('#'+m[1],new Element());
  const categories=[...html.matchAll(/data-category="([^"]+)"/g)].map(m=>{const e=new Element();e.dataset.category=m[1];return e;});
  const document={querySelector:s=>{assert.ok(elements.has(s),'Missing UI element '+s);return elements.get(s);},querySelectorAll:s=>s==='[data-category]'?categories:[]};
- const context=vm.createContext({document,analyze,computeAnalysis:analyze,gradeNames,Intl,Date,AbortController,setTimeout:()=>0,clearTimeout(){},fetch:async url=>({ok:true,json:async()=>url==='/api/catalog'?{cards,sets,markets:snapshots,local:true}:{watchlist:[]}})});
- const source=readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/^import .*;\s*/,'').replace(/init\(\);\s*$/,'');
+ const responses={'/api/catalog':{cards,sets,series:[{id:'XY',name:'XY',label:'XY Series',years:'2014–2016'},{id:'BW',name:'Black & White',label:'Black & White Series',years:'2011–2013'}],markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
+ const context=vm.createContext({document,analyze,computeAnalysis:analyze,gradeNames,summarize,portfolioSeries,priceHistory,entryValue,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,fetch:async url=>({ok:true,json:async()=>responses[url.split('?')[0]]||{}})});
+ const source=readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/^import .*;\s*$/gm,'').replace(/init\(\);\s*$/,'');
  vm.runInContext(source,context);
  return {context,e:s=>elements.get(s),run:s=>vm.runInContext(s,context)};
 }
@@ -30,7 +32,9 @@ test('Set picker, all-set search, and Radiant Collection render correct cards',a
  ui.e('#set-select').onchange({target:{value:'g1'}});assert.equal(ui.e('#page-title').textContent,'Generations');assert.match(ui.e('#set-count').innerHTML,/37/);
  ui.e('#grade').onchange({target:{value:'raw'}});ui.e('#search').oninput({target:{value:'RC30'}});assert.match(ui.e('#card-list').innerHTML,/Gardevoir/);assert.match(ui.e('#card-list').innerHTML,/RC30\/RC32/);assert.doesNotMatch(ui.e('#card-list').innerHTML,/\/160/);
  ui.e('#set-select').onchange({target:{value:'all'}});ui.run("state.category='all';updateView();");ui.e('#search').oninput({target:{value:'Flashfire'}});
- assert.equal(ui.run('filteredCards().length'),46);assert.match(ui.e('#set-count').innerHTML,/894/);
+ assert.equal(ui.run('filteredCards().length'),46);assert.match(ui.e('#set-count').innerHTML,/1447/);
+ ui.e('#search').oninput({target:{value:''}});ui.e('#set-select').onchange({target:{value:'era:BW'}});assert.match(ui.e('#set-count').innerHTML,/553/);assert.equal(ui.e('#page-title').textContent,'Explore the Black & White era');
+ ui.e('#set-select').onchange({target:{value:'bw11'}});ui.e('#search').oninput({target:{value:'RC24'}});assert.match(ui.e('#card-list').innerHTML,/Mew EX/);assert.match(ui.e('#card-list').innerHTML,/RC24\/RC25/);
 });
 test('Watchlist opens across sets and keeps saved limits with their own card',async()=>{
  const ui=workspace();await ui.run('init()');
@@ -39,4 +43,13 @@ test('Watchlist opens across sets and keeps saved limits with their own card',as
  assert.match(ui.e('#card-list').innerHTML,/\$25\.00/);assert.match(ui.e('#card-list').innerHTML,/\$150/);
  ui.e('#set-select').onchange({target:{value:'xy1'}});assert.equal(ui.run('filteredCards()[0].id'),'xy1-55');assert.match(ui.e('#detail').innerHTML,/XY Base Set/);
  ui.e('#set-select').onchange({target:{value:'xy12'}});assert.equal(ui.run('filteredCards().length'),0);assert.match(ui.e('#detail').innerHTML,/Select a card/);
+});
+
+test('Dex and Alerts views open without the set browser',async()=>{
+ const ui=workspace();await ui.run('init()');
+ ui.e('#dex-nav').onclick();assert.equal(ui.e('#workspace').hidden,true);assert.equal(ui.e('#dex-view').hidden,false);assert.equal(ui.e('#page-title').textContent,'Your Dex');
+ ui.run("state.dex.loaded=true;state.dex.entries=[{id:1,card_id:'xy5-151',grade:'psa9',quantity:1,purchase_price:1000,purchase_date:'2025-01-15',created_at:'2025-01-15T00:00:00Z'}];renderDex();");
+ assert.match(ui.e('#dex-view').innerHTML,/Primal Groudon EX/);assert.match(ui.e('#dex-view').innerHTML,/Value vs\. cost/);
+ ui.e('#alerts-nav').onclick();assert.equal(ui.e('#alerts-view').hidden,false);assert.equal(ui.e('#dex-view').hidden,true);await ui.run('loadAlerts()');assert.match(ui.e('#alerts-view').innerHTML,/Alert settings/);
+ ui.e('#browse-nav').onclick();assert.equal(ui.e('#workspace').hidden,false);
 });

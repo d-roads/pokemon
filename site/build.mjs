@@ -1,12 +1,14 @@
 import {readFileSync,writeFileSync,mkdirSync,readdirSync,copyFileSync} from 'node:fs';
-import {cards,sets} from './data/catalog.mjs';
+import {cards,sets,series} from './data/catalog.mjs';
 import {snapshots} from './data/market.mjs';
 mkdirSync('dist/server',{recursive:true});
-const files={};for(const n of readdirSync('public'))files['/'+n]=readFileSync('public/'+n,'utf8');files['/analysis.mjs']=readFileSync('lib/analysis.mjs','utf8');
+const files={};for(const n of readdirSync('public'))files['/'+n]=readFileSync('public/'+n,'utf8');
+for(const shared of ['analysis.mjs','portfolio.mjs'])files['/'+shared]=readFileSync('lib/'+shared,'utf8');
 const strip=source=>source.replace(/^import .*;\s*$/gm,'').replace(/^export /gm,'');
-const worker=`const cards=${JSON.stringify(cards)};const sets=${JSON.stringify(sets)};const snapshots=${JSON.stringify(snapshots)};\n${strip(readFileSync('lib/db.mjs','utf8'))}\n${strip(readFileSync('lib/sales.mjs','utf8'))}\n${strip(readFileSync('lib/provider.mjs','utf8'))}\n${strip(readFileSync('lib/api.mjs','utf8'))}\nconst assets=${JSON.stringify(files)};\nexport default {async fetch(request,env){const u=new URL(request.url);if(u.pathname.startsWith('/api/'))return api(request,env);const p=u.pathname==='/'?'/index.html':u.pathname;if(!(p in assets))return new Response('Not found',{status:404});const type=p.endsWith('.html')?'text/html; charset=utf-8':p.endsWith('.css')?'text/css; charset=utf-8':p.endsWith('.svg')?'image/svg+xml':'text/javascript; charset=utf-8';return new Response(assets[p],{headers:{'Content-Type':type,'X-Content-Type-Options':'nosniff'}});}};`;
+const modules=['db','sales','analysis','capture','provider','payload','portfolio','alerts','api'].map(n=>`// ---- lib/${n}.mjs\n`+strip(readFileSync(`lib/${n}.mjs`,'utf8'))).join('\n');
+const worker=`const cards=${JSON.stringify(cards)};const sets=${JSON.stringify(sets)};const series=${JSON.stringify(series)};const snapshots=${JSON.stringify(snapshots)};\n${modules}\nconst assets=${JSON.stringify(files)};\nexport default {async fetch(request,env){const u=new URL(request.url);if(u.pathname.startsWith('/api/'))return api(request,env);const p=u.pathname==='/'?'/index.html':u.pathname;if(!(p in assets))return new Response('Not found',{status:404});const type=p.endsWith('.html')?'text/html; charset=utf-8':p.endsWith('.css')?'text/css; charset=utf-8':p.endsWith('.svg')?'image/svg+xml':'text/javascript; charset=utf-8';return new Response(assets[p],{headers:{'Content-Type':type,'X-Content-Type-Options':'nosniff'}});}};`;
 writeFileSync('dist/server/index.js',worker);
 mkdirSync('dist/server/drizzle',{recursive:true});
 copyFileSync('db/schema.sql','dist/server/drizzle/0000_primal_watch.sql');
 writeFileSync('dist/server/package.json','{"type":"module"}');
-console.log('Built dependency-free Worker and public assets.');
+console.log(`Built dependency-free Worker (${(worker.length/1048576).toFixed(1)} MB) and public assets.`);

@@ -1,4 +1,6 @@
-const collector=n=>String(n).toUpperCase().replace(/\s/g,'').replace(/^(XY|RC)0+(?=\d)/,'$1');
+// Listings that are not a single, English, standard print of the card.
+export const EXCLUDED_LISTING=/\blot\b|bundle|\s&\s|\bfake\b|proxy|replica|custom|jumbo|oversized|reverse[ -]?holo|cosmos|pre-?release|\bleague\b|stamped|\bstamp\b|championship|\bwinner\b|crosshatch|\bstaff\b|signed|autograph|japanese|\bjpn\b|\bjap\b|\bger\b|german|french|\bfr\b|korean|chinese|italian|spanish|portuguese/i;
+export const collector=n=>String(n).toUpperCase().replace(/\s/g,'').replace(/^(XY|RC)0+(?=\d)/,'$1');
 export function gradeOf(title){
  if(/\b(?:CGC|BGS|BVG|Beckett|HGA|DSG|GRA|KSA|ACE|TAG|SGC|GMA|PCA|AGS|CGS)\b|\b(?:OC|MC|ST|MK|PD|OF)\b|\bPSA\s*(?:9|10)\s*\/\s*(?:9|10)\b/i.test(title))return null;
  const grades=[...title.matchAll(/\bPSA\s*([\d.]+)/gi)].map(m=>m[1]);
@@ -17,7 +19,7 @@ export function conditionOf(title){
  return 'Unknown';
 }
 export function matchesCard(title,card){
- if(/\blot\b|bundle|\s&\s|\bfake\b|proxy|replica|jumbo|oversized|reverse[ -]?holo|world championship|\bstaff\b|signed|autograph|japanese|\bjpn\b|\bjap\b|\bger\b|german|french|\bfr\b|korean|chinese|italian|spanish|portuguese/i.test(title))return false;
+ if(EXCLUDED_LISTING.test(title))return false;
  const expected=collector(card.number),total=expected.startsWith('RC')?'RC'+card.printedTotal:String(card.printedTotal);
  const numbered=[...title.matchAll(/\b(RC\s*\d+|\d{1,3})\s*\/\s*(RC\s*\d+|\d{1,3})\b/gi)];
  if(!expected.startsWith('XY')&&numbered.length)return numbered.every(m=>collector(m[1])===expected&&collector(m[2])===total);
@@ -31,14 +33,14 @@ export function makeSale({date,title,price,source,listingUrl,marketplace},card){
  return {id:identity,number:card.number,grade,date,price,condition:grade==='raw'?conditionOf(title):'',marketplace:marketplace||'eBay',provenance:'PriceCharting reported sale',source:source||card.source,title};
 }
 export function dedupeSales(sales){
- const unique=new Map();
+ const unique=new Map(),legacyIndex=new Map();
  for(const original of sales||[]){
   let s=original;if(s.title){const grade=gradeOf(s.title);if(!grade)continue;s={...s,grade,condition:grade==='raw'?conditionOf(s.title):''};}
-  const legacy=[s.number,s.date,s.grade,s.price,s.condition].join('|');
-  const duplicate=[...unique.entries()].find(([,v])=>[v.number,v.date,v.grade,v.price,v.condition].join('|')===legacy&&(!s.title||!v.title));
+  const legacy=[s.number,s.date,s.grade,s.price,s.condition].join('|'),bucket=legacyIndex.get(legacy)||[];
+  const duplicate=bucket.find(([k,v])=>unique.get(k)===v&&(!s.title||!v.title));
   if(duplicate){if(s.title&&!duplicate[1].title)unique.delete(duplicate[0]);else continue;}
   const key=s.marketplace==='TCGPlayer'?[s.date,s.grade,s.price,s.condition,s.title].join('|'):s.id||[s.date,s.grade,s.price,s.title].join('|');
-  if(!unique.has(key))unique.set(key,s);
+  if(!unique.has(key)){unique.set(key,s);bucket.push([key,s]);legacyIndex.set(legacy,bucket);}
  }
  return [...unique.values()].sort((a,b)=>b.date.localeCompare(a.date));
 }

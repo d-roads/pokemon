@@ -11,7 +11,7 @@ function dbAdapter(sqlite){const stmt=(query,values=[])=>({bind(...v){return stm
 const sqlite=new DatabaseSync(':memory:');sqlite.exec(sql);const DB=dbAdapter(sqlite);
 const env={DB,NETWORK_DISABLED:true};
 const req=(path,method='GET',body,user='collector-a',origin='https://primal.test')=>new Request('https://primal.test'+path,{method,headers:{...(user?{'oai-authenticated-user-id':user}:{}),Origin:origin,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
-test('API returns all sets and separates source coverage',async()=>{const r=await api(req('/api/catalog'),env);assert.equal(r.status,200);const data=await r.json();assert.equal(data.cards.length,1831);assert.equal(data.sets.length,14);assert.equal(Object.keys(data.markets).length,Object.keys(snapshots).length);});
+test('API returns all sets and separates source coverage',async()=>{const r=await api(req('/api/catalog'),env);assert.equal(r.status,200);const data=await r.json();assert.equal(data.cards.length,3167);assert.equal(data.sets.length,26);assert.deepEqual(data.series.map(s=>s.id),['XY','BW']);assert.ok(Array.isArray(data.markets['xy5-147'].s));assert.equal(Object.keys(data.markets).length,Object.keys(snapshots).length);});
 test('Watchlist survives repeated writes, scopes ownership, and supports removal',async()=>{
  const item={card_id:'xy5-147',grade:'psa9',target:215};
  for(let i=0;i<2;i++)assert.equal((await api(req('/api/watchlist','POST',item),env)).status,200);
@@ -47,4 +47,27 @@ test('Market cache preserves full set IDs and never merges matching numbers',asy
  assert.equal((await api(req('/api/refresh?set=invalid','POST'),env)).status,400);
  const r=await(await api(req('/api/refresh?set=g1','POST'),env)).json();assert.equal(r.refreshed,false);assert.equal(sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count,0);
 });
-test('Sales refresh is scoped to rares and reports blocked access without writes',async()=>{const before=sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count;const r=await api(req('/api/research?set=all','POST'),env),body=await r.json();assert.equal(body.total,894);assert.equal(body.refreshed,false);assert.equal(body.attempted,0);assert.equal(sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count,before);assert.equal((await api(req('/api/research?set=invalid','POST'),env)).status,400);});
+test('Sales refresh is scoped to rares and reports blocked access without writes',async()=>{const before=sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count;const r=await api(req('/api/research?set=all','POST'),env),body=await r.json();assert.equal(body.total,1447);assert.equal((await(await api(req('/api/research?set=era:XY','POST'),env)).json()).total,894);assert.equal((await(await api(req('/api/research?set=era:BW','POST'),env)).json()).total,553);assert.equal(body.refreshed,false);assert.equal(body.attempted,0);assert.equal(sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count,before);assert.equal((await api(req('/api/research?set=invalid','POST'),env)).status,400);});
+
+test('Market detail returns the full record with history and titled sales',async()=>{const data=await(await api(req('/api/market?id=xy5-151'),env)).json();assert.equal(data.refreshed,false);assert.ok(data.market.sales.some(s=>s.title&&s.grade==='psa9'));assert.ok(data.market.history?.psa10?.length>12);assert.equal(data.market.research.status,'full');});
+test('Dex entries are validated, scoped to their owner, and editable',async()=>{
+ const add=b=>api(req('/api/collection','POST',b,'dex-user'),env);
+ for(const bad of [{card_id:'nope',grade:'psa9'},{card_id:'xy5-151',grade:'bgs9'},{card_id:'xy5-151',grade:'psa9',quantity:0},{card_id:'xy5-151',grade:'psa9',purchase_price:-5},{card_id:'xy5-151',grade:'psa9',purchase_date:'2999-01-01'}])assert.equal((await add(bad)).status,400);
+ let r=await(await add({card_id:'xy5-151',grade:'psa9',quantity:2,purchase_price:1500,purchase_date:'2025-06-01',notes:'cert 123'})).json();
+ assert.equal(r.collection.length,1);assert.equal(r.collection[0].quantity,2);assert.ok(r.markets['xy5-151'].history);
+ const id=r.collection[0].id;
+ assert.equal((await(await api(req('/api/collection','GET',null,'someone-else'),env)).json()).collection.length,0);
+ assert.equal((await api(req('/api/collection','PUT',{id,card_id:'xy5-151',grade:'psa9',quantity:1,purchase_price:1400},'someone-else'),env)).status,404);
+ r=await(await api(req('/api/collection','PUT',{id,card_id:'xy5-151',grade:'psa10',quantity:1,purchase_price:3000,purchase_date:'2025-06-01'},'dex-user'),env)).json();assert.equal(r.collection[0].grade,'psa10');assert.equal(r.collection[0].purchase_price,3000);
+ r=await(await api(req('/api/collection','DELETE',{id},'dex-user'),env)).json();assert.equal(r.collection.length,0);
+});
+test('Alert settings keep secrets server-side and validate notification targets',async()=>{
+ const post=b=>api(req('/api/alerts/settings','POST',b,'alert-user'),env);
+ assert.equal((await post({enabled:true})).status,400);
+ assert.equal((await post({notify:{discord:'https://example.com/hook'}})).status,400);
+ let r=await(await post({ebay:{clientId:'Collector-PrimalWa-PRD-abc123',clientSecret:'PRD-secret-value'},enabled:true,intervalMinutes:15,notify:{ntfy:'primal-watch-test'}})).json();
+ assert.equal(r.settings.ebay.configured,true);assert.equal(r.settings.enabled,true);assert.ok(!JSON.stringify(r).includes('PRD-secret-value'));assert.ok(!JSON.stringify(r).includes('abc123')||r.settings.ebay.clientId.includes('…'));
+ r=await(await post({ebay:{clientId:'Collector-PrimalWa-PRD-abc123'},intervalMinutes:60})).json();assert.equal(r.settings.ebay.hasSecret,true);assert.equal(r.settings.intervalMinutes,60);
+ const list=await(await api(req('/api/alerts','GET',null,'alert-user'),env)).json();assert.equal(list.alerts.length,0);assert.equal(list.live,true);
+ const scan=await(await api(req('/api/alerts/scan','POST',{},'alert-user'),env)).json();assert.match(scan.error,/unavailable/);
+});
