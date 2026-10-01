@@ -1,0 +1,1057 @@
+[
+  {
+    "number": "XY01",
+    "name": "Chespin",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY02",
+    "name": "Fennekin",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY03",
+    "name": "Froakie",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY04",
+    "name": "Sylveon",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY05",
+    "name": "Xerneas",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY06",
+    "name": "Yveltal",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY07",
+    "name": "Xerneas EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY08",
+    "name": "Yveltal EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY09",
+    "name": "Garchomp EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY10",
+    "name": "Dragalge",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY11",
+    "name": "Skiddo",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY12",
+    "name": "Honedge",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY13",
+    "name": "Machamp",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY14",
+    "name": "Trevenant",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY15",
+    "name": "Slurpuff",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY16",
+    "name": "Gogoat",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY17",
+    "name": "Charizard EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY18",
+    "name": "Chesnaught EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY19",
+    "name": "Delphox EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY20",
+    "name": "Greninja EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY21",
+    "name": "Bronzong",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY22",
+    "name": "Darkrai",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY23",
+    "name": "Shiftry",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY24",
+    "name": "Greninja",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY25",
+    "name": "Krookodile EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY26",
+    "name": "Pyroar",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY27",
+    "name": "Champions Festival",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY28",
+    "name": "Venusaur EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY29",
+    "name": "Charizard EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY30",
+    "name": "Blastoise EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY31",
+    "name": "Xerneas",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY32",
+    "name": "Yveltal",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY33",
+    "name": "Trevor",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY34",
+    "name": "Metagross EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY35",
+    "name": "M Metagross EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY36",
+    "name": "Treecko",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY37",
+    "name": "Torchic",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY38",
+    "name": "Mudkip",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY39",
+    "name": "Kingdra",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY40",
+    "name": "Ditto",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY41",
+    "name": "Kyogre EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY42",
+    "name": "Groudon EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY43",
+    "name": "Diancie EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY44",
+    "name": "M Diancie EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY45",
+    "name": "Gallade EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY46",
+    "name": "Altaria",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY47",
+    "name": "Heliolisk",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY48",
+    "name": "Meowstic",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY49",
+    "name": "Regirock",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY50",
+    "name": "Pangoro",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY51",
+    "name": "Kyogre",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY52",
+    "name": "Groudon",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY53",
+    "name": "Sceptile EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY54",
+    "name": "Blaziken EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY55",
+    "name": "Swampert EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY56",
+    "name": "Blissey",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY57",
+    "name": "Fearow",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY58",
+    "name": "Malamar",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY59",
+    "name": "Salamence",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY60",
+    "name": "Gyarados",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY61",
+    "name": "Flygon EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY62",
+    "name": "Absol EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY63",
+    "name": "M Absol EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY64",
+    "name": "Rayquaza",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY65",
+    "name": "Latios",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY66",
+    "name": "Rayquaza EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY67",
+    "name": "Jirachi",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY68",
+    "name": "Chesnaught",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY69",
+    "name": "Rayquaza EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY70",
+    "name": "Tyrantrum EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY71",
+    "name": "Hoopa EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY72",
+    "name": "Latios EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY73",
+    "name": "Rayquaza EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY74",
+    "name": "Reshiram",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY75",
+    "name": "Palkia",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY76",
+    "name": "Zekrom",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY77",
+    "name": "Dialga",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY78",
+    "name": "Latias",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY79",
+    "name": "Latios",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY80",
+    "name": "Black Kyurem",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY81",
+    "name": "White Kyurem",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY82",
+    "name": "Regigigas",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY83",
+    "name": "Arceus",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY84",
+    "name": "Pikachu EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY85",
+    "name": "Hoopa EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY86",
+    "name": "M Blaziken EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY87",
+    "name": "M Swampert EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY88",
+    "name": "Chespin",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY89",
+    "name": "Pikachu",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY90",
+    "name": "Hoopa",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY91",
+    "name": "Champions Festival",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY92",
+    "name": "Sableye",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY93",
+    "name": "Celebi",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY94",
+    "name": "Trevenant",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY95",
+    "name": "Pikachu",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY96",
+    "name": "Umbreon",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY97",
+    "name": "Aerodactyl EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY98",
+    "name": "M Aerodactyl EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY99",
+    "name": "Aerodactyl Spirit Link",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY100",
+    "name": "Mewtwo",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY101",
+    "name": "Mewtwo",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY102",
+    "name": "Aurorus EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY103",
+    "name": "Mawile EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY104",
+    "name": "M Mawile EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY105",
+    "name": "Mawile Spirit Link",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY106",
+    "name": "Gyarados EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY107",
+    "name": "Mewtwo EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY108",
+    "name": "Machamp EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY109",
+    "name": "Gyarados",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY110",
+    "name": "Mew",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY111",
+    "name": "Celebi",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY112",
+    "name": "Jirachi",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY113",
+    "name": "Manaphy",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY114",
+    "name": "Darkrai",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY115",
+    "name": "Shaymin",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY116",
+    "name": "Arceus",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY117",
+    "name": "Victini",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY118",
+    "name": "Keldeo",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY119",
+    "name": "Genesect",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY120",
+    "name": "Meloetta",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY121",
+    "name": "Charizard EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY122",
+    "name": "Blastoise EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY123",
+    "name": "Venusaur EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY124",
+    "name": "Pikachu EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY125",
+    "name": "Mewtwo EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY126",
+    "name": "Mew EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY127",
+    "name": "Moltres",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY128",
+    "name": "White Kyurem",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY129",
+    "name": "Zygarde",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY130",
+    "name": "Tyranitar",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY131",
+    "name": "Pansear",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY132",
+    "name": "Gastly",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY133",
+    "name": "Ash Greninja EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY134",
+    "name": "Empoleon BREAK",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY135",
+    "name": "Beheeyem BREAK",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY136",
+    "name": "Noctowl BREAK",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY137",
+    "name": "Vivillon",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY138",
+    "name": "Froakie",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY139",
+    "name": "Floette",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY140",
+    "name": "Lucario",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY141",
+    "name": "Rayquaza",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY142",
+    "name": "Azelf",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY143",
+    "name": "Magikarp",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY144",
+    "name": "Yanmega",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY145",
+    "name": "Volcanion",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY146",
+    "name": "Clawitzer",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY147",
+    "name": "Hoopa",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY148",
+    "name": "Shaymin EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY149",
+    "name": "Xerneas EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY150",
+    "name": "Yveltal EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY151",
+    "name": "Zygarde EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY152",
+    "name": "Zygarde",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY153",
+    "name": "Ho Oh",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY154",
+    "name": "Ho-Oh BREAK",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY155",
+    "name": "Wobbuffet BREAK",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY156",
+    "name": "Lugia",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY157",
+    "name": "Beedrill EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY158",
+    "name": "M Beedrill-EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY159",
+    "name": "Beedrill Spirit Link",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY160",
+    "name": "Black Kyurem",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY161",
+    "name": "Braixen",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY162",
+    "name": "Greninja",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY163",
+    "name": "Weezing",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY164",
+    "name": "Volcanion",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY165",
+    "name": "Magearna",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY166",
+    "name": "M Gengar-EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY167",
+    "name": "Garchomp-EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY168",
+    "name": "M Garchomp-EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY169",
+    "name": "Garchomp Spirit Link",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY170",
+    "name": "Salamence EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY171",
+    "name": "M Salamence-EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY172",
+    "name": "Salamence Spirit Link",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY173",
+    "name": "Volcanion EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY174",
+    "name": "Pikachu-EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY175",
+    "name": "Magearna-EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY176",
+    "name": "Champions Festival",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY177",
+    "name": "Karen",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY178",
+    "name": "Absol",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY179",
+    "name": "Snorlax",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY180",
+    "name": "Arcanine BREAK",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY181",
+    "name": "Crobat BREAK",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY182",
+    "name": "Mandibuzz BREAK",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY183",
+    "name": "Mewtwo-EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY184",
+    "name": "Giratina",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY185",
+    "name": "Volcanion",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY186",
+    "name": "Magearna",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY187",
+    "name": "Celebi",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY188",
+    "name": "Shaymin",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY189",
+    "name": "Victini",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY190",
+    "name": "Manaphy",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY191",
+    "name": "Keldeo",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY192",
+    "name": "Mew",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY193",
+    "name": "Meloetta",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY194",
+    "name": "Darkrai",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY195",
+    "name": "Jirachi",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY196",
+    "name": "Genesect",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY197",
+    "name": "Arceus",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY198",
+    "name": "M Camerupt-EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY199",
+    "name": "Camerupt Spirit Link",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY200",
+    "name": "M Sharpedo-EX",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY201",
+    "name": "Sharpedo Spirit Link",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY202",
+    "name": "Pikachu",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY203",
+    "name": "Gym Badge",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY204",
+    "name": "Gym Badge",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY205",
+    "name": "Gym Badge",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY206",
+    "name": "Gym Badge",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY207",
+    "name": "Gym Badge",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY208",
+    "name": "Gym Badge",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY209",
+    "name": "Gym Badge",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY210",
+    "name": "Gym Badge",
+    "rarity": "Promo"
+  },
+  {
+    "number": "XY211",
+    "name": "Lucario Spirit Link",
+    "rarity": "Promo"
+  }
+]

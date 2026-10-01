@@ -1,0 +1,6 @@
+node_modules/
+site/dist/
+site/data/*.sqlite*
+site/localhost-*.log
+*.zip
+.DS_Store

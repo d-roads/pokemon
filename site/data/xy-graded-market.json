@@ -1,0 +1,1978 @@
+{
+  "xy4-15": {
+    "number": 15,
+    "guide": {
+      "raw": 1.49,
+      "grade9": 22,
+      "psa10": 41.86
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-23": {
+    "number": 23,
+    "guide": {
+      "raw": 2.76,
+      "grade9": 47.68,
+      "psa10": 236.76
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-24": {
+    "number": 24,
+    "guide": {
+      "raw": 9.23,
+      "grade9": 64,
+      "psa10": 127.09
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.814Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-26": {
+    "number": 26,
+    "guide": {
+      "raw": 1.61,
+      "grade9": 10.5,
+      "psa10": 40.26
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-33": {
+    "number": 33,
+    "guide": {
+      "raw": 1.85,
+      "grade9": 12.43,
+      "psa10": 350
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-34": {
+    "number": 34,
+    "guide": {
+      "raw": 58.43,
+      "grade9": 180,
+      "psa10": 751
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.814Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-35": {
+    "number": 35,
+    "guide": {
+      "raw": 74.34,
+      "grade9": 353.72,
+      "psa10": 3100
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.814Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-36": {
+    "number": 36,
+    "guide": {
+      "raw": 2.66,
+      "grade9": 21.29,
+      "psa10": 52.53
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-43": {
+    "number": 43,
+    "guide": {
+      "raw": 3.41,
+      "grade9": 28.33,
+      "psa10": 350
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-58": {
+    "number": 58,
+    "guide": {
+      "raw": 2.73,
+      "grade9": 18.4,
+      "psa10": 150
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-62": {
+    "number": 62,
+    "guide": {
+      "raw": 10,
+      "grade9": 50,
+      "psa10": 616.89
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.814Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-65": {
+    "number": 65,
+    "guide": {
+      "raw": 3.49,
+      "grade9": 15,
+      "psa10": 139.37
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.814Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-67": {
+    "number": 67,
+    "guide": {
+      "raw": 5.67,
+      "grade9": 39,
+      "psa10": 49.99
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-70": {
+    "number": 70,
+    "guide": {
+      "raw": 1.7,
+      "grade9": 15.35,
+      "psa10": 40.68
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-71": {
+    "number": 71,
+    "guide": {
+      "raw": 3.49,
+      "grade9": 27.95,
+      "psa10": 66.44
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-74": {
+    "number": 74,
+    "guide": {
+      "raw": 1.71,
+      "grade9": 179.17,
+      "psa10": 215
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-77": {
+    "number": 77,
+    "guide": {
+      "raw": 2.46,
+      "grade9": 15.5,
+      "psa10": 51.09
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-80": {
+    "number": 80,
+    "guide": {
+      "raw": 1.22,
+      "grade9": 14.43,
+      "psa10": 40.34
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-81": {
+    "number": 81,
+    "guide": {
+      "raw": 1.68,
+      "grade9": 17.1,
+      "psa10": 112.38
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-86": {
+    "number": 86,
+    "guide": {
+      "raw": 1.53,
+      "grade9": 19.75,
+      "psa10": 155.55
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-95": {
+    "number": 95,
+    "guide": {
+      "raw": 4.69,
+      "grade9": 78.21,
+      "psa10": 94
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.814Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-97": {
+    "number": 97,
+    "guide": {
+      "raw": 2.26,
+      "grade9": 12,
+      "psa10": 55
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-98": {
+    "number": 98,
+    "guide": {
+      "raw": 1.99,
+      "grade9": 12.55,
+      "psa10": 249.99
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-109": {
+    "number": 109,
+    "guide": {
+      "raw": 3.49,
+      "grade9": 25.24,
+      "psa10": 60.42
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-113": {
+    "number": 113,
+    "guide": {
+      "raw": 15,
+      "grade9": 69,
+      "psa10": 7797.54
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.814Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-114": {
+    "number": 114,
+    "guide": {
+      "raw": 359.99,
+      "grade9": 3768.44,
+      "psa10": 26548.45
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.814Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-115": {
+    "number": 115,
+    "guide": {
+      "raw": 13.67,
+      "grade9": 83,
+      "psa10": 3491.96
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.814Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-116": {
+    "number": 116,
+    "guide": {
+      "raw": 19.44,
+      "grade9": 70.22,
+      "psa10": 878.3
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.814Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-117": {
+    "number": 117,
+    "guide": {
+      "raw": 18.1,
+      "grade9": 106.19,
+      "psa10": 839.97
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.814Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-118": {
+    "number": 118,
+    "guide": {
+      "raw": 15,
+      "grade9": 49.69,
+      "psa10": 955
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-119": {
+    "number": 119,
+    "guide": {
+      "raw": 7,
+      "grade9": 42.01,
+      "psa10": 322.62
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-120": {
+    "number": 120,
+    "guide": {
+      "raw": 22,
+      "grade9": 135.5,
+      "psa10": 2237.5
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.814Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-121": {
+    "number": 121,
+    "guide": {
+      "raw": 186.87,
+      "grade9": 1353.96,
+      "psa10": 9201
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.814Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy4-122": {
+    "number": 122,
+    "guide": {
+      "raw": 466.54,
+      "grade9": 1706,
+      "psa10": 14179.11
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.814Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-phantom-forces?view=table",
+    "status": "snapshot"
+  },
+  "xy7-8": {
+    "number": 8,
+    "guide": {
+      "raw": 14.41,
+      "grade9": 55.91,
+      "psa10": 265.28
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-13": {
+    "number": 13,
+    "guide": {
+      "raw": 1.46,
+      "grade9": 36,
+      "psa10": 41.96
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-15": {
+    "number": 15,
+    "guide": {
+      "raw": 9.85,
+      "grade9": 72.05,
+      "psa10": 573.42
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-21": {
+    "number": 21,
+    "guide": {
+      "raw": 55,
+      "grade9": 275,
+      "psa10": 2900
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-28": {
+    "number": 28,
+    "guide": {
+      "raw": 13.5,
+      "grade9": 43,
+      "psa10": 153.92
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-32": {
+    "number": 32,
+    "guide": {
+      "raw": 0.83,
+      "grade9": 24.99,
+      "psa10": 33
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-42": {
+    "number": 42,
+    "guide": {
+      "raw": 6.35,
+      "grade9": 40,
+      "psa10": 330
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-43": {
+    "number": 43,
+    "guide": {
+      "raw": 15.5,
+      "grade9": 55,
+      "psa10": 326.65
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-50": {
+    "number": 50,
+    "guide": {
+      "raw": 5,
+      "grade9": 1630.2,
+      "psa10": 1956
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-57": {
+    "number": 57,
+    "guide": {
+      "raw": 18.5,
+      "grade9": 62.28,
+      "psa10": 355.47
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-68": {
+    "number": 68,
+    "guide": {
+      "raw": 8.99,
+      "grade9": 58.38,
+      "psa10": 630
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-84": {
+    "number": 84,
+    "guide": {
+      "raw": 44.66,
+      "grade9": 115.22,
+      "psa10": 1700
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-85": {
+    "number": 85,
+    "guide": {
+      "raw": 67.55,
+      "grade9": 195,
+      "psa10": 1412.5
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-86": {
+    "number": 86,
+    "guide": {
+      "raw": 31,
+      "grade9": 111.67,
+      "psa10": 1200
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-88": {
+    "number": 88,
+    "guide": {
+      "raw": 51,
+      "grade9": 125.98,
+      "psa10": 875
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-89": {
+    "number": 89,
+    "guide": {
+      "raw": 29.5,
+      "grade9": 115.74,
+      "psa10": 900.61
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-91": {
+    "number": 91,
+    "guide": {
+      "raw": 75,
+      "grade9": 241.07,
+      "psa10": 1886.7
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-92": {
+    "number": 92,
+    "guide": {
+      "raw": 55,
+      "grade9": 194.36,
+      "psa10": 916.75
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-93": {
+    "number": 93,
+    "guide": {
+      "raw": 91.47,
+      "grade9": 404.35,
+      "psa10": 2733.36
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-94": {
+    "number": 94,
+    "guide": {
+      "raw": 144.48,
+      "grade9": 645.59,
+      "psa10": 5325
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-96": {
+    "number": 96,
+    "guide": {
+      "raw": 202.5,
+      "grade9": 637.94,
+      "psa10": 4675
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-97": {
+    "number": 97,
+    "guide": {
+      "raw": 207.4,
+      "grade9": 729.55,
+      "psa10": 4250
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy7-98": {
+    "number": 98,
+    "guide": {
+      "raw": 454.94,
+      "grade9": 2425.49,
+      "psa10": 11556.98
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.815Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-ancient-origins?view=table",
+    "status": "snapshot"
+  },
+  "xy8-12": {
+    "number": 12,
+    "guide": {
+      "raw": 2.65,
+      "grade9": 30.05,
+      "psa10": 99.99
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-20": {
+    "number": 20,
+    "guide": {
+      "raw": 5.12,
+      "grade9": 32.1,
+      "psa10": 752.25
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-22": {
+    "number": 22,
+    "guide": {
+      "raw": 18,
+      "grade9": 58.38,
+      "psa10": 399
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-35": {
+    "number": 35,
+    "guide": {
+      "raw": 6,
+      "grade9": 39,
+      "psa10": 193.93
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-48": {
+    "number": 48,
+    "guide": {
+      "raw": 1.85,
+      "grade9": 20,
+      "psa10": 26.05
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-49": {
+    "number": 49,
+    "guide": {
+      "raw": 1.47,
+      "grade9": 36.6,
+      "psa10": 192.25
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-50": {
+    "number": 50,
+    "guide": {
+      "raw": 10.67,
+      "grade9": 46.41,
+      "psa10": 667.6
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-60": {
+    "number": 60,
+    "guide": {
+      "raw": 11,
+      "grade9": 165,
+      "psa10": null
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-61": {
+    "number": 61,
+    "guide": {
+      "raw": 9.39,
+      "grade9": 57.06,
+      "psa10": 632.81
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-62": {
+    "number": 62,
+    "guide": {
+      "raw": 9.32,
+      "grade9": 28.2,
+      "psa10": 246.95
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-63": {
+    "number": 63,
+    "guide": {
+      "raw": 29.49,
+      "grade9": 91.6,
+      "psa10": 651.06
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-64": {
+    "number": 64,
+    "guide": {
+      "raw": 24.59,
+      "grade9": 99,
+      "psa10": 775.18
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-79": {
+    "number": 79,
+    "guide": {
+      "raw": 5.71,
+      "grade9": 31.5,
+      "psa10": 448.5
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-92": {
+    "number": 92,
+    "guide": {
+      "raw": 6.04,
+      "grade9": 35.74,
+      "psa10": 274.99
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-113": {
+    "number": 113,
+    "guide": {
+      "raw": 4.03,
+      "grade9": 36,
+      "psa10": 237.68
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-118": {
+    "number": 118,
+    "guide": {
+      "raw": 6.58,
+      "grade9": 220,
+      "psa10": 264
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-153": {
+    "number": 153,
+    "guide": {
+      "raw": 30.56,
+      "grade9": 185.23,
+      "psa10": 1904
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-154": {
+    "number": 154,
+    "guide": {
+      "raw": 35,
+      "grade9": 120.07,
+      "psa10": 980.5
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-156": {
+    "number": 156,
+    "guide": {
+      "raw": 17.63,
+      "grade9": 52.08,
+      "psa10": 480
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-157": {
+    "number": 157,
+    "guide": {
+      "raw": 57.11,
+      "grade9": 324.6,
+      "psa10": 3007.14
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-158": {
+    "number": 158,
+    "guide": {
+      "raw": 71.22,
+      "grade9": 327.5,
+      "psa10": 2756.1
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-159": {
+    "number": 159,
+    "guide": {
+      "raw": 79.45,
+      "grade9": 277.18,
+      "psa10": 2187.5
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-160": {
+    "number": 160,
+    "guide": {
+      "raw": 126.25,
+      "grade9": 317.5,
+      "psa10": 2575
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-161": {
+    "number": 161,
+    "guide": {
+      "raw": 25.49,
+      "grade9": 86.68,
+      "psa10": 488.88
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-162": {
+    "number": 162,
+    "guide": {
+      "raw": 21.78,
+      "grade9": 52.36,
+      "psa10": 315
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.817Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-163": {
+    "number": 163,
+    "guide": {
+      "raw": 148.33,
+      "grade9": 620.88,
+      "psa10": 5954.84
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy8-164": {
+    "number": 164,
+    "guide": {
+      "raw": 137.5,
+      "grade9": 607.07,
+      "psa10": 5007
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T00:54:53.816Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-breakthrough?view=table",
+    "status": "snapshot"
+  },
+  "xy1-85": {
+    "number": 85,
+    "guide": {
+      "raw": 1.24,
+      "grade9": 14.16,
+      "psa10": 38.59
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.728Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-xy?sort=name",
+    "status": "snapshot"
+  },
+  "xy1-86": {
+    "number": 86,
+    "guide": {
+      "raw": 2.63,
+      "grade9": 11.63,
+      "psa10": 85
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-xy?sort=name",
+    "status": "snapshot"
+  },
+  "xy1-48": {
+    "number": 48,
+    "guide": {
+      "raw": 0.79,
+      "grade9": 14.03,
+      "psa10": 38.32
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-xy?sort=name",
+    "status": "snapshot"
+  },
+  "xy1-93": {
+    "number": 93,
+    "guide": {
+      "raw": 1.06,
+      "grade9": null,
+      "psa10": null
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-xy?sort=name",
+    "status": "snapshot"
+  },
+  "xy1-5": {
+    "number": 5,
+    "guide": {
+      "raw": 1.59,
+      "grade9": 56,
+      "psa10": 67
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-xy?sort=name",
+    "status": "snapshot"
+  },
+  "xy1-107": {
+    "number": 107,
+    "guide": {
+      "raw": 0.75,
+      "grade9": 12.91,
+      "psa10": 36
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-xy?sort=name",
+    "status": "snapshot"
+  },
+  "xy1-106": {
+    "number": 106,
+    "guide": {
+      "raw": 0.57,
+      "grade9": 11.34,
+      "psa10": 32.77
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-xy?sort=name",
+    "status": "snapshot"
+  },
+  "xy2-31": {
+    "number": 31,
+    "guide": {
+      "raw": 0.99,
+      "grade9": 59,
+      "psa10": 300
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-flashfire?sort=name",
+    "status": "snapshot"
+  },
+  "xy2-49": {
+    "number": 49,
+    "guide": {
+      "raw": 0.68,
+      "grade9": 13,
+      "psa10": 14.5
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-flashfire?sort=name",
+    "status": "snapshot"
+  },
+  "xy2-30": {
+    "number": 30,
+    "guide": {
+      "raw": 0.4,
+      "grade9": 11.78,
+      "psa10": 33.67
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-flashfire?sort=name",
+    "status": "snapshot"
+  },
+  "xy2-48": {
+    "number": 48,
+    "guide": {
+      "raw": 0.19,
+      "grade9": 4.99,
+      "psa10": 31.65
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-flashfire?sort=name",
+    "status": "snapshot"
+  },
+  "xy2-88": {
+    "number": 88,
+    "guide": {
+      "raw": 1.87,
+      "grade9": 20,
+      "psa10": 46.61
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-flashfire?sort=name",
+    "status": "snapshot"
+  },
+  "xy2-28": {
+    "number": 28,
+    "guide": {
+      "raw": 0.25,
+      "grade9": 5.5,
+      "psa10": 34.59
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-flashfire?sort=name",
+    "status": "snapshot"
+  },
+  "xy2-84": {
+    "number": 84,
+    "guide": {
+      "raw": 1,
+      "grade9": 13.16,
+      "psa10": 36.51
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-flashfire?sort=name",
+    "status": "snapshot"
+  },
+  "xy2-3": {
+    "number": 3,
+    "guide": {
+      "raw": 1.74,
+      "grade9": 18.25,
+      "psa10": 45.84
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-flashfire?sort=name",
+    "status": "snapshot"
+  },
+  "xy6-105": {
+    "number": 105,
+    "guide": {
+      "raw": 272.67,
+      "grade9": 2490.53,
+      "psa10": 24095
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-roaring-skies",
+    "status": "snapshot"
+  },
+  "xy6-61": {
+    "number": 61,
+    "guide": {
+      "raw": 78.37,
+      "grade9": 394.37,
+      "psa10": 3846.61
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-roaring-skies",
+    "status": "snapshot"
+  },
+  "xy6-104": {
+    "number": 104,
+    "guide": {
+      "raw": 125.13,
+      "grade9": 1405,
+      "psa10": 7199.99
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-roaring-skies",
+    "status": "snapshot"
+  },
+  "xy6-76": {
+    "number": 76,
+    "guide": {
+      "raw": 42.96,
+      "grade9": 242.48,
+      "psa10": 2003.56
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-roaring-skies",
+    "status": "snapshot"
+  },
+  "xy6-75": {
+    "number": 75,
+    "guide": {
+      "raw": 26.71,
+      "grade9": 235,
+      "psa10": 1808.73
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-roaring-skies",
+    "status": "snapshot"
+  },
+  "xy6-52": {
+    "number": 52,
+    "guide": {
+      "raw": 21,
+      "grade9": 147.71,
+      "psa10": 2550
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-roaring-skies",
+    "status": "snapshot"
+  },
+  "xy6-20": {
+    "number": 20,
+    "guide": {
+      "raw": 1.95,
+      "grade9": 32.61,
+      "psa10": 355.96
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-roaring-skies",
+    "status": "snapshot"
+  },
+  "xy6-102": {
+    "number": 102,
+    "guide": {
+      "raw": 36.56,
+      "grade9": 369.75,
+      "psa10": 5128.49
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-roaring-skies",
+    "status": "snapshot"
+  },
+  "xy6-101": {
+    "number": 101,
+    "guide": {
+      "raw": 36.11,
+      "grade9": 234.43,
+      "psa10": 3626.14
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-roaring-skies",
+    "status": "snapshot"
+  },
+  "xy6-60": {
+    "number": 60,
+    "guide": {
+      "raw": 20.45,
+      "grade9": 87.25,
+      "psa10": 3000
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-roaring-skies",
+    "status": "snapshot"
+  },
+  "xy6-59": {
+    "number": 59,
+    "guide": {
+      "raw": 14,
+      "grade9": 56.41,
+      "psa10": 1273
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-roaring-skies",
+    "status": "snapshot"
+  },
+  "xy6-17": {
+    "number": 17,
+    "guide": {
+      "raw": 3.15,
+      "grade9": 70.15,
+      "psa10": 396
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-roaring-skies",
+    "status": "snapshot"
+  },
+  "xy6-100": {
+    "number": 100,
+    "guide": {
+      "raw": 25.05,
+      "grade9": 250,
+      "psa10": 749.99
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-roaring-skies",
+    "status": "snapshot"
+  },
+  "xy6-35": {
+    "number": 35,
+    "guide": {
+      "raw": 10,
+      "grade9": 47.1,
+      "psa10": 305
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.729Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-roaring-skies",
+    "status": "snapshot"
+  },
+  "xy3-107": {
+    "number": 107,
+    "guide": {
+      "raw": 80,
+      "grade9": 587.48,
+      "psa10": 2999.99
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.730Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-furious-fists?sort=highest-price",
+    "status": "snapshot"
+  },
+  "xy3-108": {
+    "number": 108,
+    "guide": {
+      "raw": 66.71,
+      "grade9": 551.42,
+      "psa10": 1209.74
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.730Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-furious-fists?sort=highest-price",
+    "status": "snapshot"
+  },
+  "xy3-113": {
+    "number": 113,
+    "guide": {
+      "raw": 32.84,
+      "grade9": 278.62,
+      "psa10": 4999.95
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.730Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-furious-fists?sort=highest-price",
+    "status": "snapshot"
+  },
+  "xy3-112": {
+    "number": 112,
+    "guide": {
+      "raw": 30.62,
+      "grade9": 158.42,
+      "psa10": 2121.21
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.730Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-furious-fists?sort=highest-price",
+    "status": "snapshot"
+  },
+  "xy3-111": {
+    "number": 111,
+    "guide": {
+      "raw": 26.47,
+      "grade9": 125,
+      "psa10": 3456.43
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.730Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-furious-fists?sort=highest-price",
+    "status": "snapshot"
+  },
+  "xy3-55": {
+    "number": 55,
+    "guide": {
+      "raw": 22.98,
+      "grade9": 102,
+      "psa10": 412.31
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.730Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-furious-fists?sort=highest-price",
+    "status": "snapshot"
+  },
+  "xy11-116": {
+    "number": 116,
+    "guide": {
+      "raw": 80.46,
+      "grade9": 192.18,
+      "psa10": 1875
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-112": {
+    "number": 112,
+    "guide": {
+      "raw": 36.03,
+      "grade9": 90,
+      "psa10": 524.83
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-79": {
+    "number": 79,
+    "guide": {
+      "raw": 17.02,
+      "grade9": 37.7,
+      "psa10": 218.77
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-77": {
+    "number": 77,
+    "guide": {
+      "raw": 2.35,
+      "grade9": 80.31,
+      "psa10": 192.5
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-109": {
+    "number": 109,
+    "guide": {
+      "raw": 19.97,
+      "grade9": 59.25,
+      "psa10": 332.5
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-115": {
+    "number": 115,
+    "guide": {
+      "raw": 31.98,
+      "grade9": 103.75,
+      "psa10": 757.34
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-111": {
+    "number": 111,
+    "guide": {
+      "raw": 19.45,
+      "grade9": 51.75,
+      "psa10": 485
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-68": {
+    "number": 68,
+    "guide": {
+      "raw": 8.5,
+      "grade9": 29.99,
+      "psa10": 122.42
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-108": {
+    "number": 108,
+    "guide": {
+      "raw": 14.46,
+      "grade9": 63.69,
+      "psa10": 675.48
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-107": {
+    "number": 107,
+    "guide": {
+      "raw": 9.42,
+      "grade9": 35,
+      "psa10": 452
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-66": {
+    "number": 66,
+    "guide": {
+      "raw": 7.02,
+      "grade9": 36.02,
+      "psa10": 269.03
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-110": {
+    "number": 110,
+    "guide": {
+      "raw": 8.86,
+      "grade9": 27.21,
+      "psa10": 273
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-26": {
+    "number": 26,
+    "guide": {
+      "raw": 2.49,
+      "grade9": 20.04,
+      "psa10": 90.85
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-114": {
+    "number": 114,
+    "guide": {
+      "raw": 11.05,
+      "grade9": 30.5,
+      "psa10": 149.99
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-82": {
+    "number": 82,
+    "guide": {
+      "raw": 6.12,
+      "grade9": 28.84,
+      "psa10": 202.5
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-67": {
+    "number": 67,
+    "guide": {
+      "raw": 2.43,
+      "grade9": 18.5,
+      "psa10": 90.24
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-87": {
+    "number": 87,
+    "guide": {
+      "raw": 5.85,
+      "grade9": 24.63,
+      "psa10": 171.43
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "xy11-40": {
+    "number": 40,
+    "guide": {
+      "raw": 2.35,
+      "grade9": 32,
+      "psa10": 455
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-steam-siege",
+    "status": "snapshot"
+  },
+  "g1-RC28": {
+    "number": "RC28",
+    "guide": {
+      "raw": 106.6,
+      "grade9": 650,
+      "psa10": 11043.47
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  },
+  "g1-RC32": {
+    "number": "RC32",
+    "guide": {
+      "raw": 115,
+      "grade9": 439.9,
+      "psa10": 8700
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  },
+  "g1-RC29": {
+    "number": "RC29",
+    "guide": {
+      "raw": 99.5,
+      "grade9": 418.63,
+      "psa10": 8600
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  },
+  "g1-RC31": {
+    "number": "RC31",
+    "guide": {
+      "raw": 83.24,
+      "grade9": 240,
+      "psa10": 4300
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  },
+  "g1-RC5": {
+    "number": "RC5",
+    "guide": {
+      "raw": 31.99,
+      "grade9": 125,
+      "psa10": 1682.29
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  },
+  "g1-12": {
+    "number": 12,
+    "guide": {
+      "raw": 72,
+      "grade9": 300,
+      "psa10": 3000
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  },
+  "g1-RC30": {
+    "number": "RC30",
+    "guide": {
+      "raw": 49.95,
+      "grade9": 223.05,
+      "psa10": 4935.66
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  },
+  "g1-RC6": {
+    "number": "RC6",
+    "guide": {
+      "raw": 54.7,
+      "grade9": 225,
+      "psa10": 3048.29
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  },
+  "g1-RC21": {
+    "number": "RC21",
+    "guide": {
+      "raw": 58.68,
+      "grade9": 188.26,
+      "psa10": 1986.68
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  },
+  "g1-RC13": {
+    "number": "RC13",
+    "guide": {
+      "raw": 15,
+      "grade9": 109.57,
+      "psa10": 2752.48
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  },
+  "g1-35": {
+    "number": 35,
+    "guide": {
+      "raw": 31.71,
+      "grade9": 302.47,
+      "psa10": 2325
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  },
+  "g1-RC10": {
+    "number": "RC10",
+    "guide": {
+      "raw": 21.09,
+      "grade9": 127.79,
+      "psa10": 999.99
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  },
+  "g1-25": {
+    "number": 25,
+    "guide": {
+      "raw": 30.32,
+      "grade9": 140,
+      "psa10": 1912.5
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  },
+  "g1-RC24": {
+    "number": "RC24",
+    "guide": {
+      "raw": 18,
+      "grade9": 91,
+      "psa10": 1055.26
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  },
+  "g1-RC3": {
+    "number": "RC3",
+    "guide": {
+      "raw": 16.63,
+      "grade9": 60.18,
+      "psa10": 792.51
+    },
+    "sales": [],
+    "observedAt": "2026-10-01T01:00:05.731Z",
+    "source": "PriceCharting",
+    "sourceUrl": "https://www.pricecharting.com/console/pokemon-generations",
+    "status": "snapshot"
+  }
+}

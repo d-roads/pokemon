@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore all 13 selected XY sets, save a watchlist, compare grade-specific sales, and find a considered price to buy.">
+  <meta name="theme-color" content="#f6f8fc"><title>Primal Watch — XY card tracker</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="Primal Watch home"><span class="brand-mark">P<span></span></span><span>primal<span class="brand-light">watch</span></span></a>
+      <p class="nav-label">YOUR WORKSPACE</p>
+      <nav aria-label="Main navigation">
+        <button class="nav-item active" id="browse-nav" aria-current="page"><span class="nav-icon">▦</span>Browse sets</button>
+        <button class="nav-item" id="watch-nav"><span class="nav-icon">☆</span>Watchlist<span class="nav-count" id="watch-count">0</span></button>
+      </nav>
+      <div class="set-nav"><p class="nav-label">EXPLORING</p><div class="set-indicator"><span class="set-symbol">XY</span><span><span id="sidebar-set">Primal Clash</span><small id="sidebar-year">English · 2015</small></span></div></div>
+      <div class="sidebar-bottom"><button id="method-button" class="method-link"><span class="info-circle">i</span>How targets work</button><p>For the collector.<br>With the numbers in view.</p><div class="sidebar-rule"></div><span class="beta">PRIMAL WATCH <b>v1</b></span></div>
+    </aside>
+    <main>
+      <header class="topbar"><div class="breadcrumb">Pokémon TCG <span>/</span> XY Series <span>/</span> <strong id="breadcrumb-set">Primal Clash</strong></div><span class="workspace-badge">Personal workspace</span></header>
+      <div class="content">
+        <div class="page-heading"><div><div class="eyebrow">SET EXPLORER <span id="set-code">XY5</span></div><h1 id="page-title">XY · Primal Clash</h1><p id="page-description">A closer look at your next pickup.</p></div><div class="heading-tools"><span class="snapshot-badge" id="snapshot-label">Prices checked Sep 30, 2026</span><button class="button" id="refresh-set"><span aria-hidden="true">↻</span> Refresh sales</button></div></div>
+        <div id="error-banner" class="notice error" role="alert" hidden></div>
+        <div class="set-switcher"><label for="set-select">Explore a set</label><select id="set-select"><option value="xy5">Primal Clash</option></select><span id="set-scope">13 expansions + XY promos</span></div>
+        <div class="summary-grid">
+          <div class="summary"><span id="set-count-label">Rare cards in this set</span><strong id="set-count">164 <small>160 + 4 secret rares</small></strong></div>
+          <div class="summary"><span>Price coverage</span><strong id="price-count">— <small>cards with sourced guides</small></strong></div>
+          <div class="summary"><span>Your watchlist</span><strong id="summary-watch">0 <small>cards & grades saved</small></strong></div>
+        </div>
+        <div class="workspace">
+          <section class="catalog-panel" aria-label="XY cards">
+            <div class="catalog-toolbar"><label class="search-wrap"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search a card, number, or set" aria-label="Search cards"></label><label class="grade-control"><span class="sr-only">Card grade</span><select id="grade"><option value="psa9">PSA 9</option><option value="psa10">PSA 10</option><option value="raw">Raw · near mint</option></select></label></div>
+            <div class="filters"><div class="category-tabs" aria-label="Card category"><button class="filter-tab active" data-category="chase" aria-pressed="true">Chase cards</button><button class="filter-tab" data-category="all" aria-pressed="false">All rares</button><button class="filter-tab" data-category="Full art" aria-pressed="false">Full art</button><button class="filter-tab" data-category="Pokémon EX" aria-pressed="false">EX</button><button class="filter-tab" data-category="Secret rare" aria-pressed="false">Secret rare</button><button class="filter-tab" data-category="Promo" aria-pressed="false">Promos</button></div><label class="sort-control"><span class="sr-only">Sort cards</span><select id="sort"><option value="featured">Featured</option><option value="number">Card number</option><option value="price">Price: high to low</option><option value="activity">Sales activity</option></select></label></div>
+            <div class="results-caption"><span id="result-count">Loading cards…</span><label class="budget-toggle"><input id="budget-filter" type="checkbox"><span>$250–$350</span></label></div>
+            <div class="list-head"><span>CARD</span><span>PRICE <span class="muted">USD</span></span><span>BUY TARGET</span><span class="sr-only">Watch</span></div>
+            <div id="card-list" class="card-list" tabindex="0" aria-label="Rare card list" aria-live="polite"><div class="loading"><span class="spinner"></span>Loading your cards…</div></div>
+            <div class="catalog-footer"><p id="coverage-note">Guides are estimates. Open a card to see matching sales.</p><button id="show-more" class="quiet-button" hidden>Show more cards</button></div>
+          </section>
+          <aside id="detail" class="detail-panel" tabindex="0" aria-label="Selected card"><div class="loading">Loading card details…</div></aside>
+        </div>
+        <footer class="page-footer"><span>All values in USD. Targets exclude shipping and tax.</span><button id="sources-button">Sources & methodology</button></footer>
+      </div>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <dialog id="method-dialog"><div class="dialog-heading"><h2>The numbers, explained.</h2><button class="icon-button" id="close-method" aria-label="Close methodology">×</button></div><div class="dialog-body">
+    <h3>Market price & buy target</h3><p>Prices use the narrowest 30-, 90-, or 180-day window with at least 3 matching sales. Smaller samples are shown with a limited-sample label. A buy target also requires a sale in the last 90 days. By default, the target is 15% below that median. You can choose your own target on a watched card.</p>
+    <p>PSA 9 and PSA 10 sales are separate. Raw targets use only listings explicitly identified as near mint. Mixed-condition raw guides and mixed-grader Grade 9 guides are shown as reference estimates, and are never used on their own to calculate a buy target.</p>
+    <h3>Demand estimate / 100</h3><p>This is a sales-activity proxy for this grade, not a measured popularity or investment rating. It combines comparable sales in the last 90 days (7 points per sale, capped at 70) and recency (up to 30 points). Raw demand uses near-mint sales. Sparse coverage can understate demand. “—” means no observations.</p>
+    <h3>Sales & confidence</h3><p>PriceCharting reports completed sales from eBay and TCGPlayer. Eyevo raw guides are reference estimates and do not provide the matching transactions used for targets. These transactions have not been independently verified. Best-offer prices may differ from original asking prices. Bundles, other graders, wrong card numbers, and ambiguous conditions are excluded from matching sales. Prices below 40% or above 250% of the matching median are excluded from targets. Small samples receive limited confidence.</p>
+    <h3>Five-year scenarios</h3><p>Bear, steady, and strong scenarios apply illustrative annual changes of −7%, +5%, and +12% to the current comparable median. They are assumptions, not forecasts or backtested predictions. They exclude selling fees, tax, and inflation.</p>
+    <h3>Freshness</h3><p>Price snapshots show their original observation date. The new sets include raw reference estimates from Eyevo where available; graded coverage varies. Refresh attempts request the latest publicly available source data. If the source is unavailable or its format changes, saved observations keep their original date. A successful fetch does not make an old transaction recent.</p>
+    <h3>Sources</h3><p id="source-links"><a id="set-market-source" href="https://www.pricecharting.com/console/pokemon-primal-clash" target="_blank" rel="noopener noreferrer">PriceCharting price guide & sales</a><br><a id="set-checklist-source" href="https://www.pokemon.com/static-assets/content-assets/cms2/pdf/trading-card-game/checklist/xy5_web_cardlist_en.pdf" target="_blank" rel="noopener noreferrer">Selected set checklist</a><br><a href="https://eyevotcg.com/sets/" target="_blank" rel="noopener noreferrer">Eyevo catalogs & raw reference prices</a><br><a href="https://pokemontcg.io/" target="_blank" rel="noopener noreferrer">Pokémon TCG API card images</a></p><p class="muted">Pokémon card names and artwork belong to their respective owners. Primal Watch is an independent collector tool.</p>
+  </div></dialog>
+</body></html>

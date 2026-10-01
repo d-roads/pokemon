@@ -1,0 +1,8 @@
+{
+  "name": "primal-watch",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=24"},
+  "scripts": {"dev": "node server.mjs", "start": "node server.mjs", "build": "node build.mjs", "test": "node --test --test-isolation=none tests/*.test.mjs"}
+}
