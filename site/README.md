@@ -1,33 +1,64 @@
 # Primal Watch
 
-A functional XY era card tracker. Includes all 1,620 numbered English cards across 13 sets, including secret rares and Generations’ Radiant Collection. A set picker, all-set search, separate raw/PSA 9/PSA 10 views, sourced price snapshots, reported sales for four Primal Clash cards, a saved watchlist, custom buy limits, sales plots, activity-based demand estimates, and transparent five-year scenarios.
+A personal Pokémon card tracker for the XY and Black & White eras. Browse every rare card set by set, compare reported sold prices for raw (near mint), PSA 9 and PSA 10 copies, save a watchlist with your own buy limits, keep your collection in the Dex, and get alerts when a watched card is listed at your price.
 
 ## Open locally
 
-Requires Node.js 24 or newer; no packages or installation needed.
+Requires Node.js 24 or newer. No packages or installation are needed.
 
-Run `node server.mjs` in this folder (or run `Start-Primal-Watch.ps1` on Windows), then open http://localhost:5173.
+Run `node server.mjs` in this folder (or `Start-Primal-Watch.ps1` on Windows), then open http://localhost:5173.
 
-Watchlist data persists in `data/primal-watch.sqlite`. Local mode is one personal workspace and listens only on the loopback address. It does not use browser storage as the source of truth.
+Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-watch.sqlite`. Starting the server only ever adds missing tables, so existing data is kept. Local mode is a single personal workspace and listens only on the loopback address.
+
+## What's included
+
+- **Catalog**: 3,167 cards in 26 sets, 1,447 of them rare (rare, holo rare, EX, full art, secret rare, ACE SPEC, BREAK, Radiant Collection and promos).
+  - XY Series: XY Base Set, Flashfire, Furious Fists, Phantom Forces, Primal Clash, Roaring Skies, Ancient Origins, BREAKthrough, BREAKpoint, Fates Collide, Steam Siege, Generations (with RC1–RC32), Evolutions, and XY Black Star Promos.
+  - Black & White Series: Black & White Base Set, Emerging Powers, Noble Victories, Next Destinies, Dark Explorers, Dragons Exalted, Dragon Vault, Boundaries Crossed, Plasma Storm, Plasma Freeze, Plasma Blast and Legendary Treasures (with RC1–RC25).
+  - Reverse holos, stamped, prerelease and other alternate prints are not separate entries.
+- **Browse**: set or era picker, search, raw / PSA 9 / PSA 10 views, sold medians, buy targets, sales plots, monthly price history and PSA population.
+- **Watchlist**: star a card and grade; set your own maximum price.
+- **Dex**: add cards you own with grade, quantity, price paid and date. See total value, cost basis, unrealized profit and loss, a value-vs-cost chart over time, and each card's own P/L chart.
+- **Alerts**: with your own free eBay developer keys, the server checks newly listed Buy It Now and Best Offer listings for each watched card and alerts when price plus shipping is at or below your limit. Alerts appear in the app, as desktop notifications while the app is open, and optionally on your phone through [ntfy](https://ntfy.sh) or a Discord webhook. Without keys, the Alerts page still gives a ready-made eBay search for every watched card.
+
+### Setting up listing alerts
+
+1. Sign in at [developer.ebay.com](https://developer.ebay.com/my/keys), create an application keyset, and copy the **Production** App ID (Client ID) and Cert ID (Client Secret).
+2. In Primal Watch, open **Alerts**, paste both keys, choose how often to check, and turn on **Scan for new listings automatically**.
+3. Optional: install the ntfy app, subscribe to a topic name only you know, and enter that topic; or paste a Discord webhook URL. Use **Send a test** to check it.
+
+Alerts run while `node server.mjs` is running. Keys stay in your local database and are never sent back to the page.
 
 ## Market data
 
-Initial Primal Clash observations were collected September 30, 2026 from PriceCharting. The additional 12 catalogs and raw reference estimates come from Eyevo checklists. Selected graded guides were checked against public PriceCharting pages. Coverage varies by card and grade; unknown prices remain empty. Each snapshot retains its own source and observation date. Values are USD. The initial grade-9 source guides can mix grading companies; PSA 9 recommendations use only matching reported PSA sales. Raw targets require explicitly near-mint sales. Sales observations are sourced, not generated. Transaction links in initial data lead to the PriceCharting source page, which contains the original listing links.
+Each rare card's PriceCharting product page was read in full on October 1, 2026: every row in the Ungraded, Grade 9 and PSA 10 sold-listing tables, the monthly price history for each grade, and PSA/CGC population counts. Product URLs were matched against PriceCharting's own set listings (`data/source-urls.json`), which fixes apostrophes, Mega names, `[Holo]` products and promo numbering.
 
-Refresh fetches the public source. If it is blocked or the page layout cannot be parsed, the UI keeps the last observations and states that it could not refresh. This workspace blocks outgoing network traffic; live refresh could not be verified here. No claim is made of continuous monitoring or a licensed live feed. A production price provider with guaranteed API access is the next integration step.
+A sale is counted only when:
+
+- the table it was listed under agrees with the grade in its title (a "Gem Mint 10" without a grader in the PSA 10 table is left out, and so is a PSA-titled sale filed as ungraded);
+- the collector number and set total match the card;
+- it is not a lot, bundle, proxy, foreign-language copy, reverse holo, cosmos holo, stamped, prerelease, league, staff or signed copy, and not graded by another company.
+
+Every counted sale keeps its title, date, price and a link to the original listing. Captures live in `data/pricecharting/<set>.json`; earlier excerpt-based research (`data/sales-batches/`, `data/researched-sales.json`) is merged in only for sales older than what the full page still shows, so nothing is counted twice.
+
+**Refresh** asks PriceCharting for the latest page from your computer and parses it the same way. If the source is unavailable or its layout changes, saved observations keep their original date. This is a snapshot plus on-demand refresh, not a licensed live feed.
 
 ## Recommendation method
 
-At least 3 same-grade sales within 180 days, including a sale within 90 days, are required. The target is 15% below the matching median. Reported best-offer amounts are kept separate from crossed-out asks. Bundle and mismatched-grade listings are excluded. Demand is an explicitly labeled sales-activity proxy; five-year scenarios are illustrative assumptions and are not backtested predictions. The UI explains the full method and links sources.
+A buy target needs at least 3 same-grade sales within 180 days, including one in the last 90 days. The narrowest 30-, 90- or 180-day window with 3 usable sales is used; prices below 40% or above 250% of that window's median are dropped as outliers. The target is 15% below the median. Raw targets use only sales explicitly described as near mint. Mixed-grader Grade 9 guides are shown for reference and never become a PSA 9 price. Demand is a sales-activity proxy; five-year scenarios are illustrative assumptions, not forecasts.
 
-## Hosted runtime
+## Dex valuation
 
-`node build.mjs` writes a Cloudflare Worker to `dist/server/index.js`. It exports `fetch(request, env)` and uses a D1 binding named `DB`. Apply `db/schema.sql` before serving requests. Watchlists use full set/card IDs to prevent collisions between identical collector numbers. Existing Primal Clash entries and custom limits remain in the same database. Hosted watchlists use the authenticated ChatGPT visitor ID injected by Sites. The site remains private unless its access policy is deliberately changed. Write routes validate the grade/card, price, request size, and origin, and use prepared queries.
+Each entry is valued at the current reference for its grade: the sold median when there are recent matching sales, otherwise the source guide, otherwise the latest monthly guide. Profit and loss compares that with the price paid. The value-over-time chart uses each card's monthly price history from its purchase month; PSA 9 history is PriceCharting's Grade 9 guide, which includes other graders. Fees, shipping and tax are not included.
 
-Sites registration is `appgprj_6abda3f9d8b08191bdfd0c7d7cfb8b49`. The source push and deployment are blocked by this workspace's network restrictions. No production URL has been published.
+## Tests and build
 
-Run meaningful model/provider/API checks with `node --test --test-isolation=none tests/*.test.mjs`.
+```
+node --test --test-isolation=none tests/*.test.mjs
+node build.mjs
+node --check dist/server/index.js
+```
 
-## Included sets
+On older Node versions without `--test-isolation`, run `node --test tests/*.test.mjs`.
 
-XY Base Set, Flashfire, Furious Fists, Phantom Forces, Primal Clash, Roaring Skies, Ancient Origins, BREAKthrough, BREAKpoint, Fates Collide, Steam Siege, Generations, and Evolutions. Generations includes RC1–RC32. Alternate promos and reverse-holo variants are not separate entries.
+`node build.mjs` writes a Cloudflare Worker to `dist/server/index.js` that uses a D1 binding named `DB` (apply `db/schema.sql` first). With the full sales captures embedded, the bundle is about 18 MB, which is larger than Workers allow; hosting it would need the market data moved to D1 or KV. Scheduled alert scans run only in the local Node server.
