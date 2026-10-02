@@ -83,7 +83,7 @@ test('Investments lists picks with their signals and character demand, by grade'
  await ui.run('loadInvest()');let html=ui.e('#invest-view').innerHTML;
  const first=investData.grades.psa10.picks[0];
  assert.match(html,new RegExp('data-invest="'+first.card_id+'"'));assert.match(html,/Steady uptrend|Recovering from highs|Cheap vs\. similar cards/);
- assert.match(html,new RegExp(first.demand.character+' demand'));assert.match(html,/Not investment advice/);
+ assert.match(html,new RegExp(first.demand.character+' demand'));assert.match(html,/Not investment advice/);assert.match(html,/Why it's listed/);assert.match(html,/Not met/);assert.match(html,/✓/);
  ui.run("state.invest.grade='raw';renderInvest()");html=ui.e('#invest-view').innerHTML;
  assert.match(html,new RegExp('data-invest="'+investData.grades.raw.picks[0].card_id+'" data-grade="raw"'));
  ui.run(`openCard('${first.card_id}','psa10')`);assert.equal(ui.run('state.view'),'browse');assert.equal(ui.run('state.grade'),'psa10');

@@ -68,6 +68,9 @@ test('Investments over the real data follow every rule',()=>{
   const per=new Map();
   for(const p of col.picks){
    assert.equal(p.grade,grade);assert.ok(p.price>=25);assert.ok(p.signals.length>=1);assert.ok(p.demand.score>=r.rules.demandCut);
+   assert.equal(p.checks.length,3);assert.equal(p.checks.filter(c=>c.hit).length,p.signals.length);
+   assert.ok(p.thesis.includes(p.demand.character)&&p.thesis.includes('Not a forecast'));
+   if(p.signals.some(s=>s.type==='uptrend'))assert.match(p.thesis,/a year across \d+ sales/);
    per.set(p.demand.character,(per.get(p.demand.character)||0)+1);
    const card=cards.find(c=>c.id===p.card_id);assert.ok(card.eligible);
    assert.ok(!charactersOf(card.name).includes('Aggron'),'Aggron is not a top-quarter demand character');

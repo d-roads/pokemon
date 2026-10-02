@@ -135,6 +135,25 @@ export function cheapSignal(ctx,row,grade,demand,rules=INVEST_RULES.cheap){
  return {type:'cheap',ratio,typical,peers:prices.length,category:row.card.category,setName:row.card.setName};
 }
 
+// ---------- Thesis ----------
+// A short, plain-language case for each pick, written only from the numbers behind it.
+const INV_GRADE_NAME={raw:'raw near-mint',psa9:'PSA 9',psa10:'PSA 10'};
+const invMoney=v=>'$'+(v>=100?Math.round(v).toLocaleString('en-US'):v.toFixed(2));
+const invPct=v=>Math.round(v*100)+'%';
+const invMonth=ym=>{const [y,m]=ym.split('-');return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][Number(m)-1]+' '+y;};
+export const SIGNAL_TYPES=[['uptrend','Steady uptrend'],['recovering','Recovering from highs'],['cheap','Cheap vs. similar cards']];
+export function investmentThesis(card,pick){
+ const d=pick.demand,grade=INV_GRADE_NAME[pick.grade],by=Object.fromEntries(pick.signals.map(s=>[s.type,s]));
+ const tier=d.score>=90?'one of the most sought-after characters in these eras':d.score>=80?'a highly sought-after character':'a character in the top quarter for collector demand';
+ const parts=[`${d.character} is ${tier} (${d.score}/100): its cards typically sell for about ${d.premium.toFixed(1)}× comparable cards.`];
+ if(by.uptrend){const u=by.uptrend;parts.push(`This ${grade} copy has climbed about ${invPct(u.growth)} a year across ${u.sales} sales over ${u.months} months, from a ${invMoney(u.then)} median 6+ months ago to ${invMoney(u.now)} recently, with little scatter between sales.`);}
+ if(by.recovering){const r=by.recovering;parts.push(`It is still ${invPct(r.drawdown)} below its ${invMonth(r.peakMonth)} monthly-guide high of ${invMoney(r.peak)}, but the last 45 days of sales are up ${invPct(r.rise)} (${invMoney(r.before)} → ${invMoney(r.after)}), so buyers may be returning.`);}
+ if(by.cheap){const c=by.cheap;parts.push(`At ${invMoney(pick.price)} it sells for ${invPct(1-c.ratio)} less than the ${invMoney(c.typical)} median of ${c.peers} ${c.category.toLowerCase()} cards of less popular characters in ${c.setName}.`);}
+ const risk=by.uptrend&&!by.recovering&&!by.cheap?'The case rests on momentum: a run can stall, and buying after a rise means paying today\'s higher price.':by.cheap&&!by.uptrend?'Cheap can stay cheap if collectors prefer the other cards in the set.':by.recovering?'A recovery can stall well short of the old high.':'Signals describe past sales only.';
+ parts.push(risk+' Not a forecast or investment advice.');
+ return parts.join(' ');
+}
+
 export function potentialInvestments(entries,{now=Date.now(),rules=INVEST_RULES}={}){
  const ctx=marketContext(entries,{now,rules}),grades={};
  for(const grade of INVEST_GRADES){
@@ -146,8 +165,11 @@ export function potentialInvestments(entries,{now=Date.now(),rules=INVEST_RULES}
    screened++;
    const signals=[uptrendSignal(a,row.endDay,rules.uptrend),recoveringSignal(a,row.market.history?.[INV_HISTORY_KEY[grade]],row.endDay,rules.recovering),cheapSignal(ctx,row,grade,demand,rules.cheap)].filter(Boolean);
    if(!signals.length)continue;
-   picks.push({card_id:row.card.id,grade,price:a.fair,priceLabel:a.priceLabel,sales:a.sampleCount,signals,
-    demand:{character:demand.name,score:demand.score,premium:Math.exp(demand.premium),activity:demand.activity,cards:demand.cards}});
+   const pick={card_id:row.card.id,grade,price:a.fair,priceLabel:a.priceLabel,sales:a.sampleCount,signals,
+    checks:SIGNAL_TYPES.map(([type,label])=>({type,label,hit:signals.some(s=>s.type===type)})),
+    demand:{character:demand.name,score:demand.score,premium:Math.exp(demand.premium),activity:demand.activity,cards:demand.cards}};
+   pick.thesis=investmentThesis(row.card,pick);
+   picks.push(pick);
   }
   picks.sort((x,y)=>y.signals.length-x.signals.length||y.demand.score-x.demand.score||y.sales-x.sales||x.card_id.localeCompare(y.card_id));
   // Keep the list varied: at most a few cards per character.
