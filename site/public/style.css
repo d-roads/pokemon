@@ -101,6 +101,7 @@
 .field small{font-weight:400;color:#97a2b5}
 .field input,.field select{font-weight:400;font-size:14px;color:var(--ink);border:1px solid #dfe6f2;border-radius:7px;padding:9px 10px;background:#fff;width:100%}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.date-parts{display:grid;grid-template-columns:1.15fr .8fr 1fr;gap:5px}.date-parts select{padding-left:7px;padding-right:4px}.date-shortcuts{display:flex;align-items:center;gap:9px;min-height:18px}.date-shortcuts .link-button{font-size:11px}.date-shortcuts small{margin-left:auto;font-size:10px}
 .field-hint{font-size:12px;color:#8c98ad;margin:0}
 .dex-results{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow-y:auto}
 .dex-results button{display:flex;gap:10px;align-items:center;text-align:left;border:1px solid #e9eef6;background:#fbfcfe;border-radius:7px;padding:6px 8px;color:var(--ink)}

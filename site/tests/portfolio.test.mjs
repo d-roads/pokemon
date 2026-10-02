@@ -7,7 +7,9 @@ const market={guide:{psa10:600},sales:[100,110,120].map((price,i)=>({grade:'psa9
 test('Dex entries are validated before saving',()=>{
  assert.deepEqual(validateEntry({card_id:'xy5-151',grade:'psa9'},{cards,today:'2026-10-01'}).entry,{card_id:'xy5-151',grade:'psa9',quantity:1,purchase_price:null,purchase_date:null,notes:''});
  assert.equal(validateEntry({card_id:'xy5-151',grade:'psa9',purchase_price:'12.345'},{cards}).entry.purchase_price,12.35);
- for(const bad of [{card_id:'x',grade:'psa9'},{card_id:'xy5-151',grade:'cgc10'},{card_id:'xy5-151',grade:'raw',quantity:1.5},{card_id:'xy5-151',grade:'raw',purchase_date:'2026-02-30'},{card_id:'xy5-151',grade:'raw',purchase_date:'2026-10-02'}])assert.ok(validateEntry(bad,{cards,today:'2026-10-01'}).errors.length,JSON.stringify(bad));
+ assert.equal(validateEntry({card_id:'xy5-151',grade:'raw',purchase_date:'2010-01-01'},{cards,today:'2026-10-01'}).errors.length,0);
+ assert.equal(validateEntry({card_id:'xy5-151',grade:'raw',purchase_date:'2009-12-31'},{cards,today:'2026-10-01',existingPurchaseDate:'2009-12-31'}).errors.length,0);
+ for(const bad of [{card_id:'x',grade:'psa9'},{card_id:'xy5-151',grade:'cgc10'},{card_id:'xy5-151',grade:'raw',quantity:1.5},{card_id:'xy5-151',grade:'raw',purchase_date:'2009-12-31'},{card_id:'xy5-151',grade:'raw',purchase_date:'2026-02-30'},{card_id:'xy5-151',grade:'raw',purchase_date:'2026-10-02'}])assert.ok(validateEntry(bad,{cards,today:'2026-10-01'}).errors.length,JSON.stringify(bad));
 });
 test('An entry is worth its sold median, with P/L against what was paid',()=>{
  const v=entryValue({grade:'psa9',quantity:2,purchase_price:90},market,now);

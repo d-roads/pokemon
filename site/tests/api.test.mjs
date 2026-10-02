@@ -52,7 +52,7 @@ test('Sales refresh is scoped to rares and reports blocked access without writes
 test('Market detail returns the full record with history and titled sales',async()=>{const data=await(await api(req('/api/market?id=xy5-151'),env)).json();assert.equal(data.refreshed,false);assert.ok(data.market.sales.some(s=>s.title&&s.grade==='psa9'));assert.ok(data.market.history?.psa10?.length>12);assert.equal(data.market.research.status,'full');});
 test('Dex entries are validated, scoped to their owner, and editable',async()=>{
  const add=b=>api(req('/api/collection','POST',b,'dex-user'),env);
- for(const bad of [{card_id:'nope',grade:'psa9'},{card_id:'xy5-151',grade:'bgs9'},{card_id:'xy5-151',grade:'psa9',quantity:0},{card_id:'xy5-151',grade:'psa9',purchase_price:-5},{card_id:'xy5-151',grade:'psa9',purchase_date:'2999-01-01'}])assert.equal((await add(bad)).status,400);
+ for(const bad of [{card_id:'nope',grade:'psa9'},{card_id:'xy5-151',grade:'bgs9'},{card_id:'xy5-151',grade:'psa9',quantity:0},{card_id:'xy5-151',grade:'psa9',purchase_price:-5},{card_id:'xy5-151',grade:'psa9',purchase_date:'2009-12-31'},{card_id:'xy5-151',grade:'psa9',purchase_date:'2999-01-01'}])assert.equal((await add(bad)).status,400);
  let r=await(await add({card_id:'xy5-151',grade:'psa9',quantity:2,purchase_price:1500,purchase_date:'2025-06-01',notes:'cert 123'})).json();
  assert.equal(r.collection.length,1);assert.equal(r.collection[0].quantity,2);assert.ok(r.markets['xy5-151'].history);
  const id=r.collection[0].id;

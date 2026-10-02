@@ -3,10 +3,11 @@
 import {analyze} from './analysis.mjs';
 
 export const HISTORY_KEY={raw:'raw',psa9:'grade9',psa10:'psa10'};
+export const MIN_PURCHASE_DATE='2010-01-01';
 const month=d=>String(d).slice(0,7);
 const addMonths=(ym,n)=>{const [y,m]=ym.split('-').map(Number),t=y*12+m-1+n;return Math.floor(t/12)+'-'+String(t%12+1).padStart(2,'0');};
 
-export function validateEntry(input,{cards,today=new Date().toISOString().slice(0,10)}){
+export function validateEntry(input,{cards,today=new Date().toISOString().slice(0,10),existingPurchaseDate=null}){
  const e=input&&typeof input==='object'?input:{},errors=[];
  if(!cards.some(c=>c.id===e.card_id))errors.push('Choose a card from the catalog.');
  if(!['raw','psa9','psa10'].includes(e.grade))errors.push('Choose Raw, PSA 9, or PSA 10.');
@@ -15,7 +16,8 @@ export function validateEntry(input,{cards,today=new Date().toISOString().slice(
  const price=e.purchase_price==null||e.purchase_price===''?null:Number(e.purchase_price);
  if(price!=null&&(!Number.isFinite(price)||price<0||price>1000000))errors.push('Enter a price paid between $0 and $1,000,000, or leave it blank.');
  const date=e.purchase_date?String(e.purchase_date):null;
- if(date&&(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date))||new Date(date).toISOString().slice(0,10)!==date||date>today||date<'1996-01-01'))errors.push('Enter a purchase date that is not in the future.');
+ const preservedHistoricalDate=date===existingPurchaseDate&&date<MIN_PURCHASE_DATE;
+ if(date&&!preservedHistoricalDate&&(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date))||new Date(date).toISOString().slice(0,10)!==date||date>today||date<MIN_PURCHASE_DATE))errors.push('Enter a purchase date from 2010 through today.');
  const notes=e.notes==null?'':String(e.notes).trim().slice(0,280);
  return {errors,entry:{card_id:e.card_id,grade:e.grade,quantity,purchase_price:price==null?null:Math.round(price*100)/100,purchase_date:date,notes}};
 }

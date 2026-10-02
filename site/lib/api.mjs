@@ -58,12 +58,16 @@ export async function api(request,env){
    if(!user)return json({error:'Sign in to view your Dex.'},401);
    if(['POST','PUT'].includes(request.method)){
     let body;try{body=await input(request);}catch{return json({error:'The Dex request was invalid.'},400);}
-    const {errors,entry}=validateEntry(body,{cards});if(errors.length)return json({error:errors[0],errors},400);
+    let id=null,current=null;
+    if(request.method==='PUT'){
+     id=Number(body.id);if(!Number.isInteger(id))return json({error:'Choose a Dex entry to update.'},400);
+     current=await db.prepare('SELECT purchase_date FROM collection WHERE id = ? AND user_id = ?').bind(id,user).first();
+     if(!current)return json({error:'That Dex entry was not found.'},404);
+    }
+    const {errors,entry}=validateEntry(body,{cards,existingPurchaseDate:current?.purchase_date??null});if(errors.length)return json({error:errors[0],errors},400);
     const now=new Date().toISOString();
     if(request.method==='POST')await db.prepare('INSERT INTO collection (user_id,card_id,grade,quantity,purchase_price,purchase_date,notes,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)').bind(user,entry.card_id,entry.grade,entry.quantity,entry.purchase_price,entry.purchase_date,entry.notes,now,now).run();
-    else{const id=Number(body.id);if(!Number.isInteger(id))return json({error:'Choose a Dex entry to update.'},400);
-     const r=await db.prepare('UPDATE collection SET card_id = ?, grade = ?, quantity = ?, purchase_price = ?, purchase_date = ?, notes = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind(entry.card_id,entry.grade,entry.quantity,entry.purchase_price,entry.purchase_date,entry.notes,now,id,user).run();
-     if(!Number(r?.changes??r?.meta?.changes??1))return json({error:'That Dex entry was not found.'},404);}
+    else await db.prepare('UPDATE collection SET card_id = ?, grade = ?, quantity = ?, purchase_price = ?, purchase_date = ?, notes = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind(entry.card_id,entry.grade,entry.quantity,entry.purchase_price,entry.purchase_date,entry.notes,now,id,user).run();
    }else if(request.method==='DELETE'){
     let body;try{body=await input(request);}catch{return json({error:'The Dex request was invalid.'},400);}
     await db.prepare('DELETE FROM collection WHERE id = ? AND user_id = ?').bind(Number(body.id),user).run();
