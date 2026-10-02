@@ -11,6 +11,7 @@ Updated: October 1, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. 
 5. **New:** Show weekly and monthly top movers by percentage increase (top 20 each for PSA 10, PSA 9, and raw). Leave out any move the data can't confirm.
 6. **New:** Offer a Potential investments tab built only from the app's sales data, weighted toward characters with real collector demand.
 7. Commit each integration separately and leave an updated handoff after every session.
+8. **Standard finish (collector's rule):** commit and push to git, copy the changed files into the collector's local folder (`C:\Users\b345t\.codex\.chatgpt-projects\g-p-6a72b895d6288191b4624c5f5479fcae\primal-watch`, via the desktop link; git is not installed there), and post the handoff to the claude.ai Project.
 
 ## Current state
 
@@ -52,6 +53,14 @@ Updated: October 1, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. 
 - An earlier, broader "cheap" definition compared cards across sets and to their own character's average. It flagged things like Flying Pikachu against gold secret rares, so it was replaced with the same-set comparison above.
 - API: `GET /api/investments`.
 
+### Follow-up fixes (`b5050f3`)
+
+- **Scrolling:** on desktop the page body is fixed height and each view scrolls internally. The Top movers and Investments views were missing from that rule, so content past the first screen was unreachable. Both are now added to it, alongside Dex and Alerts, and were verified with a mouse-wheel test in Chromium.
+- **Investment thesis:** each pick now has a "Why it's listed" block containing:
+  - a short thesis written from its own numbers: character demand, then each signal's evidence, then the main risk for that kind of signal, then "Not a forecast";
+  - a checklist of all three signals, marking each met (✓ with figures) or not met.
+- The thesis is generated server-side (`investmentThesis` in `site/lib/invest.mjs`, fields `thesis` and `checks`).
+
 ### Shared
 
 - Both endpoints compute over every card and are memoised in `site/lib/api.mjs`. The cache resets when `market_cache` changes or the day rolls over, and the first request takes about 0.5 s.
@@ -60,7 +69,7 @@ Updated: October 1, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. 
 
 ## Verification
 
-- `node --test tests/*.test.mjs`: **76/76 passing**, up from 64. New tests cover each mover failure mode, the real-data invariants for movers and investments, character parsing, the uptrend and recovery edge cases, both API endpoints, and both UI views. The tests were run on Node 22, which lacks `--test-isolation`; the standard command for Node 24 is unchanged.
+- `node --test tests/*.test.mjs`: **76/76 passing** (thesis/checklist assertions added), up from 64. New tests cover each mover failure mode, the real-data invariants for movers and investments, character parsing, the uptrend and recovery edge cases, both API endpoints, and both UI views. The tests were run on Node 22, which lacks `--test-isolation`; the standard command for Node 24 is unchanged.
 - `node build.mjs` and `node --check dist/server/index.js`: pass (43.4 MB Worker).
 - Headless Chromium screenshots of both views at 1440px and 390px rendered without page errors. Card images were blocked in this sandbox, so the screenshots show placeholders; on the collector's machine the images load from pokemontcg.io.
 
@@ -88,4 +97,6 @@ Updated: October 1, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. 
 
 - `8c64966` — Add Top movers view for weekly and monthly price rises
 - `c8e73fa` — Add Potential investments view screened from sales data
-- Final commit — README methods and this handoff
+- `3e09e9d` — README methods and handoff
+- `b5050f3` — Fix scrolling in Top movers and Investments; add a thesis per pick
+- Final commit — this handoff update
