@@ -71,3 +71,9 @@ test('Alert settings keep secrets server-side and validate notification targets'
  const list=await(await api(req('/api/alerts','GET',null,'alert-user'),env)).json();assert.equal(list.alerts.length,0);assert.equal(list.live,true);
  const scan=await(await api(req('/api/alerts/scan','POST',{},'alert-user'),env)).json();assert.match(scan.error,/unavailable/);
 });
+test('Movers endpoint returns per-grade lists and rejects unknown periods',async()=>{
+ const r=await api(req('/api/movers?period=month'),env);assert.equal(r.status,200);const d=await r.json();
+ assert.deepEqual(Object.keys(d.grades),['psa10','psa9','raw']);assert.equal(d.period,'month');assert.ok(d.grades.psa10.movers.length<=20);
+ const again=await (await api(req('/api/movers?period=month'),env)).json();assert.deepEqual(again,d);
+ assert.equal((await api(req('/api/movers?period=year'),env)).status,400);
+});

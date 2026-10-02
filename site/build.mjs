@@ -5,7 +5,7 @@ mkdirSync('dist/server',{recursive:true});
 const files={};for(const n of readdirSync('public'))files['/'+n]=readFileSync('public/'+n,'utf8');
 for(const shared of ['analysis.mjs','portfolio.mjs'])files['/'+shared]=readFileSync('lib/'+shared,'utf8');
 const strip=source=>source.replace(/^import .*;\s*$/gm,'').replace(/^export /gm,'');
-const modules=['db','sales','analysis','capture','provider','payload','portfolio','alerts','api'].map(n=>`// ---- lib/${n}.mjs\n`+strip(readFileSync(`lib/${n}.mjs`,'utf8'))).join('\n');
+const modules=['db','sales','analysis','capture','provider','payload','portfolio','movers','alerts','api'].map(n=>`// ---- lib/${n}.mjs\n`+strip(readFileSync(`lib/${n}.mjs`,'utf8'))).join('\n');
 const worker=`const cards=${JSON.stringify(cards)};const sets=${JSON.stringify(sets)};const series=${JSON.stringify(series)};const snapshots=${JSON.stringify(snapshots)};\n${modules}\nconst assets=${JSON.stringify(files)};\nexport default {async fetch(request,env){const u=new URL(request.url);if(u.pathname.startsWith('/api/'))return api(request,env);const p=u.pathname==='/'?'/index.html':u.pathname;if(!(p in assets))return new Response('Not found',{status:404});const type=p.endsWith('.html')?'text/html; charset=utf-8':p.endsWith('.css')?'text/css; charset=utf-8':p.endsWith('.svg')?'image/svg+xml':'text/javascript; charset=utf-8';return new Response(assets[p],{headers:{'Content-Type':type,'X-Content-Type-Options':'nosniff'}});}};`;
 writeFileSync('dist/server/index.js',worker);
 mkdirSync('dist/server/drizzle',{recursive:true});

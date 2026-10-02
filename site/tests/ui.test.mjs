@@ -6,6 +6,8 @@ import {cards,sets} from '../data/catalog.mjs';
 import {snapshots} from '../data/market.mjs';
 import {analyze,gradeNames,trendProjection} from '../lib/analysis.mjs';
 import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE} from '../lib/portfolio.mjs';
+import {topMovers} from '../lib/movers.mjs';
+const moverData=topMovers(cards.map(c=>[c,snapshots[c.id]]),'week');
 
 // Exercise the UI's controls and rendered output without a browser runtime.
 function workspace(){
@@ -20,7 +22,7 @@ function workspace(){
  for(const m of html.matchAll(/id="([^"]+)"/g))elements.set('#'+m[1],new Element());
  const categories=[...html.matchAll(/data-category="([^"]+)"/g)].map(m=>{const e=new Element();e.dataset.category=m[1];return e;});
  const document={querySelector:s=>elements.get(s)||null,querySelectorAll:s=>s==='[data-category]'?categories:[]};
- const responses={'/api/catalog':{cards,sets,series:[{id:'XY',name:'XY',label:'XY Series',years:'2014–2016'},{id:'BW',name:'Black & White',label:'Black & White Series',years:'2011–2013'},{id:'SM',name:'Sun & Moon',label:'Sun & Moon Series',years:'2017–2019'}],markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
+ const responses={'/api/catalog':{cards,sets,series:[{id:'XY',name:'XY',label:'XY Series',years:'2014–2016'},{id:'BW',name:'Black & White',label:'Black & White Series',years:'2011–2013'},{id:'SM',name:'Sun & Moon',label:'Sun & Moon Series',years:'2017–2019'}],markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/movers':moverData,'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
  const context=vm.createContext({document,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,fetch:async url=>({ok:true,json:async()=>responses[url.split('?')[0]]||{}})});
  const source=readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/^import .*;\s*$/gm,'').replace(/init\(\);\s*$/,'');
  vm.runInContext(source,context);
@@ -63,4 +65,13 @@ test('Dex date entry uses bounded month, day, and year controls',async()=>{
 test('Card detail places labeled 1Y, 2Y, and 3Y trend estimates beside reported sales',async()=>{
  const ui=workspace();await ui.run('init()');ui.run("state.selected='xy5-147';state.grade='psa9';renderDetail()");const detail=ui.e('#detail').innerHTML;
  assert.match(detail,/Simple trend projection/);assert.match(detail,/>1Y</);assert.match(detail,/>2Y</);assert.match(detail,/>3Y</);assert.match(detail,/not investment advice/);
+});
+test('Top movers shows PSA 10, PSA 9 and raw lists and opens a card in its grade',async()=>{
+ const ui=workspace();await ui.run('init()');
+ ui.e('#movers-nav').onclick();assert.equal(ui.e('#movers-view').hidden,false);assert.equal(ui.e('#workspace').hidden,true);assert.equal(ui.e('#page-title').textContent,'Top movers');
+ await ui.run('loadMovers("week")');const html=ui.e('#movers-view').innerHTML;
+ assert.match(html,/PSA 10/);assert.match(html,/PSA 9/);assert.match(html,/Raw NM/);assert.match(html,/\$25 or more/);
+ const first=moverData.grades.psa9.movers[0];assert.match(html,new RegExp('data-mover="'+first.card_id+'" data-grade="psa9"'));
+ ui.run(`openCard('${first.card_id}','psa9')`);assert.equal(ui.run('state.view'),'browse');assert.equal(ui.run('state.grade'),'psa9');assert.equal(ui.run('state.selected'),first.card_id);
+ ui.e('#movers-nav').onclick();ui.run("state.movers.period='month';renderMovers()");assert.match(ui.e('#movers-view').innerHTML,/Finding this month/);
 });

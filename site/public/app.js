@@ -13,7 +13,7 @@ const signed=v=>v==null?'—':(v>0?'+':v<0?'−':'')+money(Math.abs(v));
 const pct=v=>v==null?'':(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(1)+'%';
 const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
 const state={sets:[],series:[],setId:'xy5',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'chase',query:'',sort:'featured',view:'browse',selected:'xy5-147',limit:18,budget:false,expanded:false,
- dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false}};
+ dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},movers:{period:'week',grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
 async function request(url,options){const r=await fetch(url,options);const b=await r.json();if(!r.ok)throw new Error(b.error||'Something went wrong. Please try again.');return b;}
 const send=(url,method,body)=>request(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
@@ -287,20 +287,57 @@ function renderAlerts(){
  wireImages();
 }
 
+// ---------- Top movers ----------
+const MOVER_GRADES=['psa10','psa9','raw'],shortGrade=g=>gradeNames[g].replace(' · near mint',' NM');
+const wholeMoney=v=>v>=100?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v):money(v);
+async function loadMovers(period){
+ if(state.movers.data[period])return;
+ try{const r=await request('/api/movers?period='+period);state.movers.data[period]=r;state.movers.error=null;}catch(e){state.movers.error=e.message;}
+ if(state.view==='movers')renderMovers();
+}
+function openCard(id,grade){
+ const c=cardById(id);if(!c)return;
+ state.view='browse';state.setId=c.setId;state.category='all';state.grade=grade;$('#grade').value=grade;state.query='';$('#search').value='';state.budget=false;$('#budget-filter').checked=false;
+ updateView();select(id);
+}
+function renderMovers(){
+ const view=$('#movers-view'),period=state.movers.period,d=state.movers.data[period],word=period==='week'?'week':'month';
+ const checked=d?.checkedAt?new Date(d.checkedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):null;
+ const head=`<section class="panel movers-head"><div><h2>Biggest price increases this ${word}</h2><p>${d?`The last ${d.current} days of matching sales compared with ${esc(d.baselineLabel)}${checked?' · sales checked '+checked:''}. `:''}Cards worth $25 or more, with at least 3 matching sales in both periods. Moves the data can't confirm are left out.</p></div><div class="segmented" role="group" aria-label="Period">${[['week','Week'],['month','Month']].map(([k,l])=>`<button data-period="${k}" aria-pressed="${period===k}" class="${period===k?'active':''}">${l}</button>`).join('')}</div></section>`;
+ if(!d){view.innerHTML=head+(state.movers.error?`<div class="panel empty-state"><strong>Movers couldn't be loaded.</strong><p>${esc(state.movers.error)}</p><button class="button" id="movers-retry">Try again</button></div>`:'<div class="loading"><span class="spinner"></span>Finding this '+word+'\'s movers…</div>');}
+ else view.innerHTML=head+`<div class="segmented mover-grades" role="group" aria-label="Grade">${MOVER_GRADES.map(g=>`<button data-mover-grade="${g}" aria-pressed="${state.movers.grade===g}" class="${state.movers.grade===g?'active':''}">${shortGrade(g)}</button>`).join('')}</div><div class="movers-grid">${MOVER_GRADES.map(g=>{const col=d.grades[g],list=col.movers;
+  return `<section class="panel mover-col ${state.movers.grade===g?'':'off'}" aria-label="${gradeNames[g]} movers"><div class="panel-head"><div><h2><span class="grade-chip ${g}">${shortGrade(g)}</span> Top ${list.length||''}</h2><p>${col.qualified>list.length?'Top '+list.length+' of '+col.qualified+' rising cards that passed every check':col.qualified?'Every rising card that passed every check':'No reliable rises'}</p></div></div>
+  ${list.length?`<ol class="mover-list">${list.map((m,i)=>{const c=cardById(m.card_id);if(!c)return '';return `<li><button class="mover-row" data-mover="${c.id}" data-grade="${g}" aria-label="${esc(c.name)}, ${esc(c.setName)}, ${gradeNames[g]}, up ${pct(m.change)} from ${money(m.from)} to ${money(m.to)}"><span class="mover-rank">${i+1}</span><img src="${c.image}" alt="" loading="lazy"><span class="mover-name"><b>${esc(c.name)}</b><small>${esc(c.setName)} · #${esc(c.numberLabel)}</small><small>${m.current.sales} sale${m.current.sales===1?'':'s'} vs ${m.baseline.sales} before</small></span><span class="mover-change"><b class="pl up"><span aria-hidden="true">▲</span> ${pct(m.change)}</b><small>${wholeMoney(m.from)} → ${wholeMoney(m.to)}</small></span></button></li>`;}).join('')}</ol>`:`<div class="chart-empty">No ${gradeNames[g]} card had enough reliable sales this ${word} to measure a rise.</div>`}
+  <div class="panel-foot">${list.length&&list.length<20?`Only ${list.length} card${list.length===1?'':'s'} qualified this ${word}. `:''}${col.leftOut.length?'Left out as uncertain: '+col.leftOut.map(x=>x.count+' because '+esc(x.text)).join('; ')+'.':'No rising cards were left out as uncertain.'}</div></section>`;}).join('')}</div>
+  <p class="sales-note movers-note">Percentages compare sold medians, not listings, and exclude shipping, fees and tax. A rise in recent sales is not a prediction. <button class="link-button" id="movers-method">How movers work</button></p>`;
+ view.querySelectorAll('[data-period]').forEach(b=>b.onclick=()=>{state.movers.period=b.dataset.period;renderMovers();loadMovers(state.movers.period);});
+ view.querySelectorAll('[data-mover-grade]').forEach(b=>b.onclick=()=>{state.movers.grade=b.dataset.moverGrade;renderMovers();});
+ view.querySelectorAll('[data-mover]').forEach(b=>b.onclick=()=>openCard(b.dataset.mover,b.dataset.grade));
+ if($('#movers-retry'))$('#movers-retry').onclick=()=>{state.movers.error=null;renderMovers();loadMovers(period);};
+ if($('#movers-method'))$('#movers-method').onclick=()=>$('#method-dialog').showModal();
+ wireImages();
+}
+
 // ---------- Views ----------
+const PAGES={
+ movers:{eyebrow:'MARKET <span>MOVERS</span>',title:'Top movers',description:'Which cards rose the most in sold price, by grade.',crumb:'Market',name:'Top movers'},
+ dex:{eyebrow:'YOUR COLLECTION <span>DEX</span>',title:'Your Dex',description:'Every card you own, what it is worth today, and how it has done since you bought it.',crumb:'Your workspace',name:'Dex'},
+ alerts:{eyebrow:'WATCHLIST <span>ALERTS</span>',title:'Listing alerts',description:'Get told when a watched card is listed at or under your buy limit.',crumb:'Your workspace',name:'Alerts'},
+};
 function updateView(){
  const v=state.view,catalogView=v==='browse'||v==='watch';
- for(const [nav,name] of [['#browse-nav','browse'],['#watch-nav','watch'],['#dex-nav','dex'],['#alerts-nav','alerts']]){$(nav).classList.toggle('active',v===name);$(nav).setAttribute('aria-current',v===name?'page':'false');}
+ for(const name of ['browse','movers','watch','dex','alerts']){const nav=$('#'+name+'-nav');nav.classList.toggle('active',v===name);nav.setAttribute('aria-current',v===name?'page':'false');}
  for(const s of ['#set-switcher','#summary-grid','#workspace','#heading-tools'])$(s).hidden=!catalogView;
- $('#dex-view').hidden=v!=='dex';$('#alerts-view').hidden=v!=='alerts';
+ for(const name of Object.keys(PAGES))$('#'+name+'-view').hidden=v!==name;
  const set=activeSet(),era=activeSeries(),name=set?.name||(state.setId==='all'?'All sets':'All '+(era?.name||'')+' sets');
- if(v==='dex'||v==='alerts'){
-  $('#page-eyebrow').innerHTML=v==='dex'?'YOUR COLLECTION <span>DEX</span>':'WATCHLIST <span>ALERTS</span>';
-  $('#page-title').textContent=v==='dex'?'Your Dex':'Listing alerts';
-  $('#page-description').textContent=v==='dex'?'Every card you own, what it is worth today, and how it has done since you bought it.':'Get told when a watched card is listed at or under your buy limit.';
-  $('#breadcrumb-series').textContent='Your workspace';$('#breadcrumb-set').textContent=v==='dex'?'Dex':'Alerts';
-  if(v==='dex'){loadDex().then(()=>{if(state.view==='dex')renderDex();});renderDex();}else{if(!state.alerts.data)loadAlerts();renderAlerts();}
-  $(v==='dex'?'#dex-view':'#alerts-view').scrollTop=0;
+ const page=PAGES[v];
+ if(page){
+  $('#page-eyebrow').innerHTML=page.eyebrow;$('#page-title').textContent=page.title;$('#page-description').textContent=page.description;
+  $('#breadcrumb-series').textContent=page.crumb;$('#breadcrumb-set').textContent=page.name;
+  if(v==='dex'){loadDex().then(()=>{if(state.view==='dex')renderDex();});renderDex();}
+  else if(v==='alerts'){if(!state.alerts.data)loadAlerts();renderAlerts();}
+  else if(v==='movers'){renderMovers();loadMovers(state.movers.period);}
+  $('#'+v+'-view').scrollTop=0;
   return;
  }
  $('#page-eyebrow').innerHTML='SET EXPLORER <span id="set-code"></span>';
@@ -330,7 +367,7 @@ $('#sort').onchange=e=>{state.sort=e.target.value;renderList();};
 $('#budget-filter').onchange=e=>{state.budget=e.target.checked;renderList();};
 document.querySelectorAll('[data-category]').forEach(b=>b.onclick=()=>{state.category=b.dataset.category;updateView();});
 $('#browse-nav').onclick=()=>{state.view='browse';updateView();};$('#watch-nav').onclick=()=>{state.view='watch';state.setId='all';state.category='all';state.query='';state.budget=false;$('#search').value='';$('#budget-filter').checked=false;updateView();};
-$('#dex-nav').onclick=()=>{state.view='dex';updateView();};$('#alerts-nav').onclick=()=>{state.view='alerts';updateView();};
+$('#dex-nav').onclick=()=>{state.view='dex';updateView();};$('#movers-nav').onclick=()=>{state.view='movers';updateView();};$('#alerts-nav').onclick=()=>{state.view='alerts';updateView();};
 $('#set-select').onchange=e=>{state.setId=e.target.value;state.category='all';state.query='';state.budget=false;$('#search').value='';$('#budget-filter').checked=false;updateView();};
 $('#show-more').onclick=()=>{state.limit+=24;renderList();};$('#refresh-set').onclick=refreshSet;
 $('#method-button').onclick=$('#sources-button').onclick=()=>$('#method-dialog').showModal();$('#close-method').onclick=()=>$('#method-dialog').close();

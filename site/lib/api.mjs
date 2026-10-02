@@ -4,6 +4,7 @@ import {database} from './db.mjs';
 import {parseMarket,parseSet,sourceFetch} from './provider.mjs';
 import {mergeMarket} from './sales.mjs';
 import {lightMarket} from './payload.mjs';
+import {topMovers,PERIODS} from './movers.mjs';
 import {validateEntry} from './portfolio.mjs';
 import {DEFAULT_SETTINGS,normalizeSettings,updateSettings,publicSettings,hasEbayKeys,runScan,sendNotifications,ebaySearchUrl,alertLimit} from './alerts.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
@@ -16,6 +17,18 @@ async function saveMarket(db,card,market){await db.prepare('INSERT INTO market_c
 async function input(request){if(!request.headers.get('Content-Type')?.includes('application/json'))throw new Error('Send JSON data.');const raw=await request.text();if(raw.length>8192)throw new Error('The request was too large.');return JSON.parse(raw);}
 export async function readSettings(db,user){const row=await db.prepare('SELECT payload FROM alert_settings WHERE user_id = ?').bind(user).first();return normalizeSettings(row?JSON.parse(row.payload):DEFAULT_SETTINGS);}
 async function writeSettings(db,user,settings){await db.prepare('INSERT INTO alert_settings (user_id,payload,updated_at) VALUES (?,?,?) ON CONFLICT(user_id) DO UPDATE SET payload=excluded.payload,updated_at=excluded.updated_at').bind(user,JSON.stringify(settings),new Date().toISOString()).run();}
+// Market-wide views (movers, investments) are recomputed only when saved market data changes.
+const insightMemo=new Map();
+async function insight(db,key,compute){
+ const sig=await db.prepare('SELECT COUNT(*) AS n, MAX(fetched_at) AS t FROM market_cache').first();
+ const stamp=key+'|'+(sig?.n||0)+'|'+(sig?.t||'')+'|'+new Date().toISOString().slice(0,10);
+ if(!insightMemo.has(stamp)){
+  for(const k of insightMemo.keys())if(k.startsWith(key+'|'))insightMemo.delete(k);
+  const cached=await cachedMarkets(db);
+  insightMemo.set(stamp,compute(cards.map(c=>[c,cached[c.id]?mergeMarket(snapshots[c.id],cached[c.id]):snapshots[c.id]])));
+ }
+ return insightMemo.get(stamp);
+}
 export async function fullMarket(db,id){return mergeMarket(snapshots[id],await cachedMarket(db,id))||null;}
 async function alertState(db,user){
  const settings=await readSettings(db,user);
@@ -108,6 +121,10 @@ export async function api(request,env){
    const settings=await readSettings(db,user);if(!settings.notify.ntfy&&!settings.notify.discord)return json({error:'Add an ntfy topic or a Discord webhook first.'},400);
    const sample={card_id:'xy5-151',grade:'psa9',card_name:'Primal Groudon EX',set_name:'Primal Clash',number_label:'151/160',title:'Test alert from Primal Watch',total:1500,shipping:0,limit_price:1600,market_price:1999,url:'https://www.ebay.com/'};
    const r=await sendNotifications([sample],settings,env.fetch||fetch);return json(r.sent?{sent:r.sent}:{sent:0,error:'The notification could not be delivered. Check the topic or webhook.'});
+  }
+  if(path==='/api/movers' && request.method==='GET'){
+   const period=url.searchParams.get('period')||'week';if(!PERIODS[period])return json({error:'Choose week or month.'},400);
+   return json(await insight(db,'movers:'+period,entries=>topMovers(entries,period)));
   }
   if(path==='/api/market' && request.method==='GET'){
    const card=cardById.get(url.searchParams.get('id'));if(!card)return json({error:'That card is not in the catalog.'},404);
