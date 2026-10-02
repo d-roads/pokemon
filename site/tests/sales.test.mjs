@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {gradeOf,conditionOf,makeSale,dedupeSales,parsePublicText,mergeMarket} from '../lib/sales.mjs';
+import {gradeOf,conditionOf,matchesCard,makeSale,dedupeSales,parsePublicText,mergeMarket} from '../lib/sales.mjs';
 import {parseMarket} from '../lib/provider.mjs';
 const card={id:'xy10-119',number:119,printedTotal:124,source:'https://www.pricecharting.com/game/pokemon-fates-collide/umbreon-ex-119'};
 test('Printed HP does not turn a near-mint card into heavily played',()=>{assert.equal(conditionOf('Umbreon EX 119/124 NM 170 HP'),'NM');assert.equal(conditionOf('Umbreon EX 119/124 HP 170 HP'),'HP');assert.equal(conditionOf('Umbreon EX 119/124 NM/LP 170 HP'),'NM/LP');});
@@ -11,3 +11,4 @@ test('Public source excerpts use the reported sale amount and date',()=>{const t
 test('Older caches cannot replace newer guides or discard researched sales',()=>{const fresh={guide:{raw:150},observedAt:'2026-09-30T12:00:00Z',source:'PriceCharting',sales:[{id:'a',number:119,date:'2026-09-29',grade:'raw',price:150,condition:'NM',title:'Umbreon #119 NM'}]},old={guide:{raw:90},observedAt:'2026-09-01T12:00:00Z',sales:[]};assert.equal(mergeMarket(fresh,old).guide.raw,150);assert.equal(mergeMarket(fresh,old).sales.length,1);assert.equal(mergeMarket(fresh,old).observedAt,fresh.observedAt);});
 test('Legacy observations do not duplicate newly titled copies of the same sale',()=>{const old={id:'old',number:119,date:'2026-09-29',grade:'psa9',price:400,condition:''},fresh={...old,id:'new',title:'Umbreon 119/124 PSA 9'};assert.equal(dedupeSales([fresh,old]).length,1);});
 test('English XY promo identifiers normalize leading zeroes',()=>{const c={id:'xyp-XY01',number:'XY01',printedTotal:null,source:'https://www.pricecharting.com/game/pokemon-promo/chespin-xy1'};assert.ok(makeSale({date:'2026-09-29',title:'Chespin XY1 PSA 9',price:30},c));assert.equal(makeSale({date:'2026-09-29',title:'Chespin XY2 PSA 9',price:30},c),null);});
+test('Sun & Moon subset and Tag Team numbers match without treating the official ampersand as a bundle',()=>{const shiny={number:'SV49',printedTotal:94,name:'Charizard GX'},tag={number:170,printedTotal:181,name:'Latias & Latios GX'};assert.equal(matchesCard('2019 Pokemon Hidden Fates Charizard GX SV49/SV94 PSA 10',shiny),true);assert.equal(matchesCard('Latias & Latios GX 170/181 Team Up PSA 9',tag),true);assert.equal(matchesCard('Latias & Latios GX & Pikachu GX 170/181 PSA 9',tag),false);});

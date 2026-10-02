@@ -39,7 +39,7 @@ function stats(){
  $('#coverage-note').textContent=priced===0&&state.grade!=='raw'?'No prices are loaded for this grade in this set. Choose Raw to see available reference guides.':priced+' of '+scope.length+' cards have a price for this grade. Guides are estimates; targets need matching sales.';
 }
 const priority=['xy5-147','xy5-55','xy5-156','xy5-151'];
-const cardNumber=c=>String(c.number).startsWith('RC')?1000+Number(String(c.number).slice(2)):String(c.number).startsWith('XY')?Number(String(c.number).slice(2)):Number(c.number);
+const cardNumber=c=>{const n=String(c.number).toUpperCase(),special=n.match(/^([A-Z]+)(\d+)/);return special?1000+Number(special[2]):Number.parseInt(n,10);};
 function filteredCards(){
  let list=scopedCards().filter(c=>(state.view!=='watch'||matchingWatch(c.id))&&(state.category==='all'||state.category==='chase'&&c.chase||(state.category==='Pokémon EX'?c.name.endsWith('EX'):c.category===state.category))&&(!state.query||(c.name+' '+c.numberLabel+' '+c.setName+' '+c.setId).toLowerCase().includes(state.query)));
  const analyses=new Map(),get=c=>{if(!analyses.has(c.id))analyses.set(c.id,analyze(state.markets[c.id],state.grade));return analyses.get(c.id);};
@@ -322,7 +322,7 @@ function updateView(){
 }
 function setOptions(){
  const opt=s=>`<option value="${s.id}">${esc(s.name)} · ${s.total} cards</option>`;
- return '<option value="all">All sets · XY and Black & White</option>'+state.series.map(e=>`<option value="era:${e.id}">All ${esc(e.name)} sets</option>`).join('')+state.series.map(e=>`<optgroup label="${esc(e.label)}">${state.sets.filter(s=>s.series===e.id).map(opt).join('')}</optgroup>`).join('');
+ return '<option value="all">All sets · 3 eras</option>'+state.series.map(e=>`<option value="era:${e.id}">All ${esc(e.name)} sets</option>`).join('')+state.series.map(e=>`<optgroup label="${esc(e.label)}">${state.sets.filter(s=>s.series===e.id).map(opt).join('')}</optgroup>`).join('');
 }
 $('#search').oninput=e=>{state.query=e.target.value.toLowerCase().trim();state.limit=60;$('#card-list').scrollTop=0;renderList();};
 $('#grade').onchange=e=>{state.grade=e.target.value;updateView();};

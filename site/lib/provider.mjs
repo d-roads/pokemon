@@ -49,8 +49,8 @@ export function parseSet(html,cards){
  const result={};
  for(const m of html.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)){
   const row=m[1],title=row.match(/<td\b[^>]*class=["'][^"']*\btitle\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/i)?.[1];if(!title)continue;
-  const name=htmlText(title),n=name.match(/#(XY\d+|RC\d+|\d+)(?![a-z0-9])/i)?.[1]?.toUpperCase();if(!n||name.includes('['))continue;
-  const normalize=n=>String(n).toUpperCase().replace(/^(XY|RC)0+(?=\d)/,'$1');
+  const name=htmlText(title),n=name.match(/#([A-Z]*\d+[a-z]?)(?![a-z0-9])/i)?.[1]?.toUpperCase();if(!n||name.includes('['))continue;
+  const normalize=n=>String(n).toUpperCase().replace(/^([A-Z]*)0+(?=\d)/,'$1');
   const card=cards.find(c=>normalize(c.number)===normalize(n));if(!card)continue;
   const values=[...row.matchAll(/<td\b[^>]*class=["'][^"']*\bprice\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/gi)].map(x=>dollars(x[1]));
   if(values.length<3||!values[0])continue;

@@ -51,6 +51,7 @@ const words=s=>s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g,'').replace(
 export function listingMatches(title,card,grade){
  const t=String(title||'');
  if(!t||EXCLUDED_LISTING.test(t)||/\b(?:you pick|pick your|choose|complete set|binder|booster (?:pack|box)|sealed|(?:case|pack|box) break)\b/i.test(t))return false;
+ if((t.match(/\s&\s/g)||[]).length>(card.name.match(/\s&\s/g)||[]).length)return false;
  if(gradeOf(t)!==grade)return false;
  if(grade==='raw'&&['Damaged','HP','MP'].includes(conditionOf(t)))return false;
  const tw=new Set(words(t)),core=words(card.name.replace(/^M\s+/,'').replace(/\s*(?:EX|BREAK)$/,''));
@@ -58,12 +59,12 @@ export function listingMatches(title,card,grade){
  if(/^M\s/.test(card.name)&&!/\b(?:m|mega)\b/i.test(t))return false;
  if(/\bEX$/.test(card.name)&&!/\bex\b/i.test(t))return false;
  if(/\bBREAK$/.test(card.name)&&!/\bbreak\b/i.test(t))return false;
- const expected=collector(card.number),total=expected.startsWith('RC')?'RC'+card.printedTotal:String(card.printedTotal);
- const numbered=[...t.matchAll(/\b(RC\s*\d+|\d{1,3})\s*\/\s*(RC\s*\d+|\d{1,3})\b/gi)];
+ const expected=collector(card.number),prefix=expected.match(/^[A-Z]+/)?.[0]||'',total=prefix+card.printedTotal;
+ const numbered=[...t.matchAll(/\b((?:XY|RC|SV)?\s*\d+[a-z]?)\s*\/\s*((?:XY|RC|SV)?\s*\d+[a-z]?)\b/gi)];
  if(expected.startsWith('XY'))return [...t.matchAll(/\bXY\s*0*(\d+)(?![a-z\d])/gi)].some(m=>'XY'+Number(m[1])===expected);
  if(numbered.length)return numbered.every(m=>collector(m[1])===expected&&collector(m[2])===total);
- const n=expected.replace(/^RC/,'');
- return new RegExp((expected.startsWith('RC')?'\\bRC\\s*0*':'(?:#|\\bno\\.?\\s*|\\b)0*')+n+'(?![\\d/])','i').test(t);
+ const parts=expected.match(/^([A-Z]*)(\d+)([A-Z]?)$/);if(!parts)return false;
+ return new RegExp((parts[1]?'\\b'+parts[1]+'\\s*0*':'(?:#|\\bno\\.?\\s*|\\b)0*')+parts[2]+parts[3]+'(?![a-z\\d/])','i').test(t);
 }
 
 // The price an alert is measured against: the collector's own limit, else the suggested target.

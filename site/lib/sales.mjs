@@ -1,6 +1,6 @@
 // Listings that are not a single, English, standard print of the card.
-export const EXCLUDED_LISTING=/\blot\b|bundle|\s&\s|\bfake\b|proxy|replica|custom|jumbo|oversized|reverse[ -]?holo|cosmos|pre-?release|\bleague\b|stamped|\bstamp\b|championship|\bwinner\b|crosshatch|\bstaff\b|signed|autograph|japanese|\bjpn\b|\bjap\b|\bger\b|german|french|\bfr\b|korean|chinese|italian|spanish|portuguese/i;
-export const collector=n=>String(n).toUpperCase().replace(/\s/g,'').replace(/^(XY|RC)0+(?=\d)/,'$1');
+export const EXCLUDED_LISTING=/\blot\b|bundle|\bfake\b|proxy|replica|custom|jumbo|oversized|reverse[ -]?holo|cosmos|pre-?release|\bleague\b|stamped|\bstamp\b|championship|\bwinner\b|crosshatch|\bstaff\b|signed|autograph|japanese|\bjpn\b|\bjap\b|\bger\b|german|french|\bfr\b|korean|chinese|italian|spanish|portuguese/i;
+export const collector=n=>String(n).toUpperCase().replace(/\s/g,'').replace(/^([A-Z]*)0+(?=\d)/,'$1');
 export function gradeOf(title){
  if(/\b(?:CGC|BGS|BVG|Beckett|HGA|DSG|GRA|KSA|ACE|TAG|SGC|GMA|PCA|AGS|CGS)\b|\b(?:OC|MC|ST|MK|PD|OF)\b|\bPSA\s*(?:9|10)\s*\/\s*(?:9|10)\b/i.test(title))return null;
  const grades=[...title.matchAll(/\bPSA\s*([\d.]+)/gi)].map(m=>m[1]);
@@ -20,11 +20,12 @@ export function conditionOf(title){
 }
 export function matchesCard(title,card){
  if(EXCLUDED_LISTING.test(title))return false;
- const expected=collector(card.number),total=expected.startsWith('RC')?'RC'+card.printedTotal:String(card.printedTotal);
- const numbered=[...title.matchAll(/\b(RC\s*\d+|\d{1,3})\s*\/\s*(RC\s*\d+|\d{1,3})\b/gi)];
+ const titleAnd=(title.match(/\s&\s/g)||[]).length,nameAnd=(String(card.name||'').match(/\s&\s/g)||[]).length;if(titleAnd>nameAnd)return false;
+ const expected=collector(card.number),prefix=expected.match(/^[A-Z]+/)?.[0]||'',total=prefix+card.printedTotal;
+ const numbered=[...title.matchAll(/\b((?:XY|RC|SV)?\s*\d+[a-z]?)\s*\/\s*((?:XY|RC|SV)?\s*\d+[a-z]?)\b/gi)];
  if(!expected.startsWith('XY')&&numbered.length)return numbered.every(m=>collector(m[1])===expected&&collector(m[2])===total);
  if(expected.startsWith('XY'))return [...title.matchAll(/\bXY\s*0*(\d+)(?![a-z\d])/gi)].some(m=>'XY'+Number(m[1])===expected);
- return new RegExp('#\\s*'+expected+'(?![a-z0-9])','i').test(title);
+ const parts=expected.match(/^([A-Z]*)(\d+)([A-Z]?)$/);return parts?new RegExp('#?\\s*'+parts[1]+'\\s*0*'+parts[2]+parts[3]+'(?![a-z0-9])','i').test(title):false;
 }
 export function makeSale({date,title,price,source,listingUrl,marketplace},card){
  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date))||!(price>0)||!matchesCard(title,card))return null;

@@ -1,6 +1,7 @@
 import extraSnapshots from './xy-market.json' with {type:'json'};
 import gradedSnapshots from './xy-graded-market.json' with {type:'json'};
 import promoSnapshots from './promo-market.json' with {type:'json'};
+import smSnapshots from './sm-market.json' with {type:'json'};
 import researched from './researched-sales.json' with {type:'json'};
 import {mergeMarket} from '../lib/sales.mjs';
 import {expandCapture,mergeCapture} from '../lib/capture.mjs';
@@ -24,7 +25,7 @@ add(151,'raw',[['2026-09-30',84.99,'MP'],['2026-09-29',117.5,'Unknown'],['2026-0
 add(156,'raw',[['2026-09-30',38,'Unknown'],['2026-09-27',70,'LP'],['2026-09-27',46.31,'NM'],['2026-09-25',46,'Unknown'],['2026-09-23',76,'Unknown'],['2026-09-20',32,'Unknown']]);
 const primalSnapshots=Object.fromEntries(Object.entries(guides).map(([n,p])=>[`xy5-${n}`,{number:Number(n),guide:{raw:p[0],grade9:p[1],psa10:p[2]},sales:sales.filter(s=>s.number===Number(n)),observedAt,source:'PriceCharting',status:'snapshot'}]));
 
-const baselines={...extraSnapshots,...gradedSnapshots,...promoSnapshots,...primalSnapshots};
+const baselines={...extraSnapshots,...gradedSnapshots,...promoSnapshots,...smSnapshots,...primalSnapshots};
 for(const [id,m]of Object.entries(baselines))m.guideSources=Object.fromEntries(Object.entries(m.guide).filter(([,v])=>v>0).map(([key])=>[key,{name:m.source,url:m.sourceUrl||cards.find(c=>c.id===id)?.source,observedAt:m.observedAt}]));
 const observations={...researched},batches=new URL('./sales-batches/',import.meta.url);
 for(const name of readdirSync(batches).filter(n=>n.endsWith('.json')).sort())for(const [id,m]of Object.entries(JSON.parse(readFileSync(new URL(name,batches),'utf8'))))observations[id]=mergeMarket(observations[id],m);

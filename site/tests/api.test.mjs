@@ -11,7 +11,7 @@ function dbAdapter(sqlite){const stmt=(query,values=[])=>({bind(...v){return stm
 const sqlite=new DatabaseSync(':memory:');sqlite.exec(sql);const DB=dbAdapter(sqlite);
 const env={DB,NETWORK_DISABLED:true};
 const req=(path,method='GET',body,user='collector-a',origin='https://primal.test')=>new Request('https://primal.test'+path,{method,headers:{...(user?{'oai-authenticated-user-id':user}:{}),Origin:origin,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
-test('API returns all sets and separates source coverage',async()=>{const r=await api(req('/api/catalog'),env);assert.equal(r.status,200);const data=await r.json();assert.equal(data.cards.length,3167);assert.equal(data.sets.length,26);assert.deepEqual(data.series.map(s=>s.id),['XY','BW']);assert.ok(Array.isArray(data.markets['xy5-147'].s));assert.equal(Object.keys(data.markets).length,Object.keys(snapshots).length);});
+test('API returns all sets and separates source coverage',async()=>{const r=await api(req('/api/catalog'),env);assert.equal(r.status,200);const data=await r.json();assert.equal(data.cards.length,5889);assert.equal(data.sets.length,42);assert.deepEqual(data.series.map(s=>s.id),['XY','BW','SM']);assert.ok(Array.isArray(data.markets['xy5-147'].s));assert.equal(Object.keys(data.markets).length,Object.keys(snapshots).length);});
 test('Watchlist survives repeated writes, scopes ownership, and supports removal',async()=>{
  const item={card_id:'xy5-147',grade:'psa9',target:215};
  for(let i=0;i<2;i++)assert.equal((await api(req('/api/watchlist','POST',item),env)).status,200);
@@ -21,7 +21,7 @@ test('Watchlist survives repeated writes, scopes ownership, and supports removal
 });
 test('Invalid cards, grades, targets and cross-origin writes are rejected',async()=>{
  const base={card_id:'xy5-147',grade:'psa9',target:215};
- for(const item of [{...base,card_id:'sm1-1'},{...base,grade:'cgc9'},{...base,target:-1}])assert.equal((await api(req('/api/watchlist','POST',item),env)).status,400);
+ for(const item of [{...base,card_id:'not-a-set-1'},{...base,grade:'cgc9'},{...base,target:-1}])assert.equal((await api(req('/api/watchlist','POST',item),env)).status,400);
  assert.equal((await api(req('/api/watchlist','POST',base,'collector-a','https://elsewhere.test'),env)).status,403);
  assert.equal((await api(req('/api/watchlist','POST',base,null),env)).status,401);
 });
@@ -47,7 +47,7 @@ test('Market cache preserves full set IDs and never merges matching numbers',asy
  assert.equal((await api(req('/api/refresh?set=invalid','POST'),env)).status,400);
  const r=await(await api(req('/api/refresh?set=g1','POST'),env)).json();assert.equal(r.refreshed,false);assert.equal(sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count,0);
 });
-test('Sales refresh is scoped to rares and reports blocked access without writes',async()=>{const before=sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count;const r=await api(req('/api/research?set=all','POST'),env),body=await r.json();assert.equal(body.total,1447);assert.equal((await(await api(req('/api/research?set=era:XY','POST'),env)).json()).total,894);assert.equal((await(await api(req('/api/research?set=era:BW','POST'),env)).json()).total,553);assert.equal(body.refreshed,false);assert.equal(body.attempted,0);assert.equal(sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count,before);assert.equal((await api(req('/api/research?set=invalid','POST'),env)).status,400);});
+test('Sales refresh is scoped to rares and reports blocked access without writes',async()=>{const before=sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count;const r=await api(req('/api/research?set=all','POST'),env),body=await r.json();assert.equal(body.total,2827);assert.equal((await(await api(req('/api/research?set=era:XY','POST'),env)).json()).total,894);assert.equal((await(await api(req('/api/research?set=era:BW','POST'),env)).json()).total,553);assert.equal((await(await api(req('/api/research?set=era:SM','POST'),env)).json()).total,1380);assert.equal(body.refreshed,false);assert.equal(body.attempted,0);assert.equal(sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count,before);assert.equal((await api(req('/api/research?set=invalid','POST'),env)).status,400);});
 
 test('Market detail returns the full record with history and titled sales',async()=>{const data=await(await api(req('/api/market?id=xy5-151'),env)).json();assert.equal(data.refreshed,false);assert.ok(data.market.sales.some(s=>s.title&&s.grade==='psa9'));assert.ok(data.market.history?.psa10?.length>12);assert.equal(data.market.research.status,'full');});
 test('Dex entries are validated, scoped to their owner, and editable',async()=>{

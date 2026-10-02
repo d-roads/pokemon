@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 import {cards} from '../data/catalog.mjs';
 import {listingMatches,searchQuery,candidates,listingPrice,runScan,updateSettings,publicSettings,ntfyUrl,ebaySearchUrl,alertLimit,resetTokenCache} from '../lib/alerts.mjs';
 const card=id=>cards.find(c=>c.id===id);
-const groudon=card('xy5-151'),umbreon=card('xy10-119'),mrayquaza=card('xy6-105'),promo=card('xyp-XY121'),rc=card('bw11-RC24');
+const groudon=card('xy5-151'),umbreon=card('xy10-119'),mrayquaza=card('xy6-105'),promo=card('xyp-XY121'),rc=card('bw11-RC24'),shiny=card('sm115-SV49'),tag=card('sm9-170');
 test('Search words drop the Mega prefix and EX suffix but keep the number and grade',()=>{
  assert.equal(searchQuery(groudon,'psa9'),'pokemon Primal Groudon 151 PSA 9');
  assert.equal(searchQuery(mrayquaza,'psa10'),'pokemon Rayquaza 105 PSA 10');
@@ -30,6 +30,8 @@ test('Listings must match the card, number, grade and exclusions',()=>{
  assert.ok(!listingMatches('Charizard EX XY29 Black Star Promo PSA 9',promo,'psa9'));
  assert.ok(listingMatches('Mew EX RC24/RC25 Legendary Treasures Full Art PSA 9',rc,'psa9'));
  assert.ok(!listingMatches('Mew EX 24/113 Legendary Treasures PSA 9',rc,'psa9'));
+ assert.ok(listingMatches('Charizard GX SV49/SV94 Hidden Fates PSA 10',shiny,'psa10'));
+ assert.ok(listingMatches('Latias & Latios GX 170/181 Team Up PSA 9',tag,'psa9'));
 });
 const item=(o={})=>({itemId:'v1|1234|0',title:'Primal Groudon EX 151/160 Primal Clash PSA 9',price:{value:'1499.00',currency:'USD'},shippingOptions:[{shippingCostType:'FIXED',shippingCost:{value:'5.00',currency:'USD'}}],buyingOptions:['FIXED_PRICE','BEST_OFFER'],itemWebUrl:'https://www.ebay.com/itm/1234',image:{imageUrl:'https://i.ebayimg.com/1.jpg'},seller:{username:'cards4u'},itemCreationDate:'2026-10-01T10:00:00.000Z',...o});
 test('Prices include listed shipping and respect the limit',()=>{

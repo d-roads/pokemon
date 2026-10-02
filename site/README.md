@@ -1,6 +1,6 @@
 # Primal Watch
 
-A personal Pokémon card tracker for the XY and Black & White eras. Browse every rare card set by set, compare reported sold prices for raw (near mint), PSA 9 and PSA 10 copies, save a watchlist with your own buy limits, keep your collection in the Dex, and get alerts when a watched card is listed at your price.
+A personal Pokémon card tracker for the Black & White, XY, and Sun & Moon eras. Browse every rare card set by set, compare reported sold prices for raw (near mint), PSA 9 and PSA 10 copies, save a watchlist with your own buy limits, keep your collection in the Dex, and get alerts when a watched card is listed at your price.
 
 ## Open locally
 
@@ -12,11 +12,12 @@ Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-wa
 
 ## What's included
 
-- **Catalog**: 3,167 cards in 26 sets, 1,447 of them rare (rare, holo rare, EX, full art, secret rare, ACE SPEC, BREAK, Radiant Collection and promos).
+- **Catalog**: 5,889 cards in 42 sets, 2,827 of them rare (rare, holo rare, EX/GX, full art, secret rare, shiny, Prism Star, BREAK, Radiant Collection and promos).
   - XY Series: XY Base Set, Flashfire, Furious Fists, Phantom Forces, Primal Clash, Roaring Skies, Ancient Origins, BREAKthrough, BREAKpoint, Fates Collide, Steam Siege, Generations (with RC1–RC32), Evolutions, and XY Black Star Promos.
   - Black & White Series: Black & White Base Set, Emerging Powers, Noble Victories, Next Destinies, Dark Explorers, Dragons Exalted, Dragon Vault, Boundaries Crossed, Plasma Storm, Plasma Freeze, Plasma Blast and Legendary Treasures (with RC1–RC25).
+  - Sun & Moon Series: Sun & Moon, Guardians Rising, Burning Shadows, Shining Legends, Crimson Invasion, Ultra Prism, Forbidden Light, Celestial Storm, Dragon Majesty, Lost Thunder, Team Up, Detective Pikachu, Unbroken Bonds, Unified Minds, Hidden Fates (including SV1–SV94) and Cosmic Eclipse.
   - Reverse holos, stamped, prerelease and other alternate prints are not separate entries.
-- **Browse**: set or era picker, search, raw / PSA 9 / PSA 10 views, sold medians, buy targets, sales plots, monthly price history and PSA population.
+- **Browse**: set or era picker, search, raw / PSA 9 / PSA 10 views, sold medians, buy targets, sales plots, 1Y/2Y/3Y trend projections, monthly price history and PSA population.
 - **Watchlist**: star a card and grade; set your own maximum price.
 - **Dex**: add cards you own with grade, quantity, price paid and date. See total value, cost basis, unrealized profit and loss, a value-vs-cost chart over time, and each card's own P/L chart.
 - **Alerts**: with your own free eBay developer keys, the server checks newly listed Buy It Now and Best Offer listings for each watched card and alerts when price plus shipping is at or below your limit. Alerts appear in the app, as desktop notifications while the app is open, and optionally on your phone through [ntfy](https://ntfy.sh) or a Discord webhook. Without keys, the Alerts page still gives a ready-made eBay search for every watched card.
@@ -31,7 +32,7 @@ Alerts run while `node server.mjs` is running. Keys stay in your local database 
 
 ## Market data
 
-Each rare card's PriceCharting product page was read in full on October 1, 2026: every row in the Ungraded, Grade 9 and PSA 10 sold-listing tables, the monthly price history for each grade, and PSA/CGC population counts. Product URLs were matched against PriceCharting's own set listings (`data/source-urls.json`), which fixes apostrophes, Mega names, `[Holo]` products and promo numbering.
+Each rare XY and Black & White card's PriceCharting product page was read in full on October 1, 2026. For Sun & Moon, 1,109 rare cards have exact product matches and guide prices; the 172 highest-interest cards also have full pages with 13,145 classified sales, monthly price history and population data. Product URLs were matched against PriceCharting's own set listings (`data/source-urls.json`), which fixes apostrophes, Mega names, `[Holo]` products, subset numbers and promo numbering.
 
 A sale is counted only when:
 
@@ -45,7 +46,7 @@ Every counted sale keeps its title, date, price and a link to the original listi
 
 ## Recommendation method
 
-A buy target needs at least 3 same-grade sales within 180 days, including one in the last 90 days. The narrowest 30-, 90- or 180-day window with 3 usable sales is used; prices below 40% or above 250% of that window's median are dropped as outliers. The target is 15% below the median. Raw targets use only sales explicitly described as near mint. Mixed-grader Grade 9 guides are shown for reference and never become a PSA 9 price. Demand is a sales-activity proxy; five-year scenarios are illustrative assumptions, not forecasts.
+A buy target needs at least 3 same-grade sales within 180 days, including one in the last 90 days. The narrowest 30-, 90- or 180-day window with 3 usable sales is used; prices below 40% or above 250% of that window's median are dropped as outliers. The target is 15% below the median. Raw targets use only sales explicitly described as near mint. Mixed-grader Grade 9 guides are shown for reference and never become a PSA 9 price. The 1Y/2Y/3Y figures apply the linear-regression dollar slope from up to 35 trailing-year sales to today's reference price; at least three sales spanning 30 days are required. Demand is a sales-activity proxy, the trend figures are simple projections rather than investment advice, and five-year scenarios remain illustrative assumptions.
 
 ## Dex valuation
 
