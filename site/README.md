@@ -12,8 +12,8 @@ Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-wa
 
 ## What's included
 
-- **Catalog**: 5,889 cards in 42 sets, 2,827 of them rare (rare, holo rare, EX/GX, full art, secret rare, shiny, Prism Star, BREAK, Radiant Collection and promos).
-  - XY Series: XY Base Set, Flashfire, Furious Fists, Phantom Forces, Primal Clash, Roaring Skies, Ancient Origins, BREAKthrough, BREAKpoint, Fates Collide, Steam Siege, Generations (with RC1–RC32), Evolutions, and XY Black Star Promos.
+- **Catalog**: 5,923 cards in 43 sets, 2,835 of them rare (rare, holo rare, EX/GX, full art, secret rare, shiny, Prism Star, BREAK, Radiant Collection and promos).
+  - XY Series: XY Base Set, Flashfire, Furious Fists, Phantom Forces, Primal Clash, Double Crisis, Roaring Skies, Ancient Origins, BREAKthrough, BREAKpoint, Fates Collide, Steam Siege, Generations (with RC1–RC32), Evolutions, and XY Black Star Promos.
   - Black & White Series: Black & White Base Set, Emerging Powers, Noble Victories, Next Destinies, Dark Explorers, Dragons Exalted, Dragon Vault, Boundaries Crossed, Plasma Storm, Plasma Freeze, Plasma Blast and Legendary Treasures (with RC1–RC25).
   - Sun & Moon Series: Sun & Moon, Guardians Rising, Burning Shadows, Shining Legends, Crimson Invasion, Ultra Prism, Forbidden Light, Celestial Storm, Dragon Majesty, Lost Thunder, Team Up, Detective Pikachu, Unbroken Bonds, Unified Minds, Hidden Fates (including SV1–SV94) and Cosmic Eclipse.
   - Reverse holos, stamped, prerelease and other alternate prints are not separate entries.
@@ -32,7 +32,7 @@ Alerts run while `node server.mjs` is running. Keys stay in your local database 
 
 ## Market data
 
-Each rare XY and Black & White card's PriceCharting product page was read in full on October 1, 2026. For Sun & Moon, 1,109 rare cards have exact product matches and guide prices; the 172 highest-interest cards also have full pages with 13,145 classified sales, monthly price history and population data. Product URLs were matched against PriceCharting's own set listings (`data/source-urls.json`), which fixes apostrophes, Mega names, `[Holo]` products, subset numbers and promo numbering.
+Each rare XY and Black & White card's PriceCharting product page was read in full on October 1, 2026, including all 8 Double Crisis rares and their 566 classified sales. For Sun & Moon, 1,109 rare cards have exact product matches and guide prices; the 172 highest-interest cards also have full pages with 13,145 classified sales, monthly price history and population data. Product URLs were matched against PriceCharting's own set listings (`data/source-urls.json`), which fixes apostrophes, Mega names, `[Holo]` products, subset numbers and promo numbering.
 
 A sale is counted only when:
 

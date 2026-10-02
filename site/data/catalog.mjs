@@ -1,6 +1,7 @@
 import extraSets from './xy-catalogs.json' with {type:'json'};
 import bwSets from './bw-catalogs.json' with {type:'json'};
 import smSets from './sm-catalogs.json' with {type:'json'};
+import xySpecialSets from './xy-special-catalogs.json' with {type:'json'};
 import primalRarities from './primal-rarities.json' with {type:'json'};
 import promos from './xy-promos.json' with {type:'json'};
 import sourceUrls from './source-urls.json' with {type:'json'};
@@ -28,7 +29,7 @@ export const series=[{id:'XY',name:'XY',label:'XY Series',years:'2014–2016'},{
 
 const primalSet={id:'xy5',slug:'primal-clash',name:'Primal Clash',series:'XY',printedTotal:160,total:164,release:'2015-02-04',checklistSource:SET_SOURCE};
 const promoSet={id:'xyp',slug:'promo',name:'XY Black Star Promos',series:'XY',printedTotal:null,total:promos.length,release:'2013-10-12',checklistSource:'https://eyevotcg.com/sets/xy-black-star-promos/checklist/'};
-export const sets=[primalSet,...extraSets.map(({cards,...set})=>({...set,series:'XY'})),promoSet,...bwSets.map(({cards,...set})=>set),...smSets.map(({cards,...set})=>set)].sort((a,b)=>a.release.localeCompare(b.release)).map(s=>({...s,marketSource:'https://www.pricecharting.com/console/pokemon-'+s.slug}));
+export const sets=[primalSet,...extraSets.map(({cards,...set})=>({...set,series:'XY'})),...xySpecialSets.map(({cards,...set})=>set),promoSet,...bwSets.map(({cards,...set})=>set),...smSets.map(({cards,...set})=>set)].sort((a,b)=>a.release.localeCompare(b.release)).map(s=>({...s,marketSource:'https://www.pricecharting.com/console/pokemon-'+s.slug}));
 
 const xyNumbered=extraSets.flatMap(s=>s.cards.map(c=>{
  const radiant=c.number.startsWith('RC'),number=radiant?c.number:Number(c.number),fullArt=radiant?Number(c.number.slice(2))>=28:s.fullArtStart>0&&number>=s.fullArtStart;
@@ -44,6 +45,7 @@ const smNumbered=smSets.flatMap(s=>s.cards.map(c=>{
  const numeric=/^\d+$/.test(c.number),number=numeric?Number(c.number):c.number,id=s.id+'-'+c.number,total=c.subsetTotal||s.printedTotal;
  return {number,name:c.name,rarity:c.rarity,id,setId:s.id,setName:s.name,printedTotal:total,numberLabel:c.number+'/'+(c.subsetTotal?'SV'+c.subsetTotal:total),type:c.type||c.rarity,category:c.category,image:'https://images.pokemontcg.io/'+(c.imageSetId||s.id)+'/'+c.number+'.png',source:sourceFor(id,s.slug,c.name,c.number)};
 }));
-const numberedCards=[...primalCards.map(c=>({...c,rarity:primalRarities.find(r=>r.number===c.number).rarity,setId:'xy5',setName:'Primal Clash',printedTotal:160,numberLabel:c.number+'/160'})),...xyNumbered,...bwNumbered,...smNumbered];
+const xySpecialNumbered=xySpecialSets.flatMap(s=>s.cards.map(c=>{const number=Number(c.number),id=s.id+'-'+c.number;return {number,name:c.name,rarity:c.rarity,id,setId:s.id,setName:s.name,printedTotal:s.printedTotal,numberLabel:c.number+'/'+s.printedTotal,type:c.type||c.rarity,category:c.category,image:'https://images.pokemontcg.io/'+s.id+'/'+c.number+'.png',source:sourceFor(id,s.slug,c.name,c.number)};}));
+const numberedCards=[...primalCards.map(c=>({...c,rarity:primalRarities.find(r=>r.number===c.number).rarity,setId:'xy5',setName:'Primal Clash',printedTotal:160,numberLabel:c.number+'/160'})),...xyNumbered,...xySpecialNumbered,...bwNumbered,...smNumbered];
 const seriesOf=Object.fromEntries(sets.map(s=>[s.id,s.series]));
 export const cards=[...numberedCards,...promos.map(c=>({...c,id:'xyp-'+c.number,setId:'xyp',setName:promoSet.name,category:'Promo',type:'Black Star Promo',printedTotal:null,numberLabel:c.number,image:'https://images.pokemontcg.io/xyp/'+c.number+'.png',source:sourceFor('xyp-'+c.number,'promo',c.name,'xy'+String(c.number).slice(2))}))].map(c=>({...c,series:seriesOf[c.setId],eligible:/rare|promo/i.test(c.rarity),chase:/Full art|Secret rare|Promo|BREAK|Pokémon EX|Pokémon GX|Shiny|Prism Star|Shining/.test(c.category)}));

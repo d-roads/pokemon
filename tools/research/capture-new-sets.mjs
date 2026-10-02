@@ -8,7 +8,7 @@ import {parsePage} from '../../site/lib/provider.mjs';
 import {classifyCapture} from '../../site/lib/capture.mjs';
 
 const root=fileURLToPath(new URL('../../',import.meta.url)),dataDir=root+'site/data/',captureDir=dataDir+'pricecharting/';
-const defaults=['sm1','sm2','sm3','sm35','sm4','sm5','sm6','sm7','sm75','sm8','sm9','det1','sm10','sm11','sm115','sm12'];
+const defaults=['dc1','sm1','sm2','sm3','sm35','sm4','sm5','sm6','sm7','sm75','sm8','sm9','det1','sm10','sm11','sm115','sm12'];
 const selected=process.argv.slice(2).filter(x=>!x.startsWith('--'));
 const setIds=selected.length?selected:defaults,perSet=Number(process.argv.find(x=>x.startsWith('--per-set='))?.split('=')[1]||12),delay=Number(process.argv.find(x=>x.startsWith('--delay='))?.split('=')[1]||1300);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));

@@ -32,11 +32,12 @@ test('Set picker, all-set search, and Radiant Collection render correct cards',a
  ui.e('#set-select').onchange({target:{value:'g1'}});assert.equal(ui.e('#page-title').textContent,'Generations');assert.match(ui.e('#set-count').innerHTML,/37/);
  ui.e('#grade').onchange({target:{value:'raw'}});ui.e('#search').oninput({target:{value:'RC30'}});assert.match(ui.e('#card-list').innerHTML,/Gardevoir/);assert.match(ui.e('#card-list').innerHTML,/RC30\/RC32/);assert.doesNotMatch(ui.e('#card-list').innerHTML,/\/160/);
  ui.e('#set-select').onchange({target:{value:'all'}});ui.run("state.category='all';updateView();");ui.e('#search').oninput({target:{value:'Flashfire'}});
- assert.equal(ui.run('filteredCards().length'),46);assert.match(ui.e('#set-count').innerHTML,/2827/);
+ assert.equal(ui.run('filteredCards().length'),46);assert.match(ui.e('#set-count').innerHTML,/2835/);
  ui.e('#search').oninput({target:{value:''}});ui.e('#set-select').onchange({target:{value:'era:BW'}});assert.match(ui.e('#set-count').innerHTML,/553/);assert.equal(ui.e('#page-title').textContent,'Explore the Black & White era');
  ui.e('#set-select').onchange({target:{value:'bw11'}});ui.e('#search').oninput({target:{value:'RC24'}});assert.match(ui.e('#card-list').innerHTML,/Mew EX/);assert.match(ui.e('#card-list').innerHTML,/RC24\/RC25/);
  ui.e('#set-select').onchange({target:{value:'era:SM'}});assert.match(ui.e('#set-count').innerHTML,/1380/);assert.equal(ui.e('#page-title').textContent,'Explore the Sun & Moon era');
  ui.e('#set-select').onchange({target:{value:'sm115'}});ui.e('#search').oninput({target:{value:'SV49'}});assert.match(ui.e('#card-list').innerHTML,/Charizard GX/);assert.match(ui.e('#card-list').innerHTML,/SV49\/SV94/);
+ ui.e('#set-select').onchange({target:{value:'dc1'}});ui.e('#search').oninput({target:{value:'Groudon'}});assert.match(ui.e('#card-list').innerHTML,/Team Magma/);assert.match(ui.e('#card-list').innerHTML,/15\/34/);
 });
 test('Watchlist opens across sets and keeps saved limits with their own card',async()=>{
  const ui=workspace();await ui.run('init()');

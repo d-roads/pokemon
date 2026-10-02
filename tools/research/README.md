@@ -21,11 +21,11 @@ the pokemon-tcg-data clone at `/home/claude/pokemontcg/pokemon-tcg-data`, and a 
 
 Classification rules live in `site/lib/capture.mjs` and `site/lib/sales.mjs`, shared with the app's own refresh.
 
-For the Sun & Moon expansion, `capture-new-sets.mjs` provides a portable direct workflow: it reads the
+For the Sun & Moon expansion and Double Crisis, `capture-new-sets.mjs` provides a portable direct workflow: it reads the
 app catalog, maps exact cards and guide prices from each PriceCharting set table, and captures the top
 rare cards by guide value (with extra Hidden Fates coverage). Example:
 
-`node tools/research/capture-new-sets.mjs sm9 sm10 sm11 sm115 sm12 --per-set=10 --delay=1300`
+`node tools/research/capture-new-sets.mjs dc1 sm9 sm10 sm11 sm115 sm12 --per-set=10 --delay=1300`
 
 It updates `source-urls.json`, `sm-market.json`, and per-set files in `data/pricecharting/`. Requests are
 paced, retried, and still pass through the same strict `capture.mjs` classifier.
