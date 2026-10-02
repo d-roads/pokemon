@@ -1,5 +1,22 @@
 export const gradeNames={raw:'Raw · near mint',psa9:'PSA 9',psa10:'PSA 10'};
 export const median=a=>a.length?[...a].sort((a,b)=>a-b).reduce((_,x,i,s)=>i===Math.floor(s.length/2)?(s.length%2?x:(s[i-1]+x)/2):_,null):null;
+const DAY=86400000,YEAR_DAYS=365.2425;
+
+// A deliberately simple projection: ordinary least-squares slope across the same
+// trailing-year sales shown in the scatter plot, added to today's reference price.
+export function trendProjection(comparable,current,now=Date.now()){
+ const rows=(comparable||[]).filter(s=>s.price>0&&now-Date.parse(s.date)>=0&&(now-Date.parse(s.date))/DAY<=365).slice(0,35).sort((a,b)=>a.date.localeCompare(b.date));
+ if(rows.length<3||!(current>=0))return {available:false,rows,reason:'Not enough information'};
+ const first=Date.parse(rows[0].date),points=rows.map(s=>({x:(Date.parse(s.date)-first)/DAY,y:s.price})),spanDays=points.at(-1).x;
+ if(spanDays<30)return {available:false,rows,reason:'Not enough information'};
+ const meanX=points.reduce((n,p)=>n+p.x,0)/points.length,meanY=points.reduce((n,p)=>n+p.y,0)/points.length;
+ const denominator=points.reduce((n,p)=>n+(p.x-meanX)**2,0);
+ if(!denominator)return {available:false,rows,reason:'Not enough information'};
+ const dailySlope=points.reduce((n,p)=>n+(p.x-meanX)*(p.y-meanY),0)/denominator,annualIncrease=dailySlope*YEAR_DAYS;
+ if(!Number.isFinite(annualIncrease))return {available:false,rows,reason:'Not enough information'};
+ const values=[1,2,3].map(years=>Math.max(0,Math.round((current+annualIncrease*years)*100)/100));
+ return {available:true,rows,sampleCount:rows.length,spanDays,annualIncrease,values};
+}
 export function analyze(market,grade,discount=15,now=Date.now()){
  const today=Math.floor(now/86400000),age=s=>today-Math.floor(Date.parse(s.date)/86400000),unique=new Map();
  for(const s of market?.sales||[]){

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {analyze,median} from '../lib/analysis.mjs';
+import {analyze,median,trendProjection} from '../lib/analysis.mjs';
 import {cards,sets} from '../data/catalog.mjs';
 import {snapshots} from '../data/market.mjs';
 const now=Date.parse('2026-10-01T00:00:00Z');
@@ -13,6 +13,14 @@ test('Raw mixed-condition transactions never enter a near-mint target',()=>{cons
 test('Other grading companies cannot affect PSA estimates',()=>{const sales=[100,110,120].map((price,i)=>({grade:'psa9',date:`2026-09-${20+i}`,price}));sales.push({grade:'cgc9',date:'2026-09-29',price:5000});const a=analyze({sales},'psa9',15,now);assert.equal(a.current,110);assert.equal(a.all.length,3);});
 test('Sparse guides and missing data leave demand and target unknown',()=>{const a=analyze(undefined,'psa9',15,now);assert.equal(a.target,null);assert.equal(a.score,null);assert.equal(a.current,null);});
 test('Median handles odd and even samples',()=>{assert.equal(median([5,1,3]),3);assert.equal(median([6,2,4,0]),3);assert.equal(median([]),null);});
+test('Trend projection uses the trailing-year regression slope as yearly dollar growth',()=>{
+ const sales=[['2025-12-05',100],['2026-03-15',110],['2026-06-23',120],['2026-10-01',130]].map(([date,price])=>({date,price}));
+ const p=trendProjection(sales,130,now);assert.equal(p.available,true);assert.equal(p.sampleCount,4);assert.ok(Math.abs(p.annualIncrease-36.52425)<.001);assert.deepEqual(p.values,[166.52,203.05,239.57]);
+});
+test('Trend projection fails closed when recent evidence is too sparse',()=>{
+ assert.equal(trendProjection([{date:'2026-01-01',price:100},{date:'2026-09-01',price:120}],120,now).reason,'Not enough information');
+ assert.equal(trendProjection([{date:'2024-01-01',price:100},{date:'2026-09-01',price:120},{date:'2026-09-15',price:130}],130,now).available,false);
+});
 test('Recent matching sales take precedence over an older price regime',()=>{const sales=[100,110,120].map((price,i)=>({grade:'psa9',date:'2026-09-'+(20+i),price}));sales.push(...[400,450,500].map((price,i)=>({grade:'psa9',date:'2026-05-'+(20+i),price})));const a=analyze({sales},'psa9',15,now);assert.equal(a.windowDays,30);assert.equal(a.current,110);assert.equal(a.target,93.5);});
 test('Duplicate and future transactions cannot create a recommendation',()=>{const s={id:'same',grade:'psa9',date:'2026-09-29',price:100};const a=analyze({sales:[s,s,s,{grade:'psa9',date:'2026-12-01',price:999}]},'psa9',15,now);assert.equal(a.sampleCount,1);assert.equal(a.target,null);assert.equal(a.all.length,1);});
 test('A recent played copy cannot make stale near-mint evidence fresh',()=>{const sales=[100,110,120].map((price,i)=>({grade:'raw',date:'2026-06-'+(1+i),price,condition:'NM'}));sales.push({grade:'raw',date:'2026-09-29',price:20,condition:'HP'});assert.equal(analyze({sales},'raw',15,now).target,null);});

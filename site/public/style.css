@@ -102,6 +102,7 @@
 .field input,.field select{font-weight:400;font-size:14px;color:var(--ink);border:1px solid #dfe6f2;border-radius:7px;padding:9px 10px;background:#fff;width:100%}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .date-parts{display:grid;grid-template-columns:1.15fr .8fr 1fr;gap:5px}.date-parts select{padding-left:7px;padding-right:4px}.date-shortcuts{display:flex;align-items:center;gap:9px;min-height:18px}.date-shortcuts .link-button{font-size:11px}.date-shortcuts small{margin-left:auto;font-size:10px}
+.trend-layout{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:10px;align-items:stretch}.trend-projection{border-left:1px solid var(--line);padding-left:10px;display:flex;flex-direction:column;gap:7px}.trend-projection>span{font-size:8px;line-height:1.3;text-transform:uppercase;letter-spacing:.7px;color:#8997ad;font-weight:650}.trend-projection>div{display:flex;flex-direction:column}.trend-projection b{font-size:9px;color:#8a98ae}.trend-projection strong{font-size:12px;color:#415272;font-variant-numeric:tabular-nums}.trend-projection p{font-size:10px;line-height:1.45;color:#8c98ad;margin:auto 0}
 .field-hint{font-size:12px;color:#8c98ad;margin:0}
 .dex-results{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow-y:auto}
 .dex-results button{display:flex;gap:10px;align-items:center;text-align:left;border:1px solid #e9eef6;background:#fbfcfe;border-radius:7px;padding:6px 8px;color:var(--ink)}

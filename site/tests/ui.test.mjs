@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import {cards,sets} from '../data/catalog.mjs';
 import {snapshots} from '../data/market.mjs';
-import {analyze,gradeNames} from '../lib/analysis.mjs';
+import {analyze,gradeNames,trendProjection} from '../lib/analysis.mjs';
 import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE} from '../lib/portfolio.mjs';
 
 // Exercise the UI's controls and rendered output without a browser runtime.
@@ -21,7 +21,7 @@ function workspace(){
  const categories=[...html.matchAll(/data-category="([^"]+)"/g)].map(m=>{const e=new Element();e.dataset.category=m[1];return e;});
  const document={querySelector:s=>elements.get(s)||null,querySelectorAll:s=>s==='[data-category]'?categories:[]};
  const responses={'/api/catalog':{cards,sets,series:[{id:'XY',name:'XY',label:'XY Series',years:'2014–2016'},{id:'BW',name:'Black & White',label:'Black & White Series',years:'2011–2013'}],markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
- const context=vm.createContext({document,analyze,computeAnalysis:analyze,gradeNames,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,fetch:async url=>({ok:true,json:async()=>responses[url.split('?')[0]]||{}})});
+ const context=vm.createContext({document,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,fetch:async url=>({ok:true,json:async()=>responses[url.split('?')[0]]||{}})});
  const source=readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/^import .*;\s*$/gm,'').replace(/init\(\);\s*$/,'');
  vm.runInContext(source,context);
  return {context,e:s=>elements.get(s),run:s=>vm.runInContext(s,context)};
@@ -56,4 +56,8 @@ test('Dex and Alerts views open without the set browser',async()=>{
 test('Dex date entry uses bounded month, day, and year controls',async()=>{
  const ui=workspace();await ui.run('init()');ui.run('openDexDialog({})');const form=ui.e('#dex-form').innerHTML;
  assert.match(form,/id="dex-date-month"/);assert.match(form,/id="dex-date-day"/);assert.match(form,/id="dex-date-year"/);assert.match(form,/>2010</);assert.doesNotMatch(form,/value="2009"/);assert.match(form,/Today/);assert.match(form,/2010 or later/);
+});
+test('Card detail places labeled 1Y, 2Y, and 3Y trend estimates beside reported sales',async()=>{
+ const ui=workspace();await ui.run('init()');ui.run("state.selected='xy5-147';state.grade='psa9';renderDetail()");const detail=ui.e('#detail').innerHTML;
+ assert.match(detail,/Simple trend projection/);assert.match(detail,/>1Y</);assert.match(detail,/>2Y</);assert.match(detail,/>3Y</);assert.match(detail,/not investment advice/);
 });
