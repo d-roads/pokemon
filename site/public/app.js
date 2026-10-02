@@ -73,11 +73,11 @@ function chart(a){
 
 // Line charts with a crosshair and tooltip. Each series: {label, color, dash, points:[[label, value]], area}.
 const charts=new Map();let chartSeq=0;
-function lineChart({series,height=170,label,format=money,reference}){
+function lineChart({series,height=170,width=560,label,format=money,reference}){
  const all=series.flatMap(s=>s.points.map(p=>p[1])).concat(reference?[reference.value]:[]).filter(v=>v!=null);
  const n=Math.max(...series.map(s=>s.points.length));
  if(n<2||!all.length)return '<div class="chart-empty">Not enough price history to chart yet.</div>';
- const narrow=typeof window!=='undefined'&&window.innerWidth<640,id='chart'+(++chartSeq),w=narrow?Math.max(300,Math.min(560,window.innerWidth-40)):560,h=narrow?Math.round(height*.9):height,left=46,right=series.length>1?56:16,top=12,bottom=24;
+ const narrow=typeof window!=='undefined'&&window.innerWidth<640,id='chart'+(++chartSeq),w=narrow?Math.max(300,Math.min(width,window.innerWidth-40)):width,h=narrow?Math.round(height*.9):height,left=46,right=series.length>1?56:16,top=12,bottom=24;
  let lo=Math.min(...all),hi=Math.max(...all);if(lo===hi){lo*=.9;hi*=1.1;}const padY=(hi-lo)*.12;lo=Math.max(0,lo-padY);hi+=padY;
  const X=i=>left+i*(w-left-right)/(n-1),Y=v=>top+(hi-v)/(hi-lo||1)*(h-top-bottom);
  const ticks=[0,.5,1].map(t=>lo+(hi-lo)*t);
@@ -106,7 +106,7 @@ function wireCharts(root=document){
 
 function historyChart(m,grade){
  const h=priceHistory(m,grade).slice(-36);if(h.length<2)return '';
- return `<div class="detail-section history"><div class="section-heading"><h3>Price history</h3><small>Monthly guide · ${h.length} months</small></div>${lineChart({series:[{label:gradeNames[grade],color:'#2658ec',area:true,points:h.map(([ym,v])=>[ym,v,monthLabel(ym)])}],height:150,label:gradeNames[grade]+' monthly guide price'})}<p class="sales-note">PriceCharting's monthly guide${grade==='psa9'?' for Grade 9, which includes other graders':''}. Sold medians above use matching sales only.</p></div>`;
+ return `<div class="detail-section history"><div class="section-heading"><h3>Price history</h3><small>Monthly guide · ${h.length} months</small></div>${lineChart({series:[{label:gradeNames[grade],color:'#2658ec',area:true,points:h.map(([ym,v])=>[ym,v,monthLabel(ym)])}],height:170,width:340,label:gradeNames[grade]+' monthly guide price'})}<p class="sales-note">PriceCharting's monthly guide${grade==='psa9'?' for Grade 9, which includes other graders':''}. Sold medians above use matching sales only.</p></div>`;
 }
 function popLine(m){const p=m?.pop?.psa;if(!Array.isArray(p)||p.length<10)return '';const total=p.reduce((a,b)=>a+b,0);return `<p>PSA population: <b>${p[8].toLocaleString()}</b> PSA 9 · <b>${p[9].toLocaleString()}</b> PSA 10 · ${total.toLocaleString()} graded.${total?' '+Math.round(p[9]/total*100)+'% gem rate.':''}</p>`;}
 function renderDetail(){
@@ -183,12 +183,19 @@ function renderDex(){
   <section class="panel dex-holdings" aria-label="Cards in your Dex"><div class="panel-head"><div><h2>Your cards</h2><p>${empty?'Nothing here yet.':'Tap a card to edit it or see its own P/L.'}</p></div><div class="holdings-tools"><label class="sort-control"><span class="sr-only">Sort Dex</span><select id="dex-sort">${[['value','Highest value'],['pl','Best P/L'],['recent','Recently bought'],['set','Set order']].map(([v,l])=>`<option value="${v}" ${state.dex.sort===v?'selected':''}>${l}</option>`).join('')}</select></label><button class="button primary" id="dex-add">＋ Add a card</button></div></div>
    ${empty?`<div class="empty-state"><strong>Start your Dex.</strong><p>Add cards you own with what you paid, and Primal Watch keeps their value and profit up to date.</p><button class="button primary" id="dex-add-empty">Add your first card</button></div>`:`<div class="dex-grid">${rows.map(r=>{const c=cardById(r.card_id);if(!c)return '';return `<button class="dex-card" data-entry="${r.id}" aria-label="${esc(c.name)} ${gradeNames[r.grade]}, value ${money(r.value)}"><img src="${c.image}" alt="" loading="lazy"><span class="dex-card-body"><span class="dex-name">${esc(c.name)}</span><span class="dex-sub">${esc(c.setName)} · #${c.numberLabel}</span><span class="dex-chips"><span class="grade-chip ${r.grade}">${gradeNames[r.grade].replace(' · near mint','')}</span>${r.quantity>1?`<span class="qty-chip">×${r.quantity}</span>`:''}</span><span class="dex-value">${money(r.value)}<small>${r.basis?esc(r.basis):'no price yet'}</small></span><span class="dex-pl">${r.cost!=null?plText(r.pl,r.plPct):'<span class="muted">Paid: not set</span>'}</span></span></button>`;}).join('')}</div>`}
   </section>
- </div>`;
+ </div>
+ ${empty?'':`<section class="panel binder-panel" aria-label="Set progress"><div class="panel-head"><div><h2>Binder progress</h2><p>Rare cards you own in each set you collect.</p></div></div><div class="binder-list">${binderProgress().map(b=>`<button class="binder-row" data-binder="${b.set.id}"><span class="binder-name"><b>${esc(b.set.name)}</b><small>${esc(state.series.find(x=>x.id===b.set.series)?.label||'')} · ${b.set.release.slice(0,4)}</small></span><span class="binder-bar" role="img" aria-label="${b.owned} of ${b.total} rare cards"><i style="width:${Math.max(2,Math.round(b.owned/b.total*100))}%"></i></span><span class="binder-count">${b.owned}<small>/ ${b.total}</small></span></button>`).join('')}</div></section>`}`;
+ view.querySelectorAll('[data-binder]').forEach(b=>b.onclick=()=>{state.view='browse';state.setId=b.dataset.binder;state.category='all';state.query='';$('#search').value='';updateView();});
  view.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{state.dex.range=b.dataset.range;renderDex();});
  const sort=view.querySelector('#dex-sort');if(sort)sort.onchange=e=>{state.dex.sort=e.target.value;renderDex();};
  view.querySelectorAll('#dex-add,#dex-add-empty').forEach(b=>b.onclick=()=>openDexDialog({}));
  view.querySelectorAll('[data-entry]').forEach(b=>b.onclick=()=>openDexDialog(state.dex.entries.find(e=>String(e.id)===b.dataset.entry)));
  wireImages();wireCharts(view);
+}
+function binderProgress(){
+ const ownedIds=new Set(state.dex.entries.map(e=>e.card_id)),bySet=new Map();
+ for(const id of ownedIds){const c=cardById(id);if(c)bySet.set(c.setId,(bySet.get(c.setId)||new Set()).add(id));}
+ return [...bySet].map(([setId,ids])=>{const set=state.sets.find(x=>x.id===setId),rares=state.cards.filter(c=>c.setId===setId&&c.eligible);return {set,owned:[...ids].filter(id=>rares.some(c=>c.id===id)).length,total:rares.length};}).filter(b=>b.set&&b.total).sort((a,b)=>b.owned/b.total-a.owned/a.total);
 }
 function cardSearch(q){q=q.toLowerCase().trim();if(q.length<2)return [];return state.cards.filter(c=>(c.name+' '+c.numberLabel+' '+c.setName).toLowerCase().includes(q)).sort((a,b)=>(b.eligible-a.eligible)||a.name.localeCompare(b.name)).slice(0,8);}
 function openDexDialog(entry){
@@ -198,17 +205,18 @@ function openDexDialog(entry){
   const market=card?marketFor(card.id):null,grade=entry.grade||'psa9',val=card?entryValue({...entry,grade,quantity:entry.quantity||1},market):null;
   const h=card?priceHistory(market,grade).slice(-48):[],paidIdx=entry.purchase_date?h.findIndex(([m])=>m>=entry.purchase_date.slice(0,7)):-1;
   form.innerHTML=`<div class="dialog-heading"><h2 id="dex-dialog-title">${editing?'Edit Dex entry':'Add to your Dex'}</h2><button class="icon-button" type="button" id="dex-close" aria-label="Close">×</button></div><div class="dialog-body dex-form-body">
-   ${card?`<div class="dex-picked"><img src="${card.image}" alt=""><div><strong>${esc(card.name)}</strong><span>${esc(card.setName)} · #${card.numberLabel}</span>${editing?'':'<button type="button" class="link-button" id="dex-change">Choose a different card</button>'}</div></div>`:`<label class="field">Card<input id="dex-search" type="search" placeholder="Search by name, number or set" autocomplete="off" aria-describedby="dex-search-hint"></label><div id="dex-results" class="dex-results" role="listbox"></div><p class="field-hint" id="dex-search-hint">Type at least two letters.</p>`}
+   ${card?`<div class="dex-picked"><img src="${card.image}" alt=""><div><strong>${esc(card.name)}</strong><span>${esc(card.setName)} · #${card.numberLabel}</span>${editing?'<button type="button" class="link-button" id="dex-view-card">Open card details</button>':'<button type="button" class="link-button" id="dex-change">Choose a different card</button>'}</div></div>`:`<label class="field">Card<input id="dex-search" type="search" placeholder="Search by name, number or set" autocomplete="off" aria-describedby="dex-search-hint"></label><div id="dex-results" class="dex-results" role="listbox"></div><p class="field-hint" id="dex-search-hint">Type at least two letters.</p>`}
    <div class="field-row"><label class="field">Grade<select id="dex-grade">${['raw','psa9','psa10'].map(g=>`<option value="${g}" ${grade===g?'selected':''}>${gradeNames[g]}</option>`).join('')}</select></label><label class="field">Quantity<input id="dex-qty" type="number" min="1" max="999" step="1" value="${entry.quantity||1}"></label></div>
    <div class="field-row"><label class="field">Price paid each (USD)<input id="dex-price" type="number" min="0" max="1000000" step="0.01" value="${entry.purchase_price??''}" placeholder="Optional"></label><label class="field">Date bought<input id="dex-date" type="date" max="${today}" value="${entry.purchase_date||''}"></label></div>
    <label class="field">Notes<input id="dex-notes" type="text" maxlength="280" value="${esc(entry.notes||'')}" placeholder="Cert number, where you bought it…"></label>
-   ${card&&val?`<div class="dex-preview"><div><span>Value now</span><strong>${money(val.value)}</strong><small>${val.basis?esc(val.basis):'No price yet'}</small></div><div><span>P/L</span><strong>${val.cost!=null?plText(val.pl,val.plPct):'—'}</strong><small>${val.cost!=null?'vs '+money(val.cost)+' paid':'Add a price paid'}</small></div></div>${h.length>1?lineChart({series:[{label:gradeNames[grade],color:'#2658ec',area:true,points:h.map(([ym,v])=>[ym,v,monthLabel(ym)])}],height:150,label:'Price history for this card',reference:entry.purchase_price!=null?{value:entry.purchase_price,label:'Paid '+money(entry.purchase_price),color:'#eb6834',markIndex:paidIdx>=0?paidIdx:null}:null}):''}`:''}
+   ${card&&val?`<div class="dex-preview"><div><span>Value now</span><strong>${money(val.value)}</strong><small>${val.basis?esc(val.basis):'No price yet'}</small></div><div><span>P/L</span><strong>${val.cost!=null?plText(val.pl,val.plPct):'—'}</strong><small>${val.cost!=null?'vs '+money(val.cost)+' paid':'Add a price paid'}</small></div></div>${h.length>1?lineChart({series:[{label:gradeNames[grade],color:'#2658ec',area:true,points:h.map(([ym,v])=>[ym,v,monthLabel(ym)])}],height:180,width:480,label:'Price history for this card',reference:entry.purchase_price!=null?{value:entry.purchase_price,label:'Paid '+money(entry.purchase_price),color:'#eb6834',markIndex:paidIdx>=0?paidIdx:null}:null}):''}`:''}
    <p class="form-error" id="dex-error" role="alert" hidden></p>
    <div class="dialog-actions">${editing?'<button type="button" class="button danger" id="dex-delete">Remove</button>':''}<span></span><button type="button" class="button" id="dex-cancel">Cancel</button><button type="submit" class="button primary" id="dex-save">${editing?'Save changes':'Add to Dex'}</button></div>
   </div>`;
   const sync=()=>{entry={...entry,grade:$('#dex-grade').value,quantity:Number($('#dex-qty').value)||1,purchase_price:$('#dex-price').value===''?null:Number($('#dex-price').value),purchase_date:$('#dex-date').value||null,notes:$('#dex-notes').value};};
   $('#dex-close').onclick=$('#dex-cancel').onclick=()=>dlg.close();
   $('#dex-grade').onchange=()=>{sync();draw();};$('#dex-price').onchange=$('#dex-date').onchange=()=>{sync();draw();};
+  if($('#dex-view-card'))$('#dex-view-card').onclick=()=>{dlg.close();state.view='browse';state.setId=card.setId;state.category='all';state.grade=entry.grade||state.grade;$('#grade').value=state.grade;state.query='';$('#search').value='';updateView();select(card.id);};
   if($('#dex-change'))$('#dex-change').onclick=()=>{sync();card=null;draw();$('#dex-search').focus();};
   if($('#dex-search')){const s=$('#dex-search');s.oninput=()=>{const res=cardSearch(s.value);$('#dex-results').innerHTML=res.map(c=>`<button type="button" role="option" data-pick="${c.id}"><img src="${c.image}" alt="" loading="lazy"><span><b>${esc(c.name)}</b><small>${esc(c.setName)} · #${c.numberLabel}</small></span></button>`).join('')||(s.value.trim().length>1?'<p class="field-hint">No cards match.</p>':'');$('#dex-results').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{sync();card=cardById(b.dataset.pick);entry.card_id=card.id;draw();});wireImages();};}
   if($('#dex-delete'))$('#dex-delete').onclick=async()=>{try{const r=await send('/api/collection','DELETE',{id:entry.id});applyDex(r);dlg.close();toast('Removed from your Dex.');}catch(e){$('#dex-error').textContent=e.message;$('#dex-error').hidden=false;}};
@@ -300,7 +308,9 @@ function updateView(){
  $('#set-scope').textContent=v==='watch'?'Filter your saved cards by set':`${xy-1} XY expansions + promos · ${bw} Black & White sets`;
  const sourceSet=set||state.sets.find(s=>s.id===cardById(state.selected)?.setId);if(sourceSet){$('#set-market-source').href=sourceSet.marketSource;$('#set-checklist-source').href=sourceSet.checklistSource;}
  stats();
- document.querySelectorAll('[data-category]').forEach(b=>{b.classList.toggle('active',b.dataset.category===state.category);b.setAttribute('aria-pressed',String(b.dataset.category===state.category));});
+ const scope=scopedCards(),present=new Set(scope.map(c=>c.category));if(scope.some(c=>c.name.endsWith('EX')))present.add('Pokémon EX');
+ if(!['chase','all'].includes(state.category)&&!present.has(state.category))state.category='all';
+ document.querySelectorAll('[data-category]').forEach(b=>{b.hidden=!['chase','all'].includes(b.dataset.category)&&!present.has(b.dataset.category);b.classList.toggle('active',b.dataset.category===state.category);b.setAttribute('aria-pressed',String(b.dataset.category===state.category));});
  state.limit=60;$('#card-list').scrollTop=0;$('#detail').scrollTop=0;const visible=filteredCards();if(!visible.some(c=>c.id===state.selected))state.selected=visible[0]?.id||null;renderList();renderDetail();
  if(state.selected&&!state.full[state.selected]&&state.markets[state.selected]?.light)loadCard(state.selected);
 }
