@@ -27,10 +27,10 @@ const FORM_PREFIX=/^(?:M|Mega|Primal|Shining|Alolan|Detective|Flying|Surfing|Ash
 // The Pokémon (or trainer) a card is about. Tag Team cards return each partner.
 export function charactersOf(name){
  return String(name).split(/\s+&\s+/).map(part=>{
-  let n=part.trim().replace(/\s*◇$/,'').replace(/[\s-]+(?:EX|GX|BREAK)$/,'').trim();
+  let n=part.trim().replace(/\s*[◇★☆δ]$/i,'').replace(/[\s-]+(?:ex|gx|break|legend|lv\.?x)$/i,'').trim();
   for(let i=0;i<3&&FORM_PREFIX.test(n);i++)n=n.replace(FORM_PREFIX,'');
   n=n.replace(/^(?:Black|White)\s+(?=Kyurem)/,'').replace(/^(?:Dawn Wings|Dusk Mane|Ultra)\s+(?=Necrozma)/,'').replace(/^(?:Heat|Wash|Frost|Fan|Mow)\s+(?=Rotom)/,'').replace(/^Ho Oh$/,'Ho-Oh');
-  return n.replace(/[\s-]+(?:EX|GX|BREAK)$/,'').trim();
+  return n.replace(/[\s-]+(?:ex|gx|break|legend|lv\.?x)$/i,'').trim();
  }).filter(Boolean);
 }
 const pctRank=(values)=>{const sorted=[...values].sort((a,b)=>a-b);return v=>{if(sorted.length<2)return .5;let lo=0;while(lo<sorted.length&&sorted[lo]<v)lo++;let hi=lo;while(hi<sorted.length&&sorted[hi]===v)hi++;return ((lo+hi-1)/2)/(sorted.length-1);};};

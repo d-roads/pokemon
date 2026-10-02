@@ -22,6 +22,7 @@ export function matchesCard(title,card){
  if(EXCLUDED_LISTING.test(title))return false;
  const titleAnd=(title.match(/\s&\s/g)||[]).length,nameAnd=(String(card.name||'').match(/\s&\s/g)||[]).length;if(titleAnd>nameAnd)return false;
  const expected=collector(card.number),prefix=expected.match(/^[A-Z]+/)?.[0]||'',total=prefix+card.printedTotal;
+ if(/^[A-Z!?]$/.test(expected)){const mark=expected.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return new RegExp('(?:\\[\\s*'+mark+'\\s*\\]|(?:^|[^A-Z0-9])'+mark+'\\s*\\/\\s*'+card.printedTotal+'(?!\\d))','i').test(title);}
  const numbered=[...title.matchAll(/\b((?:XY|RC|SV)?\s*\d+[a-z]?)\s*\/\s*((?:XY|RC|SV)?\s*\d+[a-z]?)\b/gi)];
  if(!expected.startsWith('XY')&&numbered.length)return numbered.every(m=>collector(m[1])===expected&&collector(m[2])===total);
  if(expected.startsWith('XY'))return [...title.matchAll(/\bXY\s*0*(\d+)(?![a-z\d])/gi)].some(m=>'XY'+Number(m[1])===expected);
