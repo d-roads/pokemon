@@ -5,6 +5,7 @@ import {parseMarket,parseSet,sourceFetch} from './provider.mjs';
 import {mergeMarket} from './sales.mjs';
 import {lightMarket} from './payload.mjs';
 import {topMovers,PERIODS} from './movers.mjs';
+import {potentialInvestments} from './invest.mjs';
 import {validateEntry} from './portfolio.mjs';
 import {DEFAULT_SETTINGS,normalizeSettings,updateSettings,publicSettings,hasEbayKeys,runScan,sendNotifications,ebaySearchUrl,alertLimit} from './alerts.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
@@ -126,6 +127,7 @@ export async function api(request,env){
    const period=url.searchParams.get('period')||'week';if(!PERIODS[period])return json({error:'Choose week or month.'},400);
    return json(await insight(db,'movers:'+period,entries=>topMovers(entries,period)));
   }
+  if(path==='/api/investments' && request.method==='GET')return json(await insight(db,'investments',entries=>potentialInvestments(entries)));
   if(path==='/api/market' && request.method==='GET'){
    const card=cardById.get(url.searchParams.get('id'));if(!card)return json({error:'That card is not in the catalog.'},404);
    let market=await fullMarket(db,card.id);

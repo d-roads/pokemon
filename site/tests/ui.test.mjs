@@ -7,6 +7,8 @@ import {snapshots} from '../data/market.mjs';
 import {analyze,gradeNames,trendProjection} from '../lib/analysis.mjs';
 import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE} from '../lib/portfolio.mjs';
 import {topMovers} from '../lib/movers.mjs';
+import {potentialInvestments} from '../lib/invest.mjs';
+const investData=potentialInvestments(cards.map(c=>[c,snapshots[c.id]]));
 const moverData=topMovers(cards.map(c=>[c,snapshots[c.id]]),'week');
 
 // Exercise the UI's controls and rendered output without a browser runtime.
@@ -22,7 +24,7 @@ function workspace(){
  for(const m of html.matchAll(/id="([^"]+)"/g))elements.set('#'+m[1],new Element());
  const categories=[...html.matchAll(/data-category="([^"]+)"/g)].map(m=>{const e=new Element();e.dataset.category=m[1];return e;});
  const document={querySelector:s=>elements.get(s)||null,querySelectorAll:s=>s==='[data-category]'?categories:[]};
- const responses={'/api/catalog':{cards,sets,series:[{id:'XY',name:'XY',label:'XY Series',years:'2014–2016'},{id:'BW',name:'Black & White',label:'Black & White Series',years:'2011–2013'},{id:'SM',name:'Sun & Moon',label:'Sun & Moon Series',years:'2017–2019'}],markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/movers':moverData,'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
+ const responses={'/api/catalog':{cards,sets,series:[{id:'XY',name:'XY',label:'XY Series',years:'2014–2016'},{id:'BW',name:'Black & White',label:'Black & White Series',years:'2011–2013'},{id:'SM',name:'Sun & Moon',label:'Sun & Moon Series',years:'2017–2019'}],markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/movers':moverData,'/api/investments':investData,'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
  const context=vm.createContext({document,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,fetch:async url=>({ok:true,json:async()=>responses[url.split('?')[0]]||{}})});
  const source=readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/^import .*;\s*$/gm,'').replace(/init\(\);\s*$/,'');
  vm.runInContext(source,context);
@@ -74,4 +76,15 @@ test('Top movers shows PSA 10, PSA 9 and raw lists and opens a card in its grade
  const first=moverData.grades.psa9.movers[0];assert.match(html,new RegExp('data-mover="'+first.card_id+'" data-grade="psa9"'));
  ui.run(`openCard('${first.card_id}','psa9')`);assert.equal(ui.run('state.view'),'browse');assert.equal(ui.run('state.grade'),'psa9');assert.equal(ui.run('state.selected'),first.card_id);
  ui.e('#movers-nav').onclick();ui.run("state.movers.period='month';renderMovers()");assert.match(ui.e('#movers-view').innerHTML,/Finding this month/);
+});
+test('Investments lists picks with their signals and character demand, by grade',async()=>{
+ const ui=workspace();await ui.run('init()');
+ ui.e('#invest-nav').onclick();assert.equal(ui.e('#invest-view').hidden,false);assert.equal(ui.e('#movers-view').hidden,true);assert.equal(ui.e('#page-title').textContent,'Potential investments');
+ await ui.run('loadInvest()');let html=ui.e('#invest-view').innerHTML;
+ const first=investData.grades.psa10.picks[0];
+ assert.match(html,new RegExp('data-invest="'+first.card_id+'"'));assert.match(html,/Steady uptrend|Recovering from highs|Cheap vs\. similar cards/);
+ assert.match(html,new RegExp(first.demand.character+' demand'));assert.match(html,/Not investment advice/);
+ ui.run("state.invest.grade='raw';renderInvest()");html=ui.e('#invest-view').innerHTML;
+ assert.match(html,new RegExp('data-invest="'+investData.grades.raw.picks[0].card_id+'" data-grade="raw"'));
+ ui.run(`openCard('${first.card_id}','psa10')`);assert.equal(ui.run('state.view'),'browse');assert.equal(ui.run('state.grade'),'psa10');
 });

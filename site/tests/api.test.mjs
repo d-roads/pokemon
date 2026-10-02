@@ -77,3 +77,8 @@ test('Movers endpoint returns per-grade lists and rejects unknown periods',async
  const again=await (await api(req('/api/movers?period=month'),env)).json();assert.deepEqual(again,d);
  assert.equal((await api(req('/api/movers?period=year'),env)).status,400);
 });
+test('Investments endpoint returns screened picks per grade',async()=>{
+ const r=await api(req('/api/investments'),env);assert.equal(r.status,200);const d=await r.json();
+ assert.deepEqual(Object.keys(d.grades),['psa10','psa9','raw']);assert.ok(d.rules.demandCut>0);
+ for(const col of Object.values(d.grades))for(const p of col.picks){assert.ok(p.signals.length);assert.ok(p.demand.character);}
+});
