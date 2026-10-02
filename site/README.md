@@ -1,6 +1,6 @@
 # Primal Watch
 
-A personal Pokémon card tracker for the Black & White, XY, and Sun & Moon eras. Browse every rare card set by set, compare reported sold prices for raw (near mint), PSA 9 and PSA 10 copies, see the week's and month's top movers, screen potential investments, save a watchlist with your own buy limits, keep your collection in the Dex, and get alerts when a watched card is listed at your price.
+A personal Pokémon card tracker covering the EX, Diamond & Pearl through HGSS, Black & White, XY, and Sun & Moon eras (2003–2019). Browse every rare card set by set, compare reported sold prices for raw (near mint), PSA 9 and PSA 10 copies, see the week's and month's top movers, screen potential investments, save a watchlist with your own buy limits, keep your collection in the Dex, and get alerts when a watched card is listed at your price.
 
 ## Open locally
 
@@ -12,17 +12,20 @@ Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-wa
 
 ## What's included
 
-- **Catalog**: 5,923 cards in 43 sets, 2,835 of them rare (rare, holo rare, EX/GX, full art, secret rare, shiny, Prism Star, BREAK, Radiant Collection and promos).
+- **Catalog**: 9,526 cards in 75 sets, 4,260 of them browsable rare/chase cards (rare, holo rare, Pokémon ex/EX/GX, LV.X, Prime, LEGEND, Gold Star, full art, secret rare, shiny, Prism Star, BREAK, Radiant Collection and promos).
+  - EX Series: all 16 English expansions from EX Ruby & Sapphire through EX Power Keepers.
+  - Diamond & Pearl through HGSS: all 7 Diamond & Pearl expansions, 4 Platinum expansions, 4 HeartGold & SoulSilver expansions, and Call of Legends.
   - XY Series: XY Base Set, Flashfire, Furious Fists, Phantom Forces, Primal Clash, Double Crisis, Roaring Skies, Ancient Origins, BREAKthrough, BREAKpoint, Fates Collide, Steam Siege, Generations (with RC1–RC32), Evolutions, and XY Black Star Promos.
   - Black & White Series: Black & White Base Set, Emerging Powers, Noble Victories, Next Destinies, Dark Explorers, Dragons Exalted, Dragon Vault, Boundaries Crossed, Plasma Storm, Plasma Freeze, Plasma Blast and Legendary Treasures (with RC1–RC25).
   - Sun & Moon Series: Sun & Moon, Guardians Rising, Burning Shadows, Shining Legends, Crimson Invasion, Ultra Prism, Forbidden Light, Celestial Storm, Dragon Majesty, Lost Thunder, Team Up, Detective Pikachu, Unbroken Bonds, Unified Minds, Hidden Fates (including SV1–SV94) and Cosmic Eclipse.
   - Reverse holos, stamped, prerelease and other alternate prints are not separate entries.
 - **Browse**: set or era picker, search, raw / PSA 9 / PSA 10 views, sold medians, buy targets, sales plots, 1Y/2Y/3Y trend projections, monthly price history and PSA population.
-- **Top movers**: the 20 biggest percentage rises in sold price this week or month, listed separately for PSA 10, PSA 9 and raw near-mint. Lists are shorter when fewer cards have reliable evidence.
-- **Potential investments**: up to 20 picks per grade, each showing which signals it met (steady uptrend, recovering from highs, cheap vs. similar cards) and its character's demand score.
+- **Top movers**: the 20 biggest percentage rises in sold price this week or month, listed separately for PSA 10, PSA 9 and raw near-mint. Era filters can include only the eras you want or exclude eras you do not collect. Lists are shorter when fewer cards have reliable evidence.
+- **Potential investments**: up to 20 picks per grade, each showing which signals it met (steady uptrend, recovering from highs, cheap vs. similar cards) and its character's demand score. The same era filters recompute the screen within the selected catalog scope.
 - **Watchlist**: star a card and grade; set your own maximum price.
 - **Dex**: add cards you own with grade, quantity, price paid and date. See total value, cost basis, unrealized profit and loss, a value-vs-cost chart over time, and each card's own P/L chart.
 - **Alerts**: with your own free eBay developer keys, the server checks newly listed Buy It Now and Best Offer listings for each watched card and alerts when price plus shipping is at or below your limit. Alerts appear in the app, as desktop notifications while the app is open, and optionally on your phone through [ntfy](https://ntfy.sh) or a Discord webhook. Without keys, the Alerts page still gives a ready-made eBay search for every watched card.
+- **Settings**: choose Light, Dark, or Soft contrast. The preference is stored in the browser and applied before the page paints.
 
 ### Setting up listing alerts
 
@@ -34,7 +37,7 @@ Alerts run while `node server.mjs` is running. Keys stay in your local database 
 
 ## Market data
 
-Each rare XY and Black & White card's PriceCharting product page was read in full on October 1, 2026, including all 8 Double Crisis rares and their 566 classified sales. For Sun & Moon, 1,109 rare cards have exact product matches and guide prices; the 172 highest-interest cards also have full pages with 13,145 classified sales, monthly price history and population data. Product URLs were matched against PriceCharting's own set listings (`data/source-urls.json`), which fixes apostrophes, Mega names, `[Holo]` products, subset numbers and promo numbering.
+The current snapshot contains 1,947 full PriceCharting captures and 132,454 classified sales. Every rare XY and Black & White card has a full capture; Sun & Moon has exact guide matches for 1,109 rare cards and full captures for the 172 highest-interest cards. For the newly added legacy eras, 1,317 of 1,425 eligible cards have exact product matches and guide prices, and the 10 highest-interest cards from each of the 32 sets have full pages: 160 EX captures with 11,023 classified sales and 160 Diamond & Pearl/Platinum/HGSS captures with 8,129 classified sales. Product URLs were matched against PriceCharting's own set listings (`data/source-urls.json`), including legacy letter and shiny subset numbering.
 
 A sale is counted only when:
 
@@ -89,6 +92,6 @@ node --check dist/server/index.js
 
 On older Node versions without `--test-isolation`, run `node --test tests/*.test.mjs`.
 
-`/api/movers?period=week|month` and `/api/investments` compute over every card and are cached until saved market data changes or the day rolls over.
+`/api/movers?period=week|month` and `/api/investments` compute over every card and are cached until saved market data changes or the day rolls over. Both accept a comma-separated era scope, for example `series=XY` or `series=EX,DP`; unsupported or empty scopes return 400.
 
-`node build.mjs` writes a Cloudflare Worker to `dist/server/index.js` that uses a D1 binding named `DB` (apply `db/schema.sql` first). With the full sales captures embedded, the bundle is about 37 MB, which is larger than Workers allow; hosting it would need the market data moved to D1 or KV. Scheduled alert scans run only in the local Node server.
+`node build.mjs` writes a Cloudflare Worker to `dist/server/index.js` that uses a D1 binding named `DB` (apply `db/schema.sql` first). With the full sales captures embedded, the bundle is about 52.5 MB, which is larger than Workers allow; hosting it would need the market data moved to D1 or KV. Scheduled alert scans run only in the local Node server.

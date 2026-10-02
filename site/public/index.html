@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Explore XY and Black &amp; White rare cards, compare grade-specific sales, track your Dex, and get alerts when watched cards are listed at your price.">
+  <meta name="description" content="Explore rare Pokémon cards from the EX era through Sun &amp; Moon, compare grade-specific sales, track your Dex, and follow market signals.">
   <meta name="theme-color" content="#f6f8fc"><title>Primal Watch — card tracker</title>
+  <script>try{const t=localStorage.getItem('primal-watch-theme');if(['dark','soft'].includes(t)){document.documentElement.dataset.theme=t;document.querySelector('meta[name="theme-color"]').content=t==='dark'?'#101826':'#f1f2f4';}}catch{}</script>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css">
   <script type="module" src="/app.js"></script>
 </head>
@@ -19,6 +20,7 @@
         <button class="nav-item" id="watch-nav"><span class="nav-icon">☆</span>Watchlist<span class="nav-count" id="watch-count">0</span></button>
         <button class="nav-item" id="dex-nav"><span class="nav-icon">◫</span>Dex<span class="nav-count" id="dex-count">0</span></button>
         <button class="nav-item" id="alerts-nav"><span class="nav-icon">◎</span>Alerts<span class="nav-count alert-count" id="alert-count" hidden>0</span></button>
+        <button class="nav-item" id="settings-nav"><span class="nav-icon">⚙</span>Settings</button>
       </nav>
       <div class="set-nav"><p class="nav-label">EXPLORING</p><div class="set-indicator"><span class="set-symbol" id="series-symbol">XY</span><span><span id="sidebar-set">Primal Clash</span><small id="sidebar-year">English · 2015</small></span></div></div>
       <div class="sidebar-bottom"><button id="method-button" class="method-link"><span class="info-circle">i</span>How targets work</button><p>For the collector.<br>With the numbers in view.</p><div class="sidebar-rule"></div><span class="beta">PRIMAL WATCH <b>v2</b></span></div>
@@ -28,7 +30,7 @@
       <div class="content">
         <div class="page-heading"><div><div class="eyebrow" id="page-eyebrow">SET EXPLORER <span id="set-code">XY5</span></div><h1 id="page-title">XY · Primal Clash</h1><p id="page-description">A closer look at your next pickup.</p></div><div class="heading-tools" id="heading-tools"><span class="snapshot-badge" id="snapshot-label">Prices checked Oct 1, 2026</span><button class="button" id="refresh-set"><span aria-hidden="true">↻</span> Refresh sales</button></div></div>
         <div id="error-banner" class="notice error" role="alert" hidden></div>
-        <div class="set-switcher" id="set-switcher"><label for="set-select">Explore a set</label><select id="set-select"><option value="xy5">Primal Clash</option></select><span id="set-scope">XY and Black &amp; White sets</span></div>
+        <div class="set-switcher" id="set-switcher"><label for="set-select">Explore a set</label><select id="set-select"><option value="xy5">Primal Clash</option></select><span id="set-scope">Sets from the EX era through Sun &amp; Moon</span></div>
         <div class="summary-grid" id="summary-grid">
           <div class="summary"><span id="set-count-label">Rare cards in this set</span><strong id="set-count">164 <small>160 + 4 secret rares</small></strong></div>
           <div class="summary"><span>Price coverage</span><strong id="price-count">— <small>cards with sourced guides</small></strong></div>
@@ -37,7 +39,7 @@
         <div class="workspace" id="workspace">
           <section class="catalog-panel" aria-label="Cards">
             <div class="catalog-toolbar"><label class="search-wrap"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search a card, number, or set" aria-label="Search cards"></label><label class="grade-control"><span class="sr-only">Card grade</span><select id="grade"><option value="psa9">PSA 9</option><option value="psa10">PSA 10</option><option value="raw">Raw · near mint</option></select></label></div>
-            <div class="filters"><div class="category-tabs" aria-label="Card category"><button class="filter-tab active" data-category="chase" aria-pressed="true">Chase cards</button><button class="filter-tab" data-category="all" aria-pressed="false">All rares</button><button class="filter-tab" data-category="Full art" aria-pressed="false">Full art</button><button class="filter-tab" data-category="Pokémon EX" aria-pressed="false">EX</button><button class="filter-tab" data-category="Pokémon GX" aria-pressed="false">GX</button><button class="filter-tab" data-category="Secret rare" aria-pressed="false">Secret rare</button><button class="filter-tab" data-category="Shiny GX" aria-pressed="false">Shiny GX</button><button class="filter-tab" data-category="Shiny rare" aria-pressed="false">Shiny</button><button class="filter-tab" data-category="Prism Star" aria-pressed="false">Prism Star</button><button class="filter-tab" data-category="BREAK" aria-pressed="false">BREAK</button><button class="filter-tab" data-category="ACE SPEC" aria-pressed="false">ACE SPEC</button><button class="filter-tab" data-category="Promo" aria-pressed="false">Promos</button></div><label class="sort-control"><span class="sr-only">Sort cards</span><select id="sort"><option value="featured">Featured</option><option value="number">Card number</option><option value="price">Price: high to low</option><option value="activity">Sales activity</option></select></label></div>
+            <div class="filters"><div class="category-tabs" aria-label="Card category"><button class="filter-tab active" data-category="chase" aria-pressed="true">Chase cards</button><button class="filter-tab" data-category="all" aria-pressed="false">All rares</button><button class="filter-tab" data-category="Full art" aria-pressed="false">Full art</button><button class="filter-tab" data-category="Pokémon ex" aria-pressed="false">ex</button><button class="filter-tab" data-category="Pokémon EX" aria-pressed="false">EX</button><button class="filter-tab" data-category="Pokémon LV.X" aria-pressed="false">LV.X</button><button class="filter-tab" data-category="Prime" aria-pressed="false">Prime</button><button class="filter-tab" data-category="LEGEND" aria-pressed="false">LEGEND</button><button class="filter-tab" data-category="Gold Star" aria-pressed="false">Gold Star</button><button class="filter-tab" data-category="Pokémon GX" aria-pressed="false">GX</button><button class="filter-tab" data-category="Secret rare" aria-pressed="false">Secret rare</button><button class="filter-tab" data-category="Shiny GX" aria-pressed="false">Shiny GX</button><button class="filter-tab" data-category="Shiny rare" aria-pressed="false">Shiny</button><button class="filter-tab" data-category="Prism Star" aria-pressed="false">Prism Star</button><button class="filter-tab" data-category="BREAK" aria-pressed="false">BREAK</button><button class="filter-tab" data-category="ACE SPEC" aria-pressed="false">ACE SPEC</button><button class="filter-tab" data-category="Promo" aria-pressed="false">Promos</button></div><label class="sort-control"><span class="sr-only">Sort cards</span><select id="sort"><option value="featured">Featured</option><option value="number">Card number</option><option value="price">Price: high to low</option><option value="activity">Sales activity</option></select></label></div>
             <div class="results-caption"><span id="result-count">Loading cards…</span><label class="budget-toggle"><input id="budget-filter" type="checkbox"><span>$250–$350</span></label></div>
             <div class="list-head"><span>CARD</span><span>PRICE <span class="muted">USD</span></span><span>BUY TARGET</span><span class="sr-only">Watch</span></div>
             <div id="card-list" class="card-list" tabindex="0" aria-label="Rare card list" aria-live="polite"><div class="loading"><span class="spinner"></span>Loading your cards…</div></div>
@@ -49,6 +51,7 @@
         <section id="invest-view" class="view-panel" aria-label="Potential investments" tabindex="-1" hidden></section>
         <section id="dex-view" class="view-panel" aria-label="Your Dex" tabindex="-1" hidden></section>
         <section id="alerts-view" class="view-panel" aria-label="Listing alerts" tabindex="-1" hidden></section>
+        <section id="settings-view" class="view-panel" aria-label="Settings" tabindex="-1" hidden></section>
         <footer class="page-footer"><span>All values in USD. Targets exclude shipping and tax.</span><button id="sources-button">Sources & methodology</button></footer>
       </div>
     </main>

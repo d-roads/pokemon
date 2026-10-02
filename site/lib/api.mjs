@@ -10,6 +10,8 @@ import {validateEntry} from './portfolio.mjs';
 import {DEFAULT_SETTINGS,normalizeSettings,updateSettings,publicSettings,hasEbayKeys,runScan,sendNotifications,ebaySearchUrl,alertLimit} from './alerts.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const cardById=new Map(cards.map(c=>[c.id,c]));
+const seriesIds=series.map(item=>item.id);
+function insightSeries(url){const raw=url.searchParams.get('series');if(raw==null)return seriesIds;const requested=new Set(raw.split(',').map(value=>value.trim().toUpperCase()).filter(Boolean));if(!requested.size||[...requested].some(id=>!seriesIds.includes(id)))return null;return seriesIds.filter(id=>requested.has(id));}
 async function cachedMarkets(db){const r=await db.prepare('SELECT card_id,payload FROM market_cache').all();return Object.fromEntries((r.results||[]).map(r=>[r.card_id,JSON.parse(r.payload)]));}
 async function cachedMarket(db,id){const row=await db.prepare('SELECT payload FROM market_cache WHERE card_id = ?').bind(id).first();return row?JSON.parse(row.payload):null;}
 async function readWatch(db,user){const r=await db.prepare('SELECT card_id,grade,target,created_at FROM watchlist WHERE user_id = ? ORDER BY created_at DESC').bind(user).all();return r.results||[];}
@@ -125,9 +127,13 @@ export async function api(request,env){
   }
   if(path==='/api/movers' && request.method==='GET'){
    const period=url.searchParams.get('period')||'week';if(!PERIODS[period])return json({error:'Choose week or month.'},400);
-   return json(await insight(db,'movers:'+period,entries=>topMovers(entries,period)));
+   const included=insightSeries(url);if(!included)return json({error:'Choose one or more supported eras.'},400);const selected=new Set(included),key=included.join(',');
+   const result=await insight(db,'movers:'+period+':'+key,entries=>topMovers(entries.filter(([card])=>selected.has(card.series)),period));return json({...result,series:included});
   }
-  if(path==='/api/investments' && request.method==='GET')return json(await insight(db,'investments',entries=>potentialInvestments(entries)));
+  if(path==='/api/investments' && request.method==='GET'){
+   const included=insightSeries(url);if(!included)return json({error:'Choose one or more supported eras.'},400);const selected=new Set(included),key=included.join(',');
+   const result=await insight(db,'investments:'+key,entries=>potentialInvestments(entries.filter(([card])=>selected.has(card.series))));return json({...result,series:included});
+  }
   if(path==='/api/market' && request.method==='GET'){
    const card=cardById.get(url.searchParams.get('id'));if(!card)return json({error:'That card is not in the catalog.'},404);
    let market=await fullMarket(db,card.id);

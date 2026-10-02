@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
-import {cards,sets} from '../data/catalog.mjs';
+import {cards,sets,series} from '../data/catalog.mjs';
 import {snapshots} from '../data/market.mjs';
 import {analyze,gradeNames,trendProjection} from '../lib/analysis.mjs';
 import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE} from '../lib/portfolio.mjs';
@@ -24,7 +24,7 @@ function workspace(){
  for(const m of html.matchAll(/id="([^"]+)"/g))elements.set('#'+m[1],new Element());
  const categories=[...html.matchAll(/data-category="([^"]+)"/g)].map(m=>{const e=new Element();e.dataset.category=m[1];return e;});
  const document={querySelector:s=>elements.get(s)||null,querySelectorAll:s=>s==='[data-category]'?categories:[]};
- const responses={'/api/catalog':{cards,sets,series:[{id:'XY',name:'XY',label:'XY Series',years:'2014–2016'},{id:'BW',name:'Black & White',label:'Black & White Series',years:'2011–2013'},{id:'SM',name:'Sun & Moon',label:'Sun & Moon Series',years:'2017–2019'}],markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/movers':moverData,'/api/investments':investData,'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
+ const responses={'/api/catalog':{cards,sets,series,markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/movers':moverData,'/api/investments':investData,'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
  const context=vm.createContext({document,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,fetch:async url=>({ok:true,json:async()=>responses[url.split('?')[0]]||{}})});
  const source=readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/^import .*;\s*$/gm,'').replace(/init\(\);\s*$/,'');
  vm.runInContext(source,context);
@@ -36,7 +36,9 @@ test('Set picker, all-set search, and Radiant Collection render correct cards',a
  ui.e('#set-select').onchange({target:{value:'g1'}});assert.equal(ui.e('#page-title').textContent,'Generations');assert.match(ui.e('#set-count').innerHTML,/37/);
  ui.e('#grade').onchange({target:{value:'raw'}});ui.e('#search').oninput({target:{value:'RC30'}});assert.match(ui.e('#card-list').innerHTML,/Gardevoir/);assert.match(ui.e('#card-list').innerHTML,/RC30\/RC32/);assert.doesNotMatch(ui.e('#card-list').innerHTML,/\/160/);
  ui.e('#set-select').onchange({target:{value:'all'}});ui.run("state.category='all';updateView();");ui.e('#search').oninput({target:{value:'Flashfire'}});
- assert.equal(ui.run('filteredCards().length'),46);assert.match(ui.e('#set-count').innerHTML,/2835/);
+ assert.equal(ui.run('filteredCards().length'),46);assert.match(ui.e('#set-count').innerHTML,/4260/);
+ ui.e('#search').oninput({target:{value:''}});ui.e('#set-select').onchange({target:{value:'era:EX'}});assert.match(ui.e('#set-count').innerHTML,/687/);assert.equal(ui.e('#page-title').textContent,'Explore the EX era');
+ ui.e('#set-select').onchange({target:{value:'col1'}});ui.e('#search').oninput({target:{value:'SL10'}});assert.match(ui.e('#card-list').innerHTML,/Rayquaza/);assert.match(ui.e('#card-list').innerHTML,/#SL10 · Shiny rare/);
  ui.e('#search').oninput({target:{value:''}});ui.e('#set-select').onchange({target:{value:'era:BW'}});assert.match(ui.e('#set-count').innerHTML,/553/);assert.equal(ui.e('#page-title').textContent,'Explore the Black & White era');
  ui.e('#set-select').onchange({target:{value:'bw11'}});ui.e('#search').oninput({target:{value:'RC24'}});assert.match(ui.e('#card-list').innerHTML,/Mew EX/);assert.match(ui.e('#card-list').innerHTML,/RC24\/RC25/);
  ui.e('#set-select').onchange({target:{value:'era:SM'}});assert.match(ui.e('#set-count').innerHTML,/1380/);assert.equal(ui.e('#page-title').textContent,'Explore the Sun & Moon era');
@@ -87,4 +89,8 @@ test('Investments lists picks with their signals and character demand, by grade'
  ui.run("state.invest.grade='raw';renderInvest()");html=ui.e('#invest-view').innerHTML;
  assert.match(html,new RegExp('data-invest="'+investData.grades.raw.picks[0].card_id+'" data-grade="raw"'));
  ui.run(`openCard('${first.card_id}','psa10')`);assert.equal(ui.run('state.view'),'browse');assert.equal(ui.run('state.grade'),'psa10');
+});
+test('Settings offers persistent light, dark, and soft-contrast appearances',async()=>{
+ const ui=workspace();await ui.run('init()');ui.e('#settings-nav').onclick();assert.equal(ui.e('#settings-view').hidden,false);assert.equal(ui.e('#page-title').textContent,'Settings');
+ const html=ui.e('#settings-view').innerHTML;assert.match(html,/Light/);assert.match(html,/Dark/);assert.match(html,/Soft contrast/);assert.match(html,/saved in this browser/);
 });

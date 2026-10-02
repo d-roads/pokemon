@@ -3,6 +3,9 @@ import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE} fro
 const analysisCache=new WeakMap();
 const analyze=(market,grade)=>{if(!market)return computeAnalysis(market,grade);const day=Math.floor(Date.now()/86400000);let cache=analysisCache.get(market);if(!cache||cache.day!==day){cache={day,grades:{}};analysisCache.set(market,cache);}return cache.grades[grade]??=(computeAnalysis(market,grade));};
 const $=s=>document.querySelector(s);
+const APPEARANCES={light:{label:'Light',description:'The original bright collector workspace.',color:'#f6f8fc'},dark:{label:'Dark',description:'A low-glare dark palette for evening use.',color:'#101826'},soft:{label:'Soft contrast',description:'Gentler whites, ink, and accents with less visual contrast.',color:'#f1f2f4'}};
+function savedAppearance(){try{const value=typeof localStorage==='undefined'?null:localStorage.getItem('primal-watch-theme');return value in APPEARANCES?value:'light';}catch{return 'light';}}
+function applyAppearance(value,persist=true){const theme=value in APPEARANCES?value:'light';if(document.documentElement){if(theme==='light')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=theme;}const meta=$('meta[name="theme-color"]');if(meta)meta.content=APPEARANCES[theme].color;if(persist)try{localStorage.setItem('primal-watch-theme',theme);}catch{}return theme;}
 const money=v=>v==null?'-':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(v);
 const compact=v=>v==null?'-':Math.abs(v)>=1000?'$'+(v/1000).toFixed(Math.abs(v)>=10000?0:1)+'k':'$'+Math.round(v);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -12,8 +15,8 @@ const ago=iso=>{const m=Math.round((Date.now()-Date.parse(iso))/60000);return m<
 const signed=v=>v==null?'—':(v>0?'+':v<0?'−':'')+money(Math.abs(v));
 const pct=v=>v==null?'':(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(1)+'%';
 const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
-const state={sets:[],series:[],setId:'xy5',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'chase',query:'',sort:'featured',view:'browse',selected:'xy5-147',limit:18,budget:false,expanded:false,
- dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:null,error:null}};
+const state={sets:[],series:[],marketSeries:[],setId:'xy5',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'chase',query:'',sort:'featured',view:'browse',selected:'xy5-147',limit:18,budget:false,expanded:false,appearance:savedAppearance(),
+ dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
 async function request(url,options){const r=await fetch(url,options);const b=await r.json();if(!r.ok)throw new Error(b.error||'Something went wrong. Please try again.');return b;}
 const send=(url,method,body)=>request(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
@@ -290,9 +293,20 @@ function renderAlerts(){
 // ---------- Top movers ----------
 const MOVER_GRADES=['psa10','psa9','raw'],shortGrade=g=>gradeNames[g].replace(' · near mint',' NM');
 const wholeMoney=v=>v>=100?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v):money(v);
+const marketSeriesKey=()=>state.marketSeries.join(',');
+const moverKey=period=>period+'|'+marketSeriesKey();
+const marketSeriesLabel=id=>id==='DP'?'DP–HGSS':id;
+function marketFilterView(){
+ const all=state.marketSeries.length===state.series.length;
+ return `<div class="market-era-filter" aria-label="Included eras"><span>Include eras</span><div role="group">${state.series.map(series=>`<button data-market-series="${series.id}" class="${state.marketSeries.includes(series.id)?'active':''}" aria-pressed="${state.marketSeries.includes(series.id)}" title="${esc(series.name)} · ${esc(series.years)}">${marketSeriesLabel(series.id)}</button>`).join('')}</div><button class="link-button" data-market-all ${all?'disabled':''}>All eras</button></div>`;
+}
+function wireMarketFilters(view,load){
+ view.querySelectorAll('[data-market-series]').forEach(button=>button.onclick=()=>{const id=button.dataset.marketSeries,active=state.marketSeries.includes(id);if(active&&state.marketSeries.length===1){toast('Keep at least one era included.');return;}state.marketSeries=active?state.marketSeries.filter(value=>value!==id):state.series.map(s=>s.id).filter(value=>state.marketSeries.includes(value)||value===id);renderMovers();renderInvest();load();});
+ const all=view.querySelector('[data-market-all]');if(all)all.onclick=()=>{state.marketSeries=state.series.map(series=>series.id);renderMovers();renderInvest();load();};
+}
 async function loadMovers(period){
- if(state.movers.data[period])return;
- try{const r=await request('/api/movers?period='+period);state.movers.data[period]=r;state.movers.error=null;}catch(e){state.movers.error=e.message;}
+ const key=moverKey(period);if(state.movers.data[key])return;
+ try{const r=await request('/api/movers?period='+period+'&series='+encodeURIComponent(marketSeriesKey()));state.movers.data[key]=r;state.movers.error=null;}catch(e){state.movers.error=e.message;}
  if(state.view==='movers')renderMovers();
 }
 function openCard(id,grade){
@@ -301,11 +315,11 @@ function openCard(id,grade){
  updateView();select(id);
 }
 function renderMovers(){
- const view=$('#movers-view'),period=state.movers.period,d=state.movers.data[period],word=period==='week'?'week':'month';
+ const view=$('#movers-view'),period=state.movers.period,d=state.movers.data[moverKey(period)],word=period==='week'?'week':'month';
  const checked=d?.checkedAt?new Date(d.checkedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):null;
  const head=`<section class="panel movers-head"><div><h2>Biggest price increases this ${word}</h2><p>${d?`The last ${d.current} days of matching sales compared with ${esc(d.baselineLabel)}${checked?' · sales checked '+checked:''}. `:''}Cards worth $25 or more, with at least 3 matching sales in both periods. Moves the data can't confirm are left out.</p></div><div class="segmented" role="group" aria-label="Period">${[['week','Week'],['month','Month']].map(([k,l])=>`<button data-period="${k}" aria-pressed="${period===k}" class="${period===k?'active':''}">${l}</button>`).join('')}</div></section>`;
- if(!d){view.innerHTML=head+(state.movers.error?`<div class="panel empty-state"><strong>Movers couldn't be loaded.</strong><p>${esc(state.movers.error)}</p><button class="button" id="movers-retry">Try again</button></div>`:'<div class="loading"><span class="spinner"></span>Finding this '+word+'\'s movers…</div>');}
- else view.innerHTML=head+`<div class="segmented mover-grades" role="group" aria-label="Grade">${MOVER_GRADES.map(g=>`<button data-mover-grade="${g}" aria-pressed="${state.movers.grade===g}" class="${state.movers.grade===g?'active':''}">${shortGrade(g)}</button>`).join('')}</div><div class="movers-grid">${MOVER_GRADES.map(g=>{const col=d.grades[g],list=col.movers;
+ if(!d){view.innerHTML=head+marketFilterView()+(state.movers.error?`<div class="panel empty-state"><strong>Movers couldn't be loaded.</strong><p>${esc(state.movers.error)}</p><button class="button" id="movers-retry">Try again</button></div>`:'<div class="loading"><span class="spinner"></span>Finding this '+word+'\'s movers…</div>');}
+ else view.innerHTML=head+marketFilterView()+`<div class="segmented mover-grades" role="group" aria-label="Grade">${MOVER_GRADES.map(g=>`<button data-mover-grade="${g}" aria-pressed="${state.movers.grade===g}" class="${state.movers.grade===g?'active':''}">${shortGrade(g)}</button>`).join('')}</div><div class="movers-grid">${MOVER_GRADES.map(g=>{const col=d.grades[g],list=col.movers;
   return `<section class="panel mover-col ${state.movers.grade===g?'':'off'}" aria-label="${gradeNames[g]} movers"><div class="panel-head"><div><h2><span class="grade-chip ${g}">${shortGrade(g)}</span> Top ${list.length||''}</h2><p>${col.qualified>list.length?'Top '+list.length+' of '+col.qualified+' rising cards that passed every check':col.qualified?'Every rising card that passed every check':'No reliable rises'}</p></div></div>
   ${list.length?`<ol class="mover-list">${list.map((m,i)=>{const c=cardById(m.card_id);if(!c)return '';return `<li><button class="mover-row" data-mover="${c.id}" data-grade="${g}" aria-label="${esc(c.name)}, ${esc(c.setName)}, ${gradeNames[g]}, up ${pct(m.change)} from ${money(m.from)} to ${money(m.to)}"><span class="mover-rank">${i+1}</span><img src="${c.image}" alt="" loading="lazy"><span class="mover-name"><b>${esc(c.name)}</b><small>${esc(c.setName)} · #${esc(c.numberLabel)}</small><small>${m.current.sales} sale${m.current.sales===1?'':'s'} vs ${m.baseline.sales} before</small></span><span class="mover-change"><b class="pl up"><span aria-hidden="true">▲</span> ${pct(m.change)}</b><small>${wholeMoney(m.from)} → ${wholeMoney(m.to)}</small></span></button></li>`;}).join('')}</ol>`:`<div class="chart-empty">No ${gradeNames[g]} card had enough reliable sales this ${word} to measure a rise.</div>`}
   <div class="panel-foot">${list.length&&list.length<20?`Only ${list.length} card${list.length===1?'':'s'} qualified this ${word}. `:''}${col.leftOut.length?'Left out as uncertain: '+col.leftOut.map(x=>x.count+' because '+esc(x.text)).join('; ')+'.':'No rising cards were left out as uncertain.'}</div></section>`;}).join('')}</div>
@@ -313,6 +327,7 @@ function renderMovers(){
  view.querySelectorAll('[data-period]').forEach(b=>b.onclick=()=>{state.movers.period=b.dataset.period;renderMovers();loadMovers(state.movers.period);});
  view.querySelectorAll('[data-mover-grade]').forEach(b=>b.onclick=()=>{state.movers.grade=b.dataset.moverGrade;renderMovers();});
  view.querySelectorAll('[data-mover]').forEach(b=>b.onclick=()=>openCard(b.dataset.mover,b.dataset.grade));
+ wireMarketFilters(view,()=>loadMovers(state.movers.period));
  if($('#movers-retry'))$('#movers-retry').onclick=()=>{state.movers.error=null;renderMovers();loadMovers(period);};
  if($('#movers-method'))$('#movers-method').onclick=()=>$('#method-dialog').showModal();
  wireImages();
@@ -320,8 +335,8 @@ function renderMovers(){
 
 // ---------- Potential investments ----------
 async function loadInvest(){
- if(state.invest.data)return;
- try{state.invest.data=await request('/api/investments');state.invest.error=null;}catch(e){state.invest.error=e.message;}
+ const key=marketSeriesKey();if(state.invest.data[key])return;
+ try{state.invest.data[key]=await request('/api/investments?series='+encodeURIComponent(key));state.invest.error=null;}catch(e){state.invest.error=e.message;}
  if(state.view==='invest')renderInvest();
 }
 const pctWhole=v=>Math.round(v*100)+'%';
@@ -331,14 +346,14 @@ function signalView(s){
  return {cls:'cheap',label:'Cheap vs. similar cards',value:pctWhole(1-s.ratio)+' below',detail:`${esc(s.category)} cards of less in-demand characters in ${esc(s.setName)} sell for ${wholeMoney(s.typical)} (median of ${s.peers}).`};
 }
 function renderInvest(){
- const view=$('#invest-view'),d=state.invest.data,g=state.invest.grade;
+ const view=$('#invest-view'),d=state.invest.data[marketSeriesKey()],g=state.invest.grade;
  const checked=d?.checkedAt?new Date(d.checkedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):null;
  const head=`<section class="panel movers-head"><div><h2>Cards worth a closer look</h2><p>Each pick has a confident sold price of $25 or more, features a character in the top quarter for collector demand, and shows at least one signal in its own sales history. Built only from the sales in this app${checked?', checked '+checked:''}. Not investment advice.</p></div><div class="segmented" role="group" aria-label="Grade">${MOVER_GRADES.map(x=>`<button data-invest-grade="${x}" aria-pressed="${g===x}" class="${g===x?'active':''}">${shortGrade(x)}</button>`).join('')}</div></section>
  <div class="signal-key"><span class="signal up">Steady uptrend</span><span>A clear, consistent rise over the past year.</span><span class="signal rec">Recovering from highs</span><span>Well below a held high, with sales turning up.</span><span class="signal cheap">Cheap vs. similar cards</span><span>Below same-set cards of less popular characters.</span></div>`;
- if(!d){view.innerHTML=head+(state.invest.error?`<div class="panel empty-state"><strong>Investments couldn't be loaded.</strong><p>${esc(state.invest.error)}</p><button class="button" id="invest-retry">Try again</button></div>`:'<div class="loading"><span class="spinner"></span>Screening every card…</div>');}
+ if(!d){view.innerHTML=head+marketFilterView()+(state.invest.error?`<div class="panel empty-state"><strong>Investments couldn't be loaded.</strong><p>${esc(state.invest.error)}</p><button class="button" id="invest-retry">Try again</button></div>`:'<div class="loading"><span class="spinner"></span>Screening every included card…</div>');}
  else{
   const col=d.grades[g],picks=col.picks;
-  view.innerHTML=head+`<section class="panel invest-panel" aria-label="${gradeNames[g]} potential investments"><div class="panel-head"><div><h2><span class="grade-chip ${g}">${shortGrade(g)}</span> ${picks.length?picks.length+' pick'+(picks.length===1?'':'s'):'No picks'}</h2><p>${col.qualified} of ${col.screened} high-demand cards with a confident price met at least one signal.${col.qualified>picks.length?' Strongest shown, at most 3 per character.':''}</p></div></div>
+  view.innerHTML=head+marketFilterView()+`<section class="panel invest-panel" aria-label="${gradeNames[g]} potential investments"><div class="panel-head"><div><h2><span class="grade-chip ${g}">${shortGrade(g)}</span> ${picks.length?picks.length+' pick'+(picks.length===1?'':'s'):'No picks'}</h2><p>${col.qualified} of ${col.screened} high-demand cards with a confident price met at least one signal.${col.qualified>picks.length?' Strongest shown, at most 3 per character.':''}</p></div></div>
   ${picks.length?`<div class="invest-list">${picks.map(p=>{const c=cardById(p.card_id);if(!c)return '';const dm=p.demand;return `<article class="invest-row"><button class="invest-card" data-invest="${c.id}" data-grade="${g}" aria-label="Open ${esc(c.name)} ${gradeNames[g]}"><img src="${c.image}" alt="" loading="lazy"><span><b>${esc(c.name)}</b><small>${esc(c.setName)} · #${esc(c.numberLabel)} · ${esc(c.category)}</small></span></button>
    <div class="invest-price"><strong>${money(p.price)}</strong><small>${esc(p.priceLabel)}</small></div>
    <div class="invest-why"><h3>Why it's listed</h3><p class="invest-thesis">${esc(p.thesis)}</p><ul class="invest-signals">${(p.checks||p.signals.map(x=>({type:x.type,hit:true}))).map(ch=>{const sig=p.signals.find(x=>x.type===ch.type);if(!sig)return `<li class="miss"><span class="check" aria-hidden="true">–</span><span class="signal-name">${esc(ch.label)}</span><b>Not met</b></li>`;const v=signalView(sig);return `<li class="hit"><span class="check" aria-hidden="true">✓</span><span class="signal ${v.cls}">${v.label}</span><b>${v.value}</b><small>${v.detail}</small></li>`;}).join('')}</ul></div>
@@ -347,9 +362,17 @@ function renderInvest(){
  }
  view.querySelectorAll('[data-invest-grade]').forEach(b=>b.onclick=()=>{state.invest.grade=b.dataset.investGrade;renderInvest();});
  view.querySelectorAll('[data-invest]').forEach(b=>b.onclick=()=>openCard(b.dataset.invest,b.dataset.grade));
+ wireMarketFilters(view,loadInvest);
  if($('#invest-retry'))$('#invest-retry').onclick=()=>{state.invest.error=null;renderInvest();loadInvest();};
  if($('#invest-method'))$('#invest-method').onclick=()=>$('#method-dialog').showModal();
  wireImages();
+}
+
+// ---------- Settings ----------
+function renderSettings(){
+ const view=$('#settings-view');
+ view.innerHTML=`<section class="panel settings-panel"><div class="panel-head"><div><h2>Appearance</h2><p>Choose the palette Primal Watch uses on this device. Your choice is saved in this browser.</p></div></div><div class="appearance-grid">${Object.entries(APPEARANCES).map(([id,option])=>`<button class="appearance-option ${state.appearance===id?'active':''}" data-appearance="${id}" aria-pressed="${state.appearance===id}"><span class="appearance-preview ${id}" aria-hidden="true"><i></i><i></i><i></i></span><span><b>${option.label}</b><small>${option.description}</small></span>${state.appearance===id?'<em>Selected</em>':''}</button>`).join('')}</div><div class="settings-note"><b>About soft contrast</b><p>Soft contrast keeps a light interface while reducing stark whites, dark ink, and saturated accents. Dark mode is the lower-glare choice for a dim room.</p></div></section>`;
+ view.querySelectorAll('[data-appearance]').forEach(button=>button.onclick=()=>{state.appearance=applyAppearance(button.dataset.appearance);renderSettings();toast(APPEARANCES[state.appearance].label+' appearance enabled.');});
 }
 
 // ---------- Views ----------
@@ -358,10 +381,11 @@ const PAGES={
  movers:{eyebrow:'MARKET <span>MOVERS</span>',title:'Top movers',description:'Which cards rose the most in sold price, by grade.',crumb:'Market',name:'Top movers'},
  dex:{eyebrow:'YOUR COLLECTION <span>DEX</span>',title:'Your Dex',description:'Every card you own, what it is worth today, and how it has done since you bought it.',crumb:'Your workspace',name:'Dex'},
  alerts:{eyebrow:'WATCHLIST <span>ALERTS</span>',title:'Listing alerts',description:'Get told when a watched card is listed at or under your buy limit.',crumb:'Your workspace',name:'Alerts'},
+ settings:{eyebrow:'YOUR WORKSPACE <span>SETTINGS</span>',title:'Settings',description:'Make Primal Watch comfortable for the way you collect.',crumb:'Your workspace',name:'Settings'},
 };
 function updateView(){
  const v=state.view,catalogView=v==='browse'||v==='watch';
- for(const name of ['browse','movers','invest','watch','dex','alerts']){const nav=$('#'+name+'-nav');nav.classList.toggle('active',v===name);nav.setAttribute('aria-current',v===name?'page':'false');}
+ for(const name of ['browse','movers','invest','watch','dex','alerts','settings']){const nav=$('#'+name+'-nav');nav.classList.toggle('active',v===name);nav.setAttribute('aria-current',v===name?'page':'false');}
  for(const s of ['#set-switcher','#summary-grid','#workspace','#heading-tools'])$(s).hidden=!catalogView;
  for(const name of Object.keys(PAGES))$('#'+name+'-view').hidden=v!==name;
  const set=activeSet(),era=activeSeries(),name=set?.name||(state.setId==='all'?'All sets':'All '+(era?.name||'')+' sets');
@@ -373,6 +397,7 @@ function updateView(){
   else if(v==='alerts'){if(!state.alerts.data)loadAlerts();renderAlerts();}
   else if(v==='movers'){renderMovers();loadMovers(state.movers.period);}
   else if(v==='invest'){renderInvest();loadInvest();}
+  else if(v==='settings')renderSettings();
   $('#'+v+'-view').scrollTop=0;
   return;
  }
@@ -380,11 +405,10 @@ function updateView(){
  $('#page-title').textContent=v==='watch'?'Your watchlist':set?name:state.setId==='all'?'Explore every set':'Explore the '+(era?.name||'')+' era';
  $('#page-description').textContent=v==='watch'?'Your saved cards and buy targets, across every set.':'A closer look at your next pickup.';
  $('#breadcrumb-series').textContent=state.setId==='all'?'All series':era?.label||'Series';$('#breadcrumb-set').textContent=name;$('#sidebar-set').textContent=name;
- $('#sidebar-year').textContent='English · '+(set?set.release.slice(0,4):state.setId==='all'?'2011–2016':era?.years||'');$('#series-symbol').textContent=state.setId==='all'?'ALL':era?.id||'XY';
+ $('#sidebar-year').textContent='English · '+(set?set.release.slice(0,4):state.setId==='all'?'2003–2019':era?.years||'');$('#series-symbol').textContent=state.setId==='all'?'ALL':era?.id||'XY';
  $('#set-code').textContent=set?.id.toUpperCase()||(state.setId==='all'?'ALL SETS':(era?.id||'')+' ERA');
  $('#set-select').value=state.setId;
- const xy=state.sets.filter(s=>s.series==='XY').length,bw=state.sets.filter(s=>s.series==='BW').length;
- $('#set-scope').textContent=v==='watch'?'Filter your saved cards by set':`${xy-1} XY expansions + promos · ${bw} Black & White sets`;
+ $('#set-scope').textContent=v==='watch'?'Filter your saved cards by set':`${state.sets.length} sets across ${state.series.length} eras · 2003–2019`;
  const sourceSet=set||state.sets.find(s=>s.id===cardById(state.selected)?.setId);if(sourceSet){$('#set-market-source').href=sourceSet.marketSource;$('#set-checklist-source').href=sourceSet.checklistSource;}
  stats();
  const scope=scopedCards(),present=new Set(scope.map(c=>c.category));if(scope.some(c=>c.name.endsWith('EX')))present.add('Pokémon EX');
@@ -395,7 +419,7 @@ function updateView(){
 }
 function setOptions(){
  const opt=s=>`<option value="${s.id}">${esc(s.name)} · ${s.total} cards</option>`;
- return '<option value="all">All sets · 3 eras</option>'+state.series.map(e=>`<option value="era:${e.id}">All ${esc(e.name)} sets</option>`).join('')+state.series.map(e=>`<optgroup label="${esc(e.label)}">${state.sets.filter(s=>s.series===e.id).map(opt).join('')}</optgroup>`).join('');
+ return `<option value="all">All sets · ${state.series.length} eras</option>`+state.series.map(e=>`<option value="era:${e.id}">All ${esc(e.name)} sets</option>`).join('')+state.series.map(e=>`<optgroup label="${esc(e.label)}">${state.sets.filter(s=>s.series===e.id).map(opt).join('')}</optgroup>`).join('');
 }
 $('#search').oninput=e=>{state.query=e.target.value.toLowerCase().trim();state.limit=60;$('#card-list').scrollTop=0;renderList();};
 $('#grade').onchange=e=>{state.grade=e.target.value;updateView();};
@@ -403,14 +427,14 @@ $('#sort').onchange=e=>{state.sort=e.target.value;renderList();};
 $('#budget-filter').onchange=e=>{state.budget=e.target.checked;renderList();};
 document.querySelectorAll('[data-category]').forEach(b=>b.onclick=()=>{state.category=b.dataset.category;updateView();});
 $('#browse-nav').onclick=()=>{state.view='browse';updateView();};$('#watch-nav').onclick=()=>{state.view='watch';state.setId='all';state.category='all';state.query='';state.budget=false;$('#search').value='';$('#budget-filter').checked=false;updateView();};
-$('#dex-nav').onclick=()=>{state.view='dex';updateView();};$('#movers-nav').onclick=()=>{state.view='movers';updateView();};$('#invest-nav').onclick=()=>{state.view='invest';updateView();};$('#alerts-nav').onclick=()=>{state.view='alerts';updateView();};
+$('#dex-nav').onclick=()=>{state.view='dex';updateView();};$('#movers-nav').onclick=()=>{state.view='movers';updateView();};$('#invest-nav').onclick=()=>{state.view='invest';updateView();};$('#alerts-nav').onclick=()=>{state.view='alerts';updateView();};$('#settings-nav').onclick=()=>{state.view='settings';updateView();};
 $('#set-select').onchange=e=>{state.setId=e.target.value;state.category='all';state.query='';state.budget=false;$('#search').value='';$('#budget-filter').checked=false;updateView();};
 $('#show-more').onclick=()=>{state.limit+=24;renderList();};$('#refresh-set').onclick=refreshSet;
 $('#method-button').onclick=$('#sources-button').onclick=()=>$('#method-dialog').showModal();$('#close-method').onclick=()=>$('#method-dialog').close();
 for(const id of ['#method-dialog','#dex-dialog'])$(id).onclick=e=>{if(e.target===$(id)){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}};
 async function init(){
  try{const [catalog,watch]=await Promise.all([request('/api/catalog'),request('/api/watchlist').catch(e=>{error(e.message);return {watchlist:[]};})]);
-  state.sets=catalog.sets;state.series=catalog.series||[{id:'XY',name:'XY',label:'XY Series',years:'2014–2016'}];state.cards=catalog.cards;
+  state.sets=catalog.sets;state.series=catalog.series||[{id:'XY',name:'XY',label:'XY Series',years:'2014–2016'}];state.marketSeries=state.series.map(series=>series.id);state.cards=catalog.cards;state.appearance=applyAppearance(state.appearance,false);
   $('#set-select').innerHTML=setOptions();$('#set-select').value=state.setId;
   state.markets=Object.fromEntries(Object.entries(catalog.markets).map(([id,m])=>[id,expandMarket(m)]));state.watch=watch.watchlist;
   const checked=Object.values(catalog.markets).map(m=>m?.research?.checkedAt||m?.observedAt).filter(Boolean).sort().at(-1);

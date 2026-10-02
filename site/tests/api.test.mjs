@@ -6,12 +6,13 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {api} from '../lib/api.mjs';
 import {snapshots} from '../data/market.mjs';
+import {cards} from '../data/catalog.mjs';
 const sql=readFileSync(new URL('../db/schema.sql',import.meta.url),'utf8');
 function dbAdapter(sqlite){const stmt=(query,values=[])=>({bind(...v){return stmt(query,v)},all:async()=>({results:sqlite.prepare(query).all(...values)}),first:async()=>sqlite.prepare(query).get(...values)||null,run:async()=>sqlite.prepare(query).run(...values)});return {prepare:stmt,batch:async items=>Promise.all(items.map(i=>i.run()))};}
 const sqlite=new DatabaseSync(':memory:');sqlite.exec(sql);const DB=dbAdapter(sqlite);
 const env={DB,NETWORK_DISABLED:true};
 const req=(path,method='GET',body,user='collector-a',origin='https://primal.test')=>new Request('https://primal.test'+path,{method,headers:{...(user?{'oai-authenticated-user-id':user}:{}),Origin:origin,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
-test('API returns all sets and separates source coverage',async()=>{const r=await api(req('/api/catalog'),env);assert.equal(r.status,200);const data=await r.json();assert.equal(data.cards.length,5923);assert.equal(data.sets.length,43);assert.deepEqual(data.series.map(s=>s.id),['XY','BW','SM']);assert.ok(Array.isArray(data.markets['xy5-147'].s));assert.equal(Object.keys(data.markets).length,Object.keys(snapshots).length);});
+test('API returns all sets and separates source coverage',async()=>{const r=await api(req('/api/catalog'),env);assert.equal(r.status,200);const data=await r.json();assert.equal(data.cards.length,9526);assert.equal(data.sets.length,75);assert.deepEqual(data.series.map(s=>s.id),['EX','DP','BW','XY','SM']);assert.ok(data.markets['ex8-107'].guide.raw>0);assert.ok(Array.isArray(data.markets['xy5-147'].s));assert.equal(Object.keys(data.markets).length,Object.keys(snapshots).length);});
 test('Watchlist survives repeated writes, scopes ownership, and supports removal',async()=>{
  const item={card_id:'xy5-147',grade:'psa9',target:215};
  for(let i=0;i<2;i++)assert.equal((await api(req('/api/watchlist','POST',item),env)).status,200);
@@ -47,7 +48,7 @@ test('Market cache preserves full set IDs and never merges matching numbers',asy
  assert.equal((await api(req('/api/refresh?set=invalid','POST'),env)).status,400);
  const r=await(await api(req('/api/refresh?set=g1','POST'),env)).json();assert.equal(r.refreshed,false);assert.equal(sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count,0);
 });
-test('Sales refresh is scoped to rares and reports blocked access without writes',async()=>{const before=sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count;const r=await api(req('/api/research?set=all','POST'),env),body=await r.json();assert.equal(body.total,2835);assert.equal((await(await api(req('/api/research?set=era:XY','POST'),env)).json()).total,902);assert.equal((await(await api(req('/api/research?set=era:BW','POST'),env)).json()).total,553);assert.equal((await(await api(req('/api/research?set=era:SM','POST'),env)).json()).total,1380);assert.equal(body.refreshed,false);assert.equal(body.attempted,0);assert.equal(sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count,before);assert.equal((await api(req('/api/research?set=invalid','POST'),env)).status,400);});
+test('Sales refresh is scoped to rares and reports blocked access without writes',async()=>{const before=sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count;const r=await api(req('/api/research?set=all','POST'),env),body=await r.json();assert.equal(body.total,4260);assert.equal((await(await api(req('/api/research?set=era:EX','POST'),env)).json()).total,687);assert.equal((await(await api(req('/api/research?set=era:DP','POST'),env)).json()).total,738);assert.equal((await(await api(req('/api/research?set=era:XY','POST'),env)).json()).total,902);assert.equal((await(await api(req('/api/research?set=era:BW','POST'),env)).json()).total,553);assert.equal((await(await api(req('/api/research?set=era:SM','POST'),env)).json()).total,1380);assert.equal(body.refreshed,false);assert.equal(body.attempted,0);assert.equal(sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count,before);assert.equal((await api(req('/api/research?set=invalid','POST'),env)).status,400);});
 
 test('Market detail returns the full record with history and titled sales',async()=>{const data=await(await api(req('/api/market?id=xy5-151'),env)).json();assert.equal(data.refreshed,false);assert.ok(data.market.sales.some(s=>s.title&&s.grade==='psa9'));assert.ok(data.market.history?.psa10?.length>12);assert.equal(data.market.research.status,'full');});
 test('Dex entries are validated, scoped to their owner, and editable',async()=>{
@@ -75,10 +76,14 @@ test('Movers endpoint returns per-grade lists and rejects unknown periods',async
  const r=await api(req('/api/movers?period=month'),env);assert.equal(r.status,200);const d=await r.json();
  assert.deepEqual(Object.keys(d.grades),['psa10','psa9','raw']);assert.equal(d.period,'month');assert.ok(d.grades.psa10.movers.length<=20);
  const again=await (await api(req('/api/movers?period=month'),env)).json();assert.deepEqual(again,d);
+ const xy=await(await api(req('/api/movers?period=month&series=XY'),env)).json();assert.deepEqual(xy.series,['XY']);for(const col of Object.values(xy.grades))for(const mover of col.movers)assert.equal(cards.find(c=>c.id===mover.card_id).series,'XY');
+ assert.equal((await api(req('/api/movers?series=unknown'),env)).status,400);
  assert.equal((await api(req('/api/movers?period=year'),env)).status,400);
 });
 test('Investments endpoint returns screened picks per grade',async()=>{
  const r=await api(req('/api/investments'),env);assert.equal(r.status,200);const d=await r.json();
  assert.deepEqual(Object.keys(d.grades),['psa10','psa9','raw']);assert.ok(d.rules.demandCut>0);
  for(const col of Object.values(d.grades))for(const p of col.picks){assert.ok(p.signals.length);assert.ok(p.demand.character);}
+ const xy=await(await api(req('/api/investments?series=XY'),env)).json();assert.deepEqual(xy.series,['XY']);for(const col of Object.values(xy.grades))for(const pick of col.picks)assert.equal(cards.find(c=>c.id===pick.card_id).series,'XY');
+ assert.equal((await api(req('/api/investments?series='),env)).status,400);
 });
