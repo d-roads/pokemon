@@ -1,5 +1,6 @@
 
 import {classifyCapture,expandCapture} from './capture.mjs';
+import {matchesCard} from './sales.mjs';
 const decode=s=>s.replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'").replace(/&nbsp;/g,' ').replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(+n));
 const htmlText=s=>decode(s.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim());
 const dollars=s=>{const m=s.replace(/<s\b[^>]*>[\s\S]*?<\/s>/gi,'').match(/\$\s*([\d,]+(?:\.\d{1,2})?)/);return m?Number(m[1].replace(/,/g,'')):null;};
@@ -40,7 +41,9 @@ export function parsePage(html){
 }
 
 export function parseMarket(html,card,now=new Date().toISOString()){
+ if(card.vintage&&!card.sourceVerified)throw new Error('An exact source match is required before this vintage card can be priced.');
  const page=parsePage(html);
+ if(card.vintage&&!matchesCard(page.name,card))throw new Error('The source page does not match this vintage card and printing.');
  if(!Object.keys(page.guide).length&&!page.rows.length)throw new Error('The price source format could not be read.');
  const market=expandCapture(classifyCapture({...page,url:card.source,fetchedAt:now},card),card);
  return {...market,status:'refreshed'};
@@ -52,6 +55,7 @@ export function parseSet(html,cards){
   const name=htmlText(title),n=name.match(/#([A-Z]*\d+[a-z]?)(?![a-z0-9])/i)?.[1]?.toUpperCase();if(!n||name.includes('['))continue;
   const normalize=n=>String(n).toUpperCase().replace(/^([A-Z]*)0+(?=\d)/,'$1');
   const card=cards.find(c=>normalize(c.number)===normalize(n));if(!card)continue;
+  if(card.vintage&&(!card.sourceVerified||!matchesCard(name+' '+card.setName,card)))continue;
   const values=[...row.matchAll(/<td\b[^>]*class=["'][^"']*\bprice\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/gi)].map(x=>dollars(x[1]));
   if(values.length<3||!values[0])continue;
   result[card.id]={number:card.number,guide:{raw:values[0],grade9:values[1],psa10:values[2]},sales:[],observedAt:new Date().toISOString(),source:'PriceCharting',sourceUrl:card.source,status:'refreshed'};

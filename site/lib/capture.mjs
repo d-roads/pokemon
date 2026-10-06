@@ -27,13 +27,13 @@ export function classifyCapture(page,card){
   const expected=SECTION_GRADE[section];if(!expected)continue;
   if(!cutoff[expected]||date<cutoff[expected])cutoff[expected]=date;
   const grade=gradeOf(title);
-  if(grade!==expected||!(price>0)||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!matchesCard(title,card)){excluded[expected]++;continue;}
+  if(grade!==expected||!Number.isFinite(price)||!(price>0)||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date))||new Date(date).toISOString().slice(0,10)!==date||date>String(page.fetchedAt).slice(0,10)||!matchesCard(title,card)){excluded[expected]++;continue;}
   const market=/^tcgplayer/i.test(rowId)?'t':/^ebay/i.test(rowId)||/^ebay:/.test(ref||'')?'e':'o';
   const key=(rowId||ref||'')+'|'+date+'|'+price;if(seen.has(key))continue;seen.add(key);
-  sales.push([date,price,grade,grade==='raw'?conditionOf(title):'',market,rowId||ref||'',title.slice(0,160)]);
+  sales.push([date,price,grade,grade==='raw'?conditionOf(title):'',market,/^ebay:/.test(ref||'')?ref:rowId||ref||'',title]);
  }
  sales.sort((a,b)=>b[0].localeCompare(a[0]));
- return {fetchedAt:page.fetchedAt,url:page.url,productId:page.productId||null,name:page.name||'',guide,history,pop:page.pop||null,cutoff,excluded,sales};
+ return {fetchedAt:page.fetchedAt,url:page.url,productId:page.productId||null,name:page.name||'',guide,history,pop:page.pop||null,cutoff,excluded,sales,coverage:{scope:'Source page snapshot',completeEbayHistory:false,sourceRows:(page.rows||[]).filter(r=>r[0] in SECTION_GRADE).length,acceptedRows:sales.length}};
 }
 
 export function saleSource(ref,fallback){
@@ -42,10 +42,10 @@ export function saleSource(ref,fallback){
 
 export function expandCapture(record,card){
  const source=record.url||card.source;
- const sales=record.sales.map(([date,price,grade,condition,market,ref,title])=>({id:'pc|'+(ref||date+'|'+price)+'|'+grade,number:card.number,grade,date,price,condition,marketplace:MARKET[market]||'eBay',provenance:'PriceCharting reported sale',source:saleSource(ref,source),title}));
+ const sales=record.sales.filter(([,price,grade,,,,title])=>!card.vintage||(Number.isFinite(price)&&price>0&&matchesCard(title,card)&&gradeOf(title)===grade)).map(([date,price,grade,condition,market,ref,title])=>({id:'pc|'+(market==='t'&&/^https?:/.test(ref)?[ref,date,price,condition,title].join('|'):ref||date+'|'+price)+'|'+grade,number:card.number,grade,date,price,condition,marketplace:MARKET[market]||'eBay',provenance:'PriceCharting reported sale',source:saleSource(ref,source),title}));
  const guideSources=Object.fromEntries(Object.keys(record.guide).map(k=>[k,{name:'PriceCharting',url:source,observedAt:record.fetchedAt}]));
  return {number:card.number,guide:record.guide,guideSources,sales,observedAt:record.fetchedAt,source:'PriceCharting',sourceUrl:source,status:'researched',history:record.history,pop:record.pop,
-  research:{status:'full',checkedAt:record.fetchedAt,sourceUrl:source,gradesChecked:['raw','psa9','psa10'],cutoff:record.cutoff,excluded:record.excluded,rows:record.sales.length}};
+  research:{status:'full',checkedAt:record.fetchedAt,sourceUrl:source,gradesChecked:['raw','psa9','psa10'],cutoff:record.cutoff,excluded:record.excluded,rows:record.sales.length,coverage:record.coverage||{scope:'Source page snapshot',completeEbayHistory:false}}};
 }
 
 // Older excerpt-based observations came from the same pages. Keep an older sale only when it

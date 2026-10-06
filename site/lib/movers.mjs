@@ -40,7 +40,7 @@ export function measureMove(market,grade,period,{now=Date.now(),newest=null,rule
  const p=PERIODS[period];if(!p)throw new Error('Unknown period');
  const checked=checkedAt(market);if(!checked)return {ok:false,reason:'thin'};
  const today=Math.floor(now/MOVE_DAY),endDay=Math.min(moveDayOf(checked),today);
- if(newest!=null&&newest-endDay>rules.staleDays)return {ok:false,reason:'stale'};
+ if(!Number.isFinite(endDay)||today-endDay>rules.staleDays||(newest!=null&&newest-endDay>rules.staleDays))return {ok:false,reason:'stale'};
  // analyze() keeps only matching, de-duplicated sales of this grade (raw: near mint only).
  const comparable=analyze(market,grade,15,endDay*MOVE_DAY+MOVE_DAY-1).comparable;
  const age=s=>endDay-moveDayOf(s.date);

@@ -34,7 +34,7 @@ const SC_ERA={EX:'EX-era',DP:'Diamond & Pearl–HGSS',BW:'Black & White',XY:'XY'
 
 // Share of PSA-graded copies at this grade: PSA 10s for psa10, 9-or-better for psa9.
 export function gradeShare(pop,grade,rules=SCORE_RULES.scarcity){
- const p=pop?.psa;if(!Array.isArray(p)||p.length<10||grade==='raw')return null;
+ const p=pop?.psa;if(!Array.isArray(p)||p.length!==10||p.some(n=>!Number.isInteger(n)||n<0)||grade==='raw')return null;
  const total=p.reduce((a,b)=>a+(b>0?b:0),0);if(total<rules.minGraded)return null;
  const count=grade==='psa10'?p[9]:p[8]+p[9];
  return {share:count/total,count,total,tens:p[9],nines:p[8]};

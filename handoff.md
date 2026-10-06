@@ -1,6 +1,25 @@
 # Primal Watch — session handoff
 
-Updated: October 5, 2026 (late evening) Pacific. Repository: `d-roads/pokemon`, branch `main`. The repository is authoritative.
+Updated: October 6, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. The repository is authoritative.
+
+
+## Merge note (October 6, later)
+
+- Two sessions worked in the collector's PC folder in parallel. The Wizards session (Codex) never reached GitHub (branch push got HTTP 403), while the grade-scarcity score, the reading view and the scroll fix were pushed to `main` (`dd7213c`, `39027f4`, `8336e66`).
+- **The PC folder is now the combined tree:** the Wizards work plus those three commits. The reading-view and scroll-fix changes were merged into the PC's `app.js`, `index.html`, `ui.test.mjs` and `handoff.md`; `style.css` already matched `main`. In a scratch copy of the combined tree, 115/115 tests passed and a browser check showed no page errors and 60 fps scrolling in the reading view.
+- **`main` on GitHub does not contain the Wizards work yet,** and the PC's `app.js` needs the Wizards `lib/analysis.mjs` (it reads `projection.validation`), so do not copy the PC `app.js` onto `main` without it. Next step: get the Wizards branch pushed (or push the combined tree), then `main` and the PC match again.
+
+## Wizards expansion — October 6, 2026
+
+- Added 18 pre-EX English sets (including early-2003 Aquapolis/Skyridge and contemporary promos). Total catalog: 11,315 cards, 93 sets, 5,001 browsable rares/promos.
+- All 741 new eligible cards have exact source matches and captures: 44,348 accepted sales, 43,814 reported eBay sales. Set listings are paginated, captures resume per card, and every remaining gap/error is recorded in `tools/research/vintage-coverage.json` (none at completion). This remains a limited public-page snapshot, not a complete eBay archive.
+- Vintage matching validates names/aliases, numbers, set totals and printings. Native Southern Islands/Best of Game reverse foils are supported; Best of Game Winner/non-Winner values stay separate. Machamp #8 explicitly uses the shadowed 1st Edition deck print. Other first editions/shadowless/reprints are excluded. Unknown source mappings fail closed.
+- Scores now expire against today after 14 days; movers expire after 7 days even if all records are old. Stale records no longer influence demand peers. Vintage owner names and Dark/Light forms normalize to their underlying characters.
+- Trend projections now require 8 sale dates across 180 days, recent sales and a confident current sold median. Daily-median regression must pass a chronological holdout (<=35% MAPE and no worse than unchanged prices). UI shows historical error and explicitly says the 1–3 year horizon is unverified. Missing prices, duplicate-only data, reversals and extreme slopes fail closed.
+- `tools/research/vintage-audit.json` documents grade-specific score coverage, accepted historical-test errors and withholding reasons. All 44,348 saved vintage sales pass the identity/grade/date audit. Scores remain heuristic historical screens, not calibrated probabilities of profit.
+- Fixed a pre-existing grade-parser issue: “of” in Best of Game / Call of Legends is no longer mistaken for PSA's OF qualifier. Explicit qualifiers remain excluded.
+- Validation: 113/113 Node tests, API checks for the new catalog/market/era scopes, Worker build and syntax check. Browser runtime could not initialize, so visual browser QA is unverified.
+- Work is committed locally on `codex/wizards-cards-sales-validation`. GitHub branch creation was rejected with HTTP 403 “Resource not accessible by integration”; no remote branch or PR was created. A patch and updated local-app ZIP are provided for handoff. Restart the local Node server after copying the updated source. Existing local SQLite data must be preserved and never committed.
 
 ## Product goals
 
@@ -89,7 +108,7 @@ Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. 
 - Esc, the close button or a click on the backdrop closes it and returns focus to the expand button; ← / → step through the filtered list; leaving Browse/Watchlist closes it. The rest of the page is `inert` while open.
 - `renderDetail` now builds named sections and composes them in the normal order or the reading-view layout, so both stay in sync. `chart()` and `historyChart()` take a `wide` flag.
 - Verified in headless Chromium at 1440×900, 1280×800 (Light) and 390×844: no page errors. New UI test; 102/102 passing.
-- Noticed, not changed: the "Simple trend projection" can show $0.00 for 1Y–3Y when one outlier sale drags the straight-line slope far negative (e.g. Wailord EX PSA 9, −$300/yr, floored at 0). Same in the normal panel. Candidate fix: project on log price or drop the outlier band the score's momentum already ignores.
+- Noticed while testing: the "Simple trend projection" showed $0.00 for 1Y–3Y on Wailord EX PSA 9 (one outlier sale dragged the straight-line slope to −$300/yr). The Wizards session's projection rework fixes this: that card now says the trend did not pass the held-out sales check. Confirmed in the combined build.
 
 ### Scrolling performance fix (October 6)
 
@@ -183,7 +202,6 @@ Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. 
 
 ## Suggested next session
 
-1. Ask whether the trend projection should be fixed so one outlier sale can't drive it to $0.00.
 1. Ask whether the 12% grade-scarcity weight feels right, and whether very low-pop cards (under 30 graded) should get a bonus instead of counting as average.
 1. Ask the collector how the terminal look, the screener layout and the score weights feel with real images. Tune `SCORE_RULES` in `site/lib/score.mjs` if wanted (weights, $25 cap, momentum cap).
 2. Check the redesign on the collector's own desktop and phone with real card images and fonts (sandbox screenshots used placeholders).

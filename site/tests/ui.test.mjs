@@ -33,13 +33,18 @@ function workspace(){
  vm.runInContext(source,context);
  return {context,responses,calls,e:s=>elements.get(s),run:s=>vm.runInContext(s,context)};
 }
+test('Wizards era and vintage card coverage render in Browse',async()=>{
+ const ui=workspace();await ui.run('init()');assert.match(ui.e('#set-select').innerHTML,/Wizards of the Coast/);assert.match(ui.e('#set-select').innerHTML,/Aquapolis/);
+ ui.e('#set-select').onchange({target:{value:'era:WOTC'}});assert.equal(ui.run('filteredCards().length'),741);assert.match(ui.e('#page-title').textContent,/Wizards of the Coast/);
+ ui.run("state.selected='base1-4';state.grade='psa9';renderDetail()");const detail=ui.e('#detail').innerHTML;assert.match(detail,/Standard \/ unlimited/);assert.match(detail,/not complete eBay sales history/);
+});
 test('Set picker, all-set search, and Radiant Collection render correct cards',async()=>{
  const ui=workspace();await ui.run('init()');
  assert.match(ui.e('#set-select').innerHTML,/Evolutions/);assert.equal(ui.e('#page-title').textContent,'Primal Clash');
  ui.e('#set-select').onchange({target:{value:'g1'}});assert.equal(ui.e('#page-title').textContent,'Generations');assert.match(ui.e('#set-count').innerHTML,/37/);
  ui.e('#grade').onchange({target:{value:'raw'}});ui.e('#search').oninput({target:{value:'RC30'}});assert.match(ui.e('#card-list').innerHTML,/Gardevoir/);assert.match(ui.e('#card-list').innerHTML,/RC30\/RC32/);assert.doesNotMatch(ui.e('#card-list').innerHTML,/\/160/);
  ui.e('#set-select').onchange({target:{value:'all'}});ui.run("state.category='all';updateView();");ui.e('#search').oninput({target:{value:'Flashfire'}});
- assert.equal(ui.run('filteredCards().length'),46);assert.match(ui.e('#set-count').innerHTML,/4260/);
+ assert.equal(ui.run('filteredCards().length'),46);assert.match(ui.e('#set-count').innerHTML,/5001/);
  ui.e('#search').oninput({target:{value:''}});ui.e('#set-select').onchange({target:{value:'era:EX'}});assert.match(ui.e('#set-count').innerHTML,/687/);assert.equal(ui.e('#page-title').textContent,'Explore the EX era');
  ui.e('#set-select').onchange({target:{value:'col1'}});ui.e('#search').oninput({target:{value:'SL10'}});assert.match(ui.e('#card-list').innerHTML,/Rayquaza/);assert.match(ui.e('#card-list').innerHTML,/#SL10 · Shiny rare/);
  ui.e('#search').oninput({target:{value:''}});ui.e('#set-select').onchange({target:{value:'era:BW'}});assert.match(ui.e('#set-count').innerHTML,/553/);assert.equal(ui.e('#page-title').textContent,'Explore the Black & White era');
@@ -71,7 +76,7 @@ test('Dex date entry uses bounded month, day, and year controls',async()=>{
 });
 test('Card detail places labeled 1Y, 2Y, and 3Y trend estimates beside reported sales',async()=>{
  const ui=workspace();await ui.run('init()');ui.run("state.selected='xy5-147';state.grade='psa9';renderDetail()");const detail=ui.e('#detail').innerHTML;
- assert.match(detail,/Simple trend projection/);assert.match(detail,/>1Y</);assert.match(detail,/>2Y</);assert.match(detail,/>3Y</);assert.match(detail,/not investment advice/);
+ assert.match(detail,/Simple trend projection/);assert.match(detail,/illustrative/);assert.match(detail,/future accuracy is unverified/);assert.match(detail,/not investment advice/);
 });
 test('Top movers shows PSA 10, PSA 9 and raw lists and opens a card in its grade',async()=>{
  const ui=workspace();await ui.run('init()');
@@ -143,7 +148,7 @@ test('Advanced filters screen by era, price, activity and investment score, and 
  const ui=workspace();await ui.run('init()');await ui.run('loadScores()');
  assert.doesNotMatch(readFileSync(new URL('../public/index.html',import.meta.url),'utf8'),/budget|250–\$350/);
  ui.e('#set-select').onchange({target:{value:'all'}});ui.run("state.category='all';updateView();");
- const total=ui.run('filteredCards().length');assert.equal(total,4260);
+ const total=ui.run('filteredCards().length');assert.equal(total,5001);
  // Price range for the selected grade
  ui.run("state.filters.min=100;state.filters.max=500;applyFilters();");
  const priced=ui.run("filteredCards().map(c=>analyze(state.markets[c.id],state.grade).current)");
@@ -158,12 +163,12 @@ test('Advanced filters screen by era, price, activity and investment score, and 
  // Sorting by investment score
  ui.e('#sort').onchange({target:{value:'invest'}});const sorted=ui.run('filteredCards().map(c=>scoreOf(c.id))');assert.deepEqual(sorted,[...sorted].sort((a,b)=>b-a));
  // Era chips: removing eras narrows the screen, and the last era can't be removed
- ui.run("toggleEra('EX');toggleEra('DP');toggleEra('BW');toggleEra('SM');");assert.equal(ui.run('state.setId'),'era:XY');
+ ui.run("toggleEra('WOTC');toggleEra('EX');toggleEra('DP');toggleEra('BW');toggleEra('SM');");assert.equal(ui.run('state.setId'),'era:XY');
  assert.ok(ui.run("filteredCards().every(c=>c.series==='XY')"));ui.run("toggleEra('XY')");assert.equal(ui.run('state.setId'),'era:XY');
  ui.run("toggleEra('SM')");assert.equal(ui.run('state.setId'),'all');assert.equal(ui.run('state.eras.join()'),'XY,SM');
  assert.ok(ui.run("filteredCards().every(c=>['XY','SM'].includes(c.series))"));assert.equal(ui.e('#page-title').textContent,'Explore 2 eras');
  // Clearing restores everything
- ui.e('#reset-filters').onclick();assert.equal(ui.run('filterCount()'),0);assert.equal(ui.run('state.eras.length'),5);
+ ui.e('#reset-filters').onclick();assert.equal(ui.run('filterCount()'),0);assert.equal(ui.run('state.eras.length'),6);
 });
 test('Card detail shows the investment score with its breakdown',async()=>{
  const ui=workspace();await ui.run('init()');await ui.run('loadScores()');

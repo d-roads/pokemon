@@ -23,7 +23,7 @@ const invDayOf=iso=>Math.floor(Date.parse(iso)/INV_DAY);
 const invChecked=m=>m?.research?.checkedAt||m?.observedAt||null;
 
 // ---------- Characters and demand ----------
-const FORM_PREFIX=/^(?:M|Mega|Primal|Shining|Alolan|Detective|Flying|Surfing|Ash|Imakuni\?'s|Team (?:Aqua|Magma)'s)\s+/i;
+const FORM_PREFIX=/^(?:M|Mega|Primal|Shining|Dark|Light|Alolan|Detective|Flying|Surfing|Ash|(?:Brock|Misty|Lt\. Surge|Erika|Sabrina|Koga|Blaine|Giovanni|Rocket)'s|Imakuni\?'s|Team (?:Aqua|Magma)'s)\s+/i;
 // The Pokémon (or trainer) a card is about. Tag Team cards return each partner.
 export function charactersOf(name){
  return String(name).split(/\s+&\s+/).map(part=>{
@@ -47,17 +47,17 @@ export function marketContext(entries,{now=Date.now(),rules=INVEST_RULES}={}){
   const checked=invChecked(market),endDay=checked?Math.min(invDayOf(checked),today):today,end=endDay*INV_DAY+INV_DAY-1;
   const analyses=Object.fromEntries(INVEST_GRADES.map(g=>[g,analyze(market,g,15,end)]));
   const activity=market.research?.status==='full'?(market.sales||[]).filter(s=>s.price>0&&endDay-invDayOf(s.date)>=0&&endDay-invDayOf(s.date)<180).length:null;
-  rows.push({card,market,endDay,end,stale:newest-endDay>rules.staleDays,analyses,activity,characters:charactersOf(card.name)});
+  rows.push({card,market,endDay,end,stale:!checked||!Number.isFinite(endDay)||today-endDay>rules.staleDays,analyses,activity,characters:charactersOf(card.name)});
  }
  // Peer medians per grade, by era + category, falling back to category alone for small groups.
  const peers={};
  for(const g of INVEST_GRADES){
   const groups=new Map(),wide=new Map();
-  for(const r of rows){const p=r.analyses[g].current;if(!(p>0))continue;const k=peerKey(r.card);(groups.get(k)||groups.set(k,[]).get(k)).push(p);(wide.get(r.card.category)||wide.set(r.card.category,[]).get(r.card.category)).push(p);}
+  for(const r of rows){const p=r.analyses[g].current;if(r.stale||!(p>0))continue;const k=peerKey(r.card);(groups.get(k)||groups.set(k,[]).get(k)).push(p);(wide.get(r.card.category)||wide.set(r.card.category,[]).get(r.card.category)).push(p);}
   peers[g]=card=>{const a=groups.get(peerKey(card));if(a?.length>=rules.cheap.minPeers)return {median:median(a),size:a.length,scope:'era'};const b=wide.get(card.category);return b?.length>=rules.cheap.minPeers?{median:median(b),size:b.length,scope:'all'}:null;};
  }
  for(const r of rows){
-  const logs=INVEST_GRADES.map(g=>{const p=r.analyses[g].current,peer=peers[g](r.card);return p>0&&peer?Math.log(p/peer.median):null;}).filter(v=>v!=null);
+  const logs=INVEST_GRADES.map(g=>{const p=r.analyses[g].current,peer=peers[g](r.card);return !r.stale&&p>0&&peer?Math.log(p/peer.median):null;}).filter(v=>v!=null);
   r.premium=logs.length?logs.reduce((a,b)=>a+b,0)/logs.length:null;
  }
  // Character demand: how far above their peers a character's cards sell, and how often.
@@ -67,7 +67,7 @@ export function marketContext(entries,{now=Date.now(),rules=INVEST_RULES}={}){
  for(const r of rows)for(const name of r.characters)(byCharacter.get(name)||byCharacter.set(name,[]).get(name)).push(r);
  const characters=new Map();
  for(const [name,list] of byCharacter){
-  const premiums=list.map(r=>r.premium).filter(v=>v!=null),acts=list.map(r=>r.activity).filter(v=>v!=null);
+  const premiums=list.map(r=>r.premium).filter(v=>v!=null),acts=list.filter(r=>!r.stale).map(r=>r.activity).filter(v=>v!=null);
   if(premiums.length<2)continue;
   const sum=premiums.reduce((a,b)=>a+b,0);
   characters.set(name,{name,cards:list.length,priced:premiums.length,sum,premium:sum/(premiums.length+rules.shrink),activity:acts.length?median(acts):null});
