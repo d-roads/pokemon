@@ -24821,9 +24821,9 @@
     "name": "Scarlet & Violet Black Star Promos",
     "series": "SV",
     "printedTotal": null,
-    "total": 165,
+    "total": 225,
     "release": "2023-01-01",
-    "checklistSource": "https://raw.githubusercontent.com/PokemonTCG/pokemon-tcg-data/master/cards/en/svp.json",
+    "checklistSource": "https://raw.githubusercontent.com/PokemonTCG/pokemon-tcg-data/master/cards/en/svp.json + https://api.tcgdex.net/v2/en/sets/svp",
     "cards": [
       {
         "number": "1",
@@ -25980,6 +25980,505 @@
         "rarity": "Promo",
         "type": "Colorless",
         "category": "Promo"
+      },
+      {
+        "number": "166",
+        "name": "Teal Mask Ogerpon ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/166/high.webp"
+      },
+      {
+        "number": "167",
+        "name": "Flareon",
+        "nativeCosmos": true,
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/167/high.webp"
+      },
+      {
+        "number": "168",
+        "name": "Vaporeon",
+        "nativeCosmos": true,
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/168/high.webp"
+      },
+      {
+        "number": "169",
+        "name": "Jolteon",
+        "nativeCosmos": true,
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/169/high.webp"
+      },
+      {
+        "number": "170",
+        "name": "Leafeon",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/170/high.webp"
+      },
+      {
+        "number": "171",
+        "name": "Glaceon",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/171/high.webp"
+      },
+      {
+        "number": "172",
+        "name": "Sylveon",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/172/high.webp"
+      },
+      {
+        "number": "173",
+        "name": "Eevee",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/173/high.webp"
+      },
+      {
+        "number": "174",
+        "name": "Eevee ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/174/high.webp"
+      },
+      {
+        "number": "175",
+        "name": "Espeon ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/175/high.webp"
+      },
+      {
+        "number": "176",
+        "name": "Umbreon ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/176/high.webp"
+      },
+      {
+        "number": "177",
+        "name": "Bloodmoon Ursaluna ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/177/high.webp"
+      },
+      {
+        "number": "178",
+        "name": "Kyogre ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/178/high.webp"
+      },
+      {
+        "number": "179",
+        "name": "Xerneas ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/179/high.webp"
+      },
+      {
+        "number": "180",
+        "name": "Dialga ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/180/high.webp"
+      },
+      {
+        "number": "181",
+        "name": "N's Darmanitan",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/181/high.webp"
+      },
+      {
+        "number": "182",
+        "name": "Iono's Kilowattrel",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/182/high.webp"
+      },
+      {
+        "number": "183",
+        "name": "Lillie's Ribombee",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/183/high.webp"
+      },
+      {
+        "number": "184",
+        "name": "Hop's Snorlax",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/184/high.webp"
+      },
+      {
+        "number": "185",
+        "name": "Yanma",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/185/high.webp"
+      },
+      {
+        "number": "186",
+        "name": "Scraggy",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/186/high.webp"
+      },
+      {
+        "number": "187",
+        "name": "Yanmega",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/187/high.webp"
+      },
+      {
+        "number": "188",
+        "name": "Scrafty",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/188/high.webp"
+      },
+      {
+        "number": "189",
+        "name": "N's Zorua",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/189/high.webp"
+      },
+      {
+        "number": "190",
+        "name": "Pikachu",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/190/high.webp"
+      },
+      {
+        "number": "191",
+        "name": "Sprigatito",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/191/high.webp"
+      },
+      {
+        "number": "192",
+        "name": "Fuecoco",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/192/high.webp"
+      },
+      {
+        "number": "193",
+        "name": "Hop's Zacian ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/193/high.webp"
+      },
+      {
+        "number": "194",
+        "name": "Iono's Bellibolt ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/194/high.webp"
+      },
+      {
+        "number": "195",
+        "name": "Lillie's Clefairy ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/195/high.webp"
+      },
+      {
+        "number": "196",
+        "name": "Charizard ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/196/high.webp"
+      },
+      {
+        "number": "197",
+        "name": "Koraidon ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/197/high.webp"
+      },
+      {
+        "number": "198",
+        "name": "Zacian ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/198/high.webp"
+      },
+      {
+        "number": "199",
+        "name": "Zarude",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/199/high.webp"
+      },
+      {
+        "number": "200",
+        "name": "Eevee",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/200/high.webp"
+      },
+      {
+        "number": "201",
+        "name": "Zebstrika",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/201/high.webp"
+      },
+      {
+        "number": "202",
+        "name": "Kangaskhan",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/202/high.webp"
+      },
+      {
+        "number": "203",
+        "name": "Team Rocket's Wobbuffet",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/203/high.webp"
+      },
+      {
+        "number": "204",
+        "name": "Cynthia's Garchomp ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/204/high.webp"
+      },
+      {
+        "number": "205",
+        "name": "Team Rocket's Mewtwo ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/205/high.webp"
+      },
+      {
+        "number": "206",
+        "name": "Marnie's Morpeko",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/206/high.webp"
+      },
+      {
+        "number": "207",
+        "name": "Steven's Beldum",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/207/high.webp"
+      },
+      {
+        "number": "208",
+        "name": "Victini",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/208/high.webp"
+      },
+      {
+        "number": "209",
+        "name": "Thundurus",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/209/high.webp"
+      },
+      {
+        "number": "210",
+        "name": "Tornadus",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/210/high.webp"
+      },
+      {
+        "number": "211",
+        "name": "Gothitelle",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/211/high.webp"
+      },
+      {
+        "number": "212",
+        "name": "Reuniclus",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/212/high.webp"
+      },
+      {
+        "number": "213",
+        "name": "Feraligatr",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/213/high.webp"
+      },
+      {
+        "number": "214",
+        "name": "Pikachu",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/214/high.webp"
+      },
+      {
+        "number": "215",
+        "name": "Toxtricity ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/215/high.webp"
+      },
+      {
+        "number": "216",
+        "name": "Team Rocket's Mewtwo ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/216/high.webp"
+      },
+      {
+        "number": "217",
+        "name": "Team Rocket's Nidoking ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/217/high.webp"
+      },
+      {
+        "number": "218",
+        "name": "Team Rocket's Persian ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/218/high.webp"
+      },
+      {
+        "number": "219",
+        "name": "Black Belt's Training",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/219/high.webp"
+      },
+      {
+        "number": "220",
+        "name": "Black Belt's Training",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/220/high.webp"
+      },
+      {
+        "number": "221",
+        "name": "Professor's Research",
+        "nameAliases": [
+          "Professor's Research Professor Birch"
+        ],
+        "sourceProductSlug": "professor%27s-research-professor-birch-221",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/221/high.webp"
+      },
+      {
+        "number": "222",
+        "name": "Professor's Research",
+        "nameAliases": [
+          "Professor's Research Professor Kukui"
+        ],
+        "sourceProductSlug": "professor%27s-research-professor-kukui-222",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/222/high.webp"
+      },
+      {
+        "number": "223",
+        "name": "Professor's Research",
+        "nameAliases": [
+          "Professor's Research Professor Magnolia"
+        ],
+        "sourceProductSlug": "professor%27s-research-professor-magnolia-223",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/223/high.webp"
+      },
+      {
+        "number": "224",
+        "name": "Paradise Resort",
+        "sourceProductSlug": "paradise-resort-world-championships-2025-224",
+        "nativeWorlds": true,
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/224/high.webp"
+      },
+      {
+        "number": "225",
+        "name": "Pikachu",
+        "sourceProductSlug": "pikachu-world-championships-225",
+        "nativeWorlds": true,
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/sv/svp/225/high.webp"
       }
     ]
   },
@@ -27632,9 +28131,9 @@
     "name": "Scarlet & Violet Energies",
     "series": "SV",
     "printedTotal": null,
-    "total": 16,
+    "total": 24,
     "release": "2023-03-31",
-    "checklistSource": "https://raw.githubusercontent.com/PokemonTCG/pokemon-tcg-data/master/cards/en/sve.json",
+    "checklistSource": "https://raw.githubusercontent.com/PokemonTCG/pokemon-tcg-data/master/cards/en/sve.json + https://api.tcgdex.net/v2/en/sets/sve",
     "cards": [
       {
         "number": "1",
@@ -27807,6 +28306,100 @@
         "rarity": "Common",
         "type": "Energy",
         "category": "Secret rare"
+      },
+      {
+        "number": "17",
+        "name": "Grass Energy",
+        "nameAliases": [
+          "Basic Grass Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "image": "https://assets.tcgdex.net/en/sv/sve/017/high.webp"
+      },
+      {
+        "number": "18",
+        "name": "Fire Energy",
+        "nameAliases": [
+          "Basic Fire Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "image": "https://assets.tcgdex.net/en/sv/sve/018/high.webp"
+      },
+      {
+        "number": "19",
+        "name": "Water Energy",
+        "nameAliases": [
+          "Basic Water Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "image": "https://assets.tcgdex.net/en/sv/sve/019/high.webp"
+      },
+      {
+        "number": "20",
+        "name": "Lightning Energy",
+        "nameAliases": [
+          "Basic Lightning Energy",
+          "Electric Energy",
+          "Basic Electric Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "image": "https://assets.tcgdex.net/en/sv/sve/020/high.webp"
+      },
+      {
+        "number": "21",
+        "name": "Psychic Energy",
+        "nameAliases": [
+          "Basic Psychic Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "image": "https://assets.tcgdex.net/en/sv/sve/021/high.webp"
+      },
+      {
+        "number": "22",
+        "name": "Fighting Energy",
+        "nameAliases": [
+          "Basic Fighting Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "image": "https://assets.tcgdex.net/en/sv/sve/022/high.webp"
+      },
+      {
+        "number": "23",
+        "name": "Darkness Energy",
+        "nameAliases": [
+          "Basic Darkness Energy",
+          "Dark Energy",
+          "Basic Dark Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "image": "https://assets.tcgdex.net/en/sv/sve/023/high.webp"
+      },
+      {
+        "number": "24",
+        "name": "Metal Energy",
+        "nameAliases": [
+          "Basic Metal Energy",
+          "Steel Energy",
+          "Basic Steel Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "image": "https://assets.tcgdex.net/en/sv/sve/024/high.webp"
       }
     ]
   },
@@ -53549,6 +54142,936 @@
         "rarity": "Mega Hyper Rare",
         "type": "Fighting",
         "category": "Secret rare"
+      }
+    ]
+  },
+  {
+    "id": "mee",
+    "slug": "mega-evolution-energy",
+    "name": "Mega Evolution Energy",
+    "series": "ME",
+    "printedTotal": null,
+    "total": 8,
+    "release": "2025-09-26",
+    "checklistSource": "https://api.tcgdex.net/v2/en/sets/mee",
+    "cards": [
+      {
+        "number": "1",
+        "name": "Grass Energy",
+        "nameAliases": [
+          "Basic Grass Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "nativeNonHolo": true
+      },
+      {
+        "number": "2",
+        "name": "Fire Energy",
+        "nameAliases": [
+          "Basic Fire Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "nativeNonHolo": true
+      },
+      {
+        "number": "3",
+        "name": "Water Energy",
+        "nameAliases": [
+          "Basic Water Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "nativeNonHolo": true
+      },
+      {
+        "number": "4",
+        "name": "Lightning Energy",
+        "nameAliases": [
+          "Basic Lightning Energy",
+          "Electric Energy",
+          "Basic Electric Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "nativeNonHolo": true
+      },
+      {
+        "number": "5",
+        "name": "Psychic Energy",
+        "nameAliases": [
+          "Basic Psychic Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "nativeNonHolo": true
+      },
+      {
+        "number": "6",
+        "name": "Fighting Energy",
+        "nameAliases": [
+          "Basic Fighting Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "nativeNonHolo": true
+      },
+      {
+        "number": "7",
+        "name": "Darkness Energy",
+        "nameAliases": [
+          "Basic Darkness Energy",
+          "Dark Energy",
+          "Basic Dark Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "nativeNonHolo": true
+      },
+      {
+        "number": "8",
+        "name": "Metal Energy",
+        "nameAliases": [
+          "Basic Metal Energy",
+          "Steel Energy",
+          "Basic Steel Energy"
+        ],
+        "rarity": "Common",
+        "type": "Energy",
+        "category": "Standard",
+        "nativeNonHolo": true
+      }
+    ]
+  },
+  {
+    "id": "mep",
+    "slug": "promo",
+    "name": "MEP Black Star Promos",
+    "series": "ME",
+    "printedTotal": null,
+    "total": 97,
+    "release": "2025-09-26",
+    "checklistSource": "https://business.getcardos.com/browse/pokemon/expansions/mep + https://bulbapedia.bulbagarden.net/wiki/MEP",
+    "cards": [
+      {
+        "number": "1",
+        "name": "Meganium",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/001/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "2",
+        "name": "Inteleon",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/002/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "3",
+        "name": "Alakazam",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/003/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "4",
+        "name": "Lunatone",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/004/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "5",
+        "name": "Drifloon",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/005/high.webp"
+      },
+      {
+        "number": "6",
+        "name": "Drifblim",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/006/high.webp"
+      },
+      {
+        "number": "7",
+        "name": "Psyduck",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/007/high.webp",
+        "nativeCosmos": true
+      },
+      {
+        "number": "8",
+        "name": "Golduck",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/008/high.webp"
+      },
+      {
+        "number": "9",
+        "name": "Alakazam",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/009/high.webp"
+      },
+      {
+        "number": "10",
+        "name": "Riolu",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/010/high.webp"
+      },
+      {
+        "number": "14",
+        "name": "Ceruledge",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/014/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "15",
+        "name": "Zacian",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/015/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "16",
+        "name": "Flygon",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/016/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "17",
+        "name": "Toxtricity",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/017/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "18",
+        "name": "Cottonee",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/018/high.webp"
+      },
+      {
+        "number": "19",
+        "name": "Whimsicott",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/019/high.webp"
+      },
+      {
+        "number": "20",
+        "name": "Sneasel",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/020/high.webp"
+      },
+      {
+        "number": "21",
+        "name": "Weavile",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/021/high.webp"
+      },
+      {
+        "number": "22",
+        "name": "Charcadet",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/022/high.webp"
+      },
+      {
+        "number": "23",
+        "name": "Mega Charizard X ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/023/high.webp"
+      },
+      {
+        "number": "24",
+        "name": "Oricorio ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/024/high.webp"
+      },
+      {
+        "number": "26",
+        "name": "Meloetta",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/026/high.webp"
+      },
+      {
+        "number": "27",
+        "name": "Haunter",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/027/high.webp"
+      },
+      {
+        "number": "28",
+        "name": "Celebratory Fanfare",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/028/high.webp"
+      },
+      {
+        "number": "29",
+        "name": "Mega Charizard X ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/029/high.webp"
+      },
+      {
+        "number": "30",
+        "name": "Mega Charizard Y ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/030/high.webp"
+      },
+      {
+        "number": "31",
+        "name": "N's Zekrom",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/031/high.webp"
+      },
+      {
+        "number": "32",
+        "name": "Mega Gardevoir ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/032/high.webp"
+      },
+      {
+        "number": "33",
+        "name": "Mega Lucario ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/033/high.webp"
+      },
+      {
+        "number": "34",
+        "name": "Mega Meganium ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/034/high.webp"
+      },
+      {
+        "number": "35",
+        "name": "Mega Emboar ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/035/high.webp"
+      },
+      {
+        "number": "36",
+        "name": "Mega Feraligatr ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/036/high.webp"
+      },
+      {
+        "number": "37",
+        "name": "Bulbasaur",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/037/high.webp"
+      },
+      {
+        "number": "38",
+        "name": "Charmander",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/038/high.webp"
+      },
+      {
+        "number": "39",
+        "name": "Squirtle",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/039/high.webp"
+      },
+      {
+        "number": "40",
+        "name": "Turtwig",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/040/high.webp"
+      },
+      {
+        "number": "41",
+        "name": "Chimchar",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/041/high.webp"
+      },
+      {
+        "number": "42",
+        "name": "Piplup",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/042/high.webp"
+      },
+      {
+        "number": "43",
+        "name": "Rowlet",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/043/high.webp"
+      },
+      {
+        "number": "44",
+        "name": "Litten",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/044/high.webp"
+      },
+      {
+        "number": "45",
+        "name": "Popplio",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/045/high.webp"
+      },
+      {
+        "number": "46",
+        "name": "Chikorita",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/046/high.webp"
+      },
+      {
+        "number": "47",
+        "name": "Cyndaquil",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/047/high.webp"
+      },
+      {
+        "number": "48",
+        "name": "Totodile",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/048/high.webp"
+      },
+      {
+        "number": "49",
+        "name": "Snivy",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/049/high.webp"
+      },
+      {
+        "number": "50",
+        "name": "Tepig",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/050/high.webp"
+      },
+      {
+        "number": "51",
+        "name": "Oshawott",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/051/high.webp"
+      },
+      {
+        "number": "52",
+        "name": "Grookey",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/052/high.webp"
+      },
+      {
+        "number": "53",
+        "name": "Scorbunny",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/053/high.webp"
+      },
+      {
+        "number": "54",
+        "name": "Sobble",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/054/high.webp"
+      },
+      {
+        "number": "55",
+        "name": "Treecko",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/055/high.webp"
+      },
+      {
+        "number": "56",
+        "name": "Torchic",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/056/high.webp"
+      },
+      {
+        "number": "57",
+        "name": "Mudkip",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/057/high.webp"
+      },
+      {
+        "number": "58",
+        "name": "Chespin",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/058/high.webp"
+      },
+      {
+        "number": "59",
+        "name": "Fennekin",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/059/high.webp"
+      },
+      {
+        "number": "60",
+        "name": "Froakie",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/060/high.webp"
+      },
+      {
+        "number": "61",
+        "name": "Sprigatito",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/061/high.webp"
+      },
+      {
+        "number": "62",
+        "name": "Fuecoco",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/062/high.webp"
+      },
+      {
+        "number": "63",
+        "name": "Quaxly",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/063/high.webp"
+      },
+      {
+        "number": "64",
+        "name": "Serperior",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/064/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "65",
+        "name": "Barbaracle",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/065/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "66",
+        "name": "Tyrantrum",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/066/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "67",
+        "name": "Doublade",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/067/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "68",
+        "name": "Makuhita",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/068/high.webp",
+        "nativeCosmos": true
+      },
+      {
+        "number": "69",
+        "name": "Chikorita",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/069/high.webp",
+        "nativeCosmos": true
+      },
+      {
+        "number": "70",
+        "name": "Tyrunt",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/070/high.webp"
+      },
+      {
+        "number": "71",
+        "name": "Mega Zygarde ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/071/high.webp"
+      },
+      {
+        "number": "72",
+        "name": "Mega Clefable ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/072/high.webp"
+      },
+      {
+        "number": "73",
+        "name": "Mega Gengar ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/073/high.webp"
+      },
+      {
+        "number": "74",
+        "name": "Delphox",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/074/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "75",
+        "name": "Ampharos",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/075/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "76",
+        "name": "Crobat",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/076/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "77",
+        "name": "Goodra",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/077/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "78",
+        "name": "Toxel",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/078/high.webp",
+        "nativeCosmos": true
+      },
+      {
+        "number": "79",
+        "name": "Charmeleon",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/079/high.webp",
+        "nativeCosmos": true
+      },
+      {
+        "number": "80",
+        "name": "Fennekin",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/080/high.webp"
+      },
+      {
+        "number": "81",
+        "name": "Mega Greninja ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/081/high.webp"
+      },
+      {
+        "number": "82",
+        "name": "Miraidon",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/082/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "83",
+        "name": "Slowbro",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/083/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "84",
+        "name": "Dhelmise",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/084/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "85",
+        "name": "Bastiodon",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/085/high.webp",
+        "nativeStamp": "Set logo"
+      },
+      {
+        "number": "86",
+        "name": "Slowpoke",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/086/high.webp"
+      },
+      {
+        "number": "87",
+        "name": "Binacle",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/087/high.webp"
+      },
+      {
+        "number": "88",
+        "name": "Zarude",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://assets.tcgdex.net/en/me/mep/088/high.webp"
+      },
+      {
+        "number": "89",
+        "name": "Mega Zeraora ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://api.rip.fun/storage/v1/object/public/tcg/cards/mep-89vh.small.png"
+      },
+      {
+        "number": "90",
+        "name": "Mega Darkrai ex",
+        "nameAliases": [
+          "Mega Darkai ex"
+        ],
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://api.rip.fun/storage/v1/object/public/tcg/cards/mep-90vh.small.png"
+      },
+      {
+        "number": "91",
+        "name": "Mega Dragonite ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://api.rip.fun/storage/v1/object/public/tcg/cards/mep-91vh.small.png"
+      },
+      {
+        "number": "92",
+        "name": "Paradise Resort",
+        "sourceProductSlug": "paradise-resort-world-championships-2026-92",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://api.rip.fun/storage/v1/object/public/tcg/cards/mep-92.small.png",
+        "nativeWorlds": true
+      },
+      {
+        "number": "93",
+        "name": "Pikachu",
+        "sourceProductSlug": "pikachu-world-championship-2026-93",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://api.rip.fun/storage/v1/object/public/tcg/cards/mep-93.small.png",
+        "nativeWorlds": true
+      },
+      {
+        "number": "94",
+        "name": "Alolan Exeggutor",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://api.rip.fun/storage/v1/object/public/tcg/cards/mep-94vh.small.png"
+      },
+      {
+        "number": "95",
+        "name": "Lucario",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://api.rip.fun/storage/v1/object/public/tcg/cards/mep-95vh.small.png"
+      },
+      {
+        "number": "96",
+        "name": "Moltres",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://api.rip.fun/storage/v1/object/public/tcg/cards/mep-96vh.small.png"
+      },
+      {
+        "number": "97",
+        "name": "Articuno",
+        "nameAliases": [
+          "Articuno Promo 97"
+        ],
+        "sourceProductSlug": "articuno-promo-97-97",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://api.rip.fun/storage/v1/object/public/tcg/cards/mep-97vh.small.png"
+      },
+      {
+        "number": "98",
+        "name": "Zapdos",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://api.rip.fun/storage/v1/object/public/tcg/cards/mep-98vh.small.png"
+      },
+      {
+        "number": "99",
+        "name": "Greninja ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://api.rip.fun/storage/v1/object/public/tcg/cards/mep-99vh.small.png"
+      },
+      {
+        "number": "100",
+        "name": "Sylveon ex",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://api.rip.fun/storage/v1/object/public/tcg/cards/mep-100vh.small.png"
+      },
+      {
+        "number": "101",
+        "name": "Nidorina",
+        "rarity": "Promo",
+        "type": "Unknown",
+        "category": "Promo",
+        "image": "https://api.rip.fun/storage/v1/object/public/tcg/cards/mep-101vh.small.png"
       }
     ]
   },

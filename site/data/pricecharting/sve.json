@@ -9619,5 +9619,2163 @@
       "sourceRows": 36,
       "acceptedRows": 35
     }
+  },
+  "sve-18": {
+    "fetchedAt": "2026-10-06T19:07:34.029Z",
+    "url": "https://www.pricecharting.com/game/pokemon-scarlet-&-violet-energy/basic-fire-energy-18",
+    "productId": "10046271",
+    "name": "Basic Fire Energy #18 Pokemon Scarlet & Violet Energy",
+    "guide": {
+      "raw": 0.26
+    },
+    "history": {
+      "raw": [
+        [
+          "2025-11",
+          130
+        ],
+        [
+          "2025-12",
+          130
+        ],
+        [
+          "2026-01",
+          133
+        ],
+        [
+          "2026-02",
+          135
+        ],
+        [
+          "2026-03",
+          149
+        ],
+        [
+          "2026-04",
+          147
+        ],
+        [
+          "2026-05",
+          135
+        ],
+        [
+          "2026-06",
+          24
+        ],
+        [
+          "2026-07",
+          18
+        ],
+        [
+          "2026-08",
+          26
+        ],
+        [
+          "2026-09",
+          21
+        ],
+        [
+          "2026-10",
+          26
+        ]
+      ]
+    },
+    "pop": null,
+    "cutoff": {
+      "raw": "2025-11-14"
+    },
+    "excluded": {
+      "raw": 9,
+      "psa9": 0,
+      "psa10": 0
+    },
+    "sales": [
+      [
+        "2026-09-27",
+        0.22,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-sw9pS7cMmjJH",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-09-26",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-uZ6bV/6kKFl3",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-09-20",
+        0.15,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-&#43;my&#43;68eFbJg4",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-09-19",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-FIPwWwoN2Cjj",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-09-13",
+        0.19,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-pEmSJdo8yx2M",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-09-12",
+        0.1,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-nByLoPHiQM6S",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-09-02",
+        0.15,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-T/K6xjA/9CYg",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-09-01",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-J0qce/5uqutp",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-08-28",
+        0.26,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-yPlAw1bYApuz",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-08-27",
+        0.08,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-A9WW4MgDqKX4",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-08-26",
+        0.31,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-janLf4GywcWd",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-08-19",
+        0.49,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-ucio8Jnvlu4R",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-08-18",
+        0.27,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-9GJM2PZpvRoq",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-08-17",
+        0.28,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-M/TtjHabUIbK",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-08-10",
+        0.23,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-E2rhGtCKzvG4",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-08-01",
+        0.5,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-TbLrtzMOsHnQ",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-07-31",
+        0.22,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-ADOYOD/sz5DH",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-07-26",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-2A1diQb2Iyna",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-07-25",
+        0.1,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-uN0K4buB5s48",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-07-19",
+        0.15,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-nKtd/DTeD0X6",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-07-18",
+        0.2,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-wJb5b5I5Yc63",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-07-17",
+        0.1,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-sO8iFqW/5&#43;3a",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-07-13",
+        0.16,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-2eTfAGpq0k4E",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-07-12",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-1s2WCkn1N/kw",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-07-11",
+        0.1,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-27oRqWTCvWSc",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-07-07",
+        0.09,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-YTeofUt4CFld",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-07-06",
+        0.05,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-eUoK7/VRAfA5",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-07-01",
+        0.14,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-z6Tm28oa9hnH",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-06-24",
+        0.05,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-aALAYzyf39sO",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-06-23",
+        0.1,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-faawHt0F5xle",
+        "Basic Fire Energy - 018 #18 Near Mint English"
+      ],
+      [
+        "2026-02-24",
+        0.99,
+        "raw",
+        "Unknown",
+        "e",
+        "ebay:116752034198",
+        "Basic Fire Energy 018 SvE: Pokemon Scarlet & Violet Energy #018"
+      ]
+    ],
+    "coverage": {
+      "scope": "Source page snapshot",
+      "completeEbayHistory": false,
+      "sourceRows": 40,
+      "acceptedRows": 31
+    }
+  },
+  "sve-19": {
+    "fetchedAt": "2026-10-06T19:07:34.114Z",
+    "url": "https://www.pricecharting.com/game/pokemon-scarlet-&-violet-energy/basic-water-energy-19",
+    "productId": "10045643",
+    "name": "Basic Water Energy #19 Pokemon Scarlet & Violet Energy",
+    "guide": {
+      "raw": 0.31
+    },
+    "history": {
+      "raw": [
+        [
+          "2025-09",
+          140
+        ],
+        [
+          "2025-10",
+          140
+        ],
+        [
+          "2025-11",
+          140
+        ],
+        [
+          "2025-12",
+          125
+        ],
+        [
+          "2026-01",
+          127
+        ],
+        [
+          "2026-02",
+          125
+        ],
+        [
+          "2026-03",
+          128
+        ],
+        [
+          "2026-04",
+          132
+        ],
+        [
+          "2026-05",
+          134
+        ],
+        [
+          "2026-06",
+          26
+        ],
+        [
+          "2026-07",
+          16
+        ],
+        [
+          "2026-08",
+          25
+        ],
+        [
+          "2026-09",
+          20
+        ],
+        [
+          "2026-10",
+          31
+        ]
+      ]
+    },
+    "pop": null,
+    "cutoff": {
+      "raw": "2025-08-31"
+    },
+    "excluded": {
+      "raw": 9,
+      "psa9": 0,
+      "psa10": 0
+    },
+    "sales": [
+      [
+        "2026-09-25",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-FT3OoZbjQEqm",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-09-23",
+        0.05,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-NVglqXbJ9jTY",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-09-20",
+        0.22,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-ujIoJ5a4I32n",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-09-16",
+        0.03,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-cOa3kXyt8T8H",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-09-10",
+        0.2,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-tr8Hc3SxCFPe",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-09-09",
+        0.17,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-pd&#43;mxRaUzQxp",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-09-08",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-jw4nZQMrFsjm",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-09-07",
+        0.15,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-qnJ7eb2wLYFe",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-09-04",
+        0.14,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-icdpJE5yXSPK",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-09-03",
+        0.28,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-odvxN/wFtZW8",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-09-02",
+        0.17,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-sP5lGIFEh1P7",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-08-29",
+        0.15,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-kAj2qClnSZ&#43;F",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-08-28",
+        0.28,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-AQ03KygqwDSX",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-08-22",
+        0.05,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-GdEtZ9hulHhc",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-08-21",
+        0.28,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-llj3QIkPZBV/",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-08-20",
+        0.24,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-Xd7BzKdOHcV&#43;",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-08-17",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-arguwH6&#43;fhJE",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-08-16",
+        0.2,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-kgF5&#43;KJ29z73",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-08-15",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-Vvc6tVrEf/9X",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-08-08",
+        0.28,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-vVg&#43;muQLn9vt",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-08-06",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-7M4EESAqnqJX",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-08-05",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-X7qHFnub4dIH",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-08-04",
+        0.27,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-y4sEVtlnavv0",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-08-01",
+        0.2,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-TLiEm/MnH/BW",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-07-31",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-z&#43;07ulBiWtAp",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-07-25",
+        0.08,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-2lEMxjDAK/jX",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-07-18",
+        0.15,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-2UdJk4EBoprl",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-07-17",
+        0.1,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-MEFp2vLx1U78",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-07-09",
+        0.17,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-K9Fv/y9KOUT2",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-07-03",
+        0.02,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-VNOp5oLiphYV",
+        "Basic Water Energy - 019 #19 Near Mint English"
+      ],
+      [
+        "2026-02-16",
+        1.25,
+        "raw",
+        "Unknown",
+        "e",
+        "ebay:306666336498",
+        "Basic Water Energy - SVE 019 - Holographic - Pokémon TCG #019"
+      ],
+      [
+        "2025-12-18",
+        1.25,
+        "raw",
+        "Unknown",
+        "e",
+        "ebay:127407418164",
+        "Basic Water Energy - SVE 019 - Holographic - Pokémon TCG #019"
+      ]
+    ],
+    "coverage": {
+      "scope": "Source page snapshot",
+      "completeEbayHistory": false,
+      "sourceRows": 41,
+      "acceptedRows": 32
+    }
+  },
+  "sve-17": {
+    "fetchedAt": "2026-10-06T19:07:34.184Z",
+    "url": "https://www.pricecharting.com/game/pokemon-scarlet-&-violet-energy/basic-grass-energy-17",
+    "productId": "10046270",
+    "name": "Basic Grass Energy #17 Pokemon Scarlet & Violet Energy",
+    "guide": {
+      "raw": 0.4
+    },
+    "history": {
+      "raw": [
+        [
+          "2025-09",
+          283
+        ],
+        [
+          "2025-10",
+          283
+        ],
+        [
+          "2025-11",
+          283
+        ],
+        [
+          "2025-12",
+          291
+        ],
+        [
+          "2026-01",
+          291
+        ],
+        [
+          "2026-02",
+          199
+        ],
+        [
+          "2026-03",
+          167
+        ],
+        [
+          "2026-04",
+          140
+        ],
+        [
+          "2026-05",
+          161
+        ],
+        [
+          "2026-06",
+          63
+        ],
+        [
+          "2026-07",
+          26
+        ],
+        [
+          "2026-08",
+          38
+        ],
+        [
+          "2026-10",
+          40
+        ]
+      ]
+    },
+    "pop": null,
+    "cutoff": {
+      "raw": "2025-09-28"
+    },
+    "excluded": {
+      "raw": 12,
+      "psa9": 0,
+      "psa10": 0
+    },
+    "sales": [
+      [
+        "2026-09-30",
+        0.3,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-SXguM&#43;BMcauA",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-09-29",
+        0.09,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-gjKBoyjxNOim",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-09-20",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-R8WYueyo7gJJ",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-09-13",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-sxshHcSef1xg",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-09-12",
+        0.31,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-uMn3VegThlt/",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-09-06",
+        0.13,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-xevPYVXPhbtw",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-09-05",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-KWskI8lkRWwG",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-09-04",
+        0.28,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-NPORW&#43;hNUKtL",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-08-29",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-/0U6Vs&#43;/iB6H",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-08-22",
+        0.15,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-n/&#43;jQ24xumR8",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-08-21",
+        0.15,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-egUq9Q8ocfKk",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-08-17",
+        0.26,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-EesI6EPNnSG1",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-08-16",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-KjDMlNmGoz1l",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-08-10",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-7wbZhdDvdwcH",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-08-09",
+        0.26,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-ucegfK5aaCQ0",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-08-04",
+        0.15,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-KoI1C5KHNiun",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-07-30",
+        0.26,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-nLYHSMRtjxlQ",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-07-28",
+        0.01,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-bYjlaAsV96Ts",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-07-24",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-4eFMsoQzQW4F",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-07-23",
+        0.08,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-gT0Rd5sp5&#43;ab",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-07-17",
+        0.05,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-zemmkUnQ66&#43;a",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-07-13",
+        0.29,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-D/7HNkdOyh/w",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-07-12",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-UZ9vCkCroaJH",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-07-09",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-pv&#43;FGAx73HRP",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-07-08",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-zJ6/kRMwouad",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-07-02",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-cJJKStj3uumU",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-07-01",
+        0.33,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-e9eS7FWF2sOZ",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-06-26",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-urFH64IxBkuX",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-06-25",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-5waJYcsmeitE",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-06-18",
+        0.14,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-d3RlxYEnwTNa",
+        "Basic Grass Energy - 017 #17 Near Mint English"
+      ],
+      [
+        "2026-03-04",
+        1.39,
+        "raw",
+        "NM",
+        "e",
+        "ebay:205892056803",
+        "Grass Energy 017/SVE Basic Energy Pokémon Card English NM"
+      ]
+    ],
+    "coverage": {
+      "scope": "Source page snapshot",
+      "completeEbayHistory": false,
+      "sourceRows": 43,
+      "acceptedRows": 31
+    }
+  },
+  "sve-20": {
+    "fetchedAt": "2026-10-06T19:07:35.079Z",
+    "url": "https://www.pricecharting.com/game/pokemon-scarlet-&-violet-energy/basic-lightning-energy-20",
+    "productId": "10046375",
+    "name": "Basic Lightning Energy #20 Pokemon Scarlet & Violet Energy",
+    "guide": {
+      "raw": 0.24
+    },
+    "history": {
+      "raw": [
+        [
+          "2025-09",
+          25
+        ],
+        [
+          "2025-10",
+          25
+        ],
+        [
+          "2025-11",
+          21
+        ],
+        [
+          "2025-12",
+          13
+        ],
+        [
+          "2026-01",
+          16
+        ],
+        [
+          "2026-02",
+          19
+        ],
+        [
+          "2026-03",
+          14
+        ],
+        [
+          "2026-04",
+          17
+        ],
+        [
+          "2026-05",
+          15
+        ],
+        [
+          "2026-06",
+          15
+        ],
+        [
+          "2026-07",
+          18
+        ],
+        [
+          "2026-08",
+          25
+        ],
+        [
+          "2026-09",
+          24
+        ],
+        [
+          "2026-10",
+          24
+        ]
+      ]
+    },
+    "pop": null,
+    "cutoff": {
+      "raw": "2026-04-30"
+    },
+    "excluded": {
+      "raw": 2,
+      "psa9": 0,
+      "psa10": 0
+    },
+    "sales": [
+      [
+        "2026-09-30",
+        0.3,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-&#43;/&#43;gXBnSnUc5",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-09-29",
+        0.05,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-NlNfnbCCjeNo",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-09-23",
+        0.05,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-p364J/2t2nGB",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-09-16",
+        0.2,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-sPorOqRl/xCH",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-09-08",
+        0.19,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-KzjtFZWV/UY9",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-09-07",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-&#43;X1XvMqq053Q",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-09-06",
+        0.23,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-mfI8hKsHNDGU",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-09-04",
+        0.2,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-RkRRRg1Mwlxd",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-09-02",
+        0.1,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-FyzSSm77wxIF",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-08-28",
+        0.24,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-yS2G3TcRIIvX",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-08-26",
+        0.31,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-Px6koWW6WM2c",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-08-25",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-e3gF&#43;JZ1Bffx",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-08-17",
+        0.3,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-/HAAS4UAs4r&#43;",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-08-16",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-6LU/eQe5UxPj",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-08-15",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-MwWLff6R6&#43;eW",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-08-14",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-rgYCZoplevG5",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-08-10",
+        0.23,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-NeVVKh8Ww1D6",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-08-09",
+        0.14,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-/mK1a5i2bGza",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-07-29",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-5WAJ6ZY58bJQ",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-07-28",
+        0.01,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-CIjnpS736fnz",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-07-27",
+        0.35,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-/uzlH4J0rYew",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-07-22",
+        0.19,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-/XKiHr7o2am3",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-07-19",
+        0.17,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-PWFJBvzAXM3a",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-07-18",
+        0.15,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-6naciY7SmUxq",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-07-12",
+        0.1,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-6ZeBupy9xvvu",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-07-10",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-lt1KRslQgbAR",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-07-04",
+        0.24,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-7gh8hF5h2pA1",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-07-03",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-yTfPPxKmZeFk",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-06-23",
+        0.01,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-8jGKXqbIiCKX",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ],
+      [
+        "2026-06-22",
+        0.05,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-lMpGAaxUohTI",
+        "Basic Lightning Energy - 020 #20 Near Mint English"
+      ]
+    ],
+    "coverage": {
+      "scope": "Source page snapshot",
+      "completeEbayHistory": false,
+      "sourceRows": 32,
+      "acceptedRows": 30
+    }
+  },
+  "sve-22": {
+    "fetchedAt": "2026-10-06T19:07:35.107Z",
+    "url": "https://www.pricecharting.com/game/pokemon-scarlet-&-violet-energy/basic-fighting-energy-22",
+    "productId": "10046377",
+    "name": "Basic Fighting Energy #22 Pokemon Scarlet & Violet Energy",
+    "guide": {
+      "raw": 1.49
+    },
+    "history": {
+      "raw": [
+        [
+          "2026-03",
+          60
+        ],
+        [
+          "2026-04",
+          119
+        ],
+        [
+          "2026-05",
+          133
+        ],
+        [
+          "2026-06",
+          126
+        ],
+        [
+          "2026-07",
+          133
+        ],
+        [
+          "2026-08",
+          149
+        ],
+        [
+          "2026-10",
+          149
+        ]
+      ]
+    },
+    "pop": null,
+    "cutoff": {
+      "raw": "2026-02-27"
+    },
+    "excluded": {
+      "raw": 9,
+      "psa9": 0,
+      "psa10": 0
+    },
+    "sales": [],
+    "coverage": {
+      "scope": "Source page snapshot",
+      "completeEbayHistory": false,
+      "sourceRows": 9,
+      "acceptedRows": 0
+    }
+  },
+  "sve-21": {
+    "fetchedAt": "2026-10-06T19:07:36.032Z",
+    "url": "https://www.pricecharting.com/game/pokemon-scarlet-&-violet-energy/basic-psychic-energy-21",
+    "productId": "10046376",
+    "name": "Basic Psychic Energy #21 Pokemon Scarlet & Violet Energy",
+    "guide": {
+      "raw": 1.99
+    },
+    "history": {
+      "raw": [
+        [
+          "2025-08",
+          216
+        ],
+        [
+          "2025-09",
+          216
+        ],
+        [
+          "2025-10",
+          216
+        ],
+        [
+          "2025-11",
+          216
+        ],
+        [
+          "2025-12",
+          146
+        ],
+        [
+          "2026-01",
+          173
+        ],
+        [
+          "2026-02",
+          166
+        ],
+        [
+          "2026-03",
+          169
+        ],
+        [
+          "2026-04",
+          169
+        ],
+        [
+          "2026-05",
+          135
+        ],
+        [
+          "2026-06",
+          134
+        ],
+        [
+          "2026-07",
+          102
+        ],
+        [
+          "2026-08",
+          105
+        ],
+        [
+          "2026-09",
+          103
+        ],
+        [
+          "2026-10",
+          199
+        ]
+      ]
+    },
+    "pop": null,
+    "cutoff": {
+      "raw": "2025-08-19"
+    },
+    "excluded": {
+      "raw": 11,
+      "psa9": 0,
+      "psa10": 0
+    },
+    "sales": [],
+    "coverage": {
+      "scope": "Source page snapshot",
+      "completeEbayHistory": false,
+      "sourceRows": 11,
+      "acceptedRows": 0
+    }
+  },
+  "sve-24": {
+    "fetchedAt": "2026-10-06T19:07:36.068Z",
+    "url": "https://www.pricecharting.com/game/pokemon-scarlet-&-violet-energy/basic-metal-energy-24",
+    "productId": "10046381",
+    "name": "Basic Metal Energy #24 Pokemon Scarlet & Violet Energy",
+    "guide": {
+      "raw": 0.27
+    },
+    "history": {
+      "raw": [
+        [
+          "2025-10",
+          269
+        ],
+        [
+          "2025-11",
+          269
+        ],
+        [
+          "2025-12",
+          234
+        ],
+        [
+          "2026-01",
+          234
+        ],
+        [
+          "2026-02",
+          234
+        ],
+        [
+          "2026-03",
+          234
+        ],
+        [
+          "2026-04",
+          200
+        ],
+        [
+          "2026-05",
+          190
+        ],
+        [
+          "2026-06",
+          126
+        ],
+        [
+          "2026-07",
+          138
+        ],
+        [
+          "2026-08",
+          34
+        ],
+        [
+          "2026-10",
+          27
+        ]
+      ]
+    },
+    "pop": null,
+    "cutoff": {
+      "raw": "2025-10-07"
+    },
+    "excluded": {
+      "raw": 9,
+      "psa9": 0,
+      "psa10": 0
+    },
+    "sales": [
+      [
+        "2026-09-29",
+        0.1,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-JmBD0AT3LaKG",
+        "Basic Metal Energy - 024 #24 Near Mint English"
+      ],
+      [
+        "2026-09-27",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-0czy&#43;5dtOA7Y",
+        "Basic Metal Energy - 024 #24 Near Mint English"
+      ],
+      [
+        "2026-09-20",
+        0.21,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-lw1SVf5uFAdK",
+        "Basic Metal Energy - 024 #24 Near Mint English"
+      ],
+      [
+        "2026-09-13",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-k&#43;bmLMECtuIc",
+        "Basic Metal Energy - 024 #24 Near Mint English"
+      ],
+      [
+        "2026-09-12",
+        0.27,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-ouSU94Op9hMq",
+        "Basic Metal Energy - 024 #24 Near Mint English"
+      ],
+      [
+        "2026-09-11",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-9iQMc5MRXy3U",
+        "Basic Metal Energy - 024 #24 Near Mint English"
+      ],
+      [
+        "2026-09-05",
+        0.13,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-06q198l6d397",
+        "Basic Metal Energy - 024 #24 Near Mint English"
+      ],
+      [
+        "2026-09-04",
+        0.12,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-URLs8C6g3JkV",
+        "Basic Metal Energy - 024 #24 Near Mint English"
+      ],
+      [
+        "2026-08-23",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-0AyCJWmE6L2c",
+        "Basic Metal Energy - 024 #24 Near Mint English"
+      ],
+      [
+        "2026-08-22",
+        0.03,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-3nPggVtGDA2w",
+        "Basic Metal Energy - 024 #24 Near Mint English"
+      ],
+      [
+        "2026-08-15",
+        0.1,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-9H&#43;VmXg0EDsJ",
+        "Basic Metal Energy - 024 #24 Near Mint English"
+      ],
+      [
+        "2026-08-09",
+        0.6,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-3tECbPjnHtZp",
+        "Basic Metal Energy - 024 #24 Near Mint English"
+      ],
+      [
+        "2026-08-03",
+        0.15,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-tJ/HZCXjoVCW",
+        "Basic Metal Energy - 024 #24 Near Mint English"
+      ],
+      [
+        "2026-05-28",
+        0.99,
+        "raw",
+        "NM",
+        "e",
+        "ebay:205892077732",
+        "Metal Energy 024/SVE Basic Energy Pokémon Card English NM"
+      ]
+    ],
+    "coverage": {
+      "scope": "Source page snapshot",
+      "completeEbayHistory": false,
+      "sourceRows": 23,
+      "acceptedRows": 14
+    }
+  },
+  "sve-23": {
+    "fetchedAt": "2026-10-06T19:07:36.304Z",
+    "url": "https://www.pricecharting.com/game/pokemon-scarlet-&-violet-energy/basic-darkness-energy-23",
+    "productId": "10046378",
+    "name": "Basic Darkness Energy #23 Pokemon Scarlet & Violet Energy",
+    "guide": {
+      "raw": 0.4
+    },
+    "history": {
+      "raw": [
+        [
+          "2025-08",
+          25
+        ],
+        [
+          "2025-09",
+          71
+        ],
+        [
+          "2025-10",
+          71
+        ],
+        [
+          "2025-11",
+          33
+        ],
+        [
+          "2025-12",
+          23
+        ],
+        [
+          "2026-01",
+          26
+        ],
+        [
+          "2026-02",
+          26
+        ],
+        [
+          "2026-03",
+          20
+        ],
+        [
+          "2026-04",
+          24
+        ],
+        [
+          "2026-05",
+          25
+        ],
+        [
+          "2026-06",
+          42
+        ],
+        [
+          "2026-07",
+          37
+        ],
+        [
+          "2026-08",
+          33
+        ],
+        [
+          "2026-09",
+          33
+        ],
+        [
+          "2026-10",
+          40
+        ]
+      ]
+    },
+    "pop": null,
+    "cutoff": {
+      "raw": "2025-09-25"
+    },
+    "excluded": {
+      "raw": 10,
+      "psa9": 0,
+      "psa10": 0
+    },
+    "sales": [
+      [
+        "2026-09-17",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-HNWx2y0WKD2P",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-09-16",
+        0.39,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-K92KkVOBGIAy",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-09-10",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-8WBEf1Z5gAVA",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-09-09",
+        0.31,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-5PLSYaTK9WUc",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-09-05",
+        0.29,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-HMHRkR334TVm",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-09-04",
+        0.07,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-GzYnRe4qvXu0",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-08-30",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-Dh16wZCszyuz",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-08-17",
+        0.27,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-ZPLMlKiBwJL9",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-08-08",
+        0.1,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-9aZf1B9BWP&#43;F",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-08-07",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-w4YXyJBEEbA&#43;",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-08-01",
+        0.5,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-8G&#43;CNufvhct2",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-07-31",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-dg/WBMLpqoaw",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-07-25",
+        0.33,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-7IUVAvelRS3V",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-07-24",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-uawYkdIv0m4c",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-07-23",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-JEsA4jJ1egiE",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-07-19",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-PjNQKywOXPQO",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-07-18",
+        0.2,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-zaFgnDA5ZK8X",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-07-12",
+        0.29,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-fZPBejh/qqIK",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-07-11",
+        0.26,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-yifeiBH1fS&#43;g",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-07-10",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-CyN1ad/OHUSH",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-07-05",
+        0.1,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-D0JHZa7Qom0Z",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-07-04",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-pQuiH4iAfeGG",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-06-28",
+        0.5,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-NDNkb46DEKo/",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-06-21",
+        0.39,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-czDFPFvxG92G",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-06-13",
+        0.4,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-IUetorE8HocB",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-06-06",
+        0.18,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-KnNddTF8v7AK",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-06-05",
+        0.01,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-I3Ub4Yw2sBY3",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-05-29",
+        0.19,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-EBJtvQO3uOpC",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-05-28",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-ccT0nQT6Uunj",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ],
+      [
+        "2026-05-22",
+        0.25,
+        "raw",
+        "NM",
+        "t",
+        "tcgplayer-0dewz3723STc",
+        "Basic Darkness Energy - 023 #23 Near Mint English"
+      ]
+    ],
+    "coverage": {
+      "scope": "Source page snapshot",
+      "completeEbayHistory": false,
+      "sourceRows": 40,
+      "acceptedRows": 30
+    }
   }
 }

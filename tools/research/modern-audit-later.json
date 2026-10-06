@@ -1,58 +1,61 @@
 {
-  "checkedAt": "2026-10-06T15:14:44.456Z",
-  "eligible": 2294,
-  "captured": 2293,
-  "sales": 200969,
-  "ebaySales": 137069,
+  "checkedAt": "2026-10-06T19:09:13.290Z",
+  "eligible": 2467,
+  "captured": 2463,
+  "sales": 210668,
+  "ebaySales": 143259,
   "invalidSales": [],
   "grades": {
     "psa10": {
-      "scored": 1359,
+      "scored": 1432,
       "medianScore": 59,
-      "forecasts": 201,
+      "forecasts": 205,
       "medianAcceptedHoldoutError": 0.19231715197036178,
-      "medianAcceptedBaselineError": 0.23238765135666378,
+      "medianAcceptedBaselineError": 0.23272138868323397,
       "withheld": {
-        "Not enough information": 1040,
-        "Needs 8 sale days spanning 6 months, with a sale in the last 90 days.": 695,
-        "Trend did not pass a held-out sales check against an unchanged-price baseline.": 351,
-        "Refresh sales before projecting a trend.": 1,
+        "Not enough information": 1140,
+        "Needs 8 sale days spanning 6 months, with a sale in the last 90 days.": 758,
+        "Trend did not pass a held-out sales check against an unchanged-price baseline.": 354,
+        "Refresh sales before projecting a trend.": 4,
         "Trend is too extreme to extrapolate reliably.": 6
       }
     },
     "psa9": {
-      "scored": 1281,
+      "scored": 1349,
       "medianScore": 59,
-      "forecasts": 148,
-      "medianAcceptedHoldoutError": 0.19391234567228396,
-      "medianAcceptedBaselineError": 0.22249207451432226,
+      "forecasts": 150,
+      "medianAcceptedHoldoutError": 0.1933561727008351,
+      "medianAcceptedBaselineError": 0.22017557758591955,
       "withheld": {
-        "Not enough information": 1124,
-        "Needs 8 sale days spanning 6 months, with a sale in the last 90 days.": 613,
-        "Refresh sales before projecting a trend.": 1,
-        "Trend did not pass a held-out sales check against an unchanged-price baseline.": 403,
+        "Not enough information": 1235,
+        "Needs 8 sale days spanning 6 months, with a sale in the last 90 days.": 658,
+        "Refresh sales before projecting a trend.": 4,
+        "Trend did not pass a held-out sales check against an unchanged-price baseline.": 415,
         "Not enough matching training sales to validate a trend.": 2,
         "Trend is too extreme to extrapolate reliably.": 3
       }
     },
     "raw": {
-      "scored": 2237,
+      "scored": 2386,
       "medianScore": 59,
       "forecasts": 2,
       "medianAcceptedHoldoutError": 0.25140748118098416,
       "medianAcceptedBaselineError": 0.25884395118526743,
       "withheld": {
-        "Needs 8 sale days spanning 6 months, with a sale in the last 90 days.": 2135,
-        "Not enough information": 69,
-        "Trend did not pass a held-out sales check against an unchanged-price baseline.": 84,
-        "Refresh sales before projecting a trend.": 1,
+        "Needs 8 sale days spanning 6 months, with a sale in the last 90 days.": 2263,
+        "Not enough information": 96,
+        "Trend did not pass a held-out sales check against an unchanged-price baseline.": 97,
+        "Refresh sales before projecting a trend.": 4,
         "Not enough matching training sales to validate a trend.": 1,
-        "Trend is too extreme to extrapolate reliably.": 2
+        "Trend is too extreme to extrapolate reliably.": 4
       }
     }
   },
   "missing": [
-    "svp-45"
+    "svp-45",
+    "mep-89",
+    "mep-90",
+    "mep-91"
   ],
   "completeEbayHistory": false,
   "forecastLimitation": "Holdouts test the end of the captured trailing year. They do not validate 1–3 year investment returns. Scores are uncalibrated historical screens, not probabilities of profit."

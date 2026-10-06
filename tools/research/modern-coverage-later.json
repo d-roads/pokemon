@@ -2,9 +2,9 @@
   "sets": {
     "svp": {
       "name": "Scarlet & Violet Black Star Promos",
-      "eligible": 165,
-      "mapped": 164,
-      "captured": 164,
+      "eligible": 225,
+      "mapped": 224,
+      "captured": 224,
       "unmatched": [
         {
           "id": "svp-45",
@@ -18,21 +18,21 @@
         }
       ],
       "errors": [],
-      "sales": 6759,
-      "ebaySales": 3778,
-      "sourceRows": 11830,
+      "sales": 10247,
+      "ebaySales": 5957,
+      "sourceRows": 17378,
       "listingPages": 18
     },
     "sve": {
       "name": "Scarlet & Violet Energies",
-      "eligible": 16,
-      "mapped": 16,
-      "captured": 16,
+      "eligible": 24,
+      "mapped": 24,
+      "captured": 24,
       "unmatched": [],
       "errors": [],
-      "sales": 480,
-      "ebaySales": 72,
-      "sourceRows": 662,
+      "sales": 648,
+      "ebaySales": 77,
+      "sourceRows": 901,
       "listingPages": 1
     },
     "sv1": {
@@ -322,9 +322,46 @@
       "ebaySales": 826,
       "sourceRows": 1413,
       "listingPages": 2
+    },
+    "mep": {
+      "name": "MEP Black Star Promos",
+      "eligible": 97,
+      "mapped": 97,
+      "captured": 94,
+      "unmatched": [],
+      "errors": [
+        {
+          "id": "mep-89",
+          "error": "The price source format could not be read."
+        },
+        {
+          "id": "mep-90",
+          "error": "The price source format could not be read."
+        },
+        {
+          "id": "mep-91",
+          "error": "The price source format could not be read."
+        }
+      ],
+      "sales": 5780,
+      "ebaySales": 3959,
+      "sourceRows": 6527,
+      "listingPages": 18
+    },
+    "mee": {
+      "name": "Mega Evolution Energy",
+      "eligible": 8,
+      "mapped": 8,
+      "captured": 8,
+      "unmatched": [],
+      "errors": [],
+      "sales": 263,
+      "ebaySales": 47,
+      "sourceRows": 344,
+      "listingPages": 1
     }
   },
-  "checkedAt": "2026-10-06T15:14:28.708Z",
+  "checkedAt": "2026-10-06T19:08:29.471Z",
   "completeEbayHistory": false,
   "scope": "Every exact-matched rare/promo; all rows exposed on each public source page. Earlier and unreported eBay sales may be absent."
 }

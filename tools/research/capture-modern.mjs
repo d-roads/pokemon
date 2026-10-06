@@ -18,6 +18,17 @@ const decode=s=>s.replace(/&amp;/g,'&').replace(/&#39;|&apos;/g,"'").replace(/&q
 const clean=s=>decode(s.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim());
 const norm=s=>s.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+// Verified product pages omitted from PriceCharting's console table or filed under
+// another console. The product page is still validated before any data is saved.
+const directProducts={
+ 'svp-167':'pokemon-promo/flareon-cosmos-holo-167',
+ 'svp-168':'pokemon-promo/vaporeon-cosmos-holo-168',
+ 'svp-169':'pokemon-promo/jolteon-cosmos-holo-169',
+ 'mep-7':'pokemon-promo/psyduck-cosmos-holo-7',
+ 'mep-64':'pokemon-perfect-order/serperior-stamped-64',
+ 'mep-78':'pokemon-promo/toxel-cosmos-holo-78',
+ 'mep-79':'pokemon-promo/charmeleon-cosmos-holo-79'
+};
 async function get(url){
  for(let attempt=0;attempt<3;attempt++){
   const r=await fetch(url,{signal:AbortSignal.timeout(30000),headers:{'User-Agent':'PrimalWatch modern catalog research'}});
@@ -59,13 +70,14 @@ for(const set of sets.filter(s=>eraSets.includes(s.series)&&(!selected.length||s
   const queue=[];
   for(const card of wanted){
    let matches=products.filter(p=>[card.name,...(card.nameAliases||[])].some(n=>p.name===norm(n))&&p.number===String(card.number).toUpperCase().replace(/^([A-Z]*)0+(?=\d)/,'$1'));
+   if(directProducts[card.id])matches.push({name:norm(card.name),number:String(card.number),rawNumber:String(card.number),variants:card.nativeStamp?['Stamped']:card.nativeCosmos?['Cosmos Holo']:[],holo:false,url:'https://www.pricecharting.com/game/'+directProducts[card.id]});
    const exactNumber=matches.filter(p=>p.rawNumber===String(card.number).toUpperCase());if(exactNumber.length)matches=exactNumber;
    const primary=matches.filter(p=>p.url.includes('/game/pokemon-'+set.slug+'/'));if(primary.length)matches=primary;
    if(card.sourceProductSlug)matches=matches.filter(p=>p.url.split('/').at(-1)===card.sourceProductSlug);
    const plain=matches.filter(p=>p.variants.length===0);
-   const specialty=card.nativeStamp?matches.filter(p=>p.variants.some(v=>/snowflake stamp/i.test(v))):card.nativeHolo?matches.filter(p=>p.holo):/rainbow/i.test(card.rarity)?matches.filter(p=>p.variants.some(v=>/rainbow/i.test(v))):/holo/i.test(card.rarity)?matches.filter(p=>p.holo):[];
+   const specialty=card.nativeStamp?matches.filter(p=>p.variants.some(v=>card.nativeStamp==='Snowflake'?/snowflake stamp/i.test(v):/stamped|prerelease/i.test(v))):card.nativeCosmos?matches.filter(p=>p.variants.some(v=>/cosmos holo/i.test(v))):card.nativeHolo?matches.filter(p=>p.holo):/rainbow/i.test(card.rarity)?matches.filter(p=>p.variants.some(v=>/rainbow/i.test(v))):/holo/i.test(card.rarity)?matches.filter(p=>p.holo):[];
    const preferred=card.nativeStamp?specialty:card.nativeHolo?(specialty.length?specialty:plain):specialty.length?specialty:plain;
-   const intrinsic=v=>/^(holo|rainbow foil|gold foil|professor [a-z ]+)$/i.test(v)||card.name.includes('★')&&/^gold star$/i.test(v)||card.nativeStamp==='Snowflake'&&/^snowflake stamp$/i.test(v);
+   const intrinsic=v=>/^(holo|rainbow foil|gold foil|professor [a-z ]+)$/i.test(v)||card.name.includes('★')&&/^gold star$/i.test(v)||card.nativeStamp==='Snowflake'&&/^snowflake stamp$/i.test(v)||card.nativeStamp==='Set logo'&&/stamped|prerelease/i.test(v)||card.nativeCosmos&&/cosmos holo/i.test(v);
    matches=preferred.length?preferred:matches.length===1&&(card.sourceProductSlug||matches[0].variants.every(intrinsic))?matches:[];
    if(matches.length!==1){const number=String(card.number).toUpperCase().replace(/^([A-Z]*)0+(?=\d)/,'$1');entry.unmatched.push({id:card.id,name:card.name,reason:matches.length?'Ambiguous product matches':'No exact standard-print product',sameNumber:products.filter(p=>p.number===number).slice(0,8).map(p=>p.url)});if(out[card.id]){delete out[card.id];save(file,out);}delete urls[card.id];continue;}
    const source=matches[0].url;urls[card.id]=source;entry.mapped++;queue.push({...card,source,sourceVerified:true});

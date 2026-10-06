@@ -24,15 +24,21 @@ test('Sword & Shield includes English main sets, special sets, galleries, vault,
 test('Scarlet & Violet and Mega Evolution include every released English set through October 2026',()=>{
  const modernSets=sets.filter(x=>['SV','ME'].includes(x.series));
  const modernCards=cards.filter(x=>['SV','ME'].includes(x.series));
- assert.equal(modernSets.length,26);
- assert.equal(modernCards.length,4765);
+ assert.equal(modernSets.length,28);
+ assert.equal(modernCards.length,4938);
  assert.equal(new Set(modernCards.map(x=>x.id)).size,modernCards.length);
  for(const set of modernSets)assert.equal(modernCards.filter(x=>x.setId===set.id).length,set.total);
- for(const id of ['svp','sve','sv3pt5','sv4pt5','sv6pt5','sv8pt5','zsv10pt5','rsv10pt5','me2pt5','me55','me55c'])assert.ok(modernSets.some(x=>x.id===id),id);
- assert.equal(cards.filter(x=>x.setId==='sve'&&x.eligible).length,16);
+ for(const id of ['svp','sve','sv3pt5','sv4pt5','sv6pt5','sv8pt5','zsv10pt5','rsv10pt5','mep','mee','me2pt5','me55','me55c'])assert.ok(modernSets.some(x=>x.id===id),id);
+ assert.equal(cards.filter(x=>x.setId==='sve'&&x.eligible).length,24);
+ assert.equal(cards.filter(x=>x.setId==='mee'&&x.eligible).length,8);
+ assert.equal(cards.filter(x=>x.setId==='mep'&&x.eligible).length,97);
+ assert.equal(cards.filter(x=>x.setId==='svp'&&x.eligible).length,225);
+ assert.equal(cards.some(x=>x.id==='mep-11'),false,'jumbo-only promo is excluded');
+ assert.equal(cards.some(x=>x.id==='mep-102'),false,'unreleased promo is excluded');
  assert.equal(cards.filter(x=>x.setId==='me55c'&&x.eligible).length,30);
  assert.equal(cards.find(x=>x.id==='sve-16').numberLabel,'16');
  assert.equal(modernSets.find(x=>x.id==='sve').slug,'scarlet-%26-violet-energy');
+ assert.equal(modernSets.find(x=>x.id==='mee').slug,'mega-evolution-energy');
  assert.equal(modernSets.find(x=>x.id==='sv3pt5').slug,'scarlet-%26-violet-151');
  assert.ok(matchesCard('Charizard ex #199 Pokemon Scarlet & Violet 151',cards.find(x=>x.id==='sv3pt5-199')));
  assert.ok(cards.find(x=>x.id==='sv9-190').nameAliases.includes('Spike Energy'));
@@ -42,6 +48,12 @@ test('Scarlet & Violet and Mega Evolution include every released English set thr
  assert.equal(cards.find(x=>x.id==='me4-85').printing,'Standard / non-holo');
  assert.ok(cards.find(x=>x.id==='me4-85').nameAliases.includes('Magnetic M Energy'));
  assert.ok(matchesCard('Basic Grass Energy #1 Pokemon Scarlet & Violet Energy',cards.find(x=>x.id==='sve-1')));
+ assert.ok(matchesCard('Grass Energy #1 Pokemon Mega Evolution Energy',cards.find(x=>x.id==='mee-1')));
+ assert.ok(matchesCard('Meganium MEP001 Stamped Prerelease #1',cards.find(x=>x.id==='mep-1')));
+ assert.equal(matchesCard('Meganium MEP001 Staff Stamped #1',cards.find(x=>x.id==='mep-1')),false);
+ assert.ok(matchesCard('Psyduck MEP007 Cosmos Holo #7',cards.find(x=>x.id==='mep-7')));
+ assert.equal(matchesCard('Psyduck MEP007 Reverse Holo #7',cards.find(x=>x.id==='mep-7')),false);
+ assert.ok(matchesCard('Paradise Resort World Championships 2025 #224',cards.find(x=>x.id==='svp-224')));
  assert.equal(modernSets.find(x=>x.id==='me55c').slug,'30th-celebration');
  assert.ok(matchesCard('Charizard 4/102 30th Celebration Classic Collection PSA 9',cards.find(x=>x.id==='me55c-4')));
  assert.equal(matchesCard('Charizard 4/102 Base Set 1999 PSA 9',cards.find(x=>x.id==='me55c-4')),false);
