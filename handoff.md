@@ -1,6 +1,6 @@
 # Primal Watch — session handoff
 
-Updated: October 5, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. The repository is authoritative.
+Updated: October 5, 2026 (late evening) Pacific. Repository: `d-roads/pokemon`, branch `main`. The repository is authoritative.
 
 ## Product goals
 
@@ -69,6 +69,17 @@ Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. 
 - **Lighthouse:** `site/lighthouserc.json` and `npm run lighthouse` (run on the collector's machine; warn-only thresholds).
 - **Sharp dropped:** it is a native Node library that cannot run in a Worker, and card images are remote, so there is nothing local to optimize.
 - Verified: `node --test tests/*.test.mjs` 100/100 on Node 22.22 (10 new in `tests/report.test.mjs`); `node build.mjs` still 52.5 MB; headless Chromium showed no page errors, working icons at 1440 and 390 px, and a browser crash reaching `/api/report`.
+
+### Grade scarcity in the PSA 9 / PSA 10 score (`dd7213c`)
+
+- Collector's request: a card with a low share of PSA 10s (or 9s) is a better buy. Added a sixth score part, **Grade scarcity**, for PSA 9 and PSA 10 only. Raw scores are unchanged.
+- Source: the PSA population counts already captured with every PriceCharting page (`market.pop.psa`, index 9 = PSA 10, 8 = PSA 9). 1,755 of 1,947 captures have them. `mergeMarket` now keeps `pop` if a newer record lacks it.
+- PSA 10 uses PSA 10s ÷ all PSA-graded; PSA 9 uses (PSA 9 + PSA 10) ÷ all PSA-graded, so a card where most copies gem doesn't look like it has rare 9s.
+- Ranked as a percentile **within the card's era** (lowest rate = 100), because gem rates differ hugely by era: median PSA 10 rate DP–HGSS 3%, EX 6%, BW 7%, XY 12%, SM 41%. Needs 30+ graded copies and 20+ era peers (else all cards); otherwise counts as 50 and is labeled.
+- Weights for graded scores: demand 27, momentum 22, value 18, liquidity 13, stability 8, scarcity 12 (`SCORE_RULES.gradedWeights`). Raw keeps the old weights.
+- Measured for 1,066 of 1,181 scored graded card-grades. Score counts unchanged (462 PSA 10, 719 PSA 9); medians 57 / 60.
+- Method text updated in README and the in-app dialog. Tests: 101/101 (new scarcity unit test).
+- Restart the local server after copying (it loads `lib/` at startup).
 
 ## Earlier sessions (summary)
 
@@ -155,6 +166,7 @@ Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. 
 
 ## Suggested next session
 
+1. Ask whether the 12% grade-scarcity weight feels right, and whether very low-pop cards (under 30 graded) should get a bonus instead of counting as average.
 1. Ask the collector how the terminal look, the screener layout and the score weights feel with real images. Tune `SCORE_RULES` in `site/lib/score.mjs` if wanted (weights, $25 cap, momentum cap).
 2. Check the redesign on the collector's own desktop and phone with real card images and fonts (sandbox screenshots used placeholders).
 3. Review the 108 unmatched legacy PriceCharting products manually and add only exact matches. Expand full captures beyond 10 per legacy set if broader investment coverage is wanted.
@@ -168,6 +180,7 @@ Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. 
 - `d498731` — Add a 0–100 investment score for every card and grade
 - `cc7fdca` — Replace the $250–$350 toggle with an advanced screener
 - `f665231` — Restyle Primal Watch as a trading terminal
+- `dd7213c` — Add PSA grade scarcity to the PSA 9 and PSA 10 investment score
 - Final commit — this handoff update
 
 Previous session: `70d7339` (EX through HGSS catalog), `49f7d73` (appearance settings and era-scoped market screens).
