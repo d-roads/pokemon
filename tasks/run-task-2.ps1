@@ -5,6 +5,8 @@ $LogFile = Join-Path $PSScriptRoot '02-run.log'
 $StatusFile = Join-Path $PSScriptRoot '02-run-status.json'
 
 Set-Location -LiteralPath $WorkspaceRoot
+$codexDataDir = Join-Path $env:USERPROFILE '.codex'
+if (-not $env:CODEX_HOME) { $env:CODEX_HOME = $codexDataDir }
 $started = Get-Date
 try {
     $codexCommand = (Get-Command codex -ErrorAction SilentlyContinue).Source
@@ -14,7 +16,9 @@ try {
             Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName
     }
     if (-not $codexCommand) { throw 'Codex executable was not found.' }
-    Get-Content -LiteralPath $PromptFile -Raw | & $codexCommand exec -C $WorkspaceRoot --skip-git-repo-check --sandbox workspace-write --approve-for-me - *> $LogFile
+    $ErrorActionPreference = 'Continue'
+    Get-Content -LiteralPath $PromptFile -Raw | & $codexCommand exec -C $WorkspaceRoot --skip-git-repo-check --approve-for-me --ephemeral - *> $LogFile
+    $ErrorActionPreference = 'Stop'
     $exitCode = $LASTEXITCODE
 } catch {
     $_ | Out-String | Out-File -LiteralPath $LogFile -Append

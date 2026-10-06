@@ -1,6 +1,6 @@
 # Primal Watch
 
-A personal Pokémon card tracker covering Wizards of the Coast through Sword & Shield (1999–2023). Browse every rare card set by set, compare reported sold prices for raw (near mint), PSA 9 and PSA 10 copies, see the week's and month's top movers, screen potential investments, save a watchlist with your own buy limits, keep your collection in the Dex, and get alerts when a watched card is listed at your price. Scarlet & Violet and newer releases are scheduled as a separate follow-up task.
+A personal Pokémon card tracker covering Wizards of the Coast through Sword & Shield (1999–2023). Browse every rare card set by set, compare reported sold prices for raw (near mint), PSA 9 and PSA 10 copies, see the week's and month's top movers, screen potential investments, save a watchlist with your own buy limits, keep your collection in the Dex, and get alerts when a watched card is listed at your price. Scarlet & Violet and newer releases are scoped as a separate follow-up task.
 
 ## Open locally
 
