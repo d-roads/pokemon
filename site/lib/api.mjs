@@ -9,6 +9,8 @@ import {potentialInvestments} from './invest.mjs';
 import {investmentScores} from './score.mjs';
 import {validateEntry} from './portfolio.mjs';
 import {DEFAULT_SETTINGS,normalizeSettings,updateSettings,publicSettings,hasEbayKeys,runScan,sendNotifications,ebaySearchUrl,alertLimit} from './alerts.mjs';
+import {isPlainObject,oneOf,optionalPrice,boundedText,optionalText,shapeError} from './schema.mjs';
+import {reportError} from './report.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const cardById=new Map(cards.map(c=>[c.id,c]));
 const seriesIds=series.map(item=>item.id);
@@ -18,7 +20,7 @@ async function cachedMarket(db,id){const row=await db.prepare('SELECT payload FR
 async function readWatch(db,user){const r=await db.prepare('SELECT card_id,grade,target,created_at FROM watchlist WHERE user_id = ? ORDER BY created_at DESC').bind(user).all();return r.results||[];}
 async function readCollection(db,user){const r=await db.prepare('SELECT id,card_id,grade,quantity,purchase_price,purchase_date,notes,created_at,updated_at FROM collection WHERE user_id = ? ORDER BY COALESCE(purchase_date,substr(created_at,1,10)) DESC,id DESC').bind(user).all();return r.results||[];}
 async function saveMarket(db,card,market){await db.prepare('INSERT INTO market_cache (card_id,payload,fetched_at) VALUES (?,?,?) ON CONFLICT(card_id) DO UPDATE SET payload=excluded.payload,fetched_at=excluded.fetched_at').bind(card.id,JSON.stringify(market),market.observedAt).run();}
-async function input(request){if(!request.headers.get('Content-Type')?.includes('application/json'))throw new Error('Send JSON data.');const raw=await request.text();if(raw.length>8192)throw new Error('The request was too large.');return JSON.parse(raw);}
+async function input(request){if(!request.headers.get('Content-Type')?.includes('application/json'))throw new Error('Send JSON data.');const raw=await request.text();if(raw.length>8192)throw new Error('The request was too large.');const body=JSON.parse(raw);if(!isPlainObject(body))throw new Error('Send a JSON object.');return body;}
 export async function readSettings(db,user){const row=await db.prepare('SELECT payload FROM alert_settings WHERE user_id = ?').bind(user).first();return normalizeSettings(row?JSON.parse(row.payload):DEFAULT_SETTINGS);}
 async function writeSettings(db,user,settings){await db.prepare('INSERT INTO alert_settings (user_id,payload,updated_at) VALUES (?,?,?) ON CONFLICT(user_id) DO UPDATE SET payload=excluded.payload,updated_at=excluded.updated_at').bind(user,JSON.stringify(settings),new Date().toISOString()).run();}
 // Market-wide views (movers, investments) are recomputed only when saved market data changes.
@@ -47,7 +49,7 @@ export async function scanForUser(env,user,options={}){
  const markets=await cachedMarkets(db);
  return runScan({db,user,cards,marketFor:id=>mergeMarket(snapshots[id],markets[id]),settings,fetchImpl:env.fetch||fetch,...options});
 }
-export async function api(request,env){
+export async function api(request,env,ctx){
  const url=new URL(request.url),path=url.pathname;
  try{
   const db=database(env),user=env.LOCAL_USER_ID||request.headers.get('oai-authenticated-user-id');
@@ -65,8 +67,8 @@ export async function api(request,env){
    if(['POST','DELETE'].includes(request.method)){
     let body;try{body=await input(request);}catch{return json({error:'The watchlist request was invalid.'},400);}
     const {card_id,grade,target}=body;
-    if(!cardById.has(card_id)||!['raw','psa9','psa10'].includes(grade))return json({error:'Choose a card from the catalog and a supported grade.'},400);
-    if(target!=null && (typeof target!=='number'||!Number.isFinite(target)||target<=0||target>1000000))return json({error:'Enter a price between $0.01 and $1,000,000.'},400);
+    const problem=shapeError(body,[['card_id',id=>cardById.has(id),'Choose a card from the catalog and a supported grade.'],['grade',oneOf('raw','psa9','psa10'),'Choose a card from the catalog and a supported grade.'],['target',optionalPrice(1000000),'Enter a price between $0.01 and $1,000,000.']]);
+    if(problem)return json({error:problem},400);
     if(request.method==='DELETE')await db.prepare('DELETE FROM watchlist WHERE user_id = ? AND card_id = ? AND grade = ?').bind(user,card_id,grade).run();
     else await db.prepare('INSERT INTO watchlist (user_id,card_id,grade,target,created_at) VALUES (?,?,?,?,?) ON CONFLICT(user_id,card_id,grade) DO UPDATE SET target=excluded.target').bind(user,card_id,grade,target??null,new Date().toISOString()).run();
    }else if(request.method!=='GET')return json({error:'Method not allowed.'},405);
@@ -171,6 +173,14 @@ export async function api(request,env){
    const nextOffset=offset+batch.length;
    return json({refreshed:Object.keys(markets).length>0,markets,count:Object.keys(markets).length,attempted:batch.length,nextOffset,total:scope.length,done:nextOffset>=scope.length,failures});
   }
+  // Crashes in the page are forwarded here so the Sentry address stays on the server. Does nothing unless SENTRY_DSN is set.
+  if(path==='/api/report'&&request.method==='POST'){
+   let body;try{body=await input(request);}catch{return json({error:'The report was invalid.'},400);}
+   const problem=shapeError(body,[['message',boundedText(1,500),'The report was invalid.'],['stack',optionalText(4000),'The report was invalid.']]);if(problem)return json({error:problem},400);
+   const error=new Error(body.message);error.name='BrowserError';error.stack=body.stack||'';
+   const task=reportError(env,error,{source:'browser'});ctx?.waitUntil?.(task);
+   return json({ok:true,sent:await task});
+  }
   return json({error:'Not found.'},404);
- }catch(e){console.error('Primal Watch API:',e.message);return json({error:'Saved data is temporarily unavailable. Please try again.'},503);}
+ }catch(e){console.error('Primal Watch API:',e.message);ctx?.waitUntil?.(reportError(env,e,{source:'api',route:path}));return json({error:'Saved data is temporarily unavailable. Please try again.'},503);}
 }

@@ -4,3 +4,5 @@ site/data/*.sqlite*
 site/localhost-*.log
 *.zip
 .DS_Store
+.env
+.lighthouseci/

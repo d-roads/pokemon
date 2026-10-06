@@ -30,6 +30,20 @@ Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-wa
 - **Settings**: choose Terminal (the default dark trading-terminal look), Light, or Soft contrast. The preference is stored in the browser and applied before the page paints.
 - **Status bar**: the date of the sales data and a ticker of this week's confirmed top movers.
 
+### Optional: error reporting (Sentry)
+
+Primal Watch can report crashes to your own free [Sentry](https://sentry.io) project. It is off unless you turn it on, and it needs no packages: errors are sent with a plain HTTPS request.
+
+1. Create a Sentry project (platform: Node.js) and copy its DSN.
+2. Copy `.env.example` to `.env` in this folder and paste the DSN after `SENTRY_DSN=`. The `.env` file is never committed.
+3. Restart the app. To check it, run `Invoke-RestMethod -Method Post http://localhost:5173/api/report -ContentType application/json -Body '{"message":"Primal Watch test"}'` in PowerShell (or the equivalent `curl`). It answers `sent: true` and the event appears in Sentry within a minute.
+
+Only the error type, a trimmed message (links reduced to the site name) and stack frames (file names and line numbers, never folder paths) are sent. Settings, eBay keys, request bodies and your watchlist are never included. Repeats within a minute are skipped and at most 30 reports are sent per hour, so a crash loop cannot use up the free quota. For a hosted Worker, set `SENTRY_DSN` as a secret.
+
+### Optional: performance checks (Lighthouse)
+
+With Chrome installed, close Primal Watch and run `npm run lighthouse` in this folder. It starts the app, audits the page three times, and writes reports to `.lighthouseci/`. Thresholds in `lighthouserc.json` warn rather than fail. This is the only step that downloads anything, and nothing is added to the app itself.
+
 ### Setting up listing alerts
 
 1. Sign in at [developer.ebay.com](https://developer.ebay.com/my/keys), create an application keyset, and copy the **Production** App ID (Client ID) and Cert ID (Client Secret).

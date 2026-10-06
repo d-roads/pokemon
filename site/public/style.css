@@ -761,6 +761,23 @@ dialog::backdrop{background:#000000a6;backdrop-filter:blur(3px)}
  .slider-block{grid-column:1/-1}
  .status-left #status-data{display:none}
 }
+/* Icons: line icons from the sprite in index.html; they follow the text colour. */
+.icon{width:1.15em;height:1.15em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.2em}
+.nav-icon .icon{width:19px;height:19px;vertical-align:middle}
+.search-wrap .search-icon{display:grid;place-items:center;padding-left:11px;color:var(--faint)}
+.search-wrap .search-icon .icon{width:17px;height:17px;vertical-align:middle}
+.star-button .icon{width:19px;height:19px;vertical-align:middle}
+.star-button.saved .icon{filter:drop-shadow(0 0 5px var(--accent-soft))}
+/* Motion: short, GPU-friendly transitions. The reduced-motion rule below switches all of it off. */
+@keyframes view-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes dialog-in{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+.view-panel:not([hidden]){animation:view-in .28s cubic-bezier(.2,.7,.2,1)}
+dialog[open]{animation:dialog-in .22s cubic-bezier(.2,.7,.2,1)}
+dialog[open]::backdrop{animation:fade-in .22s ease-out}
+.button,.star-button,.icon-button,.nav-item{transition:background .15s,border-color .15s,box-shadow .15s,color .15s,transform .1s}
+.button:active:not(:disabled),.star-button:active,.icon-button:active{transform:translateY(1px) scale(.98)}
+.button:hover:not(:disabled){border-color:var(--accent-line)}
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
  .ticker{overflow-x:auto;mask-image:none}

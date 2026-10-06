@@ -58,6 +58,18 @@ Updated: October 5, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. 
 - **Server:** the `insight()` memo in `lib/api.mjs` now shares in-flight work between simultaneous requests, drops stale entries for the same key and is not poisoned by a failed computation. It is keyed by the market-cache count and newest `fetched_at`, so a price saved by the refresh button changes the next answer without a restart (regression test added).
 - Tests: UI (404 message and retry, 30 s expiry, background replace, failed refresh keeps the list, Recalculate, Update sales batches) and API (saved price changes movers/investments/scores). Harness `workspace()` now exposes `responses` and `calls` and accepts function and error responses.
 
+### Production polish (October 6, branch `feat/production-polish`)
+
+Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. The app is a dependency-free Cloudflare Worker (`build.mjs` concatenates `lib/*.mjs` and strips imports), and the sandbox could not reach the npm registry, so each tool was replaced by a dependency-free equivalent instead of being installed:
+
+- **Validation (instead of Zod):** `lib/schema.mjs` (`shapeError` with `oneOf`, `optionalPrice`, text bounds). Used for the watchlist and report endpoints. `input()` now rejects `null`, arrays and other non-object JSON with 400; before, those threw and returned 503.
+- **Error reporting (instead of the Sentry SDK):** `lib/report.mjs` posts Sentry envelopes with `fetch`. Enabled by `SENTRY_DSN` (local `site/.env`, gitignored; Worker secret when hosted). Hooks: API 503 path, server errors and uncaught exceptions, the alert scan, and a browser `error`/`unhandledrejection` listener that posts to `POST /api/report` so the DSN stays on the server. Scrubbed, deduplicated and capped at 30 per hour. **Live delivery to Sentry is unverified**: the sandbox proxy blocks Sentry. Check on the collector's machine (README).
+- **Icons (instead of RemixIcon):** an inline 13-icon sprite at the top of `index.html` plus an `icon()` helper in `app.js`. The icons are simple line icons drawn for this project, **not** RemixIcon (GitHub was blocked). Any `<symbol>` can be replaced with real RemixIcon paths.
+- **Motion (instead of Framer Motion, a React library):** CSS only: views fade up, dialogs scale in, button press feedback. The existing `prefers-reduced-motion` rule disables all of it. The detail panel is deliberately not animated because it re-renders often.
+- **Lighthouse:** `site/lighthouserc.json` and `npm run lighthouse` (run on the collector's machine; warn-only thresholds).
+- **Sharp dropped:** it is a native Node library that cannot run in a Worker, and card images are remote, so there is nothing local to optimize.
+- Verified: `node --test tests/*.test.mjs` 100/100 on Node 22.22 (10 new in `tests/report.test.mjs`); `node build.mjs` still 52.5 MB; headless Chromium showed no page errors, working icons at 1440 and 390 px, and a browser crash reaching `/api/report`.
+
 ## Earlier sessions (summary)
 
 ### EX and Diamond & Pearl through HGSS catalog and market data
