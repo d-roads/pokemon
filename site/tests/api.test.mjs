@@ -95,3 +95,19 @@ test('Investment scores are served in bulk and with each card breakdown',async()
  const m=await(await api(req('/api/market?id='+id),env)).json();
  assert.equal(m.score.psa9.score,d.scores[id][1]);assert.equal(m.score.psa9.parts.length,5);assert.match(m.score.psa9.rating,/Strong|Good|Fair|Weak|Poor/);
 });
+test('Movers, investments and scores follow newly saved prices without a server restart',async()=>{
+ const mem=new DatabaseSync(':memory:');mem.exec(sql);const e={DB:dbAdapter(mem),NETWORK_DISABLED:true};
+ const get=async p=>(await api(req(p),e)).json();
+ const before={mv:await get('/api/movers?period=week'),inv:await get('/api/investments'),sc:await get('/api/scores')};
+ assert.notEqual(before.inv.checkedAt,'2099-01-01T00:00:00.000Z');
+ // The same request twice shares one answer; saving a newer market record changes what the next one reports.
+ const [a,b]=await Promise.all([get('/api/investments'),get('/api/investments')]);assert.deepEqual(a,b);
+ const id=Object.keys(snapshots).find(k=>snapshots[k].research?.checkedAt);const saved=structuredClone(snapshots[id]);
+ const stamp=new Date(Date.now()+86400000).toISOString();saved.observedAt=stamp;saved.research={...saved.research,checkedAt:stamp};
+ mem.prepare('INSERT INTO market_cache (card_id,payload,fetched_at) VALUES (?,?,?)').run(id,JSON.stringify(saved),stamp);
+ const after={mv:await get('/api/movers?period=week'),inv:await get('/api/investments'),sc:await get('/api/scores')};
+ assert.equal(after.inv.checkedAt,stamp,'investments are rebuilt from the newly saved prices');
+ assert.equal(after.mv.checkedAt,stamp,'top movers are rebuilt from the newly saved prices');
+ assert.notEqual(after.inv.checkedAt,before.inv.checkedAt);
+ assert.equal(after.sc.checkedAt,stamp);
+});

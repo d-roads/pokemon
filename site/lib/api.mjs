@@ -28,8 +28,8 @@ async function insight(db,key,compute){
  const stamp=key+'|'+(sig?.n||0)+'|'+(sig?.t||'')+'|'+new Date().toISOString().slice(0,10);
  if(!insightMemo.has(stamp)){
   for(const k of insightMemo.keys())if(k.startsWith(key+'|'))insightMemo.delete(k);
-  const cached=await cachedMarkets(db);
-  insightMemo.set(stamp,compute(cards.map(c=>[c,cached[c.id]?mergeMarket(snapshots[c.id],cached[c.id]):snapshots[c.id]])));
+  // The pending calculation is memoised, so simultaneous requests share one run. A failed run is forgotten.
+  insightMemo.set(stamp,(async()=>{const cached=await cachedMarkets(db);return compute(cards.map(c=>[c,cached[c.id]?mergeMarket(snapshots[c.id],cached[c.id]):snapshots[c.id]]));})().catch(e=>{insightMemo.delete(stamp);throw e;}));
  }
  return insightMemo.get(stamp);
 }

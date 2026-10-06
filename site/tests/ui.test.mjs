@@ -27,10 +27,11 @@ function workspace(){
  const categories=[...html.matchAll(/data-category="([^"]+)"/g)].map(m=>{const e=new Element();e.dataset.category=m[1];return e;});
  const document={querySelector:s=>elements.get(s)||null,querySelectorAll:s=>s==='[data-category]'?categories:[]};
  const responses={'/api/catalog':{cards,sets,series,markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/movers':moverData,'/api/investments':investData,'/api/scores':{grades:scoreData.grades,scores:scoreData.scores},'/api/market':{market:null,score:null},'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
- const context=vm.createContext({document,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,fetch:async url=>({ok:true,json:async()=>responses[url.split('?')[0]]||{}})});
+ const calls=[];
+ const context=vm.createContext({document,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,calls,fetch:async url=>{const path=url.split('?')[0];calls.push(url);let r=responses[path];if(typeof r==='function')r=r(url);if(r&&r.__status)return {ok:false,status:r.__status,json:async()=>r.body};return {ok:true,json:async()=>r||{}};}});
  const source=readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/^import .*;\s*$/gm,'').replace(/init\(\);\s*$/,'');
  vm.runInContext(source,context);
- return {context,e:s=>elements.get(s),run:s=>vm.runInContext(s,context)};
+ return {context,responses,calls,e:s=>elements.get(s),run:s=>vm.runInContext(s,context)};
 }
 test('Set picker, all-set search, and Radiant Collection render correct cards',async()=>{
  const ui=workspace();await ui.run('init()');
@@ -91,6 +92,47 @@ test('Investments lists picks with their signals and character demand, by grade'
  ui.run("state.invest.grade='raw';renderInvest()");html=ui.e('#invest-view').innerHTML;
  assert.match(html,new RegExp('data-invest="'+investData.grades.raw.picks[0].card_id+'" data-grade="raw"'));
  ui.run(`openCard('${first.card_id}','psa10')`);assert.equal(ui.run('state.view'),'browse');assert.equal(ui.run('state.grade'),'psa10');
+});
+test('Scores that cannot load say why: an old server gets a restart message, other failures retry',async()=>{
+ const ui=workspace();ui.responses['/api/scores']={__status:404,body:{error:'Not found.'}};await ui.run('init()');await ui.run('loadScores(false)');
+ assert.match(ui.e('#error-banner').textContent,/older server code/);assert.equal(ui.e('#error-banner').hidden,false);
+ assert.match(ui.e('#detail').innerHTML,/Close the Primal Watch window and start it again/);assert.match(ui.e('#detail').innerHTML,/id="score-retry"/);
+ assert.doesNotMatch(ui.e('#detail').innerHTML,/Scores could not be loaded\.</);
+ // After the server is restarted, Try again loads the scores and clears the banner.
+ ui.responses['/api/scores']={grades:scoreData.grades,scores:scoreData.scores};await ui.run('loadScores()');
+ assert.equal(ui.e('#error-banner').hidden,true);assert.equal(ui.run('state.scoreError'),null);assert.ok(ui.run('state.scores'));
+ const other=workspace();other.responses['/api/scores']={__status:500,body:{error:'Disk is busy.'}};await other.run('init()');await other.run('loadScores(false)');
+ assert.doesNotMatch(other.e('#error-banner').textContent,/older server/,'a plain failure does not claim the server is old');assert.match(other.e('#detail').innerHTML,/Disk is busy/);
+});
+test('Top movers and Investments reload after prices change instead of showing a stuck list',async()=>{
+ const ui=workspace();await ui.run('init()');
+ const count=p=>ui.calls.filter(u=>u.startsWith(p)&&(p!=='/api/movers'||u.includes('series='))).length,settle=()=>new Promise(r=>setImmediate(r));
+ ui.e('#movers-nav').onclick();await settle();const base=count('/api/movers');assert.equal(base,1,'opening the tab loads the list once');
+ assert.match(ui.e('#movers-view').innerHTML,/data-recalc/);assert.match(ui.e('#movers-view').innerHTML,/data-update-sales/);
+ await ui.run('loadMovers("week")');assert.equal(count('/api/movers'),base,'a fresh list is reused');
+ ui.run('Object.values(state.movers.data).forEach(d=>d._at-=60000)');await ui.run('loadMovers("week")');assert.equal(count('/api/movers'),base+1,'an old list is asked for again');
+ // The server's newer answer replaces the list, and a failed refresh keeps the old one.
+ ui.responses['/api/movers']={...moverData,checkedAt:'2030-01-02T12:00:00.000Z'};
+ ui.run('Object.values(state.movers.data).forEach(d=>d._at-=60000)');await ui.run('loadMovers("week")');assert.match(ui.e('#movers-view').innerHTML,/Jan 2, 2030/);
+ ui.responses['/api/movers']={__status:500,body:{error:'boom'}};await ui.run('loadMovers("week",true)');assert.match(ui.e('#movers-view').innerHTML,/Jan 2, 2030/);assert.doesNotMatch(ui.e('#movers-view').innerHTML,/couldn't be loaded/);
+ // Recalculate drops every cached list and loads the movers, scores and ticker again.
+ ui.responses['/api/movers']={...moverData,checkedAt:'2030-03-04T12:00:00.000Z'};const before=ui.calls.length;
+ await ui.run('recalculate()');const after=ui.calls.slice(before);
+ assert.ok(after.some(u=>u.startsWith('/api/movers')));assert.ok(after.some(u=>u.startsWith('/api/scores')));assert.match(ui.e('#movers-view').innerHTML,/Mar 4, 2030/);assert.match(ui.e('#toast').textContent,/Recalculated/);
+ ui.e('#invest-nav').onclick();await settle();const n=count('/api/investments');assert.equal(n,1);
+ ui.responses['/api/investments']={...investData,checkedAt:'2030-05-06T12:00:00.000Z'};await ui.run('recalculate()');
+ assert.equal(count('/api/investments'),n+1);assert.match(ui.e('#invest-view').innerHTML,/May 6, 2030/);assert.match(ui.e('#invest-view').innerHTML,/data-recalc/);
+ // Saving a refreshed card also discards the cached lists, so the next visit sees its new prices.
+ await ui.run('loadMovers("week")');assert.ok(ui.run('Object.keys(state.movers.data).length')>0);ui.run('dropMarketCaches()');
+ assert.equal(ui.run('Object.keys(state.movers.data).length+Object.keys(state.invest.data).length'),0);
+});
+test('Update sales fetches in batches from the Movers and Investments tabs and then rebuilds the list',async()=>{
+ const ui=workspace();await ui.run('init()');
+ const posted=[];ui.responses['/api/research']=url=>{posted.push(url);return {count:4,total:8,done:posted.length>1,nextOffset:4,markets:{}};};
+ ui.e('#movers-nav').onclick();await ui.run('loadMovers("week")');await new Promise(r=>setImmediate(r));const m=ui.calls.filter(u=>u.startsWith('/api/movers')).length;
+ await ui.run('updateMarketSales()');
+ assert.equal(posted.length,2);assert.match(posted[0],/set=all&offset=0/);assert.match(posted[1],/offset=4/);
+ assert.ok(ui.calls.filter(u=>u.startsWith('/api/movers')).length>m,'the list is rebuilt once the sales are in');
 });
 test('Settings offers persistent light, dark, and soft-contrast appearances',async()=>{
  const ui=workspace();await ui.run('init()');ui.e('#settings-nav').onclick();assert.equal(ui.e('#settings-view').hidden,false);assert.equal(ui.e('#page-title').textContent,'Settings');

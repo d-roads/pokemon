@@ -19,7 +19,7 @@ const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
 const state={sets:[],series:[],marketSeries:[],setId:'xy5',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'chase',query:'',sort:'featured',view:'browse',selected:'xy5-147',limit:18,expanded:false,eras:[],filters:{min:null,max:null,activity:0,invest:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,ticker:null,appearance:savedAppearance(),
  dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
-async function request(url,options){const r=await fetch(url,options);const b=await r.json();if(!r.ok)throw new Error(b.error||'Something went wrong. Please try again.');return b;}
+async function request(url,options){const r=await fetch(url,options);const b=await r.json().catch(()=>({}));if(!r.ok){const err=new Error(b.error||'Something went wrong. Please try again.');err.status=r.status;throw err;}return b;}
 const send=(url,method,body)=>request(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
 function toast(text){$('#toast').textContent=text;$('#toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').hidden=true,4500);}
 function error(text){$('#error-banner').textContent=text;$('#error-banner').hidden=!text;}
@@ -65,7 +65,7 @@ function filteredCards(){
 function renderList(){
  const list=filteredCards();$('#result-count').textContent=`${list.length} ${state.view==='watch'?'watched entries':'cards'} · ${gradeNames[state.grade]}`;renderFilterChips();
  $('#show-more').hidden=list.length<=state.limit;
- if(!list.length){$('#card-list').innerHTML=`<div class="empty-state"><strong>${state.view==='watch'&&!state.watch.length?'Your next pickup starts here.':'No cards match.'}</strong><p>${state.view==='watch'&&!state.watch.length?'Tap the star beside a card to save it with its grade and buy target.':(state.filters.invest>0&&!state.scores?(state.scoreError?'Investment scores could not be loaded. Clear the score filter or refresh the page.':'Investment scores are still loading.'):'Try another grade, search, category, or loosen the filters.')}</p><button class="button primary" id="clear-filters">${state.view==='watch'?'Browse cards':'Clear filters'}</button></div>`;$('#clear-filters').onclick=()=>{state.view=state.view==='watch'&&!state.watch.length?'browse':state.view;state.category='all';state.query='';$('#search').value='';resetFilters(false);updateView();};return;}
+ if(!list.length){$('#card-list').innerHTML=`<div class="empty-state"><strong>${state.view==='watch'&&!state.watch.length?'Your next pickup starts here.':'No cards match.'}</strong><p>${state.view==='watch'&&!state.watch.length?'Tap the star beside a card to save it with its grade and buy target.':(state.filters.invest>0&&!state.scores?(state.scoreError?scoreProblem()+' Clear the score filter to see cards without it.':'Investment scores are still loading.'):'Try another grade, search, category, or loosen the filters.')}</p><button class="button primary" id="clear-filters">${state.view==='watch'?'Browse cards':'Clear filters'}</button></div>`;$('#clear-filters').onclick=()=>{state.view=state.view==='watch'&&!state.watch.length?'browse':state.view;state.category='all';state.query='';$('#search').value='';resetFilters(false);updateView();};return;}
  $('#card-list').innerHTML=list.slice(0,state.limit).map(c=>{
   const a=analyze(state.markets[c.id],state.grade),w=matchingWatch(c.id),target=w?.target??a.target,own=owned(c.id).length;
   return `<div class="card-row ${c.id===state.selected?'selected':''}" data-id="${c.id}"><button class="card-open" data-open="${c.id}" aria-label="View ${esc(c.name)} number ${c.number}" ${c.id===state.selected?'aria-current="true"':''}><img class="card-thumb" src="${c.image}" alt="" loading="lazy"><span><span class="card-name">${esc(c.name)}${own?'<span class="owned-dot" title="In your Dex">●</span>':''}</span><span class="card-sub">#${c.numberLabel} · ${esc(c.category)}<span class="row-set">${esc(c.setName)}</span></span></span></button><div class="price-cell">${money(a.current)}<small>${a.priceSource==='sales'?'Sold median':a.current?'Source guide':'Awaiting source'}</small></div><div class="target-cell ${target==null?'missing':''}">${target==null?'Needs sales':money(target)}${w?.target!=null?'<small class="card-sub">Your target</small>':''}</div><div class="score-cell"><span class="score-pill ${ratingClass(scoreOf(c.id))}" title="${scoreOf(c.id)==null?'No investment score: not enough recent matching sales':'Investment score '+scoreOf(c.id)+' / 100 · '+ratingOf(scoreOf(c.id))}">${scoreOf(c.id)??'—'}</span></div><button class="star-button ${w?'saved':''}" data-watch="${c.id}" aria-label="${w?'Remove':'Add'} ${esc(c.name)} ${gradeNames[state.grade]} ${w?'from':'to'} watchlist" aria-pressed="${!!w}">${w?'★':'☆'}</button></div>`;
@@ -124,14 +124,18 @@ function historyChart(m,grade){
  return `<div class="detail-section history"><div class="section-heading"><h3>Price history</h3><small>Monthly guide · ${h.length} months</small></div>${lineChart({series:[{label:gradeNames[grade],color:C.accent,area:true,points:h.map(([ym,v])=>[ym,v,monthLabel(ym)])}],height:170,width:340,label:gradeNames[grade]+' monthly guide price'})}<p class="sales-note">PriceCharting's monthly guide${grade==='psa9'?' for Grade 9, which includes other graders':''}. Sold medians above use matching sales only.</p></div>`;
 }
 function popLine(m){const p=m?.pop?.psa;if(!Array.isArray(p)||p.length<10)return '';const total=p.reduce((a,b)=>a+b,0);return `<p>PSA population: <b>${p[8].toLocaleString()}</b> PSA 9 · <b>${p[9].toLocaleString()}</b> PSA 10 · ${total.toLocaleString()} graded.${total?' '+Math.round(p[9]/total*100)+'% gem rate.':''}</p>`;}
+// The page files are read fresh on every request, but the API code is loaded once when the server
+// starts. After an update, a server that was left running answers new routes with 404.
+const SERVER_OLD='Primal Watch is running older server code than this page. Close the Primal Watch window and start it again (node server.mjs), then reload this page.';
+const scoreProblem=()=>{const e=state.scoreError;return !e?'':e.status===404?SERVER_OLD:'Scores could not be loaded ('+e.message+').';};
 const PART_SHORT={demand:'Demand',momentum:'Momentum',value:'Value',liquidity:'Liquidity',stability:'Stability'};
 const SIGNAL_NAMES={uptrend:'Steady uptrend',recovering:'Recovering from highs',cheap:'Cheap vs. similar cards'};
 function scoreBox(c){
  const quick=scoreOf(c.id),detail=state.scoreDetail[c.id]?.[state.grade],v=detail?detail.score:quick,cls=ratingClass(v);
  const head=`<div class="score-head-row"><span class="metric-label">Investment score</span>${v!=null?`<span class="rating-tag ${cls}">${ratingOf(v)}</span>`:''}</div>`;
  if(v==null){
-  const why=detail?.reason||(state.scores?'Needs at least 3 matching sales in 180 days, including one in the last 90, before it can be scored.':state.scoreError?'Scores could not be loaded.':'Loading score…');
-  return `<div class="score-box empty">${head}<div class="score-main"><strong>—</strong><em>/ 100</em></div><p class="score-note">${esc(why)}</p></div>`;
+  const failed=!state.scores&&state.scoreError,why=detail?.reason||(state.scores?'Needs at least 3 matching sales in 180 days, including one in the last 90, before it can be scored.':failed?scoreProblem():'Loading score…');
+  return `<div class="score-box empty">${head}<div class="score-main"><strong>—</strong><em>/ 100</em></div><p class="score-note">${esc(why)}${failed?' <button class="link-button" id="score-retry">Try again</button>':''}</p></div>`;
  }
  const parts=detail?`<ul class="score-parts">${detail.parts.map(p=>`<li><span class="part-name">${PART_SHORT[p.key]||esc(p.label)}<small>${Math.round(p.weight*100)}%</small></span><span class="part-bar ${ratingClass(p.score)}"><i style="width:${Math.max(2,p.score)}%"></i></span><b>${p.score}</b><small class="part-detail">${esc(p.detail)}${p.neutral?' <em>Not measured</em>':''}</small></li>`).join('')}</ul>`:'<p class="score-note">Loading the breakdown…</p>';
  const signals=detail?.signals?.length?`<p class="score-signals">Investments signals met: ${detail.signals.map(t=>`<span class="signal ${t==='uptrend'?'up':t==='recovering'?'rec':'cheap'}">${SIGNAL_NAMES[t]}</span>`).join(' ')}</p>`:'';
@@ -163,6 +167,7 @@ function renderDetail(){
  $('#refresh-card').onclick=()=>refreshCard(c);
  $('#expand-details').onclick=()=>{state.expanded=!state.expanded;renderDetail();};
  if($('#score-method'))$('#score-method').onclick=()=>$('#method-dialog').showModal();
+ if($('#score-retry'))$('#score-retry').onclick=()=>{state.scoreError=null;renderDetail();loadScores();};
  if(w){$('#target-form').onsubmit=e=>{e.preventDefault();saveTarget(c.id,Number($('#custom-target').value));};$('#reset-target').onclick=()=>saveTarget(c.id,null);$('#open-alerts').onclick=()=>{state.view='alerts';updateView();};}
  wireImages();wireCharts($('#detail'));
 }
@@ -170,28 +175,48 @@ async function select(id){state.selected=id;state.expanded=false;renderList();re
 async function loadCard(id){selectionController?.abort();selectionController=new AbortController();try{const r=await request(`/api/market?id=${encodeURIComponent(id)}`,{signal:selectionController.signal});if(r.market){state.markets[id]=r.market;state.full[id]=true;}if(r.score)state.scoreDetail[id]=r.score;if(state.selected===id)renderDetail();}catch(e){if(e.name!=='AbortError')toast('Could not load this card. Try Refresh.');}}
 async function toggleWatch(id,button){const w=matchingWatch(id),grade=state.grade;button.disabled=true;try{const r=await send('/api/watchlist',w?'DELETE':'POST',{card_id:id,grade,target:null});state.watch=r.watchlist;toast(w?'Removed from watchlist.':'Saved to your watchlist.');stats();renderList();renderDetail();}catch(e){error(e.message);button.disabled=false;}}
 async function saveTarget(id,target){const button=$('#target-form button');if(button)button.disabled=true;try{const r=await send('/api/watchlist','POST',{card_id:id,grade:state.grade,target});state.watch=r.watchlist;renderList();renderDetail();toast(target==null?'Using the suggested target.':'Your buy limit is saved.');}catch(e){error(e.message);if(button)button.disabled=false;}}
-async function refreshCard(c){const b=$('#refresh-card');b.disabled=true;b.textContent='…';try{const r=await request(`/api/market?id=${encodeURIComponent(c.id)}&refresh=1`);if(r.market){state.markets[c.id]=r.market;state.full[c.id]=true;}if(r.score){state.scoreDetail[c.id]=r.score;if(state.scores)state.scores[c.id]=['psa10','psa9','raw'].map(g=>r.score[g]?.score??null);}toast(r.refreshed?'Latest source data saved.':r.warning||'The source is unavailable. Showing saved observations.');renderList();renderDetail();stats();}catch(e){toast(e.message);b.disabled=false;b.textContent='↻';}}
+async function refreshCard(c){const b=$('#refresh-card');b.disabled=true;b.textContent='…';try{const r=await request(`/api/market?id=${encodeURIComponent(c.id)}&refresh=1`);if(r.market){state.markets[c.id]=r.market;state.full[c.id]=true;}if(r.score){state.scoreDetail[c.id]=r.score;if(state.scores)state.scores[c.id]=['psa10','psa9','raw'].map(g=>r.score[g]?.score??null);}if(r.refreshed)dropMarketCaches();toast(r.refreshed?'Latest source data saved.':r.warning||'The source is unavailable. Showing saved observations.');renderList();renderDetail();stats();}catch(e){toast(e.message);b.disabled=false;b.textContent='↻';}}
 let refreshRun;
-async function refreshSet(){
+// Fetch the newest sold prices for one or more scopes ('all', 'era:XY' or a set id), a few cards at a time.
+// What is fetched is saved as it goes, so cancelling keeps the progress.
+const scopeSize=sc=>state.cards.filter(c=>c.eligible&&(sc==='all'||(sc.startsWith('era:')?c.series===sc.slice(4):c.setId===sc))).length;
+const updateLabel=()=>'Update sales · '+state.cards.filter(c=>c.eligible&&state.marketSeries.includes(c.series)).length.toLocaleString()+' cards';
+function setRefreshLabels(text){
+ const busy=!!text,b=$('#refresh-set');
+ if(b){if(busy)b.textContent=text;else b.innerHTML='<span aria-hidden="true">↻</span> Refresh sales';b.disabled=false;}
+ document.querySelectorAll('[data-update-sales]').forEach(x=>{x.textContent=busy?text:updateLabel();});
+}
+async function refreshSales(scopes){
  if(refreshRun){refreshRun.abort();return;}
- const controller=new AbortController();refreshRun=controller;const b=$('#refresh-set'),scope=state.setId;let offset=0,updated=0,total=0;
- b.textContent='Cancel refresh';b.disabled=false;
+ const controller=new AbortController();refreshRun=controller;
+ const grand=scopes.reduce((n,sc)=>n+scopeSize(sc),0);let updated=0,done=0;
+ setRefreshLabels('Cancel update');
  try{
-  // A partial set of eras is refreshed one era at a time.
-  const scopes=scope==='all'&&state.eras.length<state.series.length?state.eras.map(e=>'era:'+e):[scope];let done=0;
   for(const part of scopes){
-   offset=0;
+   let offset=0;
    for(;;){
     const r=await request('/api/research?set='+encodeURIComponent(part)+'&offset='+offset,{method:'POST',signal:controller.signal});
-    if(r.markets)for(const [id,m] of Object.entries(r.markets)){state.markets[id]=expandMarket(m);delete state.full[id];delete state.scoreDetail[id];}updated+=r.count||0;
-    stats();renderList();renderDetail();
+    if(r.markets)for(const [id,m] of Object.entries(r.markets)){state.markets[id]=expandMarket(m);delete state.full[id];delete state.scoreDetail[id];}
+    updated+=r.count||0;
+    if(state.view==='browse'||state.view==='watch'){stats();renderList();renderDetail();}
     if(r.warning){toast(r.warning);return;}
-    if(r.done){done+=r.total||0;total=done;break;}offset=r.nextOffset;b.textContent='Cancel · '+(done+offset)+'/'+(done+(r.total||0));
+    if(r.done){done+=r.total||0;break;}
+    offset=r.nextOffset;setRefreshLabels('Cancel · '+(done+offset).toLocaleString()+' / '+grand.toLocaleString());
    }
   }
-  toast('Refreshed sales for '+updated+' of '+total+' rare cards.');if(updated){$('#snapshot-label').textContent='Sales checked just now';loadScores();}
- }catch(e){toast(e.name==='AbortError'?'Refresh stopped. Retrieved sales are saved.':e.message);}
- finally{refreshRun=null;b.disabled=false;b.innerHTML='<span aria-hidden="true">↻</span> Refresh sales';}
+  toast('Refreshed sales for '+updated+' of '+grand+' rare cards.');
+ }catch(e){toast(e.name==='AbortError'?'Update stopped. Retrieved sales are saved.':e.message);}
+ finally{
+  refreshRun=null;setRefreshLabels('');
+  if(updated){$('#snapshot-label').textContent='Sales checked just now';$('#status-data').textContent='Sales checked just now · '+state.cards.filter(c=>c.eligible).length.toLocaleString()+' rare cards';invalidateMarketViews();}
+ }
+}
+function refreshSet(){
+ const scope=state.setId;
+ return refreshSales(scope==='all'&&state.eras.length<state.series.length?state.eras.map(e=>'era:'+e):[scope]);
+}
+function updateMarketSales(){
+ return refreshSales(state.marketSeries.length===state.series.length?['all']:state.marketSeries.map(e=>'era:'+e));
 }
 
 // ---------- Dex ----------
@@ -336,9 +361,36 @@ function wireMarketFilters(view,load){
  view.querySelectorAll('[data-market-series]').forEach(button=>button.onclick=()=>{const id=button.dataset.marketSeries,active=state.marketSeries.includes(id);if(active&&state.marketSeries.length===1){toast('Keep at least one era included.');return;}state.marketSeries=active?state.marketSeries.filter(value=>value!==id):state.series.map(s=>s.id).filter(value=>state.marketSeries.includes(value)||value===id);renderMovers();renderInvest();load();});
  const all=view.querySelector('[data-market-all]');if(all)all.onclick=()=>{state.marketSeries=state.series.map(series=>series.id);renderMovers();renderInvest();load();};
 }
-async function loadMovers(period){
- const key=moverKey(period);if(state.movers.data[key])return;
- try{const r=await request('/api/movers?period='+period+'&series='+encodeURIComponent(marketSeriesKey()));state.movers.data[key]=r;state.movers.error=null;}catch(e){state.movers.error=e.message;}
+// Market-wide lists are cached in the page, but only briefly: opening the tab again after FRESH_MS asks the
+// server again (it answers from memory unless saved sales changed) and swaps the new list in without a spinner.
+const FRESH_MS=30000;
+const checkedOf=()=>state.view==='movers'?state.movers.data[moverKey(state.movers.period)]?.checkedAt:state.invest.data[marketSeriesKey()]?.checkedAt;
+function dropMarketCaches(){state.movers.data={};state.invest.data={};}
+function invalidateMarketViews(){
+ dropMarketCaches();state.movers.error=null;state.invest.error=null;
+ loadScores();loadTicker();
+ if(state.view==='movers'){renderMovers();loadMovers(state.movers.period,true);}
+ else if(state.view==='invest'){renderInvest();loadInvest(true);}
+}
+async function recalculate(){
+ const view=state.view;
+ dropMarketCaches();state.movers.error=null;state.invest.error=null;state.ticker=null;
+ if(view==='movers')renderMovers();else renderInvest();
+ await Promise.all([view==='movers'?loadMovers(state.movers.period,true):loadInvest(true),loadScores(),loadTicker()]);
+ const at=checkedOf();
+ toast(at?'Recalculated from your saved sales · newest check '+new Date(at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+'.':'Could not recalculate. Try again.');
+}
+function refreshControls(){
+ return `<div class="refresh-tools"><button class="button primary" data-recalc title="Re-read the sales you have already saved and rebuild this list. Instant."><span aria-hidden="true">↻</span> Recalculate</button><button class="button" data-update-sales title="Fetch the newest sold prices for every rare card in the included eras, then rebuild. This can take a long while. Cancel any time: what was fetched is kept.">${refreshRun?'Cancel update':updateLabel()}</button></div>`;
+}
+function wireRefresh(view){
+ view.querySelectorAll('[data-recalc]').forEach(b=>b.onclick=recalculate);
+ view.querySelectorAll('[data-update-sales]').forEach(b=>b.onclick=updateMarketSales);
+}
+async function loadMovers(period,force=false){
+ const key=moverKey(period),have=state.movers.data[key];
+ if(have&&!force&&Date.now()-have._at<FRESH_MS)return;
+ try{const r=await request('/api/movers?period='+period+'&series='+encodeURIComponent(marketSeriesKey()));r._at=Date.now();state.movers.data[key]=r;state.movers.error=null;}catch(e){if(!have)state.movers.error=e.message;}
  if(state.view==='movers')renderMovers();
 }
 function openCard(id,grade){
@@ -349,7 +401,7 @@ function openCard(id,grade){
 function renderMovers(){
  const view=$('#movers-view'),period=state.movers.period,d=state.movers.data[moverKey(period)],word=period==='week'?'week':'month';
  const checked=d?.checkedAt?new Date(d.checkedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):null;
- const head=`<section class="panel movers-head"><div><h2>Biggest price increases this ${word}</h2><p>${d?`The last ${d.current} days of matching sales compared with ${esc(d.baselineLabel)}${checked?' · sales checked '+checked:''}. `:''}Cards worth $25 or more, with at least 3 matching sales in both periods. Moves the data can't confirm are left out.</p></div><div class="segmented" role="group" aria-label="Period">${[['week','Week'],['month','Month']].map(([k,l])=>`<button data-period="${k}" aria-pressed="${period===k}" class="${period===k?'active':''}">${l}</button>`).join('')}</div></section>`;
+ const head=`<section class="panel movers-head"><div><h2>Biggest price increases this ${word}</h2><p>${d?`The last ${d.current} days of matching sales compared with ${esc(d.baselineLabel)}${checked?' · sales checked '+checked:''}. `:''}Cards worth $25 or more, with at least 3 matching sales in both periods. Moves the data can't confirm are left out.</p></div><div class="head-actions">${refreshControls()}<div class="segmented" role="group" aria-label="Period">${[['week','Week'],['month','Month']].map(([k,l])=>`<button data-period="${k}" aria-pressed="${period===k}" class="${period===k?'active':''}">${l}</button>`).join('')}</div></div></section>`;
  if(!d){view.innerHTML=head+marketFilterView()+(state.movers.error?`<div class="panel empty-state"><strong>Movers couldn't be loaded.</strong><p>${esc(state.movers.error)}</p><button class="button" id="movers-retry">Try again</button></div>`:'<div class="loading"><span class="spinner"></span>Finding this '+word+'\'s movers…</div>');}
  else view.innerHTML=head+marketFilterView()+`<div class="segmented mover-grades" role="group" aria-label="Grade">${MOVER_GRADES.map(g=>`<button data-mover-grade="${g}" aria-pressed="${state.movers.grade===g}" class="${state.movers.grade===g?'active':''}">${shortGrade(g)}</button>`).join('')}</div><div class="movers-grid">${MOVER_GRADES.map(g=>{const col=d.grades[g],list=col.movers;
   return `<section class="panel mover-col ${state.movers.grade===g?'':'off'}" aria-label="${gradeNames[g]} movers"><div class="panel-head"><div><h2><span class="grade-chip ${g}">${shortGrade(g)}</span> Top ${list.length||''}</h2><p>${col.qualified>list.length?'Top '+list.length+' of '+col.qualified+' rising cards that passed every check':col.qualified?'Every rising card that passed every check':'No reliable rises'}</p></div></div>
@@ -359,16 +411,17 @@ function renderMovers(){
  view.querySelectorAll('[data-period]').forEach(b=>b.onclick=()=>{state.movers.period=b.dataset.period;renderMovers();loadMovers(state.movers.period);});
  view.querySelectorAll('[data-mover-grade]').forEach(b=>b.onclick=()=>{state.movers.grade=b.dataset.moverGrade;renderMovers();});
  view.querySelectorAll('[data-mover]').forEach(b=>b.onclick=()=>openCard(b.dataset.mover,b.dataset.grade));
- wireMarketFilters(view,()=>loadMovers(state.movers.period));
+ wireMarketFilters(view,()=>loadMovers(state.movers.period));wireRefresh(view);
  if($('#movers-retry'))$('#movers-retry').onclick=()=>{state.movers.error=null;renderMovers();loadMovers(period);};
  if($('#movers-method'))$('#movers-method').onclick=()=>$('#method-dialog').showModal();
  wireImages();
 }
 
 // ---------- Potential investments ----------
-async function loadInvest(){
- const key=marketSeriesKey();if(state.invest.data[key])return;
- try{state.invest.data[key]=await request('/api/investments?series='+encodeURIComponent(key));state.invest.error=null;}catch(e){state.invest.error=e.message;}
+async function loadInvest(force=false){
+ const key=marketSeriesKey(),have=state.invest.data[key];
+ if(have&&!force&&Date.now()-have._at<FRESH_MS)return;
+ try{const r=await request('/api/investments?series='+encodeURIComponent(key));r._at=Date.now();state.invest.data[key]=r;state.invest.error=null;}catch(e){if(!have)state.invest.error=e.message;}
  if(state.view==='invest')renderInvest();
 }
 const pctWhole=v=>Math.round(v*100)+'%';
@@ -380,7 +433,7 @@ function signalView(s){
 function renderInvest(){
  const view=$('#invest-view'),d=state.invest.data[marketSeriesKey()],g=state.invest.grade;
  const checked=d?.checkedAt?new Date(d.checkedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):null;
- const head=`<section class="panel movers-head"><div><h2>Cards worth a closer look</h2><p>Each pick has a confident sold price of $25 or more, features a character in the top quarter for collector demand, and shows at least one signal in its own sales history. Built only from the sales in this app${checked?', checked '+checked:''}. Not investment advice.</p></div><div class="segmented" role="group" aria-label="Grade">${MOVER_GRADES.map(x=>`<button data-invest-grade="${x}" aria-pressed="${g===x}" class="${g===x?'active':''}">${shortGrade(x)}</button>`).join('')}</div></section>
+ const head=`<section class="panel movers-head"><div><h2>Cards worth a closer look</h2><p>Each pick has a confident sold price of $25 or more, features a character in the top quarter for collector demand, and shows at least one signal in its own sales history. Built only from the sales in this app${checked?', checked '+checked:''}. Not investment advice.</p></div><div class="head-actions">${refreshControls()}<div class="segmented" role="group" aria-label="Grade">${MOVER_GRADES.map(x=>`<button data-invest-grade="${x}" aria-pressed="${g===x}" class="${g===x?'active':''}">${shortGrade(x)}</button>`).join('')}</div></div></section>
  <div class="signal-key"><span class="signal up">Steady uptrend</span><span>A clear, consistent rise over the past year.</span><span class="signal rec">Recovering from highs</span><span>Well below a held high, with sales turning up.</span><span class="signal cheap">Cheap vs. similar cards</span><span>Below same-set cards of less popular characters.</span></div>`;
  if(!d){view.innerHTML=head+marketFilterView()+(state.invest.error?`<div class="panel empty-state"><strong>Investments couldn't be loaded.</strong><p>${esc(state.invest.error)}</p><button class="button" id="invest-retry">Try again</button></div>`:'<div class="loading"><span class="spinner"></span>Screening every included card…</div>');}
  else{
@@ -394,7 +447,7 @@ function renderInvest(){
  }
  view.querySelectorAll('[data-invest-grade]').forEach(b=>b.onclick=()=>{state.invest.grade=b.dataset.investGrade;renderInvest();});
  view.querySelectorAll('[data-invest]').forEach(b=>b.onclick=()=>openCard(b.dataset.invest,b.dataset.grade));
- wireMarketFilters(view,loadInvest);
+ wireMarketFilters(view,()=>loadInvest());wireRefresh(view);
  if($('#invest-retry'))$('#invest-retry').onclick=()=>{state.invest.error=null;renderInvest();loadInvest();};
  if($('#invest-method'))$('#invest-method').onclick=()=>$('#method-dialog').showModal();
  wireImages();
@@ -456,8 +509,11 @@ function wireScreener(){
  $('#reset-filters').onclick=()=>{resetFilters(true);state.category='all';updateView();toast('Filters cleared.');};
  $('#filters-toggle').onclick=()=>{state.filtersOpen=!state.filtersOpen;syncScreener();};
 }
-async function loadScores(){
- try{const r=await request('/api/scores');state.scores=r.scores||{};state.scoreError=null;}catch(e){state.scoreError=e.message;}
+async function loadScores(retry=true){
+ try{const r=await request('/api/scores');state.scores=r.scores||{};state.scoreError=null;if($('#error-banner').textContent===SERVER_OLD)error('');}
+ catch(e){state.scoreError={message:e.message,status:e.status||0};
+  if(e.status===404)error(SERVER_OLD);
+  else if(retry)setTimeout(()=>loadScores(false),4000);}
  if(state.view==='browse'||state.view==='watch'){renderList();renderDetail();}else if(state.view==='invest')renderInvest();
 }
 async function loadTicker(){

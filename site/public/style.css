@@ -504,6 +504,8 @@ dialog::backdrop{background:#000000a6;backdrop-filter:blur(3px)}
 .mover-change b{display:block;font:700 14px var(--mono)}
 .mover-change small{font-family:var(--mono);font-size:10px}
 .movers-note{padding:12px 2px 0}
+.head-actions{display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex-shrink:0}
+.refresh-tools{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
 .mover-grades{display:none;margin-bottom:12px}
 
 /* ---------- Potential investments ---------- */
@@ -728,6 +730,9 @@ dialog::backdrop{background:#000000a6;backdrop-filter:blur(3px)}
  .score-parts li{grid-template-columns:78px minmax(0,1fr) 26px}
  .panel-head{flex-direction:column;padding:14px 14px 10px}
  .movers-head{flex-direction:column;padding:14px}
+ .head-actions{align-items:stretch;width:100%}
+ .refresh-tools{justify-content:flex-start}
+ .refresh-tools .button{flex:1}
  .mover-row{gap:8px;padding:8px 6px}
  .holdings-tools{justify-content:flex-start}
  .dex-summary{padding:12px 0}.dex-tile{padding:0 12px}.dex-tile strong{font-size:17px}.dex-tile strong.small{font-size:13px}
