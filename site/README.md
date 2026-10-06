@@ -1,6 +1,6 @@
 # Primal Watch
 
-A personal Pokémon card tracker covering the EX, Diamond & Pearl through HGSS, Black & White, XY, and Sun & Moon eras (2003–2019). Browse every rare card set by set, compare reported sold prices for raw (near mint), PSA 9 and PSA 10 copies, see the week's and month's top movers, screen potential investments, save a watchlist with your own buy limits, keep your collection in the Dex, and get alerts when a watched card is listed at your price.
+A personal Pokémon card tracker covering Wizards of the Coast, EX, Diamond & Pearl through HGSS, Black & White, XY, and Sun & Moon eras (1999–2019). Browse every rare card set by set, compare reported sold prices for raw (near mint), PSA 9 and PSA 10 copies, see the week's and month's top movers, screen potential investments, save a watchlist with your own buy limits, keep your collection in the Dex, and get alerts when a watched card is listed at your price.
 
 ## Open locally
 
@@ -14,7 +14,8 @@ Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-wa
 
 ## What's included
 
-- **Catalog**: 9,526 cards in 75 sets, 4,260 of them browsable rare/chase cards (rare, holo rare, Pokémon ex/EX/GX, LV.X, Prime, LEGEND, Gold Star, full art, secret rare, shiny, Prism Star, BREAK, Radiant Collection and promos).
+- **Catalog**: 11,315 cards in 93 sets, 5,001 of them browsable rare/chase cards (rare, holo rare, Pokémon ex/EX/GX, LV.X, Prime, LEGEND, Gold Star, full art, secret rare, shiny, Prism Star, BREAK, Radiant Collection and promos).
+  - Wizards of the Coast: Base Set, Jungle, Fossil, Base Set 2, Team Rocket, Gym Heroes, Gym Challenge, Neo Genesis, Neo Discovery, Neo Revelation, Neo Destiny, Legendary Collection, Expedition, Aquapolis, Skyridge, Wizards Black Star Promos, Southern Islands and Best of Game. Includes H1–H32 holo subsets. English standard/unlimited prints; first editions, shadowless and alternate prints are excluded. Southern Islands’ native reverse holos remain part of that set.
   - EX Series: all 16 English expansions from EX Ruby & Sapphire through EX Power Keepers.
   - Diamond & Pearl through HGSS: all 7 Diamond & Pearl expansions, 4 Platinum expansions, 4 HeartGold & SoulSilver expansions, and Call of Legends.
   - XY Series: XY Base Set, Flashfire, Furious Fists, Phantom Forces, Primal Clash, Double Crisis, Roaring Skies, Ancient Origins, BREAKthrough, BREAKpoint, Fates Collide, Steam Siege, Generations (with RC1–RC32), Evolutions, and XY Black Star Promos.
@@ -54,7 +55,11 @@ Alerts run while `node server.mjs` is running. Keys stay in your local database 
 
 ## Market data
 
-The current snapshot contains 1,947 full PriceCharting captures and 132,454 classified sales. Every rare XY and Black & White card has a full capture; Sun & Moon has exact guide matches for 1,109 rare cards and full captures for the 172 highest-interest cards. For the newly added legacy eras, 1,317 of 1,425 eligible cards have exact product matches and guide prices, and the 10 highest-interest cards from each of the 32 sets have full pages: 160 EX captures with 11,023 classified sales and 160 Diamond & Pearl/Platinum/HGSS captures with 8,129 classified sales. Product URLs were matched against PriceCharting's own set listings (`data/source-urls.json`), including legacy letter and shiny subset numbering.
+The Wizards import captures **all 741 rare/promo entries**, with 44,348 accepted sales (43,814 reported eBay sales) checked October 6, 2026. The importer follows every page of each set listing and classifies every exposed sold row on each exactly matched product page. It saves the original sale titles, dates, amounts and links. The reproducible coverage report is `tools/research/vintage-coverage.json`; `vintage-audit.json` reports grade-level score/forecast eligibility and unmatched cards. Unmatched products receive no inferred price or score.
+
+**This is not all eBay sales history.** PriceCharting reports a limited snapshot of eBay and TCGPlayer sales; older or unreported sales can be absent. The ordinary eBay Browse API used for alerts supplies listings, not a complete sold archive. The UI and capture metadata explicitly state this limitation. Existing observations are retained on refresh, and duplicate listing IDs are merged.
+
+Before the Wizards expansion, the snapshot contained 1,947 full PriceCharting captures and 132,454 classified sales. Every rare XY and Black & White card has a full capture; Sun & Moon has exact guide matches for 1,109 rare cards and full captures for the 172 highest-interest cards. For the newly added legacy eras, 1,317 of 1,425 eligible cards have exact product matches and guide prices, and the 10 highest-interest cards from each of the 32 sets have full pages: 160 EX captures with 11,023 classified sales and 160 Diamond & Pearl/Platinum/HGSS captures with 8,129 classified sales. Product URLs were matched against PriceCharting's own set listings (`data/source-urls.json`), including legacy letter and shiny subset numbering.
 
 A sale is counted only when:
 
@@ -68,7 +73,7 @@ Every counted sale keeps its title, date, price and a link to the original listi
 
 ## Recommendation method
 
-A buy target needs at least 3 same-grade sales within 180 days, including one in the last 90 days. The narrowest 30-, 90- or 180-day window with 3 usable sales is used; prices below 40% or above 250% of that window's median are dropped as outliers. The target is 15% below the median. Raw targets use only sales explicitly described as near mint. Mixed-grader Grade 9 guides are shown for reference and never become a PSA 9 price. The 1Y/2Y/3Y figures apply the linear-regression dollar slope from up to 35 trailing-year sales to today's reference price; at least three sales spanning 30 days are required. Demand is a sales-activity proxy, the trend figures are simple projections rather than investment advice, and five-year scenarios remain illustrative assumptions.
+A buy target needs at least 3 same-grade sales within 180 days, including one in the last 90 days. The narrowest 30-, 90- or 180-day window with 3 usable sales is used; prices below 40% or above 250% of that window's median are dropped as outliers. The target is 15% below the median. Raw targets use only sales explicitly described as near mint. Mixed-grader Grade 9 guides are shown for reference and never become a PSA 9 price. The 1Y/2Y/3Y figures use daily sold medians from the trailing year and require a confident current sold price, at least eight distinct sale dates spanning 180 days, a sale in the last 90 days, and a source check within 14 days. The last 30% of dates (at least three dates) are held out. A regression fitted only on earlier dates is anchored to their then-available sold median and compared with an unchanged-price baseline. Projections are withheld when average absolute percentage error exceeds 35%, is worse than that baseline, or annual dollar growth exceeds +150% / −80% of the current price. The displayed historical error does not validate the 1–3 year extrapolation; future accuracy remains unverified. Demand is a sales-activity proxy, the trend figures are simple projections rather than investment advice, and five-year scenarios remain illustrative assumptions.
 
 ## Top movers method
 
@@ -80,15 +85,15 @@ A move compares the median of matching sales in the last 7 days (week) or 30 day
 - at least two thirds of the new sales are above the starting price;
 - a rise of more than 150% has at least 5 sales in each period;
 - the new median is within 40%–250% of the source's own current guide for that grade;
-- the card's data is no more than 7 days older than the newest check.
+- the card's data was checked within the last 7 days.
 
 Raw moves use near-mint sales only. Cards that fail a check are counted under the list as "left out as uncertain" rather than shown.
 
 ## Potential investments method
 
-These are screens over past sales, not forecasts or advice. A card qualifies for a grade only when it has a confident sold price (the same evidence a buy target needs) of at least $25, its character is in the top quarter for collector demand, and it meets at least one signal.
+These are screens over past sales, not forecasts or advice. A card qualifies for a grade only when it has a confident sold price (the same evidence a buy target needs) of at least $25, its character is in the top quarter for collector demand it meets at least one signal.
 
-- **Character demand** comes from sales only. For every card, each grade's reference price is compared with the median for its era and rarity category; a character's premium is the average across its cards, shrunk toward average when it appears on only a few. It is combined (65/35) with how often the character's fully captured cards sold in the last 6 months, then ranked against all characters. Tag Team cards use their most in-demand partner. Forms and mechanics (M, Primal, Alolan, Shining, EX, GX, BREAK, Prism Star) count as the same character.
+- **Character demand** comes from sales only. For every card, each grade's reference price is compared with the median for its era and rarity category; a character's premium is the average across its cards, shrunk toward average when it appears on only a few. It is combined (65/35) with how often the character's fully captured cards sold in the last 6 months, then ranked against all characters. Tag Team cards use their most in-demand partner. Forms, owners and mechanics (including Dark, Light, Gym leaders, M, Primal, Alolan, Shining, EX, GX, BREAK, Prism Star) count as the same character.
 - **Steady uptrend**: a log-price regression across at least 8 matching sales from the past year, spanning 6+ months and 3 or more quarters, rising 15%–150% a year with a t-statistic of at least 3 and typical scatter under 25%, and the last 90 days at least 10% above sales 6–12 months ago.
 - **Recovering from highs**: the monthly guide is at least 40% below a high reached in the last five years (excluding the latest 3 months) and held for 3+ months, and sales in the last 45 days are at least 5% above the 90 days before, with most new sales above that level.
 - **Cheap vs. similar cards**: the card sells for at most 65% of the median price of at least 4 same-set, same-rarity cards whose characters score at least 10 demand points lower. Promos are not compared.
@@ -97,7 +102,7 @@ At most 3 picks per character are shown. With the October 2026 snapshot, most pi
 
 ## Investment score method
 
-Every rare card gets a 0–100 score per grade (`site/lib/score.mjs`), from the same sales, monthly guide history and catalog as the Investments tab. A score needs a confident sold price (the evidence a buy target needs) and up-to-date sales; otherwise it is left blank with the reason. Each part is scored 0–100 and blended. Weights are shown as raw / graded; PSA 9 and PSA 10 add a sixth part, grade scarcity:
+Every rare card gets a 0–100 score per grade (`site/lib/score.mjs`), from the same sales, monthly guide history and catalog as the Investments tab. A score needs a confident sold price (the evidence a buy target needs) and sales data checked within the last 14 days relative to today (even when the entire dataset is old); otherwise it is left blank with the reason. Each part is scored 0–100 and blended. Weights are shown as raw / graded; PSA 9 and PSA 10 add a sixth part, grade scarcity:
 
 - **Character demand (30% / 27%)**: the character's demand score from the Investments method.
 - **Price momentum (25% / 22%)**: a log-price regression across at least 5 matching sales spanning 90+ days of the past year. Growth maps linearly from −60% (0) to +60% a year (100), and only counts in full when the trend's t-statistic is 3 or more. Rises above 150% a year are treated as too fast to trust (45).
@@ -106,7 +111,7 @@ Every rare card gets a 0–100 score per grade (`site/lib/score.mjs`), from the 
 - **Price stability (10% / 8%)**: 100 minus the typical distance of recent sales from the median, scaled so a 40% spread scores 0.
 - **Grade scarcity (PSA 9 and PSA 10 only, 12%)**: from the PSA population counts captured with each PriceCharting page. PSA 10 uses the share of PSA-graded copies that are PSA 10; PSA 9 uses the share that reached PSA 9 or better (so a card where most copies gem does not look like it has rare 9s). The share is ranked against cards of the same era with 30+ graded copies (falling back to all cards when an era has fewer than 20), because gem rates differ widely by era: on the current data the median PSA 10 rate is about 3% for Diamond & Pearl–HGSS and 41% for Sun & Moon. The lowest rate in the era scores 100, the highest 0. Cards with fewer than 30 PSA-graded copies, or no captured counts, count as 50.
 
-A part that cannot be measured counts as 50 and is labeled. Cards under the $25 floor are capped at 59. Bands: 80+ Strong, 65–79 Good, 50–64 Fair, 35–49 Weak, under 35 Poor. `GET /api/scores` returns `{card_id: [psa10, psa9, raw]}`; `GET /api/market?id=` includes each grade's breakdown. On the October 2026 snapshot, 462 PSA 10, 719 PSA 9 and 1,799 raw cards are scored, with medians near 60; grade scarcity is measured for 1,066 of the 1,181 scored graded card-grades.
+A part that cannot be measured counts as 50 and is labeled. Cards under the $25 floor are capped at 59. Bands: 80+ Strong, 65–79 Good, 50–64 Fair, 35–49 Weak, under 35 Poor. `GET /api/scores` returns `{card_id: [psa10, psa9, raw]}`; `GET /api/market?id=` includes each grade's breakdown. Before the Wizards expansion, 462 PSA 10, 719 PSA 9 and 1,799 raw cards are scored, with medians near 60; grade scarcity is measured for 1,066 of the 1,181 scored graded card-grades.
 
 ## Dex valuation
 
@@ -131,6 +136,8 @@ node --check dist/server/index.js
 
 On older Node versions without `--test-isolation`, run `node --test tests/*.test.mjs`.
 
-`/api/movers?period=week|month` and `/api/investments` compute over every card and are cached until saved market data changes or the day rolls over. Both accept a comma-separated era scope, for example `series=XY` or `series=EX,DP`; unsupported or empty scopes return 400.
+`/api/movers?period=week|month` and `/api/investments` compute over every card and are cached until saved market data changes or the day rolls over. Both accept a comma-separated era scope, for example `series=WOTC` or `series=WOTC,EX,DP`; unsupported or empty scopes return 400.
 
-`node build.mjs` writes a Cloudflare Worker to `dist/server/index.js` that uses a D1 binding named `DB` (apply `db/schema.sql` first). With the full sales captures embedded, the bundle is about 52.5 MB, which is larger than Workers allow; hosting it would need the market data moved to D1 or KV. Scheduled alert scans run only in the local Node server.
+`node build.mjs` writes a Cloudflare Worker to `dist/server/index.js` that uses a D1 binding named `DB` (apply `db/schema.sql` first). With the full sales captures embedded, the bundle is about 70 MB, which is larger than Workers allow; hosting it would need the market data moved to D1 or KV. Scheduled alert scans run only in the local Node server.
+
+Vintage printing exceptions are explicit in the catalog and the card detail: Base Set Machamp uses the shadowed 1st Edition deck print (shadowless and 1999–2000 are still excluded); Best of Game 1–7 use the non-Winner reverse foils, and 8–9 use Winner-stamped reverse foils. A generic printing exclusion must not remove a set's native finish. The word “of” in a set name is no longer misread as the PSA “OF” qualifier; explicit grade qualifiers remain excluded.

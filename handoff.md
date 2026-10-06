@@ -1,6 +1,19 @@
 # Primal Watch — session handoff
 
-Updated: October 5, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. The repository is authoritative.
+Updated: October 6, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. The repository is authoritative.
+
+
+## Wizards expansion — October 6, 2026
+
+- Added 18 pre-EX English sets (including early-2003 Aquapolis/Skyridge and contemporary promos). Total catalog: 11,315 cards, 93 sets, 5,001 browsable rares/promos.
+- All 741 new eligible cards have exact source matches and captures: 44,348 accepted sales, 43,814 reported eBay sales. Set listings are paginated, captures resume per card, and every remaining gap/error is recorded in `tools/research/vintage-coverage.json` (none at completion). This remains a limited public-page snapshot, not a complete eBay archive.
+- Vintage matching validates names/aliases, numbers, set totals and printings. Native Southern Islands/Best of Game reverse foils are supported; Best of Game Winner/non-Winner values stay separate. Machamp #8 explicitly uses the shadowed 1st Edition deck print. Other first editions/shadowless/reprints are excluded. Unknown source mappings fail closed.
+- Scores now expire against today after 14 days; movers expire after 7 days even if all records are old. Stale records no longer influence demand peers. Vintage owner names and Dark/Light forms normalize to their underlying characters.
+- Trend projections now require 8 sale dates across 180 days, recent sales and a confident current sold median. Daily-median regression must pass a chronological holdout (<=35% MAPE and no worse than unchanged prices). UI shows historical error and explicitly says the 1–3 year horizon is unverified. Missing prices, duplicate-only data, reversals and extreme slopes fail closed.
+- `tools/research/vintage-audit.json` documents grade-specific score coverage, accepted historical-test errors and withholding reasons. All 44,348 saved vintage sales pass the identity/grade/date audit. Scores remain heuristic historical screens, not calibrated probabilities of profit.
+- Fixed a pre-existing grade-parser issue: “of” in Best of Game / Call of Legends is no longer mistaken for PSA's OF qualifier. Explicit qualifiers remain excluded.
+- Validation: 113/113 Node tests, API checks for the new catalog/market/era scopes, Worker build and syntax check. Browser runtime could not initialize, so visual browser QA is unverified.
+- Work is committed locally on `codex/wizards-cards-sales-validation`. GitHub branch creation was rejected with HTTP 403 “Resource not accessible by integration”; no remote branch or PR was created. A patch and updated local-app ZIP are provided for handoff. Restart the local Node server after copying the updated source. Existing local SQLite data must be preserved and never committed.
 
 ## Product goals
 
@@ -69,6 +82,17 @@ Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. 
 - **Lighthouse:** `site/lighthouserc.json` and `npm run lighthouse` (run on the collector's machine; warn-only thresholds).
 - **Sharp dropped:** it is a native Node library that cannot run in a Worker, and card images are remote, so there is nothing local to optimize.
 - Verified: `node --test tests/*.test.mjs` 100/100 on Node 22.22 (10 new in `tests/report.test.mjs`); `node build.mjs` still 52.5 MB; headless Chromium showed no page errors, working icons at 1440 and 390 px, and a browser crash reaching `/api/report`.
+
+### Grade scarcity in the PSA 9 / PSA 10 score (`dd7213c`)
+
+- Collector's request: a card with a low share of PSA 10s (or 9s) is a better buy. Added a sixth score part, **Grade scarcity**, for PSA 9 and PSA 10 only. Raw scores are unchanged.
+- Source: the PSA population counts already captured with every PriceCharting page (`market.pop.psa`, index 9 = PSA 10, 8 = PSA 9). 1,755 of 1,947 captures have them. `mergeMarket` now keeps `pop` if a newer record lacks it.
+- PSA 10 uses PSA 10s ÷ all PSA-graded; PSA 9 uses (PSA 9 + PSA 10) ÷ all PSA-graded, so a card where most copies gem doesn't look like it has rare 9s.
+- Ranked as a percentile **within the card's era** (lowest rate = 100), because gem rates differ hugely by era: median PSA 10 rate DP–HGSS 3%, EX 6%, BW 7%, XY 12%, SM 41%. Needs 30+ graded copies and 20+ era peers (else all cards); otherwise counts as 50 and is labeled.
+- Weights for graded scores: demand 27, momentum 22, value 18, liquidity 13, stability 8, scarcity 12 (`SCORE_RULES.gradedWeights`). Raw keeps the old weights.
+- Measured for 1,066 of 1,181 scored graded card-grades. Score counts unchanged (462 PSA 10, 719 PSA 9); medians 57 / 60.
+- Method text updated in README and the in-app dialog. Tests: 101/101 (new scarcity unit test).
+- Restart the local server after copying (it loads `lib/` at startup).
 
 ## Earlier sessions (summary)
 
@@ -155,6 +179,7 @@ Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. 
 
 ## Suggested next session
 
+1. Ask whether the 12% grade-scarcity weight feels right, and whether very low-pop cards (under 30 graded) should get a bonus instead of counting as average.
 1. Ask the collector how the terminal look, the screener layout and the score weights feel with real images. Tune `SCORE_RULES` in `site/lib/score.mjs` if wanted (weights, $25 cap, momentum cap).
 2. Check the redesign on the collector's own desktop and phone with real card images and fonts (sandbox screenshots used placeholders).
 3. Review the 108 unmatched legacy PriceCharting products manually and add only exact matches. Expand full captures beyond 10 per legacy set if broader investment coverage is wanted.
@@ -168,6 +193,7 @@ Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. 
 - `d498731` — Add a 0–100 investment score for every card and grade
 - `cc7fdca` — Replace the $250–$350 toggle with an advanced screener
 - `f665231` — Restyle Primal Watch as a trading terminal
+- `dd7213c` — Add PSA grade scarcity to the PSA 9 and PSA 10 investment score
 - Final commit — this handoff update
 
 Previous session: `70d7339` (EX through HGSS catalog), `49f7d73` (appearance settings and era-scoped market screens).

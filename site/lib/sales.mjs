@@ -2,7 +2,9 @@
 export const EXCLUDED_LISTING=/\blot\b|bundle|\bfake\b|proxy|replica|custom|jumbo|oversized|reverse[ -]?holo|cosmos|pre-?release|\bleague\b|stamped|\bstamp\b|championship|\bwinner\b|crosshatch|\bstaff\b|signed|autograph|japanese|\bjpn\b|\bjap\b|\bger\b|german|french|\bfr\b|korean|chinese|italian|spanish|portuguese/i;
 export const collector=n=>String(n).toUpperCase().replace(/\s/g,'').replace(/^([A-Z]*)0+(?=\d)/,'$1');
 export function gradeOf(title){
- if(/\b(?:CGC|BGS|BVG|Beckett|HGA|DSG|GRA|KSA|ACE|TAG|SGC|GMA|PCA|AGS|CGS)\b|\b(?:OC|MC|ST|MK|PD|OF)\b|\bPSA\s*(?:9|10)\s*\/\s*(?:9|10)\b/i.test(title))return null;
+ if(/\b(?:CGC|BGS|BVG|Beckett|HGA|DSG|GRA|KSA|ACE|TAG|SGC|GMA|PCA|AGS|CGS)\b|\bPSA\s*(?:9|10)\s*\/\s*(?:9|10)\b/i.test(title))return null;
+ // Qualifiers are annotations on the grade. The word "of" in a set name is not OF.
+ if(/\(\s*(?:OC|MC|ST|MK|PD|OF)\s*\)|\bPSA\s*(?:9|10)\s+(?:OC|MC|ST|MK|PD|OF)\b/i.test(title))return null;
  const grades=[...title.matchAll(/\bPSA\s*([\d.]+)/gi)].map(m=>m[1]);
  if(grades.length)return grades.every(g=>g==='10')?'psa10':grades.every(g=>g==='9')?'psa9':null;
  if(/\bPSA\b|graded|grading|slab|\b(?:9|10)\s*\/\s*(?:9|10)\b/i.test(title))return null;
@@ -19,11 +21,36 @@ export function conditionOf(title){
  return 'Unknown';
 }
 export function matchesCard(title,card){
- if(EXCLUDED_LISTING.test(title))return false;
+ let checkedTitle=card.nativeReverse?title.replace(/reverse[ -]?(?:holo|foil)/gi,''):title;
+ if(card.setId==='bp'){
+  if(card.nativeWinner){if(!/\bwinners?\b/i.test(title)||/\bnon[ -]?winner/i.test(title))return false;checkedTitle=checkedTitle.replace(/\bwinners?\b/gi,'');}
+  else checkedTitle=checkedTitle.replace(/\bnon[ -]?winner/gi,'');
+  checkedTitle=checkedTitle.replace(/\bstamp(?:ed)?\b/gi,'');
+ }
+ if(EXCLUDED_LISTING.test(checkedTitle))return false;
+ if(card.vintage){
+  const firstEdition=/\b1st\b|\b(?:first|1\.?)[ -]*(?:ed(?:ition)?\.?|print(?:ing)?)\b/i.test(title);
+  if(firstEdition!==!!card.nativeFirstEdition)return false;
+  if(/\bshadowless\b|\b1999[ -]*2000\b|fourth print|4th print|no symbol|no rarity|reprint|celebrations|evolutions|classic collection/i.test(title))return false;
+  if(/\berror\b/i.test(title)&&!/\berror\b/i.test(card.name))return false;
+  const norm=s=>String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+  const words=s=>String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f'’‘"\x60]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+  if(![card.name,...(card.nameAliases||[])].some(name=>(' '+words(title)+' ').includes(' '+words(name)+' ')))return false;
+  const nonHolo=/non[ -]?holo|no[ -]?holo/i.test(title);
+  if(/holo/i.test(card.rarity)&&nonHolo)return false;
+  if(!/holo/i.test(card.rarity)&&card.category!=='Promo'&&!nonHolo&&/\bholo(?:graphic)?\b/i.test(title))return false;
+  // With no denominator, require the set name and an explicit collector number.
+  if(!/\b[A-Z]*\d+\s*\/\s*[A-Z]*\d+\b/i.test(title)){
+   const setName=card.setId==='basep'?'promo':card.setId==='ecard1'?'expedition':card.setName;
+   if(!norm(title).includes(norm(setName)))return false;
+   const mark=String(card.number).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+   if(!new RegExp('(?:#\\s*0*'+mark+'|\\b0*'+mark+'\\b)','i').test(title.replace(/\bPSA\s*\d+/gi,'')))return false;
+  }
+ }
  const titleAnd=(title.match(/\s&\s/g)||[]).length,nameAnd=(String(card.name||'').match(/\s&\s/g)||[]).length;if(titleAnd>nameAnd)return false;
  const expected=collector(card.number),prefix=expected.match(/^[A-Z]+/)?.[0]||'',total=prefix+card.printedTotal;
  if(/^[A-Z!?]$/.test(expected)){const mark=expected.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return new RegExp('(?:\\[\\s*'+mark+'\\s*\\]|(?:^|[^A-Z0-9])'+mark+'\\s*\\/\\s*'+card.printedTotal+'(?!\\d))','i').test(title);}
- const numbered=[...title.matchAll(/\b((?:XY|RC|SV)?\s*\d+[a-z]?)\s*\/\s*((?:XY|RC|SV)?\s*\d+[a-z]?)\b/gi)];
+ const numbered=[...title.matchAll(/\b((?:XY|RC|SV|SH|SL|AR|H)?\s*\d+[a-z]?)\s*\/\s*((?:XY|RC|SV|SH|SL|AR|H)?\s*\d+[a-z]?)\b/gi)];
  if(!expected.startsWith('XY')&&numbered.length)return numbered.every(m=>collector(m[1])===expected&&collector(m[2])===total);
  if(expected.startsWith('XY'))return [...title.matchAll(/\bXY\s*0*(\d+)(?![a-z\d])/gi)].some(m=>'XY'+Number(m[1])===expected);
  const parts=expected.match(/^([A-Z]*)(\d+)([A-Z]?)$/);return parts?new RegExp('#?\\s*'+parts[1]+'\\s*0*'+parts[2]+parts[3]+'(?![a-z0-9])','i').test(title):false;
