@@ -1,5 +1,5 @@
 # Starts FutureSight for beta testers: the app on this computer, plus a Cloudflare Quick Tunnel
-# that gives it an https://….trycloudflare.com link anyone with the link can open.
+# that gives it an https://....trycloudflare.com link anyone with the link can open.
 # Testers create their account with an invite code from:  node invite.mjs
 # Keep this window open while people are testing; closing it takes the link down.
 # Each start gives a NEW link (Quick Tunnels do not keep their address), so re-send it after a restart.
@@ -25,7 +25,7 @@ Start-Sleep -Seconds 1
 # The app, in its own minimized window (its messages appear there). It also stays reachable on the home network.
 $serverCmd = "`$env:HOST='0.0.0.0'; `$env:PORT='$port'; Set-Location -LiteralPath '$PSScriptRoot'; node server.mjs"
 Start-Process powershell -WindowStyle Minimized -ArgumentList '-NoExit', '-Command', $serverCmd | Out-Null
-Write-Host 'Starting FutureSight…'
+Write-Host 'Starting FutureSight...'
 $ready = $false
 for ($i = 0; $i -lt 60 -and -not $ready; $i++) {
   Start-Sleep -Seconds 1
@@ -35,7 +35,7 @@ if (-not $ready) { throw 'FutureSight did not start. Open the minimized FutureSi
 Write-Host "FutureSight is running at http://127.0.0.1:$port"
 
 # The tunnel. Its link is printed in a box below once Cloudflare hands it out.
-Write-Host 'Opening the internet link (takes a few seconds)…'
+Write-Host 'Opening the internet link (takes a few seconds)...'
 & $cloudflared tunnel --no-autoupdate --url "http://127.0.0.1:$port" 2>&1 | ForEach-Object {
   $line = "$_"
   if ($line -match '(https://[a-z0-9-]+\.trycloudflare\.com)') {
