@@ -6,6 +6,7 @@ import {mergeMarket} from './sales.mjs';
 import {lightMarket} from './payload.mjs';
 import {topMovers,PERIODS} from './movers.mjs';
 import {potentialInvestments} from './invest.mjs';
+import {investmentScores} from './score.mjs';
 import {validateEntry} from './portfolio.mjs';
 import {DEFAULT_SETTINGS,normalizeSettings,updateSettings,publicSettings,hasEbayKeys,runScan,sendNotifications,ebaySearchUrl,alertLimit} from './alerts.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
@@ -32,6 +33,7 @@ async function insight(db,key,compute){
  }
  return insightMemo.get(stamp);
 }
+const scoreTable=db=>insight(db,'scores',entries=>investmentScores(entries));
 export async function fullMarket(db,id){return mergeMarket(snapshots[id],await cachedMarket(db,id))||null;}
 async function alertState(db,user){
  const settings=await readSettings(db,user);
@@ -134,14 +136,17 @@ export async function api(request,env){
    const included=insightSeries(url);if(!included)return json({error:'Choose one or more supported eras.'},400);const selected=new Set(included),key=included.join(',');
    const result=await insight(db,'investments:'+key,entries=>potentialInvestments(entries.filter(([card])=>selected.has(card.series))));return json({...result,series:included});
   }
+  if(path==='/api/scores' && request.method==='GET'){
+   const {checkedAt,grades,scores}=await scoreTable(db);return json({checkedAt,grades,scores});
+  }
   if(path==='/api/market' && request.method==='GET'){
    const card=cardById.get(url.searchParams.get('id'));if(!card)return json({error:'That card is not in the catalog.'},404);
    let market=await fullMarket(db,card.id);
    if(url.searchParams.get('refresh')==='1'){
-    try{const live=parseMarket(await sourceFetch(card.source,env),card);market=mergeMarket(market,live);await saveMarket(db,card,market);return json({market,refreshed:true});}
-    catch(e){return json({market,refreshed:false,warning:e.message});}
+    try{const live=parseMarket(await sourceFetch(card.source,env),card);market=mergeMarket(market,live);await saveMarket(db,card,market);return json({market,refreshed:true,score:(await scoreTable(db)).full.get(card.id)||null});}
+    catch(e){return json({market,refreshed:false,warning:e.message,score:(await scoreTable(db)).full.get(card.id)||null});}
    }
-   return json({market,refreshed:false});
+   return json({market,refreshed:false,score:(await scoreTable(db)).full.get(card.id)||null});
   }
   if(path==='/api/refresh' && request.method==='POST'){
    const set=sets.find(s=>s.id===(url.searchParams.get('set')||'xy5'));

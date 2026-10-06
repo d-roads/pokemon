@@ -19,13 +19,14 @@ Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-wa
   - Black & White Series: Black & White Base Set, Emerging Powers, Noble Victories, Next Destinies, Dark Explorers, Dragons Exalted, Dragon Vault, Boundaries Crossed, Plasma Storm, Plasma Freeze, Plasma Blast and Legendary Treasures (with RC1–RC25).
   - Sun & Moon Series: Sun & Moon, Guardians Rising, Burning Shadows, Shining Legends, Crimson Invasion, Ultra Prism, Forbidden Light, Celestial Storm, Dragon Majesty, Lost Thunder, Team Up, Detective Pikachu, Unbroken Bonds, Unified Minds, Hidden Fates (including SV1–SV94) and Cosmic Eclipse.
   - Reverse holos, stamped, prerelease and other alternate prints are not separate entries.
-- **Browse**: set or era picker, search, raw / PSA 9 / PSA 10 views, sold medians, buy targets, sales plots, 1Y/2Y/3Y trend projections, monthly price history and PSA population.
+- **Browse**: a screener with era chips, set picker, min/max price for the grade in view, minimum activity score, minimum investment score and quick screens; search, raw / PSA 9 / PSA 10 views, sold medians, buy targets, an investment score per card, sales plots, 1Y/2Y/3Y trend projections, monthly price history and PSA population.
 - **Top movers**: the 20 biggest percentage rises in sold price this week or month, listed separately for PSA 10, PSA 9 and raw near-mint. Era filters can include only the eras you want or exclude eras you do not collect. Lists are shorter when fewer cards have reliable evidence.
 - **Potential investments**: up to 20 picks per grade, each showing which signals it met (steady uptrend, recovering from highs, cheap vs. similar cards) and its character's demand score. The same era filters recompute the screen within the selected catalog scope.
 - **Watchlist**: star a card and grade; set your own maximum price.
 - **Dex**: add cards you own with grade, quantity, price paid and date. See total value, cost basis, unrealized profit and loss, a value-vs-cost chart over time, and each card's own P/L chart.
 - **Alerts**: with your own free eBay developer keys, the server checks newly listed Buy It Now and Best Offer listings for each watched card and alerts when price plus shipping is at or below your limit. Alerts appear in the app, as desktop notifications while the app is open, and optionally on your phone through [ntfy](https://ntfy.sh) or a Discord webhook. Without keys, the Alerts page still gives a ready-made eBay search for every watched card.
-- **Settings**: choose Light, Dark, or Soft contrast. The preference is stored in the browser and applied before the page paints.
+- **Settings**: choose Terminal (the default dark trading-terminal look), Light, or Soft contrast. The preference is stored in the browser and applied before the page paints.
+- **Status bar**: the date of the sales data and a ticker of this week's confirmed top movers.
 
 ### Setting up listing alerts
 
@@ -77,6 +78,18 @@ These are screens over past sales, not forecasts or advice. A card qualifies for
 - **Cheap vs. similar cards**: the card sells for at most 65% of the median price of at least 4 same-set, same-rarity cards whose characters score at least 10 demand points lower. Promos are not compared.
 
 At most 3 picks per character are shown. With the October 2026 snapshot, most picks are uptrends. Many XY-era prices are near their highs, so the recovery and cheapness signals rarely fire.
+
+## Investment score method
+
+Every rare card gets a 0–100 score per grade (`site/lib/score.mjs`), from the same sales, monthly guide history and catalog as the Investments tab. A score needs a confident sold price (the evidence a buy target needs) and up-to-date sales; otherwise it is left blank with the reason. Five parts are each scored 0–100 and blended:
+
+- **Character demand (30%)**: the character's demand score from the Investments method.
+- **Price momentum (25%)**: a log-price regression across at least 5 matching sales spanning 90+ days of the past year. Growth maps linearly from −60% (0) to +60% a year (100), and only counts in full when the trend's t-statistic is 3 or more. Rises above 150% a year are treated as too fast to trust (45).
+- **Value (20%)**: the average of (a) price against the median of 4+ same-set, same-rarity cards of no more popular characters (65% of that median or less scores 100; 150% or more scores 20) and (b) distance below the highest monthly guide level held for 3+ months in the last five years (at the high scores 35; 50% or more below scores 100; a card still clearly falling earns 40% less).
+- **Liquidity (15%)**: the activity score.
+- **Price stability (10%)**: 100 minus the typical distance of recent sales from the median, scaled so a 40% spread scores 0.
+
+A part that cannot be measured counts as 50 and is labeled. Cards under the $25 floor are capped at 59. Bands: 80+ Strong, 65–79 Good, 50–64 Fair, 35–49 Weak, under 35 Poor. `GET /api/scores` returns `{card_id: [psa10, psa9, raw]}`; `GET /api/market?id=` includes each grade's breakdown. On the October 2026 snapshot, 462 PSA 10, 719 PSA 9 and 1,799 raw cards are scored, with medians near 60.
 
 ## Dex valuation
 

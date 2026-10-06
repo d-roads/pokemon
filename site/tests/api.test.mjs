@@ -87,3 +87,11 @@ test('Investments endpoint returns screened picks per grade',async()=>{
  const xy=await(await api(req('/api/investments?series=XY'),env)).json();assert.deepEqual(xy.series,['XY']);for(const col of Object.values(xy.grades))for(const pick of col.picks)assert.equal(cards.find(c=>c.id===pick.card_id).series,'XY');
  assert.equal((await api(req('/api/investments?series='),env)).status,400);
 });
+test('Investment scores are served in bulk and with each card breakdown',async()=>{
+ const r=await api(req('/api/scores'),env);assert.equal(r.status,200);const d=await r.json();
+ assert.deepEqual(d.grades,['psa10','psa9','raw']);assert.ok(Object.keys(d.scores).length>1500);
+ for(const v of Object.values(d.scores)){assert.equal(v.length,3);for(const x of v)assert.ok(x===null||(Number.isInteger(x)&&x>=0&&x<=100));}
+ const id=Object.entries(d.scores).find(([,v])=>v[1]!=null)[0];
+ const m=await(await api(req('/api/market?id='+id),env)).json();
+ assert.equal(m.score.psa9.score,d.scores[id][1]);assert.equal(m.score.psa9.parts.length,5);assert.match(m.score.psa9.rating,/Strong|Good|Fair|Weak|Poor/);
+});
