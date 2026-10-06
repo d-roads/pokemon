@@ -41,9 +41,10 @@ export function parsePage(html){
 }
 
 export function parseMarket(html,card,now=new Date().toISOString()){
- if(card.vintage&&!card.sourceVerified)throw new Error('An exact source match is required before this vintage card can be priced.');
+ if((card.vintage||card.modern)&&!card.sourceVerified)throw new Error('An exact source match is required before this card can be priced.');
  const page=parsePage(html);
- if(card.vintage&&!matchesCard(page.name,card))throw new Error('The source page does not match this vintage card and printing.');
+ if((card.vintage||card.modern)&&!matchesCard(page.name,card))throw new Error('The source page does not match this card and printing.');
+ if(card.modern){const words=s=>String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f'’‘]/g,'').replace(/[^a-z0-9]+/g,' ').trim();if(![card.name,...(card.nameAliases||[])].some(name=>(' '+words(page.name)+' ').includes(' '+words(name)+' ')))throw new Error('The source page names a different card.');}
  if(!Object.keys(page.guide).length&&!page.rows.length)throw new Error('The price source format could not be read.');
  const market=expandCapture(classifyCapture({...page,url:card.source,fetchedAt:now},card),card);
  return {...market,status:'refreshed'};
@@ -55,7 +56,7 @@ export function parseSet(html,cards){
   const name=htmlText(title),n=name.match(/#([A-Z]*\d+[a-z]?)(?![a-z0-9])/i)?.[1]?.toUpperCase();if(!n||name.includes('['))continue;
   const normalize=n=>String(n).toUpperCase().replace(/^([A-Z]*)0+(?=\d)/,'$1');
   const card=cards.find(c=>normalize(c.number)===normalize(n));if(!card)continue;
-  if(card.vintage&&(!card.sourceVerified||!matchesCard(name+' '+card.setName,card)))continue;
+  if((card.vintage||card.modern)&&(!card.sourceVerified||!matchesCard(name+' '+card.setName,card)))continue;
   const values=[...row.matchAll(/<td\b[^>]*class=["'][^"']*\bprice\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/gi)].map(x=>dollars(x[1]));
   if(values.length<3||!values[0])continue;
   result[card.id]={number:card.number,guide:{raw:values[0],grade9:values[1],psa10:values[2]},sales:[],observedAt:new Date().toISOString(),source:'PriceCharting',sourceUrl:card.source,status:'refreshed'};

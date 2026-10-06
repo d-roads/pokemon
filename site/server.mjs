@@ -19,13 +19,16 @@ const wrap=sql=>({bind(...values){return statement(sql,values)},...statement(sql
 function statement(sql,values){return {all:async()=>({results:sqlite.prepare(sql).all(...values)}),first:async()=>sqlite.prepare(sql).get(...values)||null,run:async()=>sqlite.prepare(sql).run(...values)};}
 const DB={prepare:wrap,batch:async items=>{sqlite.exec('BEGIN');try{const result=[];for(const s of items)result.push(await s.run());sqlite.exec('COMMIT');return result;}catch(e){sqlite.exec('ROLLBACK');throw e;}}};
 const PORT=Number(process.env.PORT||5173);
+const HOST=process.env.HOST||'127.0.0.1';
 const env={DB,LOCAL_USER_ID:'local-owner',SENTRY_DSN:process.env.SENTRY_DSN,SENTRY_ENV:process.env.SENTRY_ENV,NETWORK_DISABLED:/127\.0\.0\.1:9\b/.test(process.env.HTTPS_PROXY||process.env.HTTP_PROXY||'')};
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.json':'application/json'};
 const SHARED_MODULES=new Set(['analysis.mjs','portfolio.mjs']);
 const server=createServer(async(req,res)=>{
  try{
   const host=req.headers.host;
-  if(![`localhost:${PORT}`,`127.0.0.1:${PORT}`].includes(host)){res.writeHead(400);res.end('Invalid host');return;}
+  const allowedHosts=new Set([`localhost:${PORT}`,`127.0.0.1:${PORT}`]);
+  const allowedByPort=HOST==='0.0.0.0'&&host?.endsWith(`:${PORT}`);
+  if(!allowedHosts.has(host)&&!allowedByPort){res.writeHead(400);res.end('Invalid host');return;}
   const url=new URL(req.url,'http://'+host),gzip=/\bgzip\b/.test(req.headers['accept-encoding']||'');
   if(url.pathname.startsWith('/api/')){
    const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>8192){res.writeHead(413);res.end();return;}chunks.push(chunk);}
@@ -59,5 +62,5 @@ async function scheduledScan(){
 }
 const timer=setInterval(scheduledScan,60000);setTimeout(scheduledScan,15000);
 
-server.listen(PORT,'127.0.0.1',()=>console.log(`FutureSight is ready at http://127.0.0.1:${PORT}`));
+server.listen(PORT,HOST,()=>console.log(`FutureSight is ready at http://${HOST==='0.0.0.0'?'127.0.0.1':HOST}:${PORT}`));
 for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>{clearInterval(timer);server.close(()=>{sqlite.close();process.exit(0)});});

@@ -2,7 +2,15 @@
 
 *Formerly Primal Watch.*
 
-Updated: October 6, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. The repository is authoritative.
+Updated: October 6, 2026 Pacific. Repository: `d-roads/pokemon`. The repository is authoritative.
+
+## Sword & Shield and modern expansions — October 6, 2026
+
+- Task 1 adds 28 released English Sword & Shield era sets and subsets, 3,712 cards, and 2,290 eligible rare/promo entries. The audit has 2,285 captured exact products, 134,238 accepted sale rows (70,913 labeled eBay), and zero invalid accepted rows. Five entries lack a saved product capture. Coverage and audit reports are `tools/research/modern-coverage-swsh.json` and `tools/research/modern-audit-swsh.json`. Public pages do not expose the complete eBay archive.
+- Exact product identity, collector number, native printing, and sale grade are checked before a market observation is used. McDonald's 2022's six holo-only cards and nine non-holo cards are handled separately. Unmatched cards have no supported price or investment score. PSA 10/9 historical holdouts passed for 98/47 cards; those tests do not validate future returns.
+- Task 2 was started manually after the 6:00 AM Pacific scheduled runner failed to start Codex. It adds 26 released English Scarlet & Violet and Mega Evolution sets/subsets through the 30th Celebration release, 4,765 cards, and 2,294 eligible browse entries. Of those, 2,293 have verified product captures: 200,969 accepted sale rows (137,069 labeled eBay), with zero invalid accepted rows. Paradise Resort SVP 045 lacks a standard-print market product; its Quarter Finalist stamped listing is deliberately excluded. Coverage and audit reports are `tools/research/modern-coverage-later.json` and `tools/research/modern-audit-later.json`.
+- Scores pass the evidence gate for 1,359 PSA 10, 1,281 PSA 9, and 2,237 raw modern cards. Historical trend holdouts pass for 201, 148, and 2 respectively; these do not validate future returns. The expanded card information view is shared by WOTC, Sword & Shield, Scarlet & Violet, and Mega Evolution cards. All 120 Node tests pass, and the Worker builds at 188.6 MB uncompressed; hosted deployment may require a smaller data-loading design. The 6:00 AM failure log remains only as task history; do not rerun the scheduled job.
+- Both branches are on GitHub: `codex/sword-shield-cards-sales` is based on `main`, and `codex/scarlet-violet-mega-cards-sales` is based on the Task 1 branch. Review them separately in that order. The GitHub integration returned HTTP 403 when asked to open a draft pull request, so no PR was created.
 
 
 ## FutureSight rebrand and opening animation — October 6, 2026

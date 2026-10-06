@@ -1,0 +1,62 @@
+{
+  "checkedAt": "2026-10-06T13:57:56.526Z",
+  "eligible": 2290,
+  "captured": 2285,
+  "sales": 134238,
+  "ebaySales": 70913,
+  "invalidSales": [],
+  "grades": {
+    "psa10": {
+      "scored": 818,
+      "medianScore": 58,
+      "forecasts": 98,
+      "medianAcceptedHoldoutError": 0.1983410492784326,
+      "medianAcceptedBaselineError": 0.23838653420559186,
+      "withheld": {
+        "Not enough information": 1655,
+        "Trend did not pass a held-out sales check against an unchanged-price baseline.": 177,
+        "Needs 8 sale days spanning 6 months, with a sale in the last 90 days.": 349,
+        "Refresh sales before projecting a trend.": 5,
+        "Trend is too extreme to extrapolate reliably.": 5,
+        "Not enough matching training sales to validate a trend.": 1
+      }
+    },
+    "psa9": {
+      "scored": 584,
+      "medianScore": 59,
+      "forecasts": 47,
+      "medianAcceptedHoldoutError": 0.2098419470921637,
+      "medianAcceptedBaselineError": 0.24761904761904763,
+      "withheld": {
+        "Not enough information": 1869,
+        "Refresh sales before projecting a trend.": 5,
+        "Needs 8 sale days spanning 6 months, with a sale in the last 90 days.": 257,
+        "Trend did not pass a held-out sales check against an unchanged-price baseline.": 111,
+        "Trend is too extreme to extrapolate reliably.": 1
+      }
+    },
+    "raw": {
+      "scored": 2204,
+      "medianScore": 59,
+      "forecasts": 5,
+      "medianAcceptedHoldoutError": 0.24736211501209696,
+      "medianAcceptedBaselineError": 0.24787945076951967,
+      "withheld": {
+        "Not enough information": 122,
+        "Needs 8 sale days spanning 6 months, with a sale in the last 90 days.": 1816,
+        "Trend did not pass a held-out sales check against an unchanged-price baseline.": 321,
+        "Refresh sales before projecting a trend.": 5,
+        "Trend is too extreme to extrapolate reliably.": 21
+      }
+    }
+  },
+  "missing": [
+    "swshp-SWSH016",
+    "swshp-SWSH112",
+    "swshp-SWSH195",
+    "swsh45-60",
+    "swsh6-118"
+  ],
+  "completeEbayHistory": false,
+  "forecastLimitation": "Holdouts test the end of the captured trailing year. They do not validate 1–3 year investment returns. Scores are uncalibrated historical screens, not probabilities of profit."
+}

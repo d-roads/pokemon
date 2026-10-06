@@ -1,5 +1,5 @@
 // Listings that are not a single, English, standard print of the card.
-export const EXCLUDED_LISTING=/\blot\b|bundle|\bfake\b|proxy|replica|custom|jumbo|oversized|reverse[ -]?holo|cosmos|pre-?release|\bleague\b|stamped|\bstamp\b|championship|\bwinner\b|crosshatch|\bstaff\b|signed|autograph|japanese|\bjpn\b|\bjap\b|\bger\b|german|french|\bfr\b|korean|chinese|italian|spanish|portuguese/i;
+export const EXCLUDED_LISTING=/\blot\b|bundle|\bfake\b|proxy|replica|custom|jumbo|oversized|reverse[ -]?holo|\brev[\/-]holo\b|cosmos|pre-?release|\bleague\b|stamped|\bstamp\b|championship|\bwinner\b|crosshatch|\bstaff\b|signed|autograph|japanese|\bjpn\b|\bjap\b|\bger\b|german|french|\bfr\b|korean|chinese|italian|spanish|portuguese/i;
 export const collector=n=>String(n).toUpperCase().replace(/\s/g,'').replace(/^([A-Z]*)0+(?=\d)/,'$1');
 export function gradeOf(title){
  if(/\b(?:CGC|BGS|BVG|Beckett|HGA|DSG|GRA|KSA|ACE|TAG|SGC|GMA|PCA|AGS|CGS)\b|\bPSA\s*(?:9|10)\s*\/\s*(?:9|10)\b/i.test(title))return null;
@@ -22,12 +22,26 @@ export function conditionOf(title){
 }
 export function matchesCard(title,card){
  let checkedTitle=card.nativeReverse?title.replace(/reverse[ -]?(?:holo|foil)/gi,''):title;
+ if(card.nativeStamp==='Snowflake'){
+  if(!/snowflake/i.test(title))return false;
+  checkedTitle=checkedTitle.replace(/\bstamp(?:ed)?\b/gi,'');
+ }
+ if(card.nativeStamp==='Set logo')checkedTitle=checkedTitle.replace(/\b(?:pre[ -]?release|stamp(?:ed)?)\b/gi,'');
+ if(card.nativeCosmos)checkedTitle=checkedTitle.replace(/\bcosmos\b/gi,'');
+ if(card.nativeWorlds)checkedTitle=checkedTitle.replace(/\bworld(?:s| championships?)?\s*(?:championships?|2026)?\b/gi,'');
  if(card.setId==='bp'){
   if(card.nativeWinner){if(!/\bwinners?\b/i.test(title)||/\bnon[ -]?winner/i.test(title))return false;checkedTitle=checkedTitle.replace(/\bwinners?\b/gi,'');}
   else checkedTitle=checkedTitle.replace(/\bnon[ -]?winner/gi,'');
   checkedTitle=checkedTitle.replace(/\bstamp(?:ed)?\b/gi,'');
  }
+ // Exclusion words inside the official name (Iron Bundle, Unfair Stamp, etc.)
+ // describe the card, while separate lot and printing terms still disqualify a sale.
+ if(card.modern&&card.name)checkedTitle=checkedTitle.replace(new RegExp(card.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),'Card Name');
  if(EXCLUDED_LISTING.test(checkedTitle))return false;
+ if(card.modern){const words=s=>String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f'’‘]/g,'').replace(/[^a-z0-9]+/g,' ').trim();if(![card.name,...(card.nameAliases||[])].some(name=>(' '+words(title)+' ').includes(' '+words(name)+' ')))return false;}
+ if(card.nativeNonHolo&&/\bholo(?:graphic)?\b/i.test(title.replace(/\bnon[ -]?holo\b/gi,'')))return false;
+ if(card.nativeHolo&&/\bnon[ -]?holo\b/i.test(title))return false;
+ if(card.category==='Classic Collection'&&!/celebrations|celebration|25th|30th|25 year|30 year|2021.*reprint|2026.*reprint|classic collection/i.test(title))return false;
  if(card.vintage){
   const firstEdition=/\b1st\b|\b(?:first|1\.?)[ -]*(?:ed(?:ition)?\.?|print(?:ing)?)\b/i.test(title);
   if(firstEdition!==!!card.nativeFirstEdition)return false;
@@ -47,13 +61,16 @@ export function matchesCard(title,card){
    if(!new RegExp('(?:#\\s*0*'+mark+'|\\b0*'+mark+'\\b)','i').test(title.replace(/\bPSA\s*\d+/gi,'')))return false;
   }
  }
- const titleAnd=(title.match(/\s&\s/g)||[]).length,nameAnd=(String(card.name||'').match(/\s&\s/g)||[]).length;if(titleAnd>nameAnd)return false;
+ const titleAnd=(title.match(/\s&\s/g)||[]).length,nameAnd=(String(card.name||'').match(/\s&\s/g)||[]).length;
+ const setName=String(card.setName||''),marketSetName=card.setId==='sve'?'Scarlet & Violet Energy':card.setId==='sv3pt5'?'Scarlet & Violet 151':setName;
+ const setAnd=card.modern&&title.toLowerCase().includes(marketSetName.toLowerCase())?(marketSetName.match(/\s&\s/g)||[]).length:0;
+ if(titleAnd>nameAnd+setAnd)return false;
  const expected=collector(card.number),prefix=expected.match(/^[A-Z]+/)?.[0]||'',total=prefix+card.printedTotal;
  if(/^[A-Z!?]$/.test(expected)){const mark=expected.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return new RegExp('(?:\\[\\s*'+mark+'\\s*\\]|(?:^|[^A-Z0-9])'+mark+'\\s*\\/\\s*'+card.printedTotal+'(?!\\d))','i').test(title);}
- const numbered=[...title.matchAll(/\b((?:XY|RC|SV|SH|SL|AR|H)?\s*\d+[a-z]?)\s*\/\s*((?:XY|RC|SV|SH|SL|AR|H)?\s*\d+[a-z]?)\b/gi)];
- if(!expected.startsWith('XY')&&numbered.length)return numbered.every(m=>collector(m[1])===expected&&collector(m[2])===total);
+ const numbered=[...title.matchAll(/\b((?:SWSH|MEP|SVP|GG|TG|XY|RC|SV|SH|SL|AR|H)?\s*\d+[a-z]?)\s*\/\s*((?:SWSH|MEP|SVP|GG|TG|XY|RC|SV|SH|SL|AR|H)?\s*\d+[a-z]?)\b/gi)];
+ if(!expected.startsWith('XY')&&numbered.length)return numbered.every(m=>collector(m[1])===expected&&(!card.modern||card.printedTotal!=null?collector(m[2])===total:true));
  if(expected.startsWith('XY'))return [...title.matchAll(/\bXY\s*0*(\d+)(?![a-z\d])/gi)].some(m=>'XY'+Number(m[1])===expected);
- const parts=expected.match(/^([A-Z]*)(\d+)([A-Z]?)$/);return parts?new RegExp('#?\\s*'+parts[1]+'\\s*0*'+parts[2]+parts[3]+'(?![a-z0-9])','i').test(title):false;
+ const parts=expected.match(/^([A-Z]*)(\d+)([A-Z]?)$/);return parts?new RegExp('(?:#|'+(card.setId==='mep'?'MEP':'')+')?\\s*'+parts[1]+'\\s*0*'+parts[2]+parts[3]+'(?![a-z0-9])','i').test(title):false;
 }
 export function makeSale({date,title,price,source,listingUrl,marketplace},card){
  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date))||!(price>0)||!matchesCard(title,card))return null;
