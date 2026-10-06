@@ -8,8 +8,10 @@ import {analyze,gradeNames,trendProjection} from '../lib/analysis.mjs';
 import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE} from '../lib/portfolio.mjs';
 import {topMovers} from '../lib/movers.mjs';
 import {potentialInvestments} from '../lib/invest.mjs';
+import {investmentScores} from '../lib/score.mjs';
 const investData=potentialInvestments(cards.map(c=>[c,snapshots[c.id]]));
 const moverData=topMovers(cards.map(c=>[c,snapshots[c.id]]),'week');
+const scoreData=investmentScores(cards.map(c=>[c,snapshots[c.id]]));
 
 // Exercise the UI's controls and rendered output without a browser runtime.
 function workspace(){
@@ -24,7 +26,7 @@ function workspace(){
  for(const m of html.matchAll(/id="([^"]+)"/g))elements.set('#'+m[1],new Element());
  const categories=[...html.matchAll(/data-category="([^"]+)"/g)].map(m=>{const e=new Element();e.dataset.category=m[1];return e;});
  const document={querySelector:s=>elements.get(s)||null,querySelectorAll:s=>s==='[data-category]'?categories:[]};
- const responses={'/api/catalog':{cards,sets,series,markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/movers':moverData,'/api/investments':investData,'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
+ const responses={'/api/catalog':{cards,sets,series,markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/movers':moverData,'/api/investments':investData,'/api/scores':{grades:scoreData.grades,scores:scoreData.scores},'/api/market':{market:null,score:null},'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
  const context=vm.createContext({document,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,fetch:async url=>({ok:true,json:async()=>responses[url.split('?')[0]]||{}})});
  const source=readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/^import .*;\s*$/gm,'').replace(/init\(\);\s*$/,'');
  vm.runInContext(source,context);
@@ -92,5 +94,41 @@ test('Investments lists picks with their signals and character demand, by grade'
 });
 test('Settings offers persistent light, dark, and soft-contrast appearances',async()=>{
  const ui=workspace();await ui.run('init()');ui.e('#settings-nav').onclick();assert.equal(ui.e('#settings-view').hidden,false);assert.equal(ui.e('#page-title').textContent,'Settings');
- const html=ui.e('#settings-view').innerHTML;assert.match(html,/Light/);assert.match(html,/Dark/);assert.match(html,/Soft contrast/);assert.match(html,/saved in this browser/);
+ const html=ui.e('#settings-view').innerHTML;assert.match(html,/Terminal/);assert.match(html,/Light/);assert.match(html,/Soft contrast/);assert.match(html,/saved in this browser/);
+});
+
+test('Advanced filters screen by era, price, activity and investment score, and the old $250–$350 toggle is gone',async()=>{
+ const ui=workspace();await ui.run('init()');await ui.run('loadScores()');
+ assert.doesNotMatch(readFileSync(new URL('../public/index.html',import.meta.url),'utf8'),/budget|250–\$350/);
+ ui.e('#set-select').onchange({target:{value:'all'}});ui.run("state.category='all';updateView();");
+ const total=ui.run('filteredCards().length');assert.equal(total,4260);
+ // Price range for the selected grade
+ ui.run("state.filters.min=100;state.filters.max=500;applyFilters();");
+ const priced=ui.run("filteredCards().map(c=>analyze(state.markets[c.id],state.grade).current)");
+ assert.ok(priced.length>0&&priced.every(p=>p>=100&&p<=500));assert.match(ui.e('#active-filters').innerHTML,/\$100–\$500 · PSA 9/);
+ // Activity score
+ ui.run("state.filters.activity=60;applyFilters();");
+ assert.ok(ui.run("filteredCards().every(c=>analyze(state.markets[c.id],state.grade).score>=60)"));
+ // Investment score, shown in each row
+ ui.run("state.filters={min:null,max:null,activity:0,invest:70};applyFilters();");
+ const ids=ui.run('filteredCards().map(c=>c.id)');assert.ok(ids.length>20);
+ assert.ok(ids.every(id=>scoreData.scores[id][1]>=70));assert.match(ui.e('#card-list').innerHTML,/score-pill (good|strong)/);assert.match(ui.e('#active-filters').innerHTML,/Inv\. score 70\+/);
+ // Sorting by investment score
+ ui.e('#sort').onchange({target:{value:'invest'}});const sorted=ui.run('filteredCards().map(c=>scoreOf(c.id))');assert.deepEqual(sorted,[...sorted].sort((a,b)=>b-a));
+ // Era chips: removing eras narrows the screen, and the last era can't be removed
+ ui.run("toggleEra('EX');toggleEra('DP');toggleEra('BW');toggleEra('SM');");assert.equal(ui.run('state.setId'),'era:XY');
+ assert.ok(ui.run("filteredCards().every(c=>c.series==='XY')"));ui.run("toggleEra('XY')");assert.equal(ui.run('state.setId'),'era:XY');
+ ui.run("toggleEra('SM')");assert.equal(ui.run('state.setId'),'all');assert.equal(ui.run('state.eras.join()'),'XY,SM');
+ assert.ok(ui.run("filteredCards().every(c=>['XY','SM'].includes(c.series))"));assert.equal(ui.e('#page-title').textContent,'Explore 2 eras');
+ // Clearing restores everything
+ ui.e('#reset-filters').onclick();assert.equal(ui.run('filterCount()'),0);assert.equal(ui.run('state.eras.length'),5);
+});
+test('Card detail shows the investment score with its breakdown',async()=>{
+ const ui=workspace();await ui.run('init()');await ui.run('loadScores()');
+ const id=Object.entries(scoreData.scores).find(([,v])=>v[1]!=null)[0];
+ ui.run(`state.scoreDetail[${JSON.stringify(id)}]=${JSON.stringify(Object.fromEntries(Object.entries(scoreData.full.get(id))))};state.selected=${JSON.stringify(id)};renderDetail();`);
+ const html=ui.e('#detail').innerHTML;assert.match(html,/Investment score/);assert.match(html,new RegExp('<strong>'+scoreData.scores[id][1]+'</strong>'));
+ for(const label of ['Demand','Momentum','Value','Liquidity','Stability'])assert.match(html,new RegExp(label));
+ assert.match(html,/not a forecast or investment advice/);assert.match(html,/Activity score/);
+ const unscored=cards.find(c=>c.eligible&&c.setId==='xy5'&&scoreData.scores[c.id]?.[1]==null).id;ui.run(`state.selected='${unscored}';renderDetail();`);assert.match(ui.e('#detail').innerHTML,/Investment score[\s\S]*—/);
 });
