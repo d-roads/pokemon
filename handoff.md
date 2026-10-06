@@ -81,6 +81,16 @@ Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. 
 - Method text updated in README and the in-app dialog. Tests: 101/101 (new scarcity unit test).
 - Restart the local server after copying (it loads `lib/` at startup).
 
+### Expanded card reading view (October 6)
+
+- Collector's request: expand the card info section to cover most of the page with a clean, readable layout.
+- An **expand** icon in the card panel header (next to the grade) opens the same panel as a reading view: fixed over the page (inset ~3–4% on desktop, max 1440 px wide; full screen under 790 px) with a blurred backdrop.
+- Layout: sticky top bar (card name, Raw NM / PSA 9 / PSA 10 tabs, "n of N", previous/next, close); hero row (large image and name | buy target, metrics, actions); then two columns: investment score, buy limit, sales coverage, five-year scenarios | wider sales chart (640×220), price history (720×230) and up to 24 recent sales (instead of 8). Larger type throughout.
+- Esc, the close button or a click on the backdrop closes it and returns focus to the expand button; ← / → step through the filtered list; leaving Browse/Watchlist closes it. The rest of the page is `inert` while open.
+- `renderDetail` now builds named sections and composes them in the normal order or the reading-view layout, so both stay in sync. `chart()` and `historyChart()` take a `wide` flag.
+- Verified in headless Chromium at 1440×900, 1280×800 (Light) and 390×844: no page errors. New UI test; 102/102 passing.
+- Noticed, not changed: the "Simple trend projection" can show $0.00 for 1Y–3Y when one outlier sale drags the straight-line slope far negative (e.g. Wailord EX PSA 9, −$300/yr, floored at 0). Same in the normal panel. Candidate fix: project on log price or drop the outlier band the score's momentum already ignores.
+
 ## Earlier sessions (summary)
 
 ### EX and Diamond & Pearl through HGSS catalog and market data
@@ -166,6 +176,7 @@ Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. 
 
 ## Suggested next session
 
+1. Ask whether the trend projection should be fixed so one outlier sale can't drive it to $0.00.
 1. Ask whether the 12% grade-scarcity weight feels right, and whether very low-pop cards (under 30 graded) should get a bonus instead of counting as average.
 1. Ask the collector how the terminal look, the screener layout and the score weights feel with real images. Tune `SCORE_RULES` in `site/lib/score.mjs` if wanted (weights, $25 cap, momentum cap).
 2. Check the redesign on the collector's own desktop and phone with real card images and fonts (sandbox screenshots used placeholders).
@@ -181,6 +192,7 @@ Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. 
 - `cc7fdca` — Replace the $250–$350 toggle with an advanced screener
 - `f665231` — Restyle Primal Watch as a trading terminal
 - `dd7213c` — Add PSA grade scarcity to the PSA 9 and PSA 10 investment score
+- Reading view — Expand card details into a full-page reading view
 - Final commit — this handoff update
 
 Previous session: `70d7339` (EX through HGSS catalog), `49f7d73` (appearance settings and era-scoped market screens).

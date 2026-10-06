@@ -174,3 +174,20 @@ test('Card detail shows the investment score with its breakdown',async()=>{
  assert.match(html,/not a forecast or investment advice/);assert.match(html,/Activity score/);
  const unscored=cards.find(c=>c.eligible&&c.setId==='xy5'&&scoreData.scores[c.id]?.[1]==null).id;ui.run(`state.selected='${unscored}';renderDetail();`);assert.match(ui.e('#detail').innerHTML,/Investment score[\s\S]*—/);
 });
+
+test('Card details expand into a reading view with grade tabs, previous/next and close',async()=>{
+ const ui=workspace();await ui.run('init()');ui.run("state.selected='xy5-147';state.grade='psa9';renderDetail()");
+ assert.match(ui.e('#detail').innerHTML,/id="detail-focus"/);assert.doesNotMatch(ui.e('#detail').innerHTML,/focus-bar/);
+ ui.e('#detail-focus').onclick();
+ const html=ui.e('#detail').innerHTML;assert.equal(ui.run('state.focus'),true);assert.equal(ui.e('#detail-backdrop').hidden,false);
+ assert.match(html,/class="focus-bar"/);assert.match(html,/class="focus-grid"/);assert.match(html,/Wailord EX/);
+ for(const part of ['Investment score','Reported sales','Recent sales','Sales coverage','Five-year scenarios'])assert.ok(html.includes(part),part);
+ assert.match(html,/data-focus-grade="psa10"/);assert.match(html,/sale-chart wide/);
+ const list=ui.run('filteredCards().map(c=>c.id)'),i=list.indexOf('xy5-147');assert.match(html,new RegExp(`${i+1} of ${list.length}`));
+ // Up to 24 sales in the reading view instead of 8.
+ const rows=(html.match(/class="sale-row"/g)||[]).length,all=ui.run("analyze(state.markets['xy5-147'],'psa9').all.length");assert.equal(rows,Math.min(24,all));
+ ui.e('#focus-next').onclick();await new Promise(r=>setImmediate(r));assert.equal(ui.run('state.selected'),list[i+1]);assert.equal(ui.run('state.focus'),true,'stays expanded while stepping');
+ ui.run("state.view='dex';updateView()");assert.equal(ui.run('state.focus'),false,'leaving Browse closes the reading view');
+ ui.run("state.view='browse';updateView();setFocus(true);setFocus(false)");assert.equal(ui.e('#detail-backdrop').hidden,true);assert.doesNotMatch(ui.e('#detail').innerHTML,/focus-bar/);
+});
+
