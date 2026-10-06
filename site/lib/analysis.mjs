@@ -4,7 +4,35 @@ const DAY=86400000,YEAR_DAYS=365.2425;
 
 // Daily medians stop a single busy day dominating the regression. A chronological
 // holdout must beat an unchanged-price baseline before extrapolation is shown.
-export function trendProjection(comparable,current,now=Date.now()){
+export function trendProjection(comparable,current,now=Date.now(),history=null){
+ const fromSales=salesProjection(comparable,current,now);
+ if(fromSales.available||!Number.isFinite(current)||current<=0||!history?.length)return fromSales;
+ // Source pages list only the most recent sold rows, so busy modern cards often show a few
+ // weeks of sales. The source's monthly price history then gives the longer trend; it is
+ // only used when it passes the same kind of held-out check, and only as a growth rate
+ // applied to the confident sold median.
+ const fromHistory=historyProjection(history,current,now);
+ return fromHistory.available?fromHistory:{...fromSales,historyReason:fromHistory.reason};
+}
+// history: [[YYYY-MM, dollars]] monthly guide points for one grade.
+export function historyProjection(history,current,now=Date.now()){
+ const fail=reason=>({available:false,rows:[],reason});
+ if(!Number.isFinite(current)||current<=0)return fail('Not enough information');
+ const pts=(history||[]).filter(([ym,v])=>/^\d{4}-\d{2}$/.test(ym)&&Number.isFinite(v)&&v>0).map(([ym,v])=>({ym,x:Date.parse(ym+'-15T00:00:00Z')/DAY,y:Math.log(v)})).filter(p=>Number.isFinite(p.x)&&p.x<=now/DAY+31).sort((a,b)=>a.x-b.x);
+ const recent=pts.filter(p=>now/DAY-p.x<=400);
+ if(recent.length<8||recent.at(-1).x-recent[0].x<180||now/DAY-recent.at(-1).x>75)return fail('Needs 8 months of source price history spanning 6 months, updated in the last 75 days.');
+ const fit=ps=>{const mx=ps.reduce((n,p)=>n+p.x,0)/ps.length,my=ps.reduce((n,p)=>n+p.y,0)/ps.length,sxx=ps.reduce((n,p)=>n+(p.x-mx)**2,0);return {slope:ps.reduce((n,p)=>n+(p.x-mx)*(p.y-my),0)/sxx};};
+ const split=Math.min(recent.length-3,Math.floor(recent.length*.7)),train=recent.slice(0,split),holdout=recent.slice(split),model=fit(train),last=train.at(-1);
+ const actual=p=>Math.exp(p.y),baseline=Math.exp(last.y);
+ const mape=holdout.reduce((n,p)=>n+Math.abs(baseline*Math.exp(model.slope*(p.x-last.x))-actual(p))/actual(p),0)/holdout.length;
+ const baselineMape=holdout.reduce((n,p)=>n+Math.abs(baseline-actual(p))/actual(p),0)/holdout.length;
+ if(!Number.isFinite(mape)||mape>.35||mape>baselineMape+1e-9)return fail('Price history trend did not pass a held-out check against an unchanged-price baseline.');
+ const rate=Math.exp(fit(recent).slope*YEAR_DAYS)-1;
+ if(!Number.isFinite(rate)||rate>1.5||rate<-.8)return fail('Trend is too extreme to extrapolate reliably.');
+ const annualIncrease=current*rate,values=[1,2,3].map(years=>Math.max(0,Math.round((current+annualIncrease*years)*100)/100));
+ return {available:true,basis:'history',rows:[],months:recent.length,spanDays:recent.at(-1).x-recent[0].x,annualRate:rate,annualIncrease,values,validation:{mape,baselineMape,months:holdout.length,spanDays:holdout.at(-1).x-last.x},method:'Monthly source price history (log-linear growth rate) applied to the sold median; illustrative, not a validated multi-year forecast'};
+}
+function salesProjection(comparable,current,now=Date.now()){
  const unique=new Map();
  for(const s of comparable||[]){
   const date=Date.parse(s.date),age=(now-date)/DAY;
@@ -28,7 +56,7 @@ export function trendProjection(comparable,current,now=Date.now()){
  const annualIncrease=fit(points).slope*YEAR_DAYS;
  if(!Number.isFinite(annualIncrease)||annualIncrease/current>1.5||annualIncrease/current<-.8)return fail('Trend is too extreme to extrapolate reliably.');
  const values=[1,2,3].map(years=>Math.max(0,Math.round((current+annualIncrease*years)*100)/100));
- return {available:true,rows,sampleCount:rows.length,saleDays:points.length,spanDays,annualIncrease,values,validation:{mape,baselineMape,saleDays:holdout.length,spanDays:holdout.at(-1).x-train.at(-1).x},method:'Daily-median linear trend; illustrative, not a validated multi-year forecast'};
+ return {available:true,basis:'sales',rows,sampleCount:rows.length,saleDays:points.length,spanDays,annualIncrease,values,validation:{mape,baselineMape,saleDays:holdout.length,spanDays:holdout.at(-1).x-train.at(-1).x},method:'Daily-median linear trend; illustrative, not a validated multi-year forecast'};
 }
 export function analyze(market,grade,discount=15,now=Date.now()){
  const today=Math.floor(now/86400000),age=s=>today-Math.floor(Date.parse(s.date)/86400000),unique=new Map();

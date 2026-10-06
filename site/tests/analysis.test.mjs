@@ -44,3 +44,18 @@ test('Source links keep apostrophes and use verified PriceCharting product names
  assert.equal(url('xy12-53'),'https://www.pricecharting.com/game/pokemon-evolutions/mew-holo-53');
  for(const c of cards)assert.match(c.source,/^https:\/\/www\.pricecharting\.com\/game\/pokemon-[a-z0-9%&-]+\/[a-z0-9%&+.-]+$/,c.id);
 });
+test('Monthly source history fills in a trend when the sold rows only cover a few weeks',()=>{
+ const sales=Array.from({length:20},(_,i)=>({date:new Date(now-(i+1)*86400000).toISOString().slice(0,10),price:200+(i%3)}));
+ const history=Array.from({length:13},(_,i)=>{const d=new Date(Date.UTC(2025,9+i,1));return [d.toISOString().slice(0,7),150*Math.exp(.02*i)];});
+ assert.equal(trendProjection(sales,200,now).available,false);
+ const p=trendProjection(sales,200,now,history);assert.equal(p.available,true);assert.equal(p.basis,'history');
+ assert.ok(Math.abs(p.annualRate-(Math.exp(.02*12*365.2425/(365.2425))-1))<.05);assert.ok(p.values[0]>200&&p.values[2]>p.values[1]);
+ const noisy=history.map(([m],i)=>[m,i%2?100:300]);const q=trendProjection(sales,200,now,noisy);assert.equal(q.available,false);assert.match(q.historyReason,/held-out/);
+ assert.equal(trendProjection(sales,200,now,history.slice(-5)).available,false);assert.equal(trendProjection(sales,null,now,history).available,false);
+});
+test('Mega Evolution and Scarlet & Violet cards point at hosts that carry their images',()=>{
+ const bySet=id=>cards.filter(c=>c.setId===id);
+ for(const id of ['me2pt5','me3','me4','me5'])for(const c of bySet(id))assert.match(c.image,/^https:\/\/assets\.tcgdex\.net\/en\/me\//,c.id);
+ for(const id of ['mee','mep','sve','me55c'])for(const c of bySet(id))assert.doesNotMatch(c.image,/images\.pokemontcg\.io|assets\.tcgdex\.net\/en\/(me\/mep|sv\/sve)\//,c.id);
+ assert.match(cards.find(c=>c.id==='svp-102').image,/limitlesstcg/);assert.match(cards.find(c=>c.id==='me55c-58').image,/30C_CC1_/);
+});

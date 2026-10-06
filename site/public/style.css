@@ -948,3 +948,10 @@ html.intro-pending .brand-mark,html.intro-playing .brand-mark{visibility:hidden}
 .intro-settings .intro-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px}
 .intro-settings .switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer}
 .intro-preview{width:56px;height:56px;flex:none}
+/* Monthly source price line drawn behind the sold-sale dots. */
+.sale-chart .guide-line{fill:none;stroke:var(--warn);stroke-width:1.4;stroke-dasharray:4 4;opacity:.8}
+.chart-legend.small{margin-top:4px;padding:0;font-size:11px}
+.chart-legend .dot-key{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.trend-projection .past-change{margin-top:8px;font-size:11px;color:var(--muted)}
+.trend-projection .past-change b.up{color:var(--up)}
+.trend-projection .past-change b.down{color:var(--down)}
