@@ -36,6 +36,8 @@ Write-Host "FutureSight is running at http://127.0.0.1:$port"
 
 # The tunnel. Its link is printed in a box below once Cloudflare hands it out.
 Write-Host 'Opening the internet link (takes a few seconds)...'
+# cloudflared writes all of its messages to stderr; let them through instead of treating them as errors.
+$ErrorActionPreference = 'Continue'
 & $cloudflared tunnel --no-autoupdate --url "http://127.0.0.1:$port" 2>&1 | ForEach-Object {
   $line = "$_"
   if ($line -match '(https://[a-z0-9-]+\.trycloudflare\.com)') {
