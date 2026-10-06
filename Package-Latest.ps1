@@ -4,12 +4,12 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = [System.IO.Path]::GetFullPath($PSScriptRoot)
 $siteRoot = Join-Path $projectRoot 'site'
 if (-not (Test-Path -LiteralPath (Join-Path $siteRoot 'server.mjs'))) {
-    throw 'Place this script in the primal-watch folder beside site, then run it again.'
+    throw 'Place this script in the app folder beside site, then run it again.'
 }
 
 $temporaryRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
-$stagingRoot = Join-Path $temporaryRoot ('primal-watch-package-' + [guid]::NewGuid().ToString('N'))
-$destination = Join-Path $projectRoot 'primal-watch-latest.zip'
+$stagingRoot = Join-Path $temporaryRoot ('futuresight-package-' + [guid]::NewGuid().ToString('N'))
+$destination = Join-Path $projectRoot 'futuresight-latest.zip'
 
 try {
     New-Item -ItemType Directory -Path $stagingRoot | Out-Null
@@ -40,7 +40,7 @@ finally {
     $resolvedStaging = [System.IO.Path]::GetFullPath($stagingRoot)
     $allowedPrefix = $temporaryRoot.TrimEnd([char[]]'\/') + [System.IO.Path]::DirectorySeparatorChar
     if ($resolvedStaging.StartsWith($allowedPrefix, [System.StringComparison]::OrdinalIgnoreCase) -and
-        [System.IO.Path]::GetFileName($resolvedStaging).StartsWith('primal-watch-package-') -and
+        [System.IO.Path]::GetFileName($resolvedStaging).StartsWith('futuresight-package-') -and
         (Test-Path -LiteralPath $resolvedStaging)) {
         Remove-Item -LiteralPath $resolvedStaging -Recurse -Force
     }

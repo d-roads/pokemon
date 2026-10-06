@@ -59,5 +59,5 @@ async function scheduledScan(){
 }
 const timer=setInterval(scheduledScan,60000);setTimeout(scheduledScan,15000);
 
-server.listen(PORT,'127.0.0.1',()=>console.log(`Primal Watch is ready at http://127.0.0.1:${PORT}`));
+server.listen(PORT,'127.0.0.1',()=>console.log(`FutureSight is ready at http://127.0.0.1:${PORT}`));
 for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>{clearInterval(timer);server.close(()=>{sqlite.close();process.exit(0)});});

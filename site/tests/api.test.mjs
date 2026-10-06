@@ -30,7 +30,7 @@ test('Blocked refresh preserves the saved date and exposes no fake live status',
  const r=await api(req('/api/market?id=xy5-147&refresh=1'),env);assert.equal(r.status,200);const data=await r.json();assert.equal(data.refreshed,false);assert.equal(data.market.observedAt,snapshots['xy5-147'].observedAt);assert.match(data.warning,/unavailable/);
 });
 test('SQLite watchlist remains after closing and reopening the database',async()=>{
- const directory=mkdtempSync(join(tmpdir(),'primal-watch-test-'));const filename=join(directory,'saved.sqlite');
+ const directory=mkdtempSync(join(tmpdir(),'futuresight-test-'));const filename=join(directory,'saved.sqlite');
  let disk=new DatabaseSync(filename);disk.exec(sql);
  await api(req('/api/watchlist','POST',{card_id:'xy5-55',grade:'psa9',target:150}),{DB:dbAdapter(disk)});disk.close();
  disk=new DatabaseSync(filename);const r=await api(req('/api/watchlist'),{DB:dbAdapter(disk)});assert.equal((await r.json()).watchlist[0].target,150);disk.close();
@@ -66,7 +66,7 @@ test('Alert settings keep secrets server-side and validate notification targets'
  const post=b=>api(req('/api/alerts/settings','POST',b,'alert-user'),env);
  assert.equal((await post({enabled:true})).status,400);
  assert.equal((await post({notify:{discord:'https://example.com/hook'}})).status,400);
- let r=await(await post({ebay:{clientId:'Collector-PrimalWa-PRD-abc123',clientSecret:'PRD-secret-value'},enabled:true,intervalMinutes:15,notify:{ntfy:'primal-watch-test'}})).json();
+ let r=await(await post({ebay:{clientId:'Collector-PrimalWa-PRD-abc123',clientSecret:'PRD-secret-value'},enabled:true,intervalMinutes:15,notify:{ntfy:'futuresight-test'}})).json();
  assert.equal(r.settings.ebay.configured,true);assert.equal(r.settings.enabled,true);assert.ok(!JSON.stringify(r).includes('PRD-secret-value'));assert.ok(!JSON.stringify(r).includes('abc123')||r.settings.ebay.clientId.includes('…'));
  r=await(await post({ebay:{clientId:'Collector-PrimalWa-PRD-abc123'},intervalMinutes:60})).json();assert.equal(r.settings.ebay.hasSecret,true);assert.equal(r.settings.intervalMinutes,60);
  const list=await(await api(req('/api/alerts','GET',null,'alert-user'),env)).json();assert.equal(list.alerts.length,0);assert.equal(list.live,true);

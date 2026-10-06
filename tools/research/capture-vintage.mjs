@@ -16,7 +16,7 @@ const norm=s=>s.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').r
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function get(url){
  for(let attempt=0;attempt<3;attempt++){
-  const r=await fetch(url,{signal:AbortSignal.timeout(30000),headers:{'User-Agent':'PrimalWatch vintage catalog research'}});
+  const r=await fetch(url,{signal:AbortSignal.timeout(30000),headers:{'User-Agent':'FutureSight vintage catalog research'}});
   if(r.ok)return r.text();
   if(r.status===429||r.status>=500){await sleep(10000*(attempt+1));continue;}
   throw new Error('HTTP '+r.status+' '+url);

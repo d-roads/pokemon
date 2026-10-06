@@ -101,7 +101,7 @@ test('Investments lists picks with their signals and character demand, by grade'
 test('Scores that cannot load say why: an old server gets a restart message, other failures retry',async()=>{
  const ui=workspace();ui.responses['/api/scores']={__status:404,body:{error:'Not found.'}};await ui.run('init()');await ui.run('loadScores(false)');
  assert.match(ui.e('#error-banner').textContent,/older server code/);assert.equal(ui.e('#error-banner').hidden,false);
- assert.match(ui.e('#detail').innerHTML,/Close the Primal Watch window and start it again/);assert.match(ui.e('#detail').innerHTML,/id="score-retry"/);
+ assert.match(ui.e('#detail').innerHTML,/Close the FutureSight window and start it again/);assert.match(ui.e('#detail').innerHTML,/id="score-retry"/);
  assert.doesNotMatch(ui.e('#detail').innerHTML,/Scores could not be loaded\.</);
  // After the server is restarted, Try again loads the scores and clears the banner.
  ui.responses['/api/scores']={grades:scoreData.grades,scores:scoreData.scores};await ui.run('loadScores()');
@@ -201,3 +201,20 @@ test('Stylesheet avoids backdrop-filter, which made scrolling over overlays run 
  assert.doesNotMatch(css,/backdrop-filter/,'blur behind a scrolling layer is re-computed every frame');
 });
 
+test('FutureSight branding and opening animation are wired safely',()=>{
+ const html=readFileSync(new URL('../public/index.html',import.meta.url),'utf8'),intro=readFileSync(new URL('../public/intro.js',import.meta.url),'utf8'),css=readFileSync(new URL('../public/style.css',import.meta.url),'utf8');
+ assert.match(html,/<title>FutureSight/);assert.doesNotMatch(html,/Primal Watch/);
+ assert.match(html,/<symbol id="fs-glint"/);assert.match(html,/id="brand-mark"[^>]*>.*<use href="#fs-glint"\/>/);
+ assert.ok(html.indexOf('/intro.js')<html.indexOf('/app.js'),'intro runs before the app script');
+ assert.match(html,/prefers-reduced-motion: reduce/,'never auto-plays with reduced motion');assert.match(html,/futuresight-intro-seen/);
+ assert.match(html,/localStorage\.getItem\('primal-watch-theme-v2'\)/,'old theme choice still applies');
+ assert.match(css,/html\.intro-pending::before\{[^}]*animation:intro-failsafe/,'the cover clears itself if the script never runs');
+ assert.doesNotMatch(intro+css,/filter:\s*blur|backdrop-filter/,'no blur during the animation');
+ assert.match(intro,/addEventListener\('pointerdown',skip\)/);assert.match(intro,/addEventListener\('keydown',onKey,true\)/);
+});
+test('Settings shows the opening animation controls when the intro script is present',async()=>{
+ const ui=workspace();await ui.run('init()');
+ let inserted='';ui.e('#settings-view').insertAdjacentHTML=(where,markup)=>{inserted+=markup;};
+ ui.run("globalThis.futureSightIntro={enabled:()=>false,setEnabled(){},play(){}};renderSettings()");
+ assert.match(inserted,/Opening animation/);assert.match(inserted,/id="intro-replay"/);assert.doesNotMatch(inserted,/id="intro-enabled" checked/);
+});

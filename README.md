@@ -1,4 +1,6 @@
-# Primal Watch
+# FutureSight
+
+*Formerly Primal Watch.*
 
 A personal Pokémon TCG card tracker: browse rare cards set by set, see reported sold prices for raw (near mint), PSA 9 and PSA 10 copies, and save a watchlist with buy limits.
 

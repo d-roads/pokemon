@@ -21,7 +21,7 @@ const normNumber=n=>String(n).toUpperCase().replace(/^([A-Z]*)0+(?=\d)/,'$1');
 const normName=s=>String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[♀]/g,' f').replace(/[♂]/g,' m').replace(/\bmega\b/g,'m').replace(/-(ex|gx)\b/g,' $1').replace(/\bdelta species\b/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 
 async function fetchText(url){
- let last;for(let attempt=1;attempt<=4;attempt++){try{const r=await fetch(url,{headers:{Accept:'text/html','User-Agent':'Mozilla/5.0 (compatible; PrimalWatch/1.2; personal collector research)'},signal:AbortSignal.timeout(45000)});if(r.ok){const body=await r.text();if(body.length>20000)return body;}last=new Error('HTTP '+r.status);if(r.status===404)break;}catch(e){last=e;if(e.message==='HTTP 404')break;}await sleep(attempt*5000);}throw last||new Error('Source unavailable');
+ let last;for(let attempt=1;attempt<=4;attempt++){try{const r=await fetch(url,{headers:{Accept:'text/html','User-Agent':'Mozilla/5.0 (compatible; FutureSight/1.2; personal collector research)'},signal:AbortSignal.timeout(45000)});if(r.ok){const body=await r.text();if(body.length>20000)return body;}last=new Error('HTTP '+r.status);if(r.status===404)break;}catch(e){last=e;if(e.message==='HTTP 404')break;}await sleep(attempt*5000);}throw last||new Error('Source unavailable');
 }
 function parseConsole(html){
  const rows=[];for(const match of html.matchAll(/<tr\b([^>]*)>([\s\S]*?)<\/tr>/gi)){

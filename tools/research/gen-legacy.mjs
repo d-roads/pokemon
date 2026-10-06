@@ -20,7 +20,7 @@ const meta=[
 async function json(path){
  let last;
  for(let attempt=1;attempt<=4;attempt++)try{
-  const response=await fetch(base+path,{headers:{Accept:'application/json','User-Agent':'PrimalWatch catalog builder'},signal:AbortSignal.timeout(45000)});
+  const response=await fetch(base+path,{headers:{Accept:'application/json','User-Agent':'FutureSight catalog builder'},signal:AbortSignal.timeout(45000)});
   if(!response.ok)throw new Error('HTTP '+response.status);
   return response.json();
  }catch(error){last=error;await new Promise(resolve=>setTimeout(resolve,attempt*1500));}

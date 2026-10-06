@@ -1,6 +1,6 @@
 # Sales research tooling
 
-These scripts build and audit the public catalog and PriceCharting snapshot used by Primal Watch. Run them from the repository root with Node.js 24 or newer. Captured source pages remain attributed to their original URLs; the app fails closed when a card cannot be matched exactly.
+These scripts build and audit the public catalog and PriceCharting snapshot used by FutureSight. Run them from the repository root with Node.js 24 or newer. Captured source pages remain attributed to their original URLs; the app fails closed when a card cannot be matched exactly.
 
 ## Legacy catalog
 

@@ -64,7 +64,7 @@ export function parseSet(html,cards){
 }
 export async function sourceFetch(url,env){
  if(env.NETWORK_DISABLED)throw new Error('Live sales refresh is unavailable in this workspace. Showing the last researched sales.');
- const r=await fetch(url,{headers:{Accept:'text/html','User-Agent':'PrimalWatch/1.1 (personal collector price tracker)'},signal:AbortSignal.timeout(10000)});
+ const r=await fetch(url,{headers:{Accept:'text/html','User-Agent':'FutureSight/1.1 (personal collector price tracker)'},signal:AbortSignal.timeout(10000)});
  if(!r.ok)throw new Error('The price source is unavailable ('+r.status+'). Showing saved observations.');
  const html=await r.text();if(html.length>3500000)throw new Error('The source response was too large.');return html;
 }

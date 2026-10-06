@@ -1,4 +1,4 @@
-# Primal Watch
+# FutureSight
 
 A personal Pokémon card tracker covering Wizards of the Coast, EX, Diamond & Pearl through HGSS, Black & White, XY, and Sun & Moon eras (1999–2019). Browse every rare card set by set, compare reported sold prices for raw (near mint), PSA 9 and PSA 10 copies, see the week's and month's top movers, screen potential investments, save a watchlist with your own buy limits, keep your collection in the Dex, and get alerts when a watched card is listed at your price.
 
@@ -6,11 +6,15 @@ A personal Pokémon card tracker covering Wizards of the Coast, EX, Diamond & Pe
 
 Requires Node.js 24 or newer. No packages or installation are needed.
 
-Run `node server.mjs` in this folder (or `Start-Primal-Watch.ps1` on Windows), then open http://localhost:5173.
+Run `node server.mjs` in this folder (or `Start-FutureSight.ps1` on Windows), then open http://localhost:5173.
 
-**After copying in new files, close the Primal Watch window and start it again.** The page files are re-read on every request, but the server's API code is loaded only once at startup. A server left running will serve the new page with the old API, and features such as Investment scores will report that the server code is older than the page.
+**After copying in new files, close the FutureSight window and start it again.** The page files are re-read on every request, but the server's API code is loaded only once at startup. A server left running will serve the new page with the old API, and features such as Investment scores will report that the server code is older than the page.
 
-Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-watch.sqlite`. Starting the server only ever adds missing tables, so existing data is kept. Local mode is a single personal workspace and listens only on the loopback address.
+Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-watch.sqlite` (the file keeps its name from before the FutureSight rename, so nothing needs moving). Starting the server only ever adds missing tables, so existing data is kept. Local mode is a single personal workspace and listens only on the loopback address.
+
+## Opening animation
+
+When you open FutureSight in a new tab, Glint (the mascot, an original comet sprite drawn for this app) flies around the screen, does a twirl with a sparkle burst and settles into the logo at the top left. It plays once per tab, any click or key skips it, and it never plays when your system asks for reduced motion. Turn it off or replay it under **Settings → Opening animation**. The code is `public/intro.js`; the artwork is the `fs-glint` symbol in `public/index.html`, shared by the logo and the animation.
 
 ## What's included
 
@@ -33,22 +37,22 @@ Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-wa
 
 ### Optional: error reporting (Sentry)
 
-Primal Watch can report crashes to your own free [Sentry](https://sentry.io) project. It is off unless you turn it on, and it needs no packages: errors are sent with a plain HTTPS request.
+FutureSight can report crashes to your own free [Sentry](https://sentry.io) project. It is off unless you turn it on, and it needs no packages: errors are sent with a plain HTTPS request.
 
 1. Create a Sentry project (platform: Node.js) and copy its DSN.
 2. Copy `.env.example` to `.env` in this folder and paste the DSN after `SENTRY_DSN=`. The `.env` file is never committed.
-3. Restart the app. To check it, run `Invoke-RestMethod -Method Post http://localhost:5173/api/report -ContentType application/json -Body '{"message":"Primal Watch test"}'` in PowerShell (or the equivalent `curl`). It answers `sent: true` and the event appears in Sentry within a minute.
+3. Restart the app. To check it, run `Invoke-RestMethod -Method Post http://localhost:5173/api/report -ContentType application/json -Body '{"message":"FutureSight test"}'` in PowerShell (or the equivalent `curl`). It answers `sent: true` and the event appears in Sentry within a minute.
 
 Only the error type, a trimmed message (links reduced to the site name) and stack frames (file names and line numbers, never folder paths) are sent. Settings, eBay keys, request bodies and your watchlist are never included. Repeats within a minute are skipped and at most 30 reports are sent per hour, so a crash loop cannot use up the free quota. For a hosted Worker, set `SENTRY_DSN` as a secret.
 
 ### Optional: performance checks (Lighthouse)
 
-With Chrome installed, close Primal Watch and run `npm run lighthouse` in this folder. It starts the app, audits the page three times, and writes reports to `.lighthouseci/`. Thresholds in `lighthouserc.json` warn rather than fail. This is the only step that downloads anything, and nothing is added to the app itself.
+With Chrome installed, close FutureSight and run `npm run lighthouse` in this folder. It starts the app, audits the page three times, and writes reports to `.lighthouseci/`. Thresholds in `lighthouserc.json` warn rather than fail. This is the only step that downloads anything, and nothing is added to the app itself.
 
 ### Setting up listing alerts
 
 1. Sign in at [developer.ebay.com](https://developer.ebay.com/my/keys), create an application keyset, and copy the **Production** App ID (Client ID) and Cert ID (Client Secret).
-2. In Primal Watch, open **Alerts**, paste both keys, choose how often to check, and turn on **Scan for new listings automatically**.
+2. In FutureSight, open **Alerts**, paste both keys, choose how often to check, and turn on **Scan for new listings automatically**.
 3. Optional: install the ntfy app, subscribe to a topic name only you know, and enter that topic; or paste a Discord webhook URL. Use **Send a test** to check it.
 
 Alerts run while `node server.mjs` is running. Keys stay in your local database and are never sent back to the page.

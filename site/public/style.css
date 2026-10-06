@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
 /* ===================================================================
-   Primal Watch v3 — trading-terminal design
+   FutureSight v4 — trading-terminal design
    Every colour is a token, so the three appearances only redefine tokens.
    =================================================================== */
 :root{
@@ -56,9 +56,17 @@ a{color:var(--accent-text)}
 /* ---------- Shell: top header (the old sidebar) ---------- */
 .app-shell{display:flex;flex-direction:column;min-height:100vh}
 .sidebar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:28px;height:58px;padding:0 24px;background:var(--header);border-bottom:1px solid var(--line);box-shadow:inset 0 2px 0 var(--accent)}
-.brand{display:flex;align-items:center;gap:10px;color:var(--accent);text-decoration:none;font-weight:700;font-size:19px;letter-spacing:-.4px;white-space:nowrap}
+.brand{display:flex;align-items:center;gap:8px;color:var(--accent);text-decoration:none;font-weight:700;font-size:19px;letter-spacing:-.5px;white-space:nowrap}
 .brand-light{font-weight:500;color:var(--ink)}
-.brand-mark{display:grid;place-items:center;color:var(--accent);filter:drop-shadow(0 0 8px color-mix(in srgb,var(--accent) 35%,transparent))}
+/* Header logo: Glint the mascot, with a soft glow (a gradient, not a filter). */
+.brand-mark{position:relative;display:grid;place-items:center;width:36px;height:36px;margin:-2px 0}
+.brand-mark::before{content:'';position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(closest-side,#7dfbcd38,transparent);pointer-events:none}
+.brand-mark svg{position:relative;overflow:visible;transform-origin:60% 45%}
+.brand:hover .brand-mark svg{animation:glint-bob 1.2s ease-in-out infinite}
+.brand-mark.landed svg{animation:glint-land .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes glint-bob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-2px) rotate(-6deg)}}
+@keyframes glint-land{0%{transform:scale(1.35)}100%{transform:none}}
+.wordmark{display:inline-flex;align-items:baseline}
 .nav-label{display:none}
 .sidebar nav{display:flex;align-items:stretch;height:100%;gap:2px;min-width:0}
 .nav-item{position:relative;display:flex;align-items:center;gap:7px;height:100%;padding:0 12px;border:0;background:none;color:var(--muted);font-size:14px;font-weight:500;white-space:nowrap;transition:color .15s}
@@ -891,3 +899,52 @@ body.detail-open{overflow:hidden}
  .focus .sale-row{grid-template-columns:86px minmax(0,1fr) auto;font-size:12.5px}
  .focus-grid,.focus-hero{gap:16px}
 }
+
+/* ---- Opening animation (public/intro.js) ----
+   Only transform and opacity animate, and there are no blur filters, so it stays smooth while the catalog loads.
+   The head script adds .intro-pending before first paint; this cover hides the page until intro.js takes over,
+   and fades by itself after 5 s in case the script never runs. */
+html.intro-pending::before{content:'';position:fixed;inset:0;z-index:300;background:#05080a;pointer-events:none;animation:intro-failsafe .4s 5s forwards}
+@keyframes intro-failsafe{to{opacity:0;visibility:hidden}}
+html.intro-pending .brand-mark,html.intro-playing .brand-mark{visibility:hidden}
+.intro{position:fixed;inset:0;z-index:300;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;contain:strict}
+.intro-dim{position:absolute;inset:0;background:radial-gradient(900px 600px at 50% 44%,#0f2a24,#05080a 70%)}
+.intro-stars{position:absolute;inset:0}
+.intro-star{position:absolute;width:var(--s);height:var(--s);border-radius:50%;background:#dffcf1;opacity:.15;animation:intro-twinkle 2.4s ease-in-out infinite}
+@keyframes intro-twinkle{50%{opacity:.85;transform:scale(1.4)}}
+.intro-fx{position:absolute;inset:0;pointer-events:none}
+.intro-land{position:fixed;inset:0;z-index:301;pointer-events:none}
+.intro-spark{position:absolute;display:block;clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);will-change:transform,opacity}
+.intro-spark.round{clip-path:none;border-radius:50%}
+.intro-mascot{position:absolute;left:0;top:0;transform:translate(-200px,-200px);will-change:transform}
+.intro-sprite{position:absolute;inset:0;transform-origin:50% 70%}
+.intro-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.intro-glow{position:absolute;inset:-60%;border-radius:50%;background:radial-gradient(closest-side,#fff6c8aa,#7dfbcd55 45%,transparent);opacity:0}
+.intro-ring{position:absolute;inset:0;border-radius:50%;border:2px solid #fff6c8;box-shadow:0 0 0 3px #7dfbcd55,inset 0 0 0 3px #b9a8ff55;opacity:0}
+.intro-svg *{transform-box:fill-box}
+.intro-svg .m-arm-l,.intro-svg .m-arm-r,.intro-svg .m-tail,.intro-svg .m-eyes,.intro-svg .m-gem{transform-origin:center}
+.intro-svg.flying .m-arm-l{animation:glint-flap .22s ease-in-out infinite alternate}
+.intro-svg.flying .m-arm-r{animation:glint-flap .22s ease-in-out infinite alternate-reverse}
+.intro-svg.flying .m-tail{transform-origin:100% 0;animation:glint-tail .3s ease-in-out infinite alternate}
+.intro-svg .m-eyes{animation:glint-blink 2.2s 1s infinite}
+.intro-svg .m-happy{transition:opacity .12s}
+.intro-svg.happy .m-happy{opacity:1}
+.intro-svg.happy .m-eyes{opacity:0;animation:none}
+.intro-svg.happy .m-arm-l{animation:glint-wave .18s ease-in-out infinite alternate}
+.intro-svg.happy .m-arm-r{animation:glint-wave .18s ease-in-out infinite alternate-reverse}
+.intro-svg.happy .m-gem{animation:glint-gem .5s ease-out}
+@keyframes glint-flap{from{transform:rotate(-25deg) translateY(-1px)}to{transform:rotate(25deg) translateY(1px)}}
+@keyframes glint-wave{from{transform:rotate(-40deg) translateY(-3px)}to{transform:rotate(30deg) translateY(-6px)}}
+@keyframes glint-tail{from{transform:scale(1) rotate(0)}to{transform:scale(1.08,.94) rotate(4deg)}}
+@keyframes glint-blink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+@keyframes glint-gem{0%{transform:scale(1)}40%{transform:scale(1.9) rotate(45deg)}100%{transform:scale(1)}}
+.intro-title{position:absolute;left:0;right:0;top:calc(44% + min(19vmin,150px)*.62);display:grid;justify-items:center;gap:6px;opacity:0;pointer-events:none}
+.intro-title span{font:700 clamp(30px,5.4vw,52px)/1 var(--font);letter-spacing:-1.5px;color:#16dc66}
+.intro-title b{font-weight:500;color:#eef2f0}
+.intro-title small{font:600 11px var(--mono);letter-spacing:3px;text-transform:uppercase;color:#86908b}
+.intro-skip{position:absolute;left:0;right:0;bottom:22px;margin:0;text-align:center;font:500 11px var(--mono);letter-spacing:1px;color:#5c6561}
+/* Settings: opening animation */
+.intro-settings{margin-top:18px}
+.intro-settings .intro-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px}
+.intro-settings .switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer}
+.intro-preview{width:56px;height:56px;flex:none}

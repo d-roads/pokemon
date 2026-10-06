@@ -45,7 +45,7 @@ test('Prices include listed shipping and respect the limit',()=>{
  assert.equal(candidates([item({itemWebUrl:'https://evil.example/itm/1'})],groudon,'psa9',2000,s).length,0,'only eBay links');
 });
 test('Settings validation masks keys and accepts ntfy topics or URLs',()=>{
- assert.equal(ntfyUrl('primal-watch-7f3k'),'https://ntfy.sh/primal-watch-7f3k');assert.equal(ntfyUrl('https://ntfy.example.com/my_topic'),'https://ntfy.example.com/my_topic');assert.equal(ntfyUrl('a b'),null);
+ assert.equal(ntfyUrl('futuresight-7f3k'),'https://ntfy.sh/futuresight-7f3k');assert.equal(ntfyUrl('https://ntfy.example.com/my_topic'),'https://ntfy.example.com/my_topic');assert.equal(ntfyUrl('a b'),null);
  const {settings,errors}=updateSettings({},{ebay:{clientId:'Me-App-PRD-1234567',clientSecret:'PRD-s3cret'}});assert.deepEqual(errors,[]);
  const pub=publicSettings(settings);assert.equal(pub.ebay.configured,true);assert.ok(!JSON.stringify(pub).includes('s3cret'));
  assert.equal(updateSettings(settings,{ebay:{clientId:'Me-App-PRD-1234567',clientSecret:''}}).settings.ebay.clientSecret,'PRD-s3cret');
@@ -67,7 +67,7 @@ test('A scan stores each matching listing once and notifies only for new ones',a
   if(String(url).includes('/oauth2/token'))return new Response(JSON.stringify({access_token:'tok',expires_in:7200}),{status:200});
   if(String(url).includes('/item_summary/search')){assert.equal(init.headers.Authorization,'Bearer tok');assert.match(String(url),/price%3A%5B\.\.1600%5D/);return new Response(JSON.stringify({itemSummaries:[item(),item({itemId:'v1|9|0',title:'Primal Groudon EX 151/160 PSA 10',itemWebUrl:'https://www.ebay.com/itm/9'})]}),{status:200});}
   return new Response('ok',{status:200});};
- const settings={enabled:true,ebay:{clientId:'id',clientSecret:'secret'},notify:{ntfy:'primal-watch-test'}};
+ const settings={enabled:true,ebay:{clientId:'id',clientSecret:'secret'},notify:{ntfy:'futuresight-test'}};
  let notified=[];const notify=async found=>{notified.push(...found);};
  const first=await runScan({db,user:'me',cards,marketFor:()=>null,settings,fetchImpl,notify,now:Date.parse('2026-10-01T12:00:00Z')});
  assert.equal(first.error,null);assert.equal(first.checked,1);assert.equal(first.found.length,1);assert.equal(first.found[0].total,1504);assert.equal(notified.length,1);

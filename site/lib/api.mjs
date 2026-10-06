@@ -54,7 +54,7 @@ export async function api(request,env,ctx){
  try{
   const db=database(env),user=env.LOCAL_USER_ID||request.headers.get('oai-authenticated-user-id');
   if(request.method!=='GET' && request.method!=='HEAD'){
-   const origin=request.headers.get('Origin');if(origin&&origin!==url.origin)return json({error:'This action must be made from your Primal Watch page.'},403);
+   const origin=request.headers.get('Origin');if(origin&&origin!==url.origin)return json({error:'This action must be made from your FutureSight page.'},403);
    if(!user)return json({error:'Sign in to save your watchlist.'},401);
   }
   if(path==='/api/catalog' && request.method==='GET'){
@@ -126,7 +126,7 @@ export async function api(request,env,ctx){
   if(path==='/api/alerts/test'&&request.method==='POST'){
    if(env.NETWORK_DISABLED)return json({sent:0,error:'Notifications are unavailable in this workspace.'});
    const settings=await readSettings(db,user);if(!settings.notify.ntfy&&!settings.notify.discord)return json({error:'Add an ntfy topic or a Discord webhook first.'},400);
-   const sample={card_id:'xy5-151',grade:'psa9',card_name:'Primal Groudon EX',set_name:'Primal Clash',number_label:'151/160',title:'Test alert from Primal Watch',total:1500,shipping:0,limit_price:1600,market_price:1999,url:'https://www.ebay.com/'};
+   const sample={card_id:'xy5-151',grade:'psa9',card_name:'Primal Groudon EX',set_name:'Primal Clash',number_label:'151/160',title:'Test alert from FutureSight',total:1500,shipping:0,limit_price:1600,market_price:1999,url:'https://www.ebay.com/'};
    const r=await sendNotifications([sample],settings,env.fetch||fetch);return json(r.sent?{sent:r.sent}:{sent:0,error:'The notification could not be delivered. Check the topic or webhook.'});
   }
   if(path==='/api/movers' && request.method==='GET'){
@@ -182,5 +182,5 @@ export async function api(request,env,ctx){
    return json({ok:true,sent:await task});
   }
   return json({error:'Not found.'},404);
- }catch(e){console.error('Primal Watch API:',e.message);ctx?.waitUntil?.(reportError(env,e,{source:'api',route:path}));return json({error:'Saved data is temporarily unavailable. Please try again.'},503);}
+ }catch(e){console.error('FutureSight API:',e.message);ctx?.waitUntil?.(reportError(env,e,{source:'api',route:path}));return json({error:'Saved data is temporarily unavailable. Please try again.'},503);}
 }

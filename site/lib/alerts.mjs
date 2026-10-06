@@ -168,7 +168,7 @@ export async function sendNotifications(found,settings,fetchImpl=fetch){
   const m=alertMessage(a);
   const topic=ntfyUrl(s.notify.ntfy);
   if(topic)jobs.push(fetchImpl(topic,{method:'POST',headers:{Title:m.title.replace(/[^\x20-\x7e]/g,''),Click:a.url,Tags:'moneybag'},body:m.body,signal:AbortSignal.timeout(10000)}));
-  if(s.notify.discord)jobs.push(fetchImpl(s.notify.discord,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:'Primal Watch',embeds:[{title:m.title.slice(0,250),url:a.url,description:m.body.slice(0,1000),...(a.image?{thumbnail:{url:a.image}}:{})}]}),signal:AbortSignal.timeout(10000)}));
+  if(s.notify.discord)jobs.push(fetchImpl(s.notify.discord,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:'FutureSight',embeds:[{title:m.title.slice(0,250),url:a.url,description:m.body.slice(0,1000),...(a.image?{thumbnail:{url:a.image}}:{})}]}),signal:AbortSignal.timeout(10000)}));
  }
  const results=await Promise.allSettled(jobs);
  return {sent:results.filter(r=>r.status==='fulfilled'&&r.value.ok).length,attempted:jobs.length};

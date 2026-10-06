@@ -3,7 +3,7 @@
     "collect": {
       "url": ["http://localhost:5173/"],
       "startServerCommand": "node server.mjs",
-      "startServerReadyPattern": "Primal Watch is ready",
+      "startServerReadyPattern": "FutureSight is ready",
       "numberOfRuns": 3,
       "settings": {"preset": "desktop"}
     },
