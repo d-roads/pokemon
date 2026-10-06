@@ -21,6 +21,36 @@ test('Sword & Shield includes English main sets, special sets, galleries, vault,
  assert.equal(c.filter(x=>x.setId==='cel25c'&&x.eligible).length,25);
  for(const id of ['fut20','mcd21','cel25','cel25c','pgo','mcd22'])assert.ok(s.some(x=>x.id===id),id);
 });
+test('Scarlet & Violet and Mega Evolution include every released English set through October 2026',()=>{
+ const modernSets=sets.filter(x=>['SV','ME'].includes(x.series));
+ const modernCards=cards.filter(x=>['SV','ME'].includes(x.series));
+ assert.equal(modernSets.length,26);
+ assert.equal(modernCards.length,4765);
+ assert.equal(new Set(modernCards.map(x=>x.id)).size,modernCards.length);
+ for(const set of modernSets)assert.equal(modernCards.filter(x=>x.setId===set.id).length,set.total);
+ for(const id of ['svp','sve','sv3pt5','sv4pt5','sv6pt5','sv8pt5','zsv10pt5','rsv10pt5','me2pt5','me55','me55c'])assert.ok(modernSets.some(x=>x.id===id),id);
+ assert.equal(cards.filter(x=>x.setId==='sve'&&x.eligible).length,16);
+ assert.equal(cards.filter(x=>x.setId==='me55c'&&x.eligible).length,30);
+ assert.equal(cards.find(x=>x.id==='sve-16').numberLabel,'16');
+ assert.equal(modernSets.find(x=>x.id==='sve').slug,'scarlet-%26-violet-energy');
+ assert.equal(modernSets.find(x=>x.id==='sv3pt5').slug,'scarlet-%26-violet-151');
+ assert.ok(matchesCard('Charizard ex #199 Pokemon Scarlet & Violet 151',cards.find(x=>x.id==='sv3pt5-199')));
+ assert.ok(cards.find(x=>x.id==='sv9-190').nameAliases.includes('Spike Energy'));
+ assert.ok(cards.find(x=>x.id==='me2pt5-256').nameAliases.includes("Boss's Orders: Corbeau"));
+ assert.equal(cards.find(x=>x.id==='svp-27').sourceProductSlug,'pikachu-paldea-27');
+ assert.equal(cards.find(x=>x.id==='sv1-23').printing,'Standard / holo');
+ assert.equal(cards.find(x=>x.id==='me4-85').printing,'Standard / non-holo');
+ assert.ok(cards.find(x=>x.id==='me4-85').nameAliases.includes('Magnetic M Energy'));
+ assert.ok(matchesCard('Basic Grass Energy #1 Pokemon Scarlet & Violet Energy',cards.find(x=>x.id==='sve-1')));
+ assert.equal(modernSets.find(x=>x.id==='me55c').slug,'30th-celebration');
+ assert.ok(matchesCard('Charizard 4/102 30th Celebration Classic Collection PSA 9',cards.find(x=>x.id==='me55c-4')));
+ assert.equal(matchesCard('Charizard 4/102 Base Set 1999 PSA 9',cards.find(x=>x.id==='me55c-4')),false);
+ assert.ok(matchesCard('Iron Bundle #58 Pokemon Promo',cards.find(x=>x.id==='svp-58')));
+ assert.equal(matchesCard('Iron Bundle #58 Pokemon Promo 3-card bundle',cards.find(x=>x.id==='svp-58')),false);
+ assert.ok(matchesCard('Unfair Stamp 165/167 Twilight Masquerade',cards.find(x=>x.id==='sv6-165')));
+ assert.equal(matchesCard('Unfair Stamp 165/167 Twilight Masquerade Staff',cards.find(x=>x.id==='sv6-165')),false);
+ assert.ok(matchesCard('Jumbo Ice Cream 109/86 Chaos Rising',cards.find(x=>x.id==='me4-109')));
+});
 test('Modern pricing requires an exact source and a matching identity',()=>{
  const card=cards.find(x=>x.id==='swsh7-215');
  assert.throws(()=>parseMarket('PriceCharting',{...card,sourceVerified:false}),/exact source/);

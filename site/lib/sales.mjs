@@ -31,6 +31,9 @@ export function matchesCard(title,card){
   else checkedTitle=checkedTitle.replace(/\bnon[ -]?winner/gi,'');
   checkedTitle=checkedTitle.replace(/\bstamp(?:ed)?\b/gi,'');
  }
+ // Exclusion words inside the official name (Iron Bundle, Unfair Stamp, etc.)
+ // describe the card, while separate lot and printing terms still disqualify a sale.
+ if(card.modern&&card.name)checkedTitle=checkedTitle.replace(new RegExp(card.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),'Card Name');
  if(EXCLUDED_LISTING.test(checkedTitle))return false;
  if(card.modern){const words=s=>String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f'’‘]/g,'').replace(/[^a-z0-9]+/g,' ').trim();if(![card.name,...(card.nameAliases||[])].some(name=>(' '+words(title)+' ').includes(' '+words(name)+' ')))return false;}
  if(card.nativeNonHolo&&/\bholo(?:graphic)?\b/i.test(title.replace(/\bnon[ -]?holo\b/gi,'')))return false;
@@ -56,7 +59,8 @@ export function matchesCard(title,card){
   }
  }
  const titleAnd=(title.match(/\s&\s/g)||[]).length,nameAnd=(String(card.name||'').match(/\s&\s/g)||[]).length;
- const setAnd=card.modern&&title.toLowerCase().includes(String(card.setName||'').toLowerCase())?(String(card.setName).match(/\s&\s/g)||[]).length:0;
+ const setName=String(card.setName||''),marketSetName=card.setId==='sve'?'Scarlet & Violet Energy':card.setId==='sv3pt5'?'Scarlet & Violet 151':setName;
+ const setAnd=card.modern&&title.toLowerCase().includes(marketSetName.toLowerCase())?(marketSetName.match(/\s&\s/g)||[]).length:0;
  if(titleAnd>nameAnd+setAnd)return false;
  const expected=collector(card.number),prefix=expected.match(/^[A-Z]+/)?.[0]||'',total=prefix+card.printedTotal;
  if(/^[A-Z!?]$/.test(expected)){const mark=expected.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return new RegExp('(?:\\[\\s*'+mark+'\\s*\\]|(?:^|[^A-Z0-9])'+mark+'\\s*\\/\\s*'+card.printedTotal+'(?!\\d))','i').test(title);}

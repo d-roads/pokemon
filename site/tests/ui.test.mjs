@@ -195,9 +195,9 @@ test('Card details expand into a reading view with grade tabs, previous/next and
  ui.run("state.view='dex';updateView()");assert.equal(ui.run('state.focus'),false,'leaving Browse closes the reading view');
  ui.run("state.view='browse';updateView();setFocus(true);setFocus(false)");assert.equal(ui.e('#detail-backdrop').hidden,true);assert.doesNotMatch(ui.e('#detail').innerHTML,/focus-bar/);
 });
-test('Wizards and Sword & Shield cards use the same expanded information view',async()=>{
+test('Wizards and every modern era use the same expanded information view',async()=>{
  const ui=workspace();await ui.run('init()');
- for(const [id,name] of [['base1-4','Charizard'],['swsh7-215','Umbreon VMAX']]){
+ for(const [id,name] of [['base1-4','Charizard'],['swsh7-215','Umbreon VMAX'],['sv1-1','Pineco'],['me1-1','Bulbasaur'],['me55c-4','Charizard']]){
   ui.run(`state.selected=${JSON.stringify(id)};renderDetail();setFocus(true)`);
   const html=ui.e('#detail').innerHTML;
   assert.match(html,/class="focus-grid"/);assert.match(html,new RegExp(name));

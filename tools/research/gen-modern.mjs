@@ -10,9 +10,10 @@ const all=await json('sets/en.json');
 const today=new Date().toISOString().slice(0,10);
 const swshSpecials=new Set(['fut20','mcd21','cel25','cel25c','pgo','mcd22']);
 const mcd22Holos=new Set(['2','3','4','5','7','15']);
+const megaNonHoloEnergy=new Set(['me4-84','me4-85','me4-86']);
 const chosen=all.filter(s=>(group==='swsh'?s.id.startsWith('swsh')||swshSpecials.has(s.id):/^(sv|me|zsv|rsv)/.test(s.id))&&s.releaseDate.replaceAll('/','-')<=today);
 const previous=existsSync(output)?JSON.parse(readFileSync(output,'utf8')):[];
-const specialSlugs={swshp:'promo',svp:'promo',fut20:'promo',cel25:'celebrations',cel25c:'celebrations',pgo:'go',mcd21:'mcdonalds-2021',mcd22:'mcdonalds-2022'};
+const specialSlugs={swshp:'promo',svp:'promo',sve:'scarlet-%26-violet-energy',sv3pt5:'scarlet-%26-violet-151',fut20:'promo',cel25:'celebrations',cel25c:'celebrations',pgo:'go',mcd21:'mcdonalds-2021',mcd22:'mcdonalds-2022'};
 // PriceCharting shortens these product names; the set and printed number still disambiguate them.
 const sourceAliases={
  'swshp-SWSH135':'Zacian LV',
@@ -26,10 +27,16 @@ const sourceAliases={
  'swsh9tg-TG29':'Urshifu VMAX',
  'cel25c-24_A':['Pikachu Birthday','Birthday Pikachu'],
  'pgo-78':"Professor's Research: Professor Willow",
- 'pgo-84':"Professor's Research: Professor Willow"
+ 'pgo-84':"Professor's Research: Professor Willow",
+ 'sv9-190':'Spike Energy',
+ 'me2pt5-256':"Boss's Orders: Corbeau",
+ 'me4-84':'Bubbly W Energy',
+ 'me4-85':'Magnetic M Energy',
+ 'me4-86':'Nitro R Energy'
 };
+const sourceProductSlugs={'svp-27':'pikachu-paldea-27'};
 const slug=s=>specialSlugs[s.id]||s.name.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/['’]/g,'%27').replace(/&/g,'%26').replace(/[^a-z0-9%]+/g,'-').replace(/^-|-$/g,'');
-const parent=s=>s.id==='swsh45sv'?'swsh45':s.id.match(/^(swsh\d+(?:pt\d+)?)(?:tg|gg)$/)?.[1]||s.id;
+const parent=s=>s.id==='swsh45sv'?'swsh45':s.id==='me55c'?'me55':s.id.match(/^(swsh\d+(?:pt\d+)?)(?:tg|gg)$/)?.[1]||s.id;
 const category=(card,set)=>{
  const rarity=card.rarity||'';
  if(/promo/i.test(rarity)||['fut20','mcd21','mcd22'].includes(set.id))return 'Promo';
@@ -49,10 +56,15 @@ for(const s of chosen){
  const cards=raw.map(c=>{const aliases=[];
   if(/\s+\([^)]*\)$/.test(c.name))aliases.push(c.name.replace(/\s+\([^)]*\)$/,''));
   const energyAlias={'Lightning Energy':'Electric Energy','Darkness Energy':'Dark Energy','Metal Energy':'Steel Energy'}[c.name];if(energyAlias)aliases.push(energyAlias);
+  if(/^Basic .+ Energy$/.test(c.name)){
+   aliases.push(c.name.replace(/^Basic /,''));
+   const alternate=c.name.replace(/Lightning/,'Electric').replace(/Darkness/,'Dark').replace(/Metal/,'Steel');
+   if(alternate!==c.name)aliases.push(alternate,alternate.replace(/^Basic /,''));
+  }
   if(sourceAliases[c.id])aliases.push(...[].concat(sourceAliases[c.id]));
-  return {number:c.number,name:c.name,...(c.id!==s.id+'-'+c.number?{catalogId:c.id}:{}),...(aliases.length?{nameAliases:aliases}:{}),...(s.id==='mcd21'||s.id==='mcd22'&&!mcd22Holos.has(c.number)?{nativeNonHolo:true}:s.id==='mcd22'?{nativeHolo:true}:{}),...(c.id==='swshp-SWSH153'?{nativeStamp:'Snowflake'}:{}),rarity:c.rarity||(['fut20','mcd21','mcd22'].includes(s.id)?'Promo':'Unknown'),type:c.types?.[0]||c.supertype,category:category(c,s)};
+  return {number:c.number,name:c.name,...(c.id!==s.id+'-'+c.number?{catalogId:c.id}:{}),...(aliases.length?{nameAliases:aliases}:{}),...(sourceProductSlugs[c.id]?{sourceProductSlug:sourceProductSlugs[c.id]}:{}),...(s.id==='mcd21'||s.id==='mcd22'&&!mcd22Holos.has(c.number)||megaNonHoloEnergy.has(c.id)?{nativeNonHolo:true}:s.id==='mcd22'||group==='later'&&!s.id.startsWith('me')&&c.rarity==='Rare'?{nativeHolo:true}:{}),...(c.id==='swshp-SWSH153'?{nativeStamp:'Snowflake'}:{}),rarity:c.rarity||(['fut20','mcd21','mcd22'].includes(s.id)?'Promo':'Unknown'),type:c.types?.[0]||c.supertype,category:category(c,s)};
  });
- generated.push({id:s.id,slug:slug(p),name:s.name,series:group==='swsh'?'SWSH':s.id.startsWith('me')?'ME':'SV',printedTotal:/promo|classic collection/i.test(s.name)||s.id==='fut20'?null:s.printedTotal||null,total:cards.length,release:s.releaseDate.replaceAll('/','-'),checklistSource:source+'cards/en/'+s.id+'.json',cards});
+ generated.push({id:s.id,slug:slug(p),name:s.name,series:group==='swsh'?'SWSH':s.id.startsWith('me')?'ME':'SV',printedTotal:/promo|classic collection/i.test(s.name)||['fut20','sve'].includes(s.id)?null:s.printedTotal||null,total:cards.length,release:s.releaseDate.replaceAll('/','-'),checklistSource:source+'cards/en/'+s.id+'.json',cards});
  console.log(s.id,s.name,cards.length,cards.filter(c=>/rare|promo/i.test(c.rarity)).length);
 }
 const keep=previous.filter(s=>!generated.some(g=>g.id===s.id));

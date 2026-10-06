@@ -1,9 +1,10 @@
-// Capture every exact-matched modern rare/promo from public PriceCharting pages.
+// Capture every eligible modern card from exact-matched public PriceCharting pages.
 // Resumes per card: node tools/research/capture-modern.mjs swsh [set ids] [--refresh]
 import {readFileSync,writeFileSync,existsSync,renameSync} from 'node:fs';
 import {cards,sets} from '../../site/data/catalog.mjs';
 import {parsePage,parseMarket} from '../../site/lib/provider.mjs';
 import {classifyCapture} from '../../site/lib/capture.mjs';
+import {matchesCard,gradeOf} from '../../site/lib/sales.mjs';
 const era=process.argv[2],eraSets=era==='swsh'?['SWSH']:era==='later'?['SV','ME']:null;
 if(!eraSets)throw new Error('Choose swsh or later.');
 const dir=new URL('../../site/data/',import.meta.url),reportFile=new URL('./modern-coverage-'+era+'.json',import.meta.url);
@@ -30,8 +31,8 @@ for(const set of sets.filter(s=>eraSets.includes(s.series)&&(!selected.length||s
  const entry=report.sets[set.id]={name:set.name,eligible:wanted.length,mapped:0,captured:0,unmatched:[],errors:[],sales:0,ebaySales:0,sourceRows:0};
  try{
   let html='',pages=0;
-  // Some Black Star promos are catalogued under Celebrations rather than Promo.
-  for(const listing of [set.marketSource,...(set.id==='swshp'?['https://www.pricecharting.com/console/pokemon-celebrations']:[])]){
+  // Some Black Star promos and one Scarlet & Violet gold energy are filed under another console.
+  for(const listing of [set.marketSource,...(set.id==='swshp'?['https://www.pricecharting.com/console/pokemon-celebrations']:set.id==='sv1'?['https://www.pricecharting.com/console/pokemon-scarlet-%26-violet-energy']:[])]){
    let cursor='';const cursors=new Set();let listingPages=0;
    do{
     const body=await get(listing+'?view=table'+(cursor?'&cursor='+encodeURIComponent(cursor):''));
@@ -60,12 +61,13 @@ for(const set of sets.filter(s=>eraSets.includes(s.series)&&(!selected.length||s
    let matches=products.filter(p=>[card.name,...(card.nameAliases||[])].some(n=>p.name===norm(n))&&p.number===String(card.number).toUpperCase().replace(/^([A-Z]*)0+(?=\d)/,'$1'));
    const exactNumber=matches.filter(p=>p.rawNumber===String(card.number).toUpperCase());if(exactNumber.length)matches=exactNumber;
    const primary=matches.filter(p=>p.url.includes('/game/pokemon-'+set.slug+'/'));if(primary.length)matches=primary;
+   if(card.sourceProductSlug)matches=matches.filter(p=>p.url.split('/').at(-1)===card.sourceProductSlug);
    const plain=matches.filter(p=>p.variants.length===0);
    const specialty=card.nativeStamp?matches.filter(p=>p.variants.some(v=>/snowflake stamp/i.test(v))):card.nativeHolo?matches.filter(p=>p.holo):/rainbow/i.test(card.rarity)?matches.filter(p=>p.variants.some(v=>/rainbow/i.test(v))):/holo/i.test(card.rarity)?matches.filter(p=>p.holo):[];
-   const preferred=card.nativeStamp||card.nativeHolo?specialty:specialty.length?specialty:plain;
+   const preferred=card.nativeStamp?specialty:card.nativeHolo?(specialty.length?specialty:plain):specialty.length?specialty:plain;
    const intrinsic=v=>/^(holo|rainbow foil|gold foil|professor [a-z ]+)$/i.test(v)||card.name.includes('★')&&/^gold star$/i.test(v)||card.nativeStamp==='Snowflake'&&/^snowflake stamp$/i.test(v);
-   matches=preferred.length?preferred:matches.length===1&&matches[0].variants.every(intrinsic)?matches:[];
-   if(matches.length!==1){entry.unmatched.push({id:card.id,name:card.name,reason:matches.length?'Ambiguous product matches':'No exact standard-print product'});continue;}
+   matches=preferred.length?preferred:matches.length===1&&(card.sourceProductSlug||matches[0].variants.every(intrinsic))?matches:[];
+   if(matches.length!==1){const number=String(card.number).toUpperCase().replace(/^([A-Z]*)0+(?=\d)/,'$1');entry.unmatched.push({id:card.id,name:card.name,reason:matches.length?'Ambiguous product matches':'No exact standard-print product',sameNumber:products.filter(p=>p.number===number).slice(0,8).map(p=>p.url)});if(out[card.id]){delete out[card.id];save(file,out);}delete urls[card.id];continue;}
    const source=matches[0].url;urls[card.id]=source;entry.mapped++;queue.push({...card,source,sourceVerified:true});
   }
   // Each worker processes one card at a time; at most three public requests in flight.
@@ -77,17 +79,20 @@ for(const set of sets.filter(s=>eraSets.includes(s.series)&&(!selected.length||s
       const body=await get(card.source),stamp=new Date().toISOString();
       parseMarket(body,card,stamp); // Validate page identity before accepting guides/population.
       const record=classifyCapture({...parsePage(body),url:card.source,fetchedAt:stamp},card);
-      if(out[card.id]){
+      if(out[card.id]?.url===card.source){
        const previous=out[card.id],seen=new Set(record.sales.map(s=>s[5]+'|'+s[0]+'|'+s[2]));
        record.sales.push(...previous.sales.filter(s=>!seen.has(s[5]+'|'+s[0]+'|'+s[2])));record.sales.sort((a,b)=>b[0].localeCompare(a[0]));
       }
       out[card.id]=record;save(file,out);
-     }catch(e){entry.errors.push({id:card.id,error:e.message});}
+     }catch(e){if(out[card.id]?.url!==card.source){delete out[card.id];save(file,out);delete urls[card.id];}entry.errors.push({id:card.id,error:e.message});}
      await sleep(600);
     }
    }
   }));
-  for(const card of queue){const r=out[card.id];if(!r||r.url!==card.source)continue;entry.captured++;entry.sales+=r.sales.length;entry.ebaySales+=r.sales.filter(s=>s[4]==='e').length;entry.sourceRows+=r.coverage?.sourceRows||0;}
+  for(const card of queue){const r=out[card.id];if(!r||r.url!==card.source)continue;
+   const before=r.sales,valid=before.filter(([date,price,grade,,,,title])=>matchesCard(title,card)&&gradeOf(title)===grade&&Number.isFinite(price)&&price>0&&/^\d{4}-\d{2}-\d{2}$/.test(date)&&Number.isFinite(Date.parse(date))&&new Date(date).toISOString().slice(0,10)===date&&date<=new Date().toISOString().slice(0,10));
+   if(valid.length!==before.length){for(const sale of before.filter(s=>!valid.includes(s))){r.excluded[sale[2]]=(r.excluded[sale[2]]||0)+1;}r.sales=valid;r.coverage.acceptedRows=Math.max(0,(r.coverage.acceptedRows??before.length)-(before.length-valid.length));save(file,out);}
+   entry.captured++;entry.sales+=r.sales.length;entry.ebaySales+=r.sales.filter(s=>s[4]==='e').length;entry.sourceRows+=r.coverage?.sourceRows||0;}
  }catch(e){entry.errors.push({error:e.message});}
  // Preserve the original compact formatting of the existing URL registry.
  writeFileSync(new URL('source-urls.json',dir),'{'+Object.entries(urls).map(([k,v])=>JSON.stringify(k)+':'+JSON.stringify(v)).join(',\n')+'}\n');
