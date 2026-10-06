@@ -97,15 +97,16 @@ At most 3 picks per character are shown. With the October 2026 snapshot, most pi
 
 ## Investment score method
 
-Every rare card gets a 0–100 score per grade (`site/lib/score.mjs`), from the same sales, monthly guide history and catalog as the Investments tab. A score needs a confident sold price (the evidence a buy target needs) and up-to-date sales; otherwise it is left blank with the reason. Five parts are each scored 0–100 and blended:
+Every rare card gets a 0–100 score per grade (`site/lib/score.mjs`), from the same sales, monthly guide history and catalog as the Investments tab. A score needs a confident sold price (the evidence a buy target needs) and up-to-date sales; otherwise it is left blank with the reason. Each part is scored 0–100 and blended. Weights are shown as raw / graded; PSA 9 and PSA 10 add a sixth part, grade scarcity:
 
-- **Character demand (30%)**: the character's demand score from the Investments method.
-- **Price momentum (25%)**: a log-price regression across at least 5 matching sales spanning 90+ days of the past year. Growth maps linearly from −60% (0) to +60% a year (100), and only counts in full when the trend's t-statistic is 3 or more. Rises above 150% a year are treated as too fast to trust (45).
-- **Value (20%)**: the average of (a) price against the median of 4+ same-set, same-rarity cards of no more popular characters (65% of that median or less scores 100; 150% or more scores 20) and (b) distance below the highest monthly guide level held for 3+ months in the last five years (at the high scores 35; 50% or more below scores 100; a card still clearly falling earns 40% less).
-- **Liquidity (15%)**: the activity score.
-- **Price stability (10%)**: 100 minus the typical distance of recent sales from the median, scaled so a 40% spread scores 0.
+- **Character demand (30% / 27%)**: the character's demand score from the Investments method.
+- **Price momentum (25% / 22%)**: a log-price regression across at least 5 matching sales spanning 90+ days of the past year. Growth maps linearly from −60% (0) to +60% a year (100), and only counts in full when the trend's t-statistic is 3 or more. Rises above 150% a year are treated as too fast to trust (45).
+- **Value (20% / 18%)**: the average of (a) price against the median of 4+ same-set, same-rarity cards of no more popular characters (65% of that median or less scores 100; 150% or more scores 20) and (b) distance below the highest monthly guide level held for 3+ months in the last five years (at the high scores 35; 50% or more below scores 100; a card still clearly falling earns 40% less).
+- **Liquidity (15% / 13%)**: the activity score.
+- **Price stability (10% / 8%)**: 100 minus the typical distance of recent sales from the median, scaled so a 40% spread scores 0.
+- **Grade scarcity (PSA 9 and PSA 10 only, 12%)**: from the PSA population counts captured with each PriceCharting page. PSA 10 uses the share of PSA-graded copies that are PSA 10; PSA 9 uses the share that reached PSA 9 or better (so a card where most copies gem does not look like it has rare 9s). The share is ranked against cards of the same era with 30+ graded copies (falling back to all cards when an era has fewer than 20), because gem rates differ widely by era: on the current data the median PSA 10 rate is about 3% for Diamond & Pearl–HGSS and 41% for Sun & Moon. The lowest rate in the era scores 100, the highest 0. Cards with fewer than 30 PSA-graded copies, or no captured counts, count as 50.
 
-A part that cannot be measured counts as 50 and is labeled. Cards under the $25 floor are capped at 59. Bands: 80+ Strong, 65–79 Good, 50–64 Fair, 35–49 Weak, under 35 Poor. `GET /api/scores` returns `{card_id: [psa10, psa9, raw]}`; `GET /api/market?id=` includes each grade's breakdown. On the October 2026 snapshot, 462 PSA 10, 719 PSA 9 and 1,799 raw cards are scored, with medians near 60.
+A part that cannot be measured counts as 50 and is labeled. Cards under the $25 floor are capped at 59. Bands: 80+ Strong, 65–79 Good, 50–64 Fair, 35–49 Weak, under 35 Poor. `GET /api/scores` returns `{card_id: [psa10, psa9, raw]}`; `GET /api/market?id=` includes each grade's breakdown. On the October 2026 snapshot, 462 PSA 10, 719 PSA 9 and 1,799 raw cards are scored, with medians near 60; grade scarcity is measured for 1,066 of the 1,181 scored graded card-grades.
 
 ## Dex valuation
 

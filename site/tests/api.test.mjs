@@ -93,7 +93,7 @@ test('Investment scores are served in bulk and with each card breakdown',async()
  for(const v of Object.values(d.scores)){assert.equal(v.length,3);for(const x of v)assert.ok(x===null||(Number.isInteger(x)&&x>=0&&x<=100));}
  const id=Object.entries(d.scores).find(([,v])=>v[1]!=null)[0];
  const m=await(await api(req('/api/market?id='+id),env)).json();
- assert.equal(m.score.psa9.score,d.scores[id][1]);assert.equal(m.score.psa9.parts.length,5);assert.match(m.score.psa9.rating,/Strong|Good|Fair|Weak|Poor/);
+ assert.equal(m.score.psa9.score,d.scores[id][1]);assert.equal(m.score.psa9.parts.length,6);assert.ok(m.score.psa9.parts.some(p=>p.key==='scarcity'));assert.match(m.score.psa9.rating,/Strong|Good|Fair|Weak|Poor/);
 });
 test('Movers, investments and scores follow newly saved prices without a server restart',async()=>{
  const mem=new DatabaseSync(':memory:');mem.exec(sql);const e={DB:dbAdapter(mem),NETWORK_DISABLED:true};

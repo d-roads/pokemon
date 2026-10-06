@@ -51,7 +51,7 @@ export function mergeMarket(previous,next){
  const newer=!previous?.observedAt||Date.parse(next.observedAt)>=Date.parse(previous.observedAt);
  const guide={...previous?.guide},guideSources={...previous?.guideSources};for(const [key,value]of Object.entries(next.guide||{}))if(value>0&&(newer||!guide[key])){guide[key]=value;guideSources[key]=next.guideSources?.[key]||{name:next.source,url:next.sourceUrl,observedAt:next.observedAt};}
  const latest=newer?next:previous;
- return {...previous,...next,source:latest?.source,sourceUrl:latest?.sourceUrl,observedAt:latest?.observedAt,status:latest?.status,guide,guideSources,sales:dedupeSales([...(next.sales||[]),...(previous?.sales||[])])};
+ return {...previous,...next,source:latest?.source,sourceUrl:latest?.sourceUrl,observedAt:latest?.observedAt,status:latest?.status,pop:next.pop||previous?.pop||null,guide,guideSources,sales:dedupeSales([...(next.sales||[]),...(previous?.sales||[])])};
 }
 export function parsePublicText(text,card){
  const plain=text.replace(/^L\d+:\s*/gm,''),guide={},sales=[];

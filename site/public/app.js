@@ -134,7 +134,7 @@ function popLine(m){const p=m?.pop?.psa;if(!Array.isArray(p)||p.length<10)return
 // starts. After an update, a server that was left running answers new routes with 404.
 const SERVER_OLD='Primal Watch is running older server code than this page. Close the Primal Watch window and start it again (node server.mjs), then reload this page.';
 const scoreProblem=()=>{const e=state.scoreError;return !e?'':e.status===404?SERVER_OLD:'Scores could not be loaded ('+e.message+').';};
-const PART_SHORT={demand:'Demand',momentum:'Momentum',value:'Value',liquidity:'Liquidity',stability:'Stability'};
+const PART_SHORT={demand:'Demand',momentum:'Momentum',value:'Value',liquidity:'Liquidity',stability:'Stability',scarcity:'Scarcity'};
 const SIGNAL_NAMES={uptrend:'Steady uptrend',recovering:'Recovering from highs',cheap:'Cheap vs. similar cards'};
 function scoreBox(c){
  const quick=scoreOf(c.id),detail=state.scoreDetail[c.id]?.[state.grade],v=detail?detail.score:quick,cls=ratingClass(v);

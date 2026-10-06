@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {cards} from '../data/catalog.mjs';
 import {snapshots} from '../data/market.mjs';
-import {investmentScores,priceMomentum,heldHigh,scoreRating,SCORE_RULES,SCORE_PARTS} from '../lib/score.mjs';
+import {investmentScores,priceMomentum,heldHigh,scoreRating,gradeShare,scarcityTable,scarcityPart,partsFor,SCORE_RULES,SCORE_PARTS} from '../lib/score.mjs';
 
 const DAY=86400000,end=Math.floor(Date.parse('2026-10-01')/DAY);
 const iso=age=>new Date((end-age)*DAY).toISOString().slice(0,10);
@@ -32,6 +32,24 @@ test('Ratings follow the published bands',()=>{
  assert.deepEqual([90,80,79,65,64,50,49,35,34,0].map(scoreRating),['Strong','Strong','Good','Good','Fair','Fair','Weak','Weak','Poor','Poor']);
  assert.equal(scoreRating(null),null);
  assert.equal(Object.values(SCORE_RULES.weights).reduce((a,b)=>a+b,0).toFixed(6),'1.000000');
+ assert.equal(Object.values(SCORE_RULES.gradedWeights).reduce((a,b)=>a+b,0).toFixed(6),'1.000000');
+ assert.ok(!partsFor('raw').some(([k])=>k==='scarcity'),'raw cards have no grade scarcity');
+ assert.ok(partsFor('psa10').some(([k])=>k==='scarcity')&&partsFor('psa9').some(([k])=>k==='scarcity'));
+});
+
+test('Grade scarcity ranks low PSA 10 and PSA 9-or-better rates higher, within the era',()=>{
+ const pop=(n9,n10,rest=100)=>({psa:[0,0,0,0,0,0,rest,0,n9,n10]});
+ assert.deepEqual(gradeShare(pop(50,50),'psa10'),{share:.25,count:50,total:200,tens:50,nines:50});
+ assert.equal(gradeShare(pop(50,50),'psa9').share,.5,'PSA 9 uses 9-or-better');
+ assert.equal(gradeShare(pop(5,5,10),'psa10'),null,'needs 30+ graded copies');
+ assert.equal(gradeShare(pop(50,50),'raw'),null);
+ // 25 EX cards with gem rates 1%..25%, 25 SM cards with 30%..54%.
+ const rows=[];for(let i=0;i<25;i++){rows.push({card:{series:'EX'},market:{pop:pop(0,i+1,99-i)}});rows.push({card:{series:'SM'},market:{pop:pop(0,30+i,70-i)}});}
+ const table=scarcityTable(rows),low=scarcityPart(table,rows[0],'psa10'),high=scarcityPart(table,rows[48],'psa10');
+ assert.ok(low.score>=95&&high.score<=5,`${low.score} ${high.score}`);
+ // An SM card at 30% is the rarest in its era even though EX cards are all lower.
+ assert.ok(scarcityPart(table,rows[1],'psa10').score>=95);assert.match(low.detail,/EX-era/);
+ const none=scarcityPart(table,{card:{series:'EX'},market:{}},'psa10');assert.equal(none.score,50);assert.ok(none.neutral);
 });
 
 test('Investment scores over the real data are bounded, explained and fail closed',()=>{
@@ -43,7 +61,7 @@ test('Investment scores over the real data are bounded, explained and fail close
    counts[g]++;
    assert.ok(Number.isInteger(s.score)&&s.score>=0&&s.score<=100,id);
    assert.ok(s.price>0,'a score needs a confident sold price');
-   assert.deepEqual(s.parts.map(p=>p.key),SCORE_PARTS.map(([k])=>k));
+   assert.deepEqual(s.parts.map(p=>p.key),partsFor(g).map(([k])=>k));
    for(const p of s.parts){assert.ok(p.score>=0&&p.score<=100);assert.ok(p.detail.length>10);}
    const blended=Math.round(s.parts.reduce((t,p)=>t+p.weight*p.score,0));
    assert.equal(s.score,s.belowFloor?Math.min(blended,SCORE_RULES.belowFloorCap):blended);
