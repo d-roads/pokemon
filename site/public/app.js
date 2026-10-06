@@ -26,7 +26,17 @@ let toastTimer,selectionController;
 let crashReports=0;
 function reportCrash(problem){if(crashReports>=5)return;crashReports++;try{const e=problem instanceof Error?problem:new Error(String(problem));fetch('/api/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:(e.message||'Unknown error').slice(0,500),stack:(e.stack||'').slice(0,4000)}),keepalive:true}).catch(()=>{});}catch{}}
 if(typeof addEventListener==='function'){addEventListener('error',ev=>reportCrash(ev.error||ev.message));addEventListener('unhandledrejection',ev=>reportCrash(ev.reason));}
-async function request(url,options){const r=await fetch(url,options);const b=await r.json().catch(()=>({}));if(r.status===401&&b.signedOut){location.replace('/login');}if(!r.ok){const err=new Error(b.error||'Something went wrong. Please try again.');err.status=r.status;throw err;}return b;}
+async function request(url,options){
+ const r=await fetch(url,{...options,credentials:'same-origin',redirect:'manual'});
+ if(r.type==='opaqueredirect')throw new Error('The connection to FutureSight was interrupted. Reload this page.');
+ if(!r.headers.get('content-type')?.includes('application/json')){
+  const err=new Error(r.status===401?'Your sign-in has ended. Reload this page and sign in again.':`The server returned HTTP ${r.status} without the requested data. Please reload and try again.`);err.status=r.status;throw err;
+ }
+ const b=await r.json();
+ if(r.status===401&&b.signedOut)location.replace('/login');
+ if(!r.ok){const err=new Error(b.error||'Something went wrong. Please try again.');err.status=r.status;throw err;}
+ return b;
+}
 const send=(url,method,body)=>request(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
 function toast(text){$('#toast').textContent=text;$('#toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').hidden=true,4500);}
 function error(text){$('#error-banner').textContent=text;$('#error-banner').hidden=!text;}

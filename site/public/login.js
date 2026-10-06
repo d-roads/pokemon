@@ -24,7 +24,7 @@ function passProblem(v){
 const tabs={in:$('#tab-in'),up:$('#tab-up')},forms={in:$('#form-in'),up:$('#form-up')};
 function show(which,focus=true){
  for(const k of ['in','up']){const on=k===which;tabs[k].setAttribute('aria-selected',on);tabs[k].tabIndex=on?0:-1;forms[k].hidden=!on;}
- if(focus)forms[which].querySelector('input').focus();
+ if(focus)forms[which].querySelector('label:not([hidden]) input').focus();
 }
 tabs.in.onclick=()=>show('in');tabs.up.onclick=()=>show('up');
 $('.tabs').addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){const next=tabs.in.getAttribute('aria-selected')==='true'?'up':'in';show(next,false);tabs[next].focus();}});
@@ -39,9 +39,15 @@ function fail(form,text,field){
 async function submit(form,route,body){
  const button=form.querySelector('.go'),label=button.textContent;button.disabled=true;button.textContent=route==='login'?'Signing in…':'Creating account…';
  try{
-  const r=await fetch('/api/auth/'+route,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),credentials:'same-origin'});
-  const data=await r.json().catch(()=>({}));
+  const r=await fetch('/api/auth/'+route,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),credentials:'same-origin',redirect:'manual'});
+  if(r.type==='opaqueredirect'||(r.status===401&&!r.headers.get('content-type')?.includes('application/json'))){fail(form,'The connection to FutureSight was interrupted. Reload this page and try again.');return;}
+  if(!r.headers.get('content-type')?.includes('application/json')){fail(form,`Sign-in returned HTTP ${r.status} instead of an account response. Refresh this page and try again.`);return;}
+  const data=await r.json();
   if(!r.ok){fail(form,data.error||'Something went wrong. Try again.');return;}
+  const check=await fetch('/api/auth/me',{credentials:'same-origin',redirect:'manual',cache:'no-store'});
+  if(check.type==='opaqueredirect'||!check.headers.get('content-type')?.includes('application/json')){fail(form,'Your password was accepted, but the connection was interrupted before FutureSight opened. Reload this page and sign in again.');return;}
+  const session=await check.json();
+  if(!check.ok||!session.user?.username){fail(form,'Your password was accepted, but the sign-in session was not retained. Allow cookies for this site and try again.');return;}
   const msg=form.querySelector('.msg');msg.className='msg ok';msg.textContent=route==='login'?'Signed in. Opening FutureSight…':'Account created. Opening FutureSight…';
   location.replace('/');
  }catch{fail(form,'FutureSight could not be reached. Check that the server is running.');}
@@ -53,12 +59,18 @@ forms.in.addEventListener('submit',e=>{
  if(!password)return fail(f,'Enter your password.','password');
  submit(f,'login',{username,password});
 });
+// New accounts made through the internet link need an invite code; the server says when.
+let inviteRequired=false;
+fetch('/api/auth/options',{credentials:'same-origin',cache:'no-store'}).then(r=>r.ok?r.json():{}).then(o=>{
+ inviteRequired=!!o.inviteRequired;$('#invite-field').hidden=$('#hint-invite').hidden=!inviteRequired;
+}).catch(()=>{});
 forms.up.addEventListener('submit',e=>{
- e.preventDefault();const f=forms.up,username=f.elements.username.value.trim(),password=f.elements.password.value,repeat=f.elements.repeat.value;
+ e.preventDefault();const f=forms.up,username=f.elements.username.value.trim(),password=f.elements.password.value,repeat=f.elements.repeat.value,invite=f.elements.invite.value.trim();
+ if(inviteRequired&&!invite)return fail(f,'Enter your invite code.','invite');
  let p=userProblem(username);if(p)return fail(f,p,'username');
  p=passProblem(password);if(p)return fail(f,p,'password');
  if(repeat!==password)return fail(f,'The two passwords do not match.','repeat');
- submit(f,'signup',{username,password,repeat});
+ submit(f,'signup',inviteRequired?{username,password,repeat,invite}:{username,password,repeat});
 });
 // Live feedback on the sign-up fields once something has been typed.
 for(const [name,check] of [['username',userProblem],['password',passProblem]]){

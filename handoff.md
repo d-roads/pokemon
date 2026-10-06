@@ -1,3 +1,45 @@
+# FutureSight beta access: invite codes over a Quick Tunnel (resolved)
+
+Updated October 6, 2026 (evening) Pacific, Claude session. Replaces Codex's "Private Quick Tunnel / Dashboard Loading" handoff.
+
+## Cause of the stuck dashboard
+- **Not the app.** On the PC (127.0.0.1:5174), a fresh test account loaded the whole dashboard with every request 200, and all app tests pass.
+- **cloudflared's `--allowed-mail` email gate drops its session within about a minute.** This is the new protected Quick Tunnel feature in cloudflared 2026.10.0. Traced live in the desktop app's browser pane through `dot-phrase-quarter-nancy.trycloudflare.com`:
+  - Email check → app login (200) → `/api/auth/me` (200) all worked.
+  - On the next page load the gate's `__Host-cloudflared-qt-auth-session` cookie was already gone, so the gate redirected to Cloudflare Access. Access re-posted the old login, and `/.cloudflared/qt-auth/callback` returned **403 Forbidden**.
+  - After a fresh email code the dashboard loaded completely, but a probe every 15 s was redirected from the first check (15 s) onward.
+  - In cloudflared's source (`quicktunnelauth/session.go`, `assertion.go`), the gate session ends at the broker's `identity_exp`, which matches the short life we measured. The PC clock was checked against Cloudflare: correct.
+- That explains every earlier symptom: "Failed to fetch", "needs verification", and the static loading shell (module and API requests redirected cross-origin before reaching Node).
+
+## Decision (owner)
+Drop the email gate. Keep the Quick Tunnel; FutureSight's own accounts guard everything, and **sign-up through the tunnel needs a single-use invite code**. Alternatives offered: own domain with Cloudflare Access (~$10/yr), or Tailscale.
+
+## Changes
+- `lib/accounts.mjs`: `invites` table (SHA-256 of the normalized code, label, used_at, account_id); `createInvite`, `listInvites`. `create(..., {invite})` checks and spends the code in the same `BEGIN IMMEDIATE` transaction as the account, so a taken username leaves the code unused. Codes look like `FS-XXXXX-XXXXX` (no 0/O/1/I), about 50 bits.
+- `server.mjs`:
+  - Tunnel sign-ups pass `invite` (missing → "Enter your invite code."); LAN sign-ups are unchanged.
+  - New `GET /api/auth/options` → `{inviteRequired}`.
+  - Rate limits use `Cf-Connecting-Ip` only on a trusted tunnel request. Before, every tunnel visitor was 127.0.0.1, so 8 typos by one tester locked out everyone. Failed invites count toward the sign-up limit.
+  - Removed Codex's temporary catalog/auth logging; kept the rejected-host log and the `clientError` handler.
+- `invite.mjs` (new): `node invite.mjs [n] ["note"]`, `node invite.mjs list`. Safe while the server runs.
+- `public/login.html`/`login.js`: the invite field appears only when the server asks for it. `app.js`/`login.js` messages no longer mention an email check.
+- `Start-Beta.ps1` (new):
+  - Stops old FutureSight node listeners on 5173/5174 and old cloudflared processes.
+  - Starts the server minimized (HOST 0.0.0.0, port 5173), waits for it, then runs `cloudflared tunnel --no-autoupdate --url http://127.0.0.1:5173` and prints the link in a green box.
+- Codex's PC-only tunnel work (origin/cookie/login/app changes and tests) is now in git.
+- Tests: **159/159** (new `tests/invite.test.mjs`, `tests/login.test.mjs`). An end-to-end check against the real server with simulated tunnel headers covered: options, no/bad/good/reused invite, LAN sign-up without code, per-visitor lockout, Secure+Lax cookie, catalog/watchlist/Dex/scores 200, logout.
+
+## State on the PC
+- The new files were copied into the PC folder, but **the running processes still run the old code**: node on 5174 (Codex) and the old `--allowed-mail` tunnel. The owner runs `site\Start-Beta.ps1` to switch over; it replaces both and prints a new link.
+- Test account `claudetest` was created on the PC database during diagnosis (random password, not recorded). There is no account deletion yet; it can be ignored.
+
+## Next
+- Owner: run `Start-Beta.ps1`, then `node invite.mjs 1 "name"` per tester. Re-check one real tester sign-up through the new link.
+- Still missing for beta: password change/reset and account deletion (admin can only edit the DB); an in-app admin page for invites.
+- If testers need a stable link, move to a named tunnel on an owned domain.
+
+---
+
 # FutureSight — session handoff
 
 *Formerly Primal Watch.*
@@ -35,7 +77,7 @@ Updated: October 6, 2026 (night) Pacific. Repository: `d-roads/pokemon`. The rep
 - **Server (`site/lib/accounts.mjs`, `site/server.mjs`):** `accounts` and `sessions` tables live in the same SQLite file (created on start; existing tables untouched). Every `/api/*` call needs a signed-in session; the account's `user_key` is passed to the API as `LOCAL_USER_ID`, so the API code itself did not change. Routes: `POST /api/auth/signup`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`. `/` serves `login.html` until someone signs in; `/login` always shows it.
 - **Rules:** usernames 3–20 of `A–Z a–z 0–9`, with `. - _` only between letters/numbers (no doubles), unique case-insensitively. Passwords 5–64 printable ASCII, no spaces and none of `< > " ' ` \ ; &`, repeated on sign-up. Same checks in `login.js` and on the server.
 - **Security:** salted scrypt hashes, timing-safe compare (unknown usernames take as long as wrong passwords), 32-byte session tokens stored only as SHA-256, 30-day HttpOnly SameSite=Strict cookie, auth POSTs must carry this site's Origin, 8 failed sign-ins per device per 10 minutes, 6 new accounts per device per hour. Plain HTTP on the LAN, so no `Secure` flag.
-- **Admin:** `FUTURESIGHT_ADMIN_PASSWORD` in `site/.env` creates `admin` once, with `user_key` `local-owner`, so it owns the watchlist (10), Dex (2) and alerts saved before accounts. The collector asked for password `test1` (weak, fine for a home test); remote tools cannot write `.env`, so the collector adds `FUTURESIGHT_ADMIN_PASSWORD=test1` to `site/.env` by hand, then restarts. The password is not in git.
+- **Admin:** `FUTURESIGHT_ADMIN_PASSWORD` in `site/.env` creates `admin` once, with `user_key` `local-owner`, so it owns the watchlist (10), Dex (2) and alerts saved before accounts. Historical plaintext credential instructions were removed from this handoff. Keep credentials in local configuration; do not assume that configuration changes reset an existing account's password.
 - **Alerts:** the background scan now loops over every account with alerts turned on.
 - **LAN:** `Start-FutureSight.ps1` sets `HOST=0.0.0.0` and prints the network address(es). Windows asks once to allow Node.js on private networks.
 - **Landing page (`public/login.html`, `login.css`, `login.js`, `glint.svg`):** night-indigo card vault. Canvas background of drifting, flipping holo card silhouettes (front: little price chart; back: Glint's star gem), twinkling stars and occasional comets; the form is a holographic "Collector pass" card with a pointer-reactive foil edge and tilt, an art window where Glint rides a self-drawing price line, and a tape of real set names along the bottom. Bricolage Grotesque + Inter. Pauses when the tab is hidden; `prefers-reduced-motion` gets a still frame. Glint transparent copy is `glint.svg` (favicon minus its tile).

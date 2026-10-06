@@ -11,7 +11,17 @@ import {randomBytes,scryptSync,timingSafeEqual,createHash} from 'node:crypto';
 export const ACCOUNT_SQL=`
 CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, username_key TEXT NOT NULL UNIQUE, password_hash TEXT NOT NULL, user_key TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL, last_login_at TEXT);
 CREATE TABLE IF NOT EXISTS sessions (token_hash TEXT PRIMARY KEY NOT NULL, account_id INTEGER NOT NULL, created_at TEXT NOT NULL, expires_at TEXT NOT NULL);
-CREATE INDEX IF NOT EXISTS sessions_account ON sessions (account_id);`;
+CREATE INDEX IF NOT EXISTS sessions_account ON sessions (account_id);
+CREATE TABLE IF NOT EXISTS invites (code_hash TEXT PRIMARY KEY NOT NULL, label TEXT, created_at TEXT NOT NULL, used_at TEXT, account_id INTEGER);`;
+
+// Invite codes: people joining through the internet link need one, and each works once.
+// Codes are shown once when made (node invite.mjs) and stored only as SHA-256 hashes.
+const INVITE_ALPHABET='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+export function normalizeInvite(code){return typeof code==='string'?code.toUpperCase().replace(/[\s-]/g,''):'';}
+export function newInviteCode(random=randomBytes){
+ const bytes=random(10);let out='';for(const b of bytes)out+=INVITE_ALPHABET[b%INVITE_ALPHABET.length];
+ return `FS-${out.slice(0,5)}-${out.slice(5)}`;
+}
 
 export const USERNAME_RULES={min:3,max:20};
 export const PASSWORD_RULES={min:5,max:64};
@@ -54,6 +64,7 @@ export function verifyPassword(password,stored){
  return timingSafeEqual(actual,expected)&&stored!=null;
 }
 const tokenHash=token=>createHash('sha256').update(token).digest('hex');
+const inviteHash=code=>tokenHash('invite:'+normalizeInvite(code));
 
 export function accountStore(sqlite,now=()=>new Date()){
  sqlite.exec(ACCOUNT_SQL);
@@ -67,11 +78,30 @@ export function accountStore(sqlite,now=()=>new Date()){
   drop:sqlite.prepare('DELETE FROM sessions WHERE token_hash = ?'),
   expire:sqlite.prepare('DELETE FROM sessions WHERE expires_at < ?'),
   keys:sqlite.prepare('SELECT user_key FROM accounts'),
-  count:sqlite.prepare('SELECT COUNT(*) AS n FROM accounts')
+  count:sqlite.prepare('SELECT COUNT(*) AS n FROM accounts'),
+  addInvite:sqlite.prepare('INSERT INTO invites (code_hash,label,created_at) VALUES (?,?,?)'),
+  openInvite:sqlite.prepare('SELECT code_hash FROM invites WHERE code_hash = ? AND used_at IS NULL'),
+  useInvite:sqlite.prepare('UPDATE invites SET used_at = ?, account_id = ? WHERE code_hash = ? AND used_at IS NULL'),
+  invites:sqlite.prepare('SELECT i.label,i.created_at,i.used_at,a.username FROM invites i LEFT JOIN accounts a ON a.id = i.account_id ORDER BY i.created_at')
  };
+ const BAD_INVITE={error:'That invite code is not valid or has already been used.',status:403};
  const store={
-  create(username,password,userKey){
+  // With an invite, the account and the used code are saved together or not at all.
+  create(username,password,userKey,options={}){
    const problem=usernameProblem(username)||passwordProblem(password);if(problem)return {error:problem};
+   if(!Object.hasOwn(options,'invite'))return store.createAccount(username,password,userKey);
+   const {invite}=options;
+   if(!normalizeInvite(invite))return {error:'Enter your invite code.',status:400};
+   const hash=inviteHash(invite);
+   sqlite.exec('BEGIN IMMEDIATE');
+   try{
+    if(!q.openInvite.get(hash)){sqlite.exec('ROLLBACK');return BAD_INVITE;}
+    const r=store.createAccount(username,password,userKey);
+    if(r.error||q.useInvite.run(now().toISOString(),r.account.id,hash).changes!==1){sqlite.exec('ROLLBACK');return r.error?r:BAD_INVITE;}
+    sqlite.exec('COMMIT');return r;
+   }catch(e){try{sqlite.exec('ROLLBACK');}catch{}throw e;}
+  },
+  createAccount(username,password,userKey){
    const key=username.toLowerCase();
    if(q.byKey.get(key))return {error:'That username is taken. Try another.',status:409};
    try{
@@ -101,7 +131,9 @@ export function accountStore(sqlite,now=()=>new Date()){
   endSession(token){if(typeof token==='string')q.drop.run(tokenHash(token));},
   userKeys(){return q.keys.all().map(r=>r.user_key);},
   count(){return q.count.get().n;},
-  exists(username){return !!q.byKey.get(String(username).toLowerCase());}
+  exists(username){return !!q.byKey.get(String(username).toLowerCase());},
+  createInvite(label=''){const code=newInviteCode();q.addInvite.run(inviteHash(code),String(label).slice(0,60)||null,now().toISOString());return code;},
+  listInvites(){return q.invites.all();}
  };
  return store;
 }
@@ -118,8 +150,9 @@ export function readCookie(header,name=COOKIE){
  for(const part of String(header||'').split(';')){const i=part.indexOf('=');if(i>0&&part.slice(0,i).trim()===name)return part.slice(i+1).trim();}
  return null;
 }
-export const sessionCookie=(token,secure=false)=>`${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${SESSION_DAYS*86400}${secure?'; Secure':''}`;
-export const clearCookie=(secure=false)=>`${COOKIE}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0${secure?'; Secure':''}`;
+// Tunnel visitors open shared links from other sites, so their cookie is Lax and Secure.
+export const sessionCookie=(token,secure=false)=>`${COOKIE}=${token}; Path=/; HttpOnly; SameSite=${secure?'Lax':'Strict'}; Max-Age=${SESSION_DAYS*86400}${secure?'; Secure':''}`;
+export const clearCookie=(secure=false)=>`${COOKIE}=; Path=/; HttpOnly; SameSite=${secure?'Lax':'Strict'}; Max-Age=0${secure?'; Secure':''}`;
 
 // Failed sign-ins are limited per address: 8 tries per 10 minutes.
 export function attemptLimiter({max=8,windowMs=600000,now=()=>Date.now()}={}){

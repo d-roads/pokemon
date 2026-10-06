@@ -32,9 +32,14 @@ const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=
 const SHARED_MODULES=new Set(['analysis.mjs','portfolio.mjs','investment-costs.mjs']);
 const PAGE_HEADERS={'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'same-origin','Cache-Control':'no-store'};
 function sendJson(res,status,body,extra={}){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...extra});res.end(JSON.stringify(body));}
-const clientAddress=req=>req.socket.remoteAddress||'unknown';
+// Through the tunnel every request arrives from this computer, so rate limits use the visitor
+// address cloudflared passes on. Elsewhere the header is ignored, since anyone could send it.
+const IP_RE=/^[0-9A-Fa-f:.]{2,45}$/;
+const clientAddress=(req,tunnel=false)=>{const forwarded=req.headers['cf-connecting-ip'];return tunnel&&typeof forwarded==='string'&&IP_RE.test(forwarded)?'cf:'+forwarded:(req.socket.remoteAddress||'unknown');};
 async function auth(req,res,url,raw,token,user,tunnel){
  const route=url.pathname.slice('/api/auth/'.length);
+ // The sign-in page asks whether new accounts need an invite code (only through the internet link).
+ if(route==='options'&&req.method==='GET')return sendJson(res,200,{inviteRequired:!!tunnel});
  if(route==='me'&&req.method==='GET'){if(!user)return sendJson(res,401,{error:'Not signed in.',signedOut:true});return sendJson(res,200,{user:{username:user.username}});}
  if(req.method!=='POST')return sendJson(res,405,{error:'Unsupported request.'});
  // Sign-in forms must be posted from this site's own page.
@@ -43,7 +48,7 @@ async function auth(req,res,url,raw,token,user,tunnel){
  if(!/^application\/json\b/.test(req.headers['content-type']||''))return sendJson(res,415,{error:'Unsupported request.'});
  let body;try{body=JSON.parse(raw.toString('utf8'));}catch{return sendJson(res,400,{error:'The request was invalid.'});}
  if(!body||typeof body!=='object')return sendJson(res,400,{error:'The request was invalid.'});
- const ip=clientAddress(req);
+ const ip=clientAddress(req,tunnel);
  if(route==='login'){
   const wait=loginLimit.blocked(ip);if(wait)return sendJson(res,429,{error:`Too many sign-in attempts. Try again in ${Math.ceil(wait/60)} minute${wait>60?'s':''}.`});
   const account=accounts.authenticate(body.username,body.password);
@@ -54,10 +59,11 @@ async function auth(req,res,url,raw,token,user,tunnel){
  if(route==='signup'){
   const wait=signupLimit.blocked(ip);if(wait)return sendJson(res,429,{error:'Too many new accounts from this device. Try again later.'});
   const problem=usernameProblem(body.username)||passwordProblem(body.password,body.repeat);if(problem)return sendJson(res,400,{error:problem});
-  const r=accounts.create(body.username,body.password);
+  const r=accounts.create(body.username,body.password,undefined,tunnel?{invite:body.invite}:{});
+  if(r.status===403)signupLimit.fail(ip);
   if(r.error)return sendJson(res,r.status||400,{error:r.error});
   signupLimit.fail(ip);
-  console.log(`New account: ${r.account.username}`);
+  console.log(`New account: ${r.account.username}${tunnel?' (invite)':''}`);
   return sendJson(res,201,{user:{username:r.account.username}},{'Set-Cookie':sessionCookie(accounts.startSession(r.account.id),tunnel)});
  }
  return sendJson(res,404,{error:'Not found.'});
@@ -69,15 +75,12 @@ const server=createServer(async(req,res)=>{
   const {url,tunnel}=location,gzip=/\bgzip\b/.test(req.headers['accept-encoding']||'');
   const token=readCookie(req.headers.cookie),user=token?accounts.sessionUser(token):null;
   if(url.pathname.startsWith('/api/')){
-   const catalogStarted=url.pathname==='/api/catalog'?Date.now():null;
-   if(catalogStarted)console.log('Catalog request started');
    const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>8192){res.writeHead(413);res.end();return;}chunks.push(chunk);}
    if(url.pathname.startsWith('/api/auth/')){await auth(req,res,url,Buffer.concat(chunks),token,user,tunnel);return;}
    if(!user){sendJson(res,401,{error:'Sign in to use FutureSight.',signedOut:true});return;}
    // The account's storage key stands in for the single local user the API was written for.
    const request=new Request(url,{method:req.method,headers:req.headers,...(!['GET','HEAD'].includes(req.method)?{body:Buffer.concat(chunks)}:{})});
    const result=await api(request,{...env,LOCAL_USER_ID:user.user_key}),headers=Object.fromEntries(result.headers),body=Buffer.from(await result.arrayBuffer());
-   if(catalogStarted)console.log('Catalog response',result.status,body.length+' bytes',Date.now()-catalogStarted+' ms');
    if(gzip&&body.length>2048){headers['Content-Encoding']='gzip';headers['Vary']='Accept-Encoding';res.writeHead(result.status,headers);res.end(gzipSync(body));return;}
    res.writeHead(result.status,headers);res.end(body);return;
   }
@@ -92,6 +95,10 @@ const server=createServer(async(req,res)=>{
   if(!existsSync(file)){res.writeHead(404);res.end('Not found');return;}
   res.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream','X-Content-Type-Options':'nosniff','Cache-Control':'no-cache'});res.end(readFileSync(file));
  }catch(e){console.error(e.message);reportError(env,e,{source:'server',route:req.url?.split('?')[0]});res.writeHead(500);res.end('Something went wrong.');}
+});
+server.on('clientError',(err,socket)=>{
+ console.error('HTTP request rejected before routing:',err.code);
+ if(socket.writable)socket.end(`HTTP/1.1 ${err.code==='HPE_HEADER_OVERFLOW'?'431 Request Header Fields Too Large':'400 Bad Request'}\r\nConnection: close\r\nContent-Length: 0\r\n\r\n`);
 });
 // A crash is reported (briefly waiting for the send) and then the process exits, as Node would do anyway.
 process.on('uncaughtException',async e=>{console.error(e);await reportError(env,e,{source:'server',level:'fatal'});process.exit(1);});

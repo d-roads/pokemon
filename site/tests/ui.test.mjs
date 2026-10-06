@@ -30,11 +30,23 @@ function workspace(){
  const document={querySelector:s=>elements.get(s)||null,querySelectorAll:s=>s==='[data-category]'?categories:[]};
  const responses={'/api/catalog':{cards,sets,series,markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/movers':moverData,'/api/investments':investData,'/api/scores':{grades:scoreData.grades,scores:scoreData.scores},'/api/market':{market:null,score:null},'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
  const calls=[];
- const context=vm.createContext({document,normalizeCosts,costSummary,netReturn,maxBuyPrice,DEFAULT_COSTS,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,calls,fetch:async url=>{const path=url.split('?')[0];calls.push(url);let r=responses[path];if(typeof r==='function')r=r(url);if(r&&r.__status)return {ok:false,status:r.__status,json:async()=>r.body};return {ok:true,json:async()=>r||{}};}});
+ const context=vm.createContext({document,normalizeCosts,costSummary,netReturn,maxBuyPrice,DEFAULT_COSTS,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,calls,fetch:async url=>{const path=url.split('?')[0];calls.push(url);let r=responses[path];if(typeof r==='function')r=r(url);if(r?.__response)return r.__response;const headers=new Headers({'Content-Type':'application/json'});if(r&&r.__status)return {ok:false,status:r.__status,headers,json:async()=>r.body};return {ok:true,status:200,headers,json:async()=>r||{}};}});
  const source=readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/^import .*;\s*$/gm,'').replace(/init\(\);\s*$/,'');
  vm.runInContext(source,context);
  return {context,responses,calls,e:s=>elements.get(s),run:s=>vm.runInContext(s,context)};
 }
+test('Tunnel redirects and non-JSON failures are explained instead of becoming empty data',async()=>{
+ const ui=workspace();
+ ui.responses['/api/probe']={__response:{type:'opaqueredirect'}};
+ await assert.rejects(ui.run("request('/api/probe')"),/connection to FutureSight was interrupted/);
+ ui.responses['/api/probe']={__response:new Response('Unauthorized',{status:401})};
+ await assert.rejects(ui.run("request('/api/probe')"),/sign-in has ended/);
+ ui.responses['/api/probe']={__response:new Response('Bad Gateway',{status:502})};
+ await assert.rejects(ui.run("request('/api/probe')"),/HTTP 502/);
+ ui.responses['/api/probe']={scores:{test:[1,2,3]}};
+ assert.deepEqual(await ui.run("request('/api/probe')"),ui.responses['/api/probe']);
+});
+
 test('Wizards era and vintage card coverage render in Browse',async()=>{
  const ui=workspace();await ui.run('init()');assert.match(ui.e('#set-select').innerHTML,/Wizards of the Coast/);assert.match(ui.e('#set-select').innerHTML,/Aquapolis/);
  ui.e('#set-select').onchange({target:{value:'era:WOTC'}});assert.equal(ui.run('filteredCards().length'),741);assert.match(ui.e('#page-title').textContent,/Wizards of the Coast/);

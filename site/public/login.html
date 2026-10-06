@@ -52,6 +52,8 @@
       </form>
 
       <form id="form-up" class="form" role="tabpanel" aria-labelledby="tab-up" hidden novalidate>
+        <label id="invite-field" hidden>Invite code<input name="invite" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24" placeholder="FS-XXXXX-XXXXX" aria-describedby="hint-invite"></label>
+        <small class="hint" id="hint-invite" hidden>The code you were sent with this link. Each code works once.</small>
         <label>Username<input name="username" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20" required aria-describedby="hint-user"></label>
         <small class="hint" id="hint-user">3–20 letters or numbers; . - _ allowed between them.</small>
         <label>Password<input name="password" type="password" autocomplete="new-password" maxlength="64" required aria-describedby="hint-pass"></label>

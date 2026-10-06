@@ -22,6 +22,10 @@ test('Local and LAN requests keep their HTTP origin',()=>{
 
 test('Tunnel session cookies are marked Secure',()=>{
  assert.match(sessionCookie('token',true),/; Secure$/);
+ assert.match(sessionCookie('token',true),/; SameSite=Lax;/);
+ assert.match(sessionCookie('token',true),/; Path=\/; HttpOnly;/);
  assert.match(clearCookie(true),/; Secure$/);
+ assert.match(clearCookie(true),/; SameSite=Lax;/);
+ assert.match(clearCookie(true),/; Max-Age=0;/);
  assert.doesNotMatch(sessionCookie('token'),/; Secure$/);
 });

@@ -21,9 +21,15 @@ Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-wa
 - **Home network:** `Start-FutureSight.ps1` listens on the network (`HOST=0.0.0.0`) and prints the address others should open, such as `http://192.168.1.20:5173`. Windows may ask once whether Node.js can use private networks; choose Allow. Traffic is plain HTTP, so use this only on a network you trust.
 - Listing alerts run in the background for every account that has turned them on.
 
-### Sharing outside your network (Cloudflare Quick Tunnel)
+### Beta testers outside your network (Cloudflare Quick Tunnel + invite codes)
 
-`server.mjs` also accepts requests from a Cloudflare Quick Tunnel (`cloudflared tunnel --url http://127.0.0.1:5173`): only HTTPS requests for a `*.trycloudflare.com` address arriving from the tunnel on this computer are allowed (`lib/origin.mjs`), and sign-in cookies are then marked `Secure`. Anyone with the tunnel link reaches the sign-in page, so use real passwords before sharing it. `cloudflared.exe` can live in `site/.tools/` (ignored by git).
+1. Run `Start-Beta.ps1` (right-click → Run with PowerShell). It restarts FutureSight with the current code, opens a Cloudflare Quick Tunnel and prints the **beta link** (`https://….trycloudflare.com`) in a green box. Keep that window open; closing it takes the link down. Each start gives a new link.
+2. In another PowerShell window in this folder, run `node invite.mjs` for one invite code, `node invite.mjs 5` for five, or `node invite.mjs 1 "Sam"` to note who it is for. `node invite.mjs list` shows who used which code.
+3. Send each tester the link and their code. They choose **Create account** and enter it. Each code works once.
+
+How it is protected: through the link, new accounts need an unused invite code (stored only as a hash, used and spent in one step), and everything else needs a signed-in account. Sign-in cookies are `Secure`. Failed sign-ins (8 per 10 minutes) and sign-ups (6 per hour) are limited per tester, using the visitor address cloudflared passes on, so one tester's typos cannot lock out the others. `server.mjs` only accepts the tunnel when the request comes from cloudflared on this computer for a `*.trycloudflare.com` address over HTTPS (`lib/origin.mjs`). On the home network, accounts still need no code.
+
+Not used: cloudflared's `--allowed-mail` email check. In cloudflared 2026.10.0 its session ended about a minute after the email code, which bounced testers back to Cloudflare and then to a "Forbidden" page (tested October 6, 2026). Quick Tunnels are meant for testing and come with no uptime guarantee; for a permanent address, use your own domain with a named tunnel.
 
 ## Opening animation
 
