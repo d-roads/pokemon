@@ -1,7 +1,23 @@
-# Primal Watch — session handoff
+# FutureSight — session handoff
+
+*Formerly Primal Watch.*
 
 Updated: October 6, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. The repository is authoritative.
 
+
+## FutureSight rebrand and opening animation — October 6, 2026
+
+- **The app is now called FutureSight** (formerly Primal Watch), since it covers far more than Primal Clash. Commit `d1a2968` on `main`. Page title, header, footer badge, server messages, alert sender name, User-Agent strings, READMEs, `package.json` and tests are renamed. `site/Start-Primal-Watch.ps1` is now `site/Start-FutureSight.ps1`; `Package-Latest.ps1` writes `futuresight-latest.zip`.
+- **Kept on purpose:** the database file stays `site/data/primal-watch.sqlite`, so saved watchlists, Dex and alerts need no moving. The new theme key `futuresight-theme` falls back to the old `primal-watch-theme-v2`, so the chosen appearance carries over.
+- **Mascot and logo:** the collector asked for shiny Celebi. That is a Pokémon Company character, so it was not drawn, nor a lookalike from the reference images. The collector chose to keep **Glint**, an original comet sprite (teal-to-indigo round body, gold star gem, crest, little arms, comet tail). It is one SVG `<symbol id="fs-glint">` at the top of `site/public/index.html`, shared by the header logo, the favicon (`site/public/favicon.svg`, a copy) and the animation. Wordmark: **future**sight in accent green + ink. Do not replace the mascot with a Pokémon character.
+- **Opening animation** (`site/public/intro.js`, styles at the end of `style.css`): Glint flies in from the lower left on an arc-length-even spline loop around the screen (with a twinkle trail), stops in the middle, squashes, hops, spins with happy eyes and waving arms while about 50 star/dot sparkles burst out with a ring and glow, then the "futuresight / card terminal" title appears; it then swoops to the top left, shrinking into the logo, which gives a small bounce and twinkle. About 5 s in total.
+  - Plays once per browser tab (sessionStorage `futuresight-intro-seen`). Any click, tap or key (except Tab) skips it. Never auto-plays with `prefers-reduced-motion`. Settings → **Opening animation** has an on/off switch (localStorage `futuresight-intro`) and **Replay now**.
+  - The head script adds `html.intro-pending` before first paint, so the page doesn't flash first; a CSS fail-safe clears that cover after 5 s if `intro.js` never runs.
+  - Performance: transform and opacity only, no blur (rule from the scroll fix still holds). Headless Chromium: median 16.7 ms frames during the animation at 1440×900 and 390×844, no page errors.
+- Tests: 2 new in `tests/ui.test.mjs` (branding, wiring, reduced motion, fail-safe, no blur, Settings controls). 117/117 on `main`; Worker build passes.
+- **PC folder:** the collector's local folder already holds Codex's Sword & Shield / Scarlet & Violet / Mega Evolution work (branches `codex/sword-shield-cards-sales` and `codex/scarlet-violet-mega-cards-sales`, not yet merged to `main`). The rebrand was three-way merged into the PC's copies of `index.html`, `app.js`, `provider.mjs`, `site/README.md`, `api.test.mjs` and `ui.test.mjs` (one conflict, the page `<head>`: kept the PC's newer description plus the rebrand lines), so that work was not overwritten. The other changed files were identical to `main` and were copied as is. The old `Start-Primal-Watch.ps1` is still in the PC folder and can be deleted. Restart the local server after copying.
+- **When the Codex branches are merged into `main`:** expect small conflicts in the same places (page `<head>`, app.js strings such as "Primal Watch", tests, README). Keep the FutureSight names and the Codex content.
+- Cards' sources link still points to PriceCharting's Primal Clash page by default; that is the set name, not the app name, and was left as is.
 
 ## Merge note (October 6, later)
 
