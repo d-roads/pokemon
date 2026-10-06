@@ -11,6 +11,8 @@ import {gradeOf,conditionOf,matchesCard} from './sales.mjs';
 const SECTION_GRADE={used:'raw',graded:'psa9','manual-only':'psa10'};
 const GRADE_SECTION={raw:'used',psa9:'graded',psa10:'manual-only'};
 const MARKET={e:'eBay',t:'TCGPlayer',o:'Other'};
+// Bump when classification rules change, so stored observations say which rules produced them.
+export const CAPTURE_PARSER_VERSION='capture-2026.10.06';
 
 export function classifyCapture(page,card){
  const guide={};
@@ -33,7 +35,7 @@ export function classifyCapture(page,card){
   sales.push([date,price,grade,grade==='raw'?conditionOf(title):'',market,/^ebay:/.test(ref||'')?ref:rowId||ref||'',title]);
  }
  sales.sort((a,b)=>b[0].localeCompare(a[0]));
- return {fetchedAt:page.fetchedAt,url:page.url,productId:page.productId||null,name:page.name||'',guide,history,pop:page.pop||null,cutoff,excluded,sales,coverage:{scope:'Source page snapshot',completeEbayHistory:false,sourceRows:(page.rows||[]).filter(r=>r[0] in SECTION_GRADE).length,acceptedRows:sales.length}};
+ return {fetchedAt:page.fetchedAt,parserVersion:CAPTURE_PARSER_VERSION,url:page.url,productId:page.productId||null,name:page.name||'',guide,history,pop:page.pop||null,cutoff,excluded,sales,coverage:{scope:'Source page snapshot',completeEbayHistory:false,sourceRows:(page.rows||[]).filter(r=>r[0] in SECTION_GRADE).length,acceptedRows:sales.length}};
 }
 
 export function saleSource(ref,fallback){
@@ -45,7 +47,7 @@ export function expandCapture(record,card){
  const sales=record.sales.filter(([,price,grade,,,,title])=>!card.vintage||(Number.isFinite(price)&&price>0&&matchesCard(title,card)&&gradeOf(title)===grade)).map(([date,price,grade,condition,market,ref,title])=>({id:'pc|'+(market==='t'&&/^https?:/.test(ref)?[ref,date,price,condition,title].join('|'):ref||date+'|'+price)+'|'+grade,number:card.number,grade,date,price,condition,marketplace:MARKET[market]||'eBay',provenance:'PriceCharting reported sale',source:saleSource(ref,source),title}));
  const guideSources=Object.fromEntries(Object.keys(record.guide).map(k=>[k,{name:'PriceCharting',url:source,observedAt:record.fetchedAt}]));
  return {number:card.number,guide:record.guide,guideSources,sales,observedAt:record.fetchedAt,source:'PriceCharting',sourceUrl:source,status:'researched',history:record.history,pop:record.pop,
-  research:{status:'full',checkedAt:record.fetchedAt,sourceUrl:source,gradesChecked:['raw','psa9','psa10'],cutoff:record.cutoff,excluded:record.excluded,rows:record.sales.length,coverage:record.coverage||{scope:'Source page snapshot',completeEbayHistory:false}}};
+  research:{status:'full',checkedAt:record.fetchedAt,sourceUrl:source,gradesChecked:['raw','psa9','psa10'],cutoff:record.cutoff,excluded:record.excluded,rows:record.sales.length,productId:record.productId||null,parserVersion:record.parserVersion||null,coverage:record.coverage||{scope:'Source page snapshot',completeEbayHistory:false}}};
 }
 
 // Older excerpt-based observations came from the same pages. Keep an older sale only when it

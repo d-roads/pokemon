@@ -59,7 +59,7 @@ export function parseSet(html,cards){
   if((card.vintage||card.modern)&&(!card.sourceVerified||!matchesCard(name+' '+card.setName,card)))continue;
   const values=[...row.matchAll(/<td\b[^>]*class=["'][^"']*\bprice\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/gi)].map(x=>dollars(x[1]));
   if(values.length<3||!values[0])continue;
-  result[card.id]={number:card.number,guide:{raw:values[0],grade9:values[1],psa10:values[2]},sales:[],observedAt:new Date().toISOString(),source:'PriceCharting',sourceUrl:card.source,status:'refreshed'};
+  result[card.id]={number:card.number,guide:{raw:values[0],grade9:values[1],psa10:values[2]},sales:[],observedAt:new Date().toISOString(),source:'PriceCharting',sourceUrl:card.source,status:'refreshed',parserVersion:'set-guide-2026.10.06'};
  }
  if(!Object.keys(result).length)throw new Error('The set price guide could not be read.');return result;
 }

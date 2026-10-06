@@ -97,6 +97,8 @@ export function mergeMarket(previous,next){
  const latest=newer?next:previous;
  return {...previous,...next,source:latest?.source,sourceUrl:latest?.sourceUrl,observedAt:latest?.observedAt,status:latest?.status,pop:next.pop||previous?.pop||null,guide,guideSources,sales:dedupeSales([...(next.sales||[]),...(previous?.sales||[])])};
 }
+// Bump when listing-title rules change.
+export const SALES_PARSER_VERSION='sales-2026.10.06';
 export function parsePublicText(text,card){
  const plain=text.replace(/^L\d+:\s*/gm,''),guide={},sales=[];
  const lines=plain.split('\n');
@@ -112,5 +114,5 @@ export function parsePublicText(text,card){
   const sale=makeSale({date:row[1],title,price:Number(m[3].replace(/,/g,'')),source:card.source,marketplace:m[2]},card);if(sale)sales.push(sale);
  }
  if(!sales.length&&!Object.keys(guide).length)throw new Error('No supported prices or matching sales could be read.');
- return {number:card.number,guide,sales:dedupeSales(sales),observedAt:new Date().toISOString(),source:'PriceCharting',sourceUrl:card.source,status:'researched'};
+ return {number:card.number,guide,sales:dedupeSales(sales),observedAt:new Date().toISOString(),source:'PriceCharting',sourceUrl:card.source,status:'researched',parserVersion:SALES_PARSER_VERSION};
 }

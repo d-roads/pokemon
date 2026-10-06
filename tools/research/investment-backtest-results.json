@@ -1,0 +1,3689 @@
+{
+ "config": {
+  "version": "investment-backtest-v1",
+  "sha256": "d9ba81d6298642164ec86fae5bcdd1bc8db58b767d1499ebc5230addf6d07a19"
+ },
+ "inventory": {
+  "cards": 9370,
+  "series": 22001,
+  "points": 1039621,
+  "sales": 521705,
+  "eligible": 9758,
+  "catalogCards": 19965,
+  "sets": 149,
+  "observations": 70084,
+  "uniqueCards": 5202,
+  "setsTested": 131,
+  "eras": [
+   "WOTC",
+   "EX",
+   "DP",
+   "XY",
+   "BW",
+   "SM",
+   "SWSH",
+   "SV"
+  ]
+ },
+ "cohorts": [
+  {
+   "date": "2022-03",
+   "g": "raw",
+   "eligible": 421,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 2536,
+    "history-gap": 623,
+    "flat-history": 153,
+    "too-new": 3702
+   }
+  },
+  {
+   "date": "2022-03",
+   "g": "grade9",
+   "eligible": 741,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 92,
+    "history-gap": 2649,
+    "flat-history": 214,
+    "too-new": 3600
+   }
+  },
+  {
+   "date": "2022-03",
+   "g": "psa10",
+   "eligible": 624,
+   "missing12": 0,
+   "excluded": {
+    "flat-history": 222,
+    "history-gap": 2815,
+    "below-floor": 23,
+    "too-new": 3586
+   }
+  },
+  {
+   "date": "2022-06",
+   "g": "raw",
+   "eligible": 474,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 2846,
+    "history-gap": 438,
+    "flat-history": 118,
+    "too-new": 3559
+   }
+  },
+  {
+   "date": "2022-06",
+   "g": "grade9",
+   "eligible": 947,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 214,
+    "history-gap": 2412,
+    "flat-history": 266,
+    "too-new": 3457
+   }
+  },
+  {
+   "date": "2022-06",
+   "g": "psa10",
+   "eligible": 886,
+   "missing12": 0,
+   "excluded": {
+    "history-gap": 2571,
+    "flat-history": 299,
+    "below-floor": 71,
+    "too-new": 3443
+   }
+  },
+  {
+   "date": "2022-09",
+   "g": "raw",
+   "eligible": 531,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 3069,
+    "flat-history": 122,
+    "history-gap": 298,
+    "too-new": 3415
+   }
+  },
+  {
+   "date": "2022-09",
+   "g": "grade9",
+   "eligible": 1456,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 1570,
+    "flat-history": 444,
+    "history-gap": 513,
+    "too-new": 3313
+   }
+  },
+  {
+   "date": "2022-09",
+   "g": "psa10",
+   "eligible": 2665,
+   "missing12": 11,
+   "excluded": {
+    "flat-history": 439,
+    "below-floor": 356,
+    "history-gap": 511,
+    "too-new": 3299
+   }
+  },
+  {
+   "date": "2022-12",
+   "g": "raw",
+   "eligible": 572,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 3279,
+    "history-gap": 213,
+    "flat-history": 118,
+    "too-new": 3253
+   }
+  },
+  {
+   "date": "2022-12",
+   "g": "grade9",
+   "eligible": 1508,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 1738,
+    "flat-history": 442,
+    "history-gap": 457,
+    "too-new": 3151
+   }
+  },
+  {
+   "date": "2022-12",
+   "g": "psa10",
+   "eligible": 2844,
+   "missing12": 14,
+   "excluded": {
+    "flat-history": 462,
+    "below-floor": 378,
+    "history-gap": 449,
+    "too-new": 3137
+   }
+  },
+  {
+   "date": "2023-03",
+   "g": "raw",
+   "eligible": 605,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 3421,
+    "history-gap": 182,
+    "flat-history": 102,
+    "too-new": 3125
+   }
+  },
+  {
+   "date": "2023-03",
+   "g": "grade9",
+   "eligible": 1563,
+   "missing12": 2,
+   "excluded": {
+    "below-floor": 1782,
+    "flat-history": 456,
+    "history-gap": 472,
+    "too-new": 3023
+   }
+  },
+  {
+   "date": "2023-03",
+   "g": "psa10",
+   "eligible": 2965,
+   "missing12": 13,
+   "excluded": {
+    "flat-history": 443,
+    "history-gap": 458,
+    "below-floor": 395,
+    "too-new": 3009
+   }
+  },
+  {
+   "date": "2023-06",
+   "g": "raw",
+   "eligible": 618,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 3596,
+    "history-gap": 152,
+    "flat-history": 103,
+    "too-new": 2966
+   }
+  },
+  {
+   "date": "2023-06",
+   "g": "grade9",
+   "eligible": 1534,
+   "missing12": 1,
+   "excluded": {
+    "below-floor": 1918,
+    "flat-history": 536,
+    "history-gap": 443,
+    "too-new": 2865
+   }
+  },
+  {
+   "date": "2023-06",
+   "g": "psa10",
+   "eligible": 3066,
+   "missing12": 18,
+   "excluded": {
+    "flat-history": 478,
+    "below-floor": 443,
+    "history-gap": 433,
+    "too-new": 2850
+   }
+  },
+  {
+   "date": "2023-09",
+   "g": "raw",
+   "eligible": 602,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 3832,
+    "history-gap": 135,
+    "flat-history": 109,
+    "too-new": 2757
+   }
+  },
+  {
+   "date": "2023-09",
+   "g": "grade9",
+   "eligible": 1543,
+   "missing12": 1,
+   "excluded": {
+    "below-floor": 2037,
+    "flat-history": 618,
+    "history-gap": 441,
+    "too-new": 2657
+   }
+  },
+  {
+   "date": "2023-09",
+   "g": "psa10",
+   "eligible": 3117,
+   "missing12": 17,
+   "excluded": {
+    "flat-history": 528,
+    "history-gap": 440,
+    "below-floor": 542,
+    "too-new": 2643
+   }
+  },
+  {
+   "date": "2023-12",
+   "g": "raw",
+   "eligible": 613,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 3991,
+    "history-gap": 77,
+    "flat-history": 133,
+    "too-new": 2621
+   }
+  },
+  {
+   "date": "2023-12",
+   "g": "grade9",
+   "eligible": 1470,
+   "missing12": 1,
+   "excluded": {
+    "below-floor": 2085,
+    "flat-history": 843,
+    "history-gap": 377,
+    "too-new": 2521
+   }
+  },
+  {
+   "date": "2023-12",
+   "g": "psa10",
+   "eligible": 3184,
+   "missing12": 14,
+   "excluded": {
+    "flat-history": 605,
+    "history-gap": 370,
+    "below-floor": 604,
+    "too-new": 2507
+   }
+  },
+  {
+   "date": "2024-03",
+   "g": "raw",
+   "eligible": 637,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 4244,
+    "history-gap": 300,
+    "flat-history": 133,
+    "too-new": 2121
+   }
+  },
+  {
+   "date": "2024-03",
+   "g": "grade9",
+   "eligible": 1457,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 2130,
+    "flat-history": 1025,
+    "history-gap": 620,
+    "too-new": 2064
+   }
+  },
+  {
+   "date": "2024-03",
+   "g": "psa10",
+   "eligible": 3204,
+   "missing12": 10,
+   "excluded": {
+    "flat-history": 747,
+    "below-floor": 657,
+    "history-gap": 606,
+    "too-new": 2056
+   }
+  },
+  {
+   "date": "2024-06",
+   "g": "raw",
+   "eligible": 677,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 4363,
+    "history-gap": 260,
+    "flat-history": 142,
+    "too-new": 1993
+   }
+  },
+  {
+   "date": "2024-06",
+   "g": "grade9",
+   "eligible": 1475,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 2210,
+    "flat-history": 1135,
+    "history-gap": 540,
+    "too-new": 1936
+   }
+  },
+  {
+   "date": "2024-06",
+   "g": "psa10",
+   "eligible": 3326,
+   "missing12": 6,
+   "excluded": {
+    "flat-history": 858,
+    "below-floor": 616,
+    "history-gap": 542,
+    "too-new": 1928
+   }
+  },
+  {
+   "date": "2024-09",
+   "g": "raw",
+   "eligible": 665,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 4559,
+    "history-gap": 237,
+    "flat-history": 124,
+    "too-new": 1850
+   }
+  },
+  {
+   "date": "2024-09",
+   "g": "grade9",
+   "eligible": 1484,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 2348,
+    "flat-history": 1155,
+    "history-gap": 516,
+    "too-new": 1793
+   }
+  },
+  {
+   "date": "2024-09",
+   "g": "psa10",
+   "eligible": 3413,
+   "missing12": 2,
+   "excluded": {
+    "flat-history": 918,
+    "below-floor": 633,
+    "history-gap": 521,
+    "too-new": 1785
+   }
+  },
+  {
+   "date": "2024-12",
+   "g": "raw",
+   "eligible": 724,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 4688,
+    "history-gap": 197,
+    "flat-history": 107,
+    "too-new": 1719
+   }
+  },
+  {
+   "date": "2024-12",
+   "g": "grade9",
+   "eligible": 1516,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 2494,
+    "flat-history": 1127,
+    "history-gap": 497,
+    "too-new": 1662
+   }
+  },
+  {
+   "date": "2024-12",
+   "g": "psa10",
+   "eligible": 3533,
+   "missing12": 0,
+   "excluded": {
+    "flat-history": 949,
+    "below-floor": 637,
+    "history-gap": 492,
+    "too-new": 1659
+   }
+  },
+  {
+   "date": "2025-03",
+   "g": "raw",
+   "eligible": 861,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 4869,
+    "history-gap": 171,
+    "flat-history": 87,
+    "too-new": 1447
+   }
+  },
+  {
+   "date": "2025-03",
+   "g": "grade9",
+   "eligible": 1708,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 2568,
+    "flat-history": 1106,
+    "history-gap": 524,
+    "too-new": 1390
+   }
+  },
+  {
+   "date": "2025-03",
+   "g": "psa10",
+   "eligible": 3973,
+   "missing12": 0,
+   "excluded": {
+    "flat-history": 905,
+    "below-floor": 501,
+    "history-gap": 504,
+    "too-new": 1387
+   }
+  },
+  {
+   "date": "2025-06",
+   "g": "raw",
+   "eligible": 924,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 4944,
+    "history-gap": 149,
+    "flat-history": 66,
+    "too-new": 1352
+   }
+  },
+  {
+   "date": "2025-06",
+   "g": "grade9",
+   "eligible": 1754,
+   "missing12": 0,
+   "excluded": {
+    "below-floor": 2651,
+    "flat-history": 1143,
+    "history-gap": 453,
+    "too-new": 1295
+   }
+  },
+  {
+   "date": "2025-06",
+   "g": "psa10",
+   "eligible": 4204,
+   "missing12": 0,
+   "excluded": {
+    "flat-history": 909,
+    "below-floor": 427,
+    "history-gap": 438,
+    "too-new": 1292
+   }
+  }
+ ],
+ "selection": [
+  {
+   "name": "grid_1_3",
+   "w": [
+    0.25,
+    0.75,
+    0
+   ],
+   "objective": 0.04215355,
+   "lift": 0.06750813,
+   "meanNet": -0.22848519,
+   "baskets": 12
+  },
+  {
+   "name": "grid_0_3",
+   "w": [
+    0,
+    0.75,
+    0.25
+   ],
+   "objective": 0.03599067,
+   "lift": 0.06544423,
+   "meanNet": -0.23054909,
+   "baskets": 12
+  },
+  {
+   "name": "grid_1_2",
+   "w": [
+    0.25,
+    0.5,
+    0.25
+   ],
+   "objective": 0.0346885,
+   "lift": 0.05896688,
+   "meanNet": -0.23702644,
+   "baskets": 12
+  },
+  {
+   "name": "grid_0_4",
+   "w": [
+    0,
+    1,
+    0
+   ],
+   "objective": 0.034007,
+   "lift": 0.06439063,
+   "meanNet": -0.23160269,
+   "baskets": 12
+  },
+  {
+   "name": "value",
+   "w": [
+    0,
+    1,
+    0
+   ],
+   "objective": 0.034007,
+   "lift": 0.06439063,
+   "meanNet": -0.23160269,
+   "baskets": 12
+  },
+  {
+   "name": "grid_2_1",
+   "w": [
+    0.5,
+    0.25,
+    0.25
+   ],
+   "objective": 0.02764304,
+   "lift": 0.04772197,
+   "meanNet": -0.24827135,
+   "baskets": 12
+  },
+  {
+   "name": "balanced",
+   "w": [
+    0.33333333,
+    0.33333333,
+    0.33333333
+   ],
+   "objective": 0.02442192,
+   "lift": 0.04779121,
+   "meanNet": -0.24820211,
+   "baskets": 12
+  },
+  {
+   "name": "grid_2_2",
+   "w": [
+    0.5,
+    0.5,
+    0
+   ],
+   "objective": 0.01867301,
+   "lift": 0.04245363,
+   "meanNet": -0.25353969,
+   "baskets": 12
+  },
+  {
+   "name": "momentumValue",
+   "w": [
+    0.5,
+    0.5,
+    0
+   ],
+   "objective": 0.01867301,
+   "lift": 0.04245363,
+   "meanNet": -0.25353969,
+   "baskets": 12
+  },
+  {
+   "name": "grid_2_0",
+   "w": [
+    0.5,
+    0,
+    0.5
+   ],
+   "objective": 0.01250649,
+   "lift": 0.03272325,
+   "meanNet": -0.26327007,
+   "baskets": 12
+  },
+  {
+   "name": "momentumQuality",
+   "w": [
+    0.5,
+    0,
+    0.5
+   ],
+   "objective": 0.01250649,
+   "lift": 0.03272325,
+   "meanNet": -0.26327007,
+   "baskets": 12
+  },
+  {
+   "name": "grid_1_1",
+   "w": [
+    0.25,
+    0.25,
+    0.5
+   ],
+   "objective": 0.01001936,
+   "lift": 0.04444213,
+   "meanNet": -0.25155119,
+   "baskets": 12
+  },
+  {
+   "name": "grid_0_2",
+   "w": [
+    0,
+    0.5,
+    0.5
+   ],
+   "objective": 0.00764771,
+   "lift": 0.03817304,
+   "meanNet": -0.25782028,
+   "baskets": 12
+  },
+  {
+   "name": "valueQuality",
+   "w": [
+    0,
+    0.5,
+    0.5
+   ],
+   "objective": 0.00764771,
+   "lift": 0.03817304,
+   "meanNet": -0.25782028,
+   "baskets": 12
+  },
+  {
+   "name": "grid_0_1",
+   "w": [
+    0,
+    0.25,
+    0.75
+   ],
+   "objective": -0.00032198,
+   "lift": 0.03297869,
+   "meanNet": -0.26301463,
+   "baskets": 12
+  },
+  {
+   "name": "grid_0_0",
+   "w": [
+    0,
+    0,
+    1
+   ],
+   "objective": -0.0008317,
+   "lift": 0.03995561,
+   "meanNet": -0.25603771,
+   "baskets": 12
+  },
+  {
+   "name": "lowVol",
+   "w": [
+    0,
+    0,
+    1
+   ],
+   "objective": -0.0008317,
+   "lift": 0.03995561,
+   "meanNet": -0.25603771,
+   "baskets": 12
+  },
+  {
+   "name": "grid_1_0",
+   "w": [
+    0.25,
+    0,
+    0.75
+   ],
+   "objective": -0.00524586,
+   "lift": 0.03968726,
+   "meanNet": -0.25630606,
+   "baskets": 12
+  },
+  {
+   "name": "grid_3_1",
+   "w": [
+    0.75,
+    0.25,
+    0
+   ],
+   "objective": -0.03674107,
+   "lift": -0.01213863,
+   "meanNet": -0.30813195,
+   "baskets": 12
+  },
+  {
+   "name": "grid_3_0",
+   "w": [
+    0.75,
+    0,
+    0.25
+   ],
+   "objective": -0.03979266,
+   "lift": -0.01866234,
+   "meanNet": -0.31465566,
+   "baskets": 12
+  },
+  {
+   "name": "grid_4_0",
+   "w": [
+    1,
+    0,
+    0
+   ],
+   "objective": -0.06151432,
+   "lift": -0.03732709,
+   "meanNet": -0.33332041,
+   "baskets": 12
+  },
+  {
+   "name": "momentum",
+   "w": [
+    1,
+    0,
+    0
+   ],
+   "objective": -0.06151432,
+   "lift": -0.03732709,
+   "meanNet": -0.33332041,
+   "baskets": 12
+  }
+ ],
+ "chosen": {
+  "name": "grid_1_3",
+  "w": [
+   0.25,
+   0.75,
+   0
+  ],
+  "objective": 0.04215355
+ },
+ "comparison": {
+  "momentum": {
+   "baskets": 18,
+   "meanNet": 0.29491501,
+   "baseline": 0.30564402,
+   "lift": -0.01072901,
+   "medianLift": -0.02532129,
+   "positiveLift": 0.33333333,
+   "win": 0.52104782,
+   "loss30": 0.1982228,
+   "worstBasket": -0.15125301,
+   "missingExits": 18,
+   "unfilled": 0
+  },
+  "value": {
+   "baskets": 18,
+   "meanNet": 0.35969536,
+   "baseline": 0.30564402,
+   "lift": 0.05405134,
+   "medianLift": 0.07101428,
+   "positiveLift": 0.83333333,
+   "win": 0.59733953,
+   "loss30": 0.15328026,
+   "worstBasket": -0.04278991,
+   "missingExits": 18,
+   "unfilled": 0
+  },
+  "lowVol": {
+   "baskets": 18,
+   "meanNet": 0.24496548,
+   "baseline": 0.30564402,
+   "lift": -0.06067854,
+   "medianLift": 0.01197346,
+   "positiveLift": 0.55555556,
+   "win": 0.51444213,
+   "loss30": 0.2842113,
+   "worstBasket": -0.30605599,
+   "missingExits": 18,
+   "unfilled": 0
+  },
+  "balanced": {
+   "baskets": 18,
+   "meanNet": 0.29020388,
+   "baseline": 0.30564402,
+   "lift": -0.01544014,
+   "medianLift": 0.07722902,
+   "positiveLift": 0.66666667,
+   "win": 0.54249842,
+   "loss30": 0.2416292,
+   "worstBasket": -0.1473219,
+   "missingExits": 18,
+   "unfilled": 0
+  },
+  "momentumValue": {
+   "baskets": 18,
+   "meanNet": 0.35096457,
+   "baseline": 0.30564402,
+   "lift": 0.04532055,
+   "medianLift": 0.0600296,
+   "positiveLift": 0.83333333,
+   "win": 0.58636807,
+   "loss30": 0.15342828,
+   "worstBasket": -0.03914826,
+   "missingExits": 18,
+   "unfilled": 0
+  },
+  "momentumQuality": {
+   "baskets": 18,
+   "meanNet": 0.37091474,
+   "baseline": 0.30564402,
+   "lift": 0.06527072,
+   "medianLift": 0.03554801,
+   "positiveLift": 0.66666667,
+   "win": 0.57378345,
+   "loss30": 0.2030034,
+   "worstBasket": -0.21736699,
+   "missingExits": 18,
+   "unfilled": 0
+  },
+  "valueQuality": {
+   "baskets": 18,
+   "meanNet": 0.26339467,
+   "baseline": 0.30564402,
+   "lift": -0.04224934,
+   "medianLift": 0.01082756,
+   "positiveLift": 0.55555556,
+   "win": 0.5436765,
+   "loss30": 0.23326858,
+   "worstBasket": -0.08823011,
+   "missingExits": 18,
+   "unfilled": 0
+  },
+  "grid_1_3": {
+   "baskets": 18,
+   "meanNet": 0.35694613,
+   "baseline": 0.30564402,
+   "lift": 0.05130211,
+   "medianLift": 0.06684177,
+   "positiveLift": 0.72222222,
+   "win": 0.59606686,
+   "loss30": 0.15097533,
+   "worstBasket": -0.02601913,
+   "missingExits": 18,
+   "unfilled": 0
+  }
+ },
+ "byYear": {
+  "2024": {
+   "baskets": 12,
+   "meanNet": 0.29647739,
+   "baseline": 0.21714976,
+   "lift": 0.07932763,
+   "medianLift": 0.09729234,
+   "positiveLift": 0.83333333,
+   "win": 0.58776399,
+   "loss30": 0.12942882,
+   "worstBasket": -0.02601913,
+   "missingExits": 18,
+   "unfilled": 0
+  },
+  "2025": {
+   "baskets": 6,
+   "meanNet": 0.47788362,
+   "baseline": 0.48263253,
+   "lift": -0.00474891,
+   "medianLift": -0.00568084,
+   "positiveLift": 0.5,
+   "win": 0.61267259,
+   "loss30": 0.19406836,
+   "worstBasket": 0.35381537,
+   "missingExits": 0,
+   "unfilled": 0
+  }
+ },
+ "byGrade": {
+  "raw": {
+   "baskets": 6,
+   "meanNet": 0.35502386,
+   "baseline": 0.23160717,
+   "lift": 0.12341668,
+   "medianLift": 0.13806181,
+   "positiveLift": 1,
+   "win": 0.71378413,
+   "loss30": 0.06268718,
+   "worstBasket": 0.12511453,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  "grade9": {
+   "baskets": 6,
+   "meanNet": 0.27611032,
+   "baseline": 0.29768135,
+   "lift": -0.02157103,
+   "medianLift": -0.00756247,
+   "positiveLift": 0.5,
+   "win": 0.58301057,
+   "loss30": 0.15814294,
+   "worstBasket": -0.02601913,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  "psa10": {
+   "baskets": 6,
+   "meanNet": 0.43970422,
+   "baseline": 0.38764354,
+   "lift": 0.05206068,
+   "medianLift": 0.09307296,
+   "positiveLift": 0.66666667,
+   "win": 0.49140588,
+   "loss30": 0.23209587,
+   "worstBasket": 0.08949111,
+   "missingExits": 18,
+   "unfilled": 0
+  }
+ },
+ "byEra": {
+  "WOTC": {
+   "baskets": 18,
+   "meanNet": 0.33762125,
+   "baseline": 0.29144198,
+   "lift": 0.04617928,
+   "medianLift": 0.05147537,
+   "positiveLift": 0.61111111,
+   "win": 0.64071581,
+   "loss30": 0.08128647,
+   "worstBasket": -0.14423977,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  "EX": {
+   "baskets": 18,
+   "meanNet": 1.12812553,
+   "baseline": 0.77276604,
+   "lift": 0.35535949,
+   "medianLift": 0.10718313,
+   "positiveLift": 0.66666667,
+   "win": 0.7971264,
+   "loss30": 0.02804233,
+   "worstBasket": 0.06406611,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  "DP": {
+   "baskets": 18,
+   "meanNet": 1.12292104,
+   "baseline": 0.93196956,
+   "lift": 0.19095148,
+   "medianLift": 0.08714029,
+   "positiveLift": 0.72222222,
+   "win": 0.71237916,
+   "loss30": 0.074746,
+   "worstBasket": -0.03737677,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  "XY": {
+   "baskets": 18,
+   "meanNet": 0.65823205,
+   "baseline": 0.59695725,
+   "lift": 0.06127481,
+   "medianLift": 0.0531337,
+   "positiveLift": 0.66666667,
+   "win": 0.61118926,
+   "loss30": 0.15328267,
+   "worstBasket": 0.01389541,
+   "missingExits": 17,
+   "unfilled": 0
+  },
+  "BW": {
+   "baskets": 18,
+   "meanNet": 0.47296427,
+   "baseline": 0.42302015,
+   "lift": 0.04994412,
+   "medianLift": 0.10090012,
+   "positiveLift": 0.77777778,
+   "win": 0.57292407,
+   "loss30": 0.13072946,
+   "worstBasket": -0.04926504,
+   "missingExits": 1,
+   "unfilled": 0
+  },
+  "SM": {
+   "baskets": 18,
+   "meanNet": 0.49398821,
+   "baseline": 0.44684429,
+   "lift": 0.04714392,
+   "medianLift": -0.00518254,
+   "positiveLift": 0.44444444,
+   "win": 0.71215614,
+   "loss30": 0.05562695,
+   "worstBasket": 0.03166657,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  "SWSH": {
+   "baskets": 18,
+   "meanNet": -0.00410241,
+   "baseline": 0.04331661,
+   "lift": -0.04741903,
+   "medianLift": -0.03490069,
+   "positiveLift": 0.22222222,
+   "win": 0.39492438,
+   "loss30": 0.31642111,
+   "worstBasket": -0.24982237,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  "SV": {
+   "baskets": 12,
+   "meanNet": 0.02761397,
+   "baseline": 0.0365977,
+   "lift": -0.00898374,
+   "medianLift": -0.0701433,
+   "positiveLift": 0.41666667,
+   "win": 0.4044093,
+   "loss30": 0.38350652,
+   "worstBasket": -0.44761285,
+   "missingExits": 0,
+   "unfilled": 0
+  }
+ },
+ "heldSets": {
+  "baskets": 18,
+  "meanNet": 0.32626965,
+  "baseline": 0.25384232,
+  "lift": 0.07242733,
+  "medianLift": 0.08733119,
+  "positiveLift": 0.77777778,
+  "win": 0.60333575,
+  "loss30": 0.16538692,
+  "worstBasket": -0.08974282,
+  "missingExits": 1,
+  "unfilled": 0
+ },
+ "bySetBaskets": {
+  "baskets": 555,
+  "meanNet": 0.33020626,
+  "baseline": 0.29962283,
+  "lift": 0.03058343,
+  "medianLift": 0.0082799,
+  "positiveLift": 0.51171171,
+  "win": 0.50602323,
+  "loss30": 0.21308907,
+  "worstBasket": -0.44355744,
+  "missingExits": 18,
+  "unfilled": 0
+ },
+ "horizons": {
+  "6": {
+   "baskets": 18,
+   "meanNet": -0.06722874,
+   "baseline": -0.0919053,
+   "lift": 0.02467656,
+   "medianLift": 0.03829278,
+   "positiveLift": 0.66666667,
+   "win": 0.28935375,
+   "loss30": 0.27153202,
+   "worstBasket": -0.24000173,
+   "missingExits": 22,
+   "unfilled": 0
+  },
+  "12": {
+   "baskets": 18,
+   "meanNet": 0.35694613,
+   "baseline": 0.30564402,
+   "lift": 0.05130211,
+   "medianLift": 0.06684177,
+   "positiveLift": 0.72222222,
+   "win": 0.59606686,
+   "loss30": 0.15097533,
+   "worstBasket": -0.02601913,
+   "missingExits": 18,
+   "unfilled": 0
+  },
+  "24": {
+   "baskets": 6,
+   "meanNet": 1.49725452,
+   "baseline": 1.21144479,
+   "lift": 0.28580974,
+   "medianLift": 0.20756725,
+   "positiveLift": 1,
+   "win": 0.85025345,
+   "loss30": 0.05551741,
+   "worstBasket": 0.96214935,
+   "missingExits": 0,
+   "unfilled": 0
+  }
+ },
+ "costs": {
+  "0": {
+   "baskets": 18,
+   "meanNet": 0.70196164,
+   "baseline": 0.63179083,
+   "lift": 0.07017081,
+   "medianLift": 0.0843532,
+   "positiveLift": 0.72222222,
+   "win": 0.80876163,
+   "loss30": 0.02602173,
+   "worstBasket": 0.24708643,
+   "missingExits": 18,
+   "unfilled": 0
+  },
+  "0.1": {
+   "baskets": 18,
+   "meanNet": 0.44204421,
+   "baseline": 0.38723356,
+   "lift": 0.05481065,
+   "medianLift": 0.07092269,
+   "positiveLift": 0.72222222,
+   "win": 0.65794921,
+   "loss30": 0.11976241,
+   "worstBasket": 0.03633519,
+   "missingExits": 18,
+   "unfilled": 0
+  },
+  "0.15": {
+   "baskets": 18,
+   "meanNet": 0.35694613,
+   "baseline": 0.30564402,
+   "lift": 0.05130211,
+   "medianLift": 0.06684177,
+   "positiveLift": 0.72222222,
+   "win": 0.59606686,
+   "loss30": 0.15097533,
+   "worstBasket": -0.02601913,
+   "missingExits": 18,
+   "unfilled": 0
+  },
+  "0.2": {
+   "baskets": 18,
+   "meanNet": 0.27184805,
+   "baseline": 0.22405448,
+   "lift": 0.04779357,
+   "medianLift": 0.06276085,
+   "positiveLift": 0.72222222,
+   "win": 0.53765389,
+   "loss30": 0.18506719,
+   "worstBasket": -0.08837345,
+   "missingExits": 18,
+   "unfilled": 0
+  }
+ },
+ "testBaskets": [
+  {
+   "key": "24290|raw",
+   "date": "2024-03",
+   "g": "raw",
+   "n": 637,
+   "k": 128,
+   "missing": 0,
+   "unfilled": 0,
+   "net": 0.12511453,
+   "base": -0.00072207,
+   "lift": 0.1258366,
+   "median": 0.09722992,
+   "win": 0.609375,
+   "loss": 0.109375,
+   "worst": -0.54732283
+  },
+  {
+   "key": "24290|grade9",
+   "date": "2024-03",
+   "g": "grade9",
+   "n": 1457,
+   "k": 292,
+   "missing": 0,
+   "unfilled": 0,
+   "net": -0.02601913,
+   "base": -0.09708028,
+   "lift": 0.07106115,
+   "median": -0.06213733,
+   "win": 0.39726027,
+   "loss": 0.19178082,
+   "worst": -0.78538103
+  },
+  {
+   "key": "24290|psa10",
+   "date": "2024-03",
+   "g": "psa10",
+   "n": 3204,
+   "k": 641,
+   "missing": 10,
+   "unfilled": 0,
+   "net": 0.08949111,
+   "base": -0.03403241,
+   "lift": 0.12352353,
+   "median": -0.02303002,
+   "win": 0.46957878,
+   "loss": 0.16224649,
+   "worst": -0.93983153
+  },
+  {
+   "key": "24293|raw",
+   "date": "2024-06",
+   "g": "raw",
+   "n": 677,
+   "k": 136,
+   "missing": 0,
+   "unfilled": 0,
+   "net": 0.22099547,
+   "base": 0.07070846,
+   "lift": 0.15028701,
+   "median": 0.13154194,
+   "win": 0.59558824,
+   "loss": 0.05882353,
+   "worst": -0.47509615
+  },
+  {
+   "key": "24293|grade9",
+   "date": "2024-06",
+   "g": "grade9",
+   "n": 1475,
+   "k": 295,
+   "missing": 0,
+   "unfilled": 0,
+   "net": 0.13375015,
+   "base": 0.0740439,
+   "lift": 0.05970625,
+   "median": 0.0301619,
+   "win": 0.5559322,
+   "loss": 0.12542373,
+   "worst": -0.75397256
+  },
+  {
+   "key": "24293|psa10",
+   "date": "2024-06",
+   "g": "psa10",
+   "n": 3326,
+   "k": 666,
+   "missing": 6,
+   "unfilled": 0,
+   "net": 0.18226884,
+   "base": 0.11964645,
+   "lift": 0.06262239,
+   "median": -0.00174035,
+   "win": 0.4954955,
+   "loss": 0.19219219,
+   "worst": -0.83461963
+  },
+  {
+   "key": "24296|raw",
+   "date": "2024-09",
+   "g": "raw",
+   "n": 665,
+   "k": 133,
+   "missing": 0,
+   "unfilled": 0,
+   "net": 0.46733358,
+   "base": 0.41602123,
+   "lift": 0.05131236,
+   "median": 0.31870159,
+   "win": 0.76691729,
+   "loss": 0.03007519,
+   "worst": -0.48078499
+  },
+  {
+   "key": "24296|grade9",
+   "date": "2024-09",
+   "g": "grade9",
+   "n": 1484,
+   "k": 297,
+   "missing": 0,
+   "unfilled": 0,
+   "net": 0.30410959,
+   "base": 0.40861557,
+   "lift": -0.10450598,
+   "median": 0.11856364,
+   "win": 0.65319865,
+   "loss": 0.13468013,
+   "worst": -0.82386364
+  },
+  {
+   "key": "24296|psa10",
+   "date": "2024-09",
+   "g": "psa10",
+   "n": 3413,
+   "k": 683,
+   "missing": 2,
+   "unfilled": 0,
+   "net": 0.63879564,
+   "base": 0.47515858,
+   "lift": 0.16363706,
+   "median": 0.10234996,
+   "win": 0.57393851,
+   "loss": 0.15373353,
+   "worst": -1
+  },
+  {
+   "key": "24299|raw",
+   "date": "2024-12",
+   "g": "raw",
+   "n": 724,
+   "k": 145,
+   "missing": 0,
+   "unfilled": 0,
+   "net": 0.47747209,
+   "base": 0.31963349,
+   "lift": 0.1578386,
+   "median": 0.34682391,
+   "win": 0.75172414,
+   "loss": 0.04827586,
+   "worst": -0.65981919
+  },
+  {
+   "key": "24299|grade9",
+   "date": "2024-12",
+   "g": "grade9",
+   "n": 1516,
+   "k": 304,
+   "missing": 0,
+   "unfilled": 0,
+   "net": 0.33865032,
+   "base": 0.39818425,
+   "lift": -0.05953392,
+   "median": 0.16671628,
+   "win": 0.62828947,
+   "loss": 0.14144737,
+   "worst": -0.85240906
+  },
+  {
+   "key": "24299|psa10",
+   "date": "2024-12",
+   "g": "psa10",
+   "n": 3533,
+   "k": 707,
+   "missing": 0,
+   "unfilled": 0,
+   "net": 0.60576647,
+   "base": 0.45561999,
+   "lift": 0.15014648,
+   "median": 0.09276585,
+   "win": 0.55586987,
+   "loss": 0.20509194,
+   "worst": -0.75871276
+  },
+  {
+   "key": "24302|raw",
+   "date": "2025-03",
+   "g": "raw",
+   "n": 861,
+   "k": 173,
+   "missing": 0,
+   "unfilled": 0,
+   "net": 0.42526132,
+   "base": 0.25573152,
+   "lift": 0.16952981,
+   "median": 0.30881752,
+   "win": 0.78612717,
+   "loss": 0.08092486,
+   "worst": -0.65431391
+  },
+  {
+   "key": "24302|grade9",
+   "date": "2025-03",
+   "g": "grade9",
+   "n": 1708,
+   "k": 342,
+   "missing": 0,
+   "unfilled": 0,
+   "net": 0.39249598,
+   "base": 0.34808699,
+   "lift": 0.04440899,
+   "median": 0.18144116,
+   "win": 0.60526316,
+   "loss": 0.19883041,
+   "worst": -0.83941667
+  },
+  {
+   "key": "24302|psa10",
+   "date": "2025-03",
+   "g": "psa10",
+   "n": 3973,
+   "k": 795,
+   "missing": 0,
+   "unfilled": 0,
+   "net": 0.35381537,
+   "base": 0.40958605,
+   "lift": -0.05577068,
+   "median": -0.16666667,
+   "win": 0.36603774,
+   "loss": 0.37610063,
+   "worst": -0.81989247
+  },
+  {
+   "key": "24305|raw",
+   "date": "2025-06",
+   "g": "raw",
+   "n": 924,
+   "k": 185,
+   "missing": 0,
+   "unfilled": 0,
+   "net": 0.41396614,
+   "base": 0.32827042,
+   "lift": 0.08569572,
+   "median": 0.35988111,
+   "win": 0.77297297,
+   "loss": 0.04864865,
+   "worst": -0.50423333
+  },
+  {
+   "key": "24305|grade9",
+   "date": "2025-06",
+   "g": "grade9",
+   "n": 1754,
+   "k": 351,
+   "missing": 0,
+   "unfilled": 0,
+   "net": 0.51367502,
+   "base": 0.65423766,
+   "lift": -0.14056264,
+   "median": 0.34191647,
+   "win": 0.65811966,
+   "loss": 0.15669516,
+   "worst": -0.87567877
+  },
+  {
+   "key": "24305|psa10",
+   "date": "2025-06",
+   "g": "psa10",
+   "n": 4204,
+   "k": 841,
+   "missing": 0,
+   "unfilled": 0,
+   "net": 0.76808788,
+   "base": 0.89988257,
+   "lift": -0.13179469,
+   "median": -0.02109231,
+   "win": 0.48751486,
+   "loss": 0.30321046,
+   "worst": -0.74164166
+  }
+ ],
+ "heldSetNames": [
+  "Base Set",
+  "Legendary Collection",
+  "Expedition Base Set",
+  "Best of Game",
+  "Ruby & Sapphire",
+  "FireRed & LeafGreen",
+  "Legend Maker",
+  "Majestic Dawn",
+  "Rising Rivals",
+  "Dark Explorers",
+  "Legendary Treasures",
+  "XY Base Set",
+  "Roaring Skies",
+  "Evolutions",
+  "Burning Shadows",
+  "Lost Thunder",
+  "Hidden Fates",
+  "SWSH Black Star Promos",
+  "Vivid Voltage",
+  "Celebrations: Classic Collection",
+  "Brilliant Stars",
+  "Brilliant Stars Trainer Gallery",
+  "Astral Radiance",
+  "Scarlet & Violet Black Star Promos",
+  "Crown Zenith",
+  "151",
+  "Paradox Rift"
+ ],
+ "walkForward": [
+  {
+   "year": 2024,
+   "selected": {
+    "name": "grid_1_3",
+    "w": [
+     0.25,
+     0.75,
+     0
+    ],
+    "objective": 0.04215355
+   },
+   "test": {
+    "baskets": 12,
+    "meanNet": 0.29647739,
+    "baseline": 0.21714976,
+    "lift": 0.07932763,
+    "medianLift": 0.09729234,
+    "positiveLift": 0.83333333,
+    "win": 0.58776399,
+    "loss30": 0.12942882,
+    "worstBasket": -0.02601913,
+    "missingExits": 18,
+    "unfilled": 0
+   },
+   "heldSets": {
+    "baskets": 12,
+    "meanNet": 0.25936404,
+    "baseline": 0.16277366,
+    "lift": 0.09659037,
+    "medianLift": 0.11333483,
+    "positiveLift": 0.83333333,
+    "win": 0.58666014,
+    "loss30": 0.15123457,
+    "worstBasket": -0.08974282,
+    "missingExits": 1,
+    "unfilled": 0
+   }
+  },
+  {
+   "year": 2025,
+   "selected": {
+    "name": "grid_1_3",
+    "w": [
+     0.25,
+     0.75,
+     0
+    ],
+    "objective": 0.05424201
+   },
+   "test": {
+    "baskets": 6,
+    "meanNet": 0.47788362,
+    "baseline": 0.48263253,
+    "lift": -0.00474891,
+    "medianLift": -0.00568084,
+    "positiveLift": 0.5,
+    "win": 0.61267259,
+    "loss30": 0.19406836,
+    "worstBasket": 0.35381537,
+    "missingExits": 0,
+    "unfilled": 0
+   },
+   "heldSets": {
+    "baskets": 6,
+    "meanNet": 0.46008088,
+    "baseline": 0.43597963,
+    "lift": 0.02410125,
+    "medianLift": 0.04768158,
+    "positiveLift": 0.66666667,
+    "win": 0.63668696,
+    "loss30": 0.19369163,
+    "worstBasket": 0.25657718,
+    "missingExits": 0,
+    "unfilled": 0
+   }
+  }
+ ],
+ "setDetails": [
+  {
+   "set": "base1",
+   "name": "Base Set",
+   "baskets": 12,
+   "meanNet": 0.35138802,
+   "baseline": 0.23550075,
+   "lift": 0.11588727,
+   "medianLift": 0.10105498,
+   "positiveLift": 0.58333333,
+   "win": 0.68055556,
+   "loss30": 0.10277778,
+   "worstBasket": -0.13889341,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "base3",
+   "name": "Fossil",
+   "baskets": 12,
+   "meanNet": 0.27482212,
+   "baseline": 0.16748888,
+   "lift": 0.10733324,
+   "medianLift": 0.06719944,
+   "positiveLift": 0.66666667,
+   "win": 0.68888889,
+   "loss30": 0.06666667,
+   "worstBasket": -0.17348745,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "base4",
+   "name": "Base Set 2",
+   "baskets": 12,
+   "meanNet": 0.25950059,
+   "baseline": 0.07238406,
+   "lift": 0.18711653,
+   "medianLift": 0.13182123,
+   "positiveLift": 0.66666667,
+   "win": 0.56944444,
+   "loss30": 0.18888889,
+   "worstBasket": -0.23237373,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "base5",
+   "name": "Team Rocket",
+   "baskets": 12,
+   "meanNet": 0.17551261,
+   "baseline": 0.10908226,
+   "lift": 0.06643035,
+   "medianLift": 0.06429337,
+   "positiveLift": 0.66666667,
+   "win": 0.49444444,
+   "loss30": 0.125,
+   "worstBasket": -0.2884614,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "gym1",
+   "name": "Gym Heroes",
+   "baskets": 12,
+   "meanNet": 0.1862532,
+   "baseline": 0.17817069,
+   "lift": 0.00808251,
+   "medianLift": 0.0179639,
+   "positiveLift": 0.5,
+   "win": 0.56944444,
+   "loss30": 0.12222222,
+   "worstBasket": -0.22884251,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "gym2",
+   "name": "Gym Challenge",
+   "baskets": 12,
+   "meanNet": 0.2056456,
+   "baseline": 0.19799198,
+   "lift": 0.00765362,
+   "medianLift": 0.00722581,
+   "positiveLift": 0.5,
+   "win": 0.48541667,
+   "loss30": 0.09603175,
+   "worstBasket": -0.23832143,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "neo1",
+   "name": "Neo Genesis",
+   "baskets": 5,
+   "meanNet": 0.22421264,
+   "baseline": 0.062143,
+   "lift": 0.16206965,
+   "medianLift": 0.16833189,
+   "positiveLift": 0.6,
+   "win": 0.51,
+   "loss30": 0.08,
+   "worstBasket": -0.18010628,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "neo2",
+   "name": "Neo Discovery",
+   "baskets": 12,
+   "meanNet": 0.25813819,
+   "baseline": 0.20652064,
+   "lift": 0.05161754,
+   "medianLift": 0.03589114,
+   "positiveLift": 0.58333333,
+   "win": 0.54166667,
+   "loss30": 0.04722222,
+   "worstBasket": -0.06964255,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "neo3",
+   "name": "Neo Revelation",
+   "baskets": 12,
+   "meanNet": 0.24970236,
+   "baseline": 0.13044718,
+   "lift": 0.11925517,
+   "medianLift": 0.04110845,
+   "positiveLift": 0.66666667,
+   "win": 0.59166667,
+   "loss30": 0.11666667,
+   "worstBasket": -0.17513591,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "neo4",
+   "name": "Neo Destiny",
+   "baskets": 16,
+   "meanNet": 0.207991,
+   "baseline": 0.35043364,
+   "lift": -0.14244264,
+   "medianLift": -0.08729814,
+   "positiveLift": 0.3125,
+   "win": 0.6358631,
+   "loss30": 0.09136905,
+   "worstBasket": -0.10482965,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "base6",
+   "name": "Legendary Collection",
+   "baskets": 12,
+   "meanNet": 0.43181956,
+   "baseline": 0.25271009,
+   "lift": 0.17910947,
+   "medianLift": 0.02567876,
+   "positiveLift": 0.66666667,
+   "win": 0.5734127,
+   "loss30": 0.1202381,
+   "worstBasket": -0.31301111,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "ecard1",
+   "name": "Expedition Base Set",
+   "baskets": 18,
+   "meanNet": 0.43463932,
+   "baseline": 0.4286851,
+   "lift": 0.00595422,
+   "medianLift": -0.00314558,
+   "positiveLift": 0.5,
+   "win": 0.67171717,
+   "loss30": 0.09042809,
+   "worstBasket": -0.24674649,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "ecard2",
+   "name": "Aquapolis",
+   "baskets": 18,
+   "meanNet": 0.31406654,
+   "baseline": 0.30673462,
+   "lift": 0.00733192,
+   "medianLift": 0.05645209,
+   "positiveLift": 0.61111111,
+   "win": 0.65244709,
+   "loss30": 0.08303271,
+   "worstBasket": -0.12962866,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "ecard3",
+   "name": "Skyridge",
+   "baskets": 18,
+   "meanNet": 0.4673797,
+   "baseline": 0.50157252,
+   "lift": -0.03419282,
+   "medianLift": -0.08934796,
+   "positiveLift": 0.44444444,
+   "win": 0.70746568,
+   "loss30": 0.08571336,
+   "worstBasket": -0.16962483,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "basep",
+   "name": "Wizards Black Star Promos",
+   "baskets": 12,
+   "meanNet": 1.21241979,
+   "baseline": 0.79122256,
+   "lift": 0.42119723,
+   "medianLift": 0.05320216,
+   "positiveLift": 0.5,
+   "win": 0.80959897,
+   "loss30": 0.06729497,
+   "worstBasket": -0.0975202,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "xy5",
+   "name": "Primal Clash",
+   "baskets": 9,
+   "meanNet": 0.47916377,
+   "baseline": 0.60521063,
+   "lift": -0.12604686,
+   "medianLift": -0.12755918,
+   "positiveLift": 0.33333333,
+   "win": 0.45959596,
+   "loss30": 0.27929293,
+   "worstBasket": -0.14827572,
+   "missingExits": 4,
+   "unfilled": 0
+  },
+  {
+   "set": "xy1",
+   "name": "XY Base Set",
+   "baskets": 6,
+   "meanNet": 1.6951652,
+   "baseline": 1.05266298,
+   "lift": 0.64250222,
+   "medianLift": -0.20336397,
+   "positiveLift": 0.33333333,
+   "win": 0.43333333,
+   "loss30": 0.18333333,
+   "worstBasket": -0.09956136,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "xy2",
+   "name": "Flashfire",
+   "baskets": 6,
+   "meanNet": 0.23548871,
+   "baseline": 0.25796898,
+   "lift": -0.02248027,
+   "medianLift": 0.05621545,
+   "positiveLift": 0.66666667,
+   "win": 0.48333333,
+   "loss30": 0.29444444,
+   "worstBasket": -0.22948808,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "xy3",
+   "name": "Furious Fists",
+   "baskets": 6,
+   "meanNet": 0.00379711,
+   "baseline": 0.11734752,
+   "lift": -0.11355041,
+   "medianLift": -0.11414093,
+   "positiveLift": 0.5,
+   "win": 0.22222222,
+   "loss30": 0.41666667,
+   "worstBasket": -0.35871627,
+   "missingExits": 2,
+   "unfilled": 0
+  },
+  {
+   "set": "xy4",
+   "name": "Phantom Forces",
+   "baskets": 6,
+   "meanNet": 1.17301262,
+   "baseline": 0.6743482,
+   "lift": 0.49866442,
+   "medianLift": 0.40166667,
+   "positiveLift": 0.83333333,
+   "win": 0.51190476,
+   "loss30": 0.1031746,
+   "worstBasket": 0.14326162,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "xy6",
+   "name": "Roaring Skies",
+   "baskets": 7,
+   "meanNet": 0.91714987,
+   "baseline": 0.75399557,
+   "lift": 0.1631543,
+   "medianLift": 0.05626326,
+   "positiveLift": 0.57142857,
+   "win": 0.44132653,
+   "loss30": 0.29081633,
+   "worstBasket": -0.11577968,
+   "missingExits": 1,
+   "unfilled": 0
+  },
+  {
+   "set": "xy7",
+   "name": "Ancient Origins",
+   "baskets": 12,
+   "meanNet": 0.40232731,
+   "baseline": 0.68933599,
+   "lift": -0.28700868,
+   "medianLift": -0.25885731,
+   "positiveLift": 0.16666667,
+   "win": 0.50833333,
+   "loss30": 0.29768519,
+   "worstBasket": -0.23355073,
+   "missingExits": 1,
+   "unfilled": 0
+  },
+  {
+   "set": "xy8",
+   "name": "BREAKthrough",
+   "baskets": 8,
+   "meanNet": 0.34260337,
+   "baseline": 0.4624826,
+   "lift": -0.11987922,
+   "medianLift": -0.05041666,
+   "positiveLift": 0.5,
+   "win": 0.46805556,
+   "loss30": 0.30138889,
+   "worstBasket": -0.18573646,
+   "missingExits": 6,
+   "unfilled": 0
+  },
+  {
+   "set": "xy9",
+   "name": "BREAKpoint",
+   "baskets": 7,
+   "meanNet": 0.44558726,
+   "baseline": 0.44580941,
+   "lift": -0.00022215,
+   "medianLift": 0.18753436,
+   "positiveLift": 0.57142857,
+   "win": 0.52896825,
+   "loss30": 0.23015873,
+   "worstBasket": -0.1284029,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "xy10",
+   "name": "Fates Collide",
+   "baskets": 6,
+   "meanNet": 0.6154941,
+   "baseline": 0.46335626,
+   "lift": 0.15213784,
+   "medianLift": 0.17443123,
+   "positiveLift": 0.66666667,
+   "win": 0.51666667,
+   "loss30": 0.23703704,
+   "worstBasket": -0.01715377,
+   "missingExits": 3,
+   "unfilled": 0
+  },
+  {
+   "set": "xy11",
+   "name": "Steam Siege",
+   "baskets": 6,
+   "meanNet": 0.17384836,
+   "baseline": 0.34467015,
+   "lift": -0.1708218,
+   "medianLift": -0.32048859,
+   "positiveLift": 0.33333333,
+   "win": 0.3422619,
+   "loss30": 0.55357143,
+   "worstBasket": -0.44355744,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "g1",
+   "name": "Generations",
+   "baskets": 8,
+   "meanNet": 0.65997716,
+   "baseline": 0.7446502,
+   "lift": -0.08467304,
+   "medianLift": -0.29386765,
+   "positiveLift": 0.375,
+   "win": 0.45892857,
+   "loss30": 0.40119048,
+   "worstBasket": -0.29649744,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "xy12",
+   "name": "Evolutions",
+   "baskets": 6,
+   "meanNet": 0.39343347,
+   "baseline": 0.55285166,
+   "lift": -0.15941819,
+   "medianLift": -0.16324435,
+   "positiveLift": 0.16666667,
+   "win": 0.77777778,
+   "loss30": 0.01851852,
+   "worstBasket": 0.13746004,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "bw3",
+   "name": "Noble Victories",
+   "baskets": 3,
+   "meanNet": -0.19739861,
+   "baseline": 0.10230273,
+   "lift": -0.29970134,
+   "medianLift": -0.28769705,
+   "positiveLift": 0,
+   "win": 0.13333333,
+   "loss30": 0.26666667,
+   "worstBasket": -0.21174829,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "bw4",
+   "name": "Next Destinies",
+   "baskets": 6,
+   "meanNet": 1.81101279,
+   "baseline": 0.98222996,
+   "lift": 0.82878283,
+   "medianLift": 0.00416318,
+   "positiveLift": 0.5,
+   "win": 0.66666667,
+   "loss30": 0.13333333,
+   "worstBasket": -0.01363583,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "bw5",
+   "name": "Dark Explorers",
+   "baskets": 6,
+   "meanNet": 0.06978055,
+   "baseline": 0.35390419,
+   "lift": -0.28412364,
+   "medianLift": -0.32395127,
+   "positiveLift": 0.16666667,
+   "win": 0.3,
+   "loss30": 0.06666667,
+   "worstBasket": -0.24195651,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "bw6",
+   "name": "Dragons Exalted",
+   "baskets": 4,
+   "meanNet": 0.69278454,
+   "baseline": 0.90788172,
+   "lift": -0.21509718,
+   "medianLift": -0.20415576,
+   "positiveLift": 0.25,
+   "win": 0.875,
+   "loss30": 0,
+   "worstBasket": 0.08852271,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "bw7",
+   "name": "Boundaries Crossed",
+   "baskets": 6,
+   "meanNet": 0.24360495,
+   "baseline": 0.31312234,
+   "lift": -0.06951739,
+   "medianLift": -0.1155181,
+   "positiveLift": 0.16666667,
+   "win": 0.44444444,
+   "loss30": 0.11111111,
+   "worstBasket": -0.38851217,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "bw8",
+   "name": "Plasma Storm",
+   "baskets": 6,
+   "meanNet": 0.76664678,
+   "baseline": 0.5705314,
+   "lift": 0.19611538,
+   "medianLift": 0.21284671,
+   "positiveLift": 0.66666667,
+   "win": 0.68888889,
+   "loss30": 0.02777778,
+   "worstBasket": 0.05551948,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "bw9",
+   "name": "Plasma Freeze",
+   "baskets": 12,
+   "meanNet": 0.54018161,
+   "baseline": 0.51488893,
+   "lift": 0.02529268,
+   "medianLift": -0.08294783,
+   "positiveLift": 0.41666667,
+   "win": 0.47291667,
+   "loss30": 0.10575397,
+   "worstBasket": -0.18810361,
+   "missingExits": 1,
+   "unfilled": 0
+  },
+  {
+   "set": "bw10",
+   "name": "Plasma Blast",
+   "baskets": 6,
+   "meanNet": 0.60825462,
+   "baseline": 0.69281385,
+   "lift": -0.08455923,
+   "medianLift": -0.03584458,
+   "positiveLift": 0.5,
+   "win": 0.41269841,
+   "loss30": 0.1468254,
+   "worstBasket": -0.02038226,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "bw11",
+   "name": "Legendary Treasures",
+   "baskets": 8,
+   "meanNet": 0.50350782,
+   "baseline": 0.82178686,
+   "lift": -0.31827905,
+   "medianLift": 0.03882543,
+   "positiveLift": 0.625,
+   "win": 0.58883929,
+   "loss30": 0.20357143,
+   "worstBasket": -0.14609536,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "sm115",
+   "name": "Hidden Fates",
+   "baskets": 7,
+   "meanNet": 0.63244015,
+   "baseline": 0.45970469,
+   "lift": 0.17273547,
+   "medianLift": 0.11730655,
+   "positiveLift": 0.85714286,
+   "win": 0.93571429,
+   "loss30": 0,
+   "worstBasket": 0.19317793,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swshp",
+   "name": "SWSH Black Star Promos",
+   "baskets": 12,
+   "meanNet": 0.15974997,
+   "baseline": 0.21106214,
+   "lift": -0.05131217,
+   "medianLift": -0.11623399,
+   "positiveLift": 0.41666667,
+   "win": 0.32378641,
+   "loss30": 0.35733842,
+   "worstBasket": -0.18763079,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh1",
+   "name": "Sword & Shield",
+   "baskets": 6,
+   "meanNet": -0.12294675,
+   "baseline": -0.15071171,
+   "lift": 0.02776497,
+   "medianLift": 0.11832619,
+   "positiveLift": 0.66666667,
+   "win": 0.35694444,
+   "loss30": 0.40534512,
+   "worstBasket": -0.40016987,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh2",
+   "name": "Rebel Clash",
+   "baskets": 6,
+   "meanNet": -0.22898911,
+   "baseline": -0.30074778,
+   "lift": 0.07175868,
+   "medianLift": 0.08711713,
+   "positiveLift": 0.66666667,
+   "win": 0.16001684,
+   "loss30": 0.53728956,
+   "worstBasket": -0.34051177,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh4",
+   "name": "Vivid Voltage",
+   "baskets": 6,
+   "meanNet": -0.2426021,
+   "baseline": -0.17628102,
+   "lift": -0.06632108,
+   "medianLift": -0.03742809,
+   "positiveLift": 0.5,
+   "win": 0.18665825,
+   "loss30": 0.43354377,
+   "worstBasket": -0.33178257,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh45sv",
+   "name": "Shining Fates Shiny Vault",
+   "baskets": 6,
+   "meanNet": -0.21655132,
+   "baseline": -0.22960217,
+   "lift": 0.01305085,
+   "medianLift": 0.03729347,
+   "positiveLift": 0.83333333,
+   "win": 0.24089105,
+   "loss30": 0.61399711,
+   "worstBasket": -0.37272268,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh5",
+   "name": "Battle Styles",
+   "baskets": 6,
+   "meanNet": -0.20107583,
+   "baseline": -0.19853532,
+   "lift": -0.00254051,
+   "medianLift": 0.01402539,
+   "positiveLift": 0.5,
+   "win": 0.21007326,
+   "loss30": 0.39774115,
+   "worstBasket": -0.28772847,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh6",
+   "name": "Chilling Reign",
+   "baskets": 6,
+   "meanNet": -0.11914901,
+   "baseline": -0.18473333,
+   "lift": 0.06558432,
+   "medianLift": 0.05561057,
+   "positiveLift": 0.83333333,
+   "win": 0.27781307,
+   "loss30": 0.3989154,
+   "worstBasket": -0.22281692,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh7",
+   "name": "Evolving Skies",
+   "baskets": 11,
+   "meanNet": -0.10615132,
+   "baseline": 0.00735607,
+   "lift": -0.11350739,
+   "medianLift": -0.10642735,
+   "positiveLift": 0.18181818,
+   "win": 0.28347107,
+   "loss30": 0.2960085,
+   "worstBasket": -0.28639065,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "cel25c",
+   "name": "Celebrations: Classic Collection",
+   "baskets": 4,
+   "meanNet": 0.65109904,
+   "baseline": 0.55831642,
+   "lift": 0.09278262,
+   "medianLift": -0.03952623,
+   "positiveLift": 0.5,
+   "win": 0.85,
+   "loss30": 0,
+   "worstBasket": 0.16684949,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh8",
+   "name": "Fusion Strike",
+   "baskets": 6,
+   "meanNet": -0.17119035,
+   "baseline": -0.1143667,
+   "lift": -0.05682365,
+   "medianLift": -0.04915271,
+   "positiveLift": 0.5,
+   "win": 0.23766534,
+   "loss30": 0.48707011,
+   "worstBasket": -0.32274008,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh9",
+   "name": "Brilliant Stars",
+   "baskets": 6,
+   "meanNet": -0.17859584,
+   "baseline": -0.16726784,
+   "lift": -0.011328,
+   "medianLift": -0.01325095,
+   "positiveLift": 0.5,
+   "win": 0.25367063,
+   "loss30": 0.50934066,
+   "worstBasket": -0.32912117,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh10",
+   "name": "Astral Radiance",
+   "baskets": 6,
+   "meanNet": -0.15100224,
+   "baseline": -0.19690077,
+   "lift": 0.04589853,
+   "medianLift": 0.10610137,
+   "positiveLift": 0.66666667,
+   "win": 0.20697454,
+   "loss30": 0.37726178,
+   "worstBasket": -0.28680486,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh10tg",
+   "name": "Astral Radiance Trainer Gallery",
+   "baskets": 6,
+   "meanNet": 0.32477553,
+   "baseline": 0.16294004,
+   "lift": 0.16183549,
+   "medianLift": 0.11871526,
+   "positiveLift": 0.66666667,
+   "win": 0.63333333,
+   "loss30": 0,
+   "worstBasket": -0.03249873,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "pgo",
+   "name": "Pokémon GO",
+   "baskets": 6,
+   "meanNet": 0.35820887,
+   "baseline": 0.15179084,
+   "lift": 0.20641802,
+   "medianLift": 0.20132905,
+   "positiveLift": 0.83333333,
+   "win": 0.55654762,
+   "loss30": 0.25595238,
+   "worstBasket": -0.13510498,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh11",
+   "name": "Lost Origin",
+   "baskets": 6,
+   "meanNet": -0.29860062,
+   "baseline": -0.28109737,
+   "lift": -0.01750325,
+   "medianLift": -0.00034125,
+   "positiveLift": 0.5,
+   "win": 0.11520969,
+   "loss30": 0.6356073,
+   "worstBasket": -0.37010221,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh12",
+   "name": "Silver Tempest",
+   "baskets": 6,
+   "meanNet": -0.16234356,
+   "baseline": -0.1757307,
+   "lift": 0.01338714,
+   "medianLift": 0.01594472,
+   "positiveLift": 0.5,
+   "win": 0.2078373,
+   "loss30": 0.50119048,
+   "worstBasket": -0.27184007,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh12pt5gg",
+   "name": "Crown Zenith Galarian Gallery",
+   "baskets": 6,
+   "meanNet": 0.32216276,
+   "baseline": 0.40006289,
+   "lift": -0.07790013,
+   "medianLift": -0.03606673,
+   "positiveLift": 0.5,
+   "win": 0.69688645,
+   "loss30": 0.07234432,
+   "worstBasket": -0.10299545,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "sv1",
+   "name": "Scarlet & Violet",
+   "baskets": 5,
+   "meanNet": 0.04993824,
+   "baseline": 0.10727497,
+   "lift": -0.05733673,
+   "medianLift": -0.11385137,
+   "positiveLift": 0.2,
+   "win": 0.3214652,
+   "loss30": 0.53604396,
+   "worstBasket": -0.38301672,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "xyp",
+   "name": "XY Black Star Promos",
+   "baskets": 13,
+   "meanNet": 0.95063928,
+   "baseline": 0.83746904,
+   "lift": 0.11317024,
+   "medianLift": 0.08936143,
+   "positiveLift": 0.61538462,
+   "win": 0.56627,
+   "loss30": 0.14278198,
+   "worstBasket": -0.04693404,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "base2",
+   "name": "Jungle",
+   "baskets": 12,
+   "meanNet": 0.2755555,
+   "baseline": 0.14659274,
+   "lift": 0.12896276,
+   "medianLift": 0.04290688,
+   "positiveLift": 0.66666667,
+   "win": 0.63154762,
+   "loss30": 0.075,
+   "worstBasket": -0.20497515,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "bw1",
+   "name": "Black & White Base Set",
+   "baskets": 2,
+   "meanNet": 0.961829,
+   "baseline": 0.67349583,
+   "lift": 0.28833316,
+   "medianLift": 0.28833316,
+   "positiveLift": 0.5,
+   "win": 0.45,
+   "loss30": 0.325,
+   "worstBasket": 0.28862178,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh3",
+   "name": "Darkness Ablaze",
+   "baskets": 6,
+   "meanNet": -0.25455466,
+   "baseline": -0.24150685,
+   "lift": -0.01304781,
+   "medianLift": -0.02368669,
+   "positiveLift": 0.5,
+   "win": 0.13552189,
+   "loss30": 0.53198653,
+   "worstBasket": -0.33497711,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "cel25",
+   "name": "Celebrations",
+   "baskets": 6,
+   "meanNet": 0.61205127,
+   "baseline": 0.75196414,
+   "lift": -0.13991287,
+   "medianLift": -0.03341,
+   "positiveLift": 0.5,
+   "win": 0.70833333,
+   "loss30": 0.14166667,
+   "worstBasket": -0.26592796,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh9tg",
+   "name": "Brilliant Stars Trainer Gallery",
+   "baskets": 5,
+   "meanNet": 0.4692913,
+   "baseline": 0.41690952,
+   "lift": 0.05238178,
+   "medianLift": -0.15891152,
+   "positiveLift": 0.4,
+   "win": 0.53333333,
+   "loss30": 0.06666667,
+   "worstBasket": -0.19000982,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh11tg",
+   "name": "Lost Origin Trainer Gallery",
+   "baskets": 6,
+   "meanNet": 0.45439435,
+   "baseline": 0.44884911,
+   "lift": 0.00554523,
+   "medianLift": 0.00437945,
+   "positiveLift": 0.5,
+   "win": 0.65,
+   "loss30": 0.14444444,
+   "worstBasket": -0.16573364,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh12tg",
+   "name": "Silver Tempest Trainer Gallery",
+   "baskets": 5,
+   "meanNet": 0.29381766,
+   "baseline": 0.24802584,
+   "lift": 0.04579182,
+   "medianLift": -0.06359536,
+   "positiveLift": 0.4,
+   "win": 0.65,
+   "loss30": 0.08,
+   "worstBasket": -0.17608556,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh45",
+   "name": "Shining Fates",
+   "baskets": 2,
+   "meanNet": -0.34408258,
+   "baseline": -0.17222019,
+   "lift": -0.17186239,
+   "medianLift": -0.17186239,
+   "positiveLift": 0,
+   "win": 0.1,
+   "loss30": 0.73333333,
+   "worstBasket": -0.35540252,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "swsh12pt5",
+   "name": "Crown Zenith",
+   "baskets": 6,
+   "meanNet": -0.26137411,
+   "baseline": -0.20730413,
+   "lift": -0.05406997,
+   "medianLift": -0.02833933,
+   "positiveLift": 0.5,
+   "win": 0.13055556,
+   "loss30": 0.64166667,
+   "worstBasket": -0.41674036,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "sv2",
+   "name": "Paldea Evolved",
+   "baskets": 6,
+   "meanNet": -0.04974116,
+   "baseline": -0.13390251,
+   "lift": 0.08416135,
+   "medianLift": 0.08857594,
+   "positiveLift": 0.83333333,
+   "win": 0.34076859,
+   "loss30": 0.33614592,
+   "worstBasket": -0.28124128,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "svp",
+   "name": "Scarlet & Violet Black Star Promos",
+   "baskets": 2,
+   "meanNet": 0.82377877,
+   "baseline": 0.63275843,
+   "lift": 0.19102034,
+   "medianLift": 0.19102034,
+   "positiveLift": 1,
+   "win": 0.58333333,
+   "loss30": 0.14583333,
+   "worstBasket": 0.68406484,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "sv3",
+   "name": "Obsidian Flames",
+   "baskets": 4,
+   "meanNet": -0.03918332,
+   "baseline": 0.02147357,
+   "lift": -0.06065689,
+   "medianLift": -0.07866389,
+   "positiveLift": 0.25,
+   "win": 0.28611111,
+   "loss30": 0.41111111,
+   "worstBasket": -0.25890234,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "sv3pt5",
+   "name": "151",
+   "baskets": 4,
+   "meanNet": 0.30446345,
+   "baseline": 0.35587702,
+   "lift": -0.05141358,
+   "medianLift": -0.18414717,
+   "positiveLift": 0.25,
+   "win": 0.54982517,
+   "loss30": 0.16970529,
+   "worstBasket": -0.07786632,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "sv4",
+   "name": "Paradox Rift",
+   "baskets": 3,
+   "meanNet": -0.17474327,
+   "baseline": -0.11652112,
+   "lift": -0.05822215,
+   "medianLift": -0.0513032,
+   "positiveLift": 0,
+   "win": 0.31328321,
+   "loss30": 0.52130326,
+   "worstBasket": -0.36771178,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "sv4pt5",
+   "name": "Paldean Fates",
+   "baskets": 2,
+   "meanNet": -0.03493053,
+   "baseline": 0.18673964,
+   "lift": -0.22167017,
+   "medianLift": -0.22167017,
+   "positiveLift": 0,
+   "win": 0.36666667,
+   "loss30": 0.45,
+   "worstBasket": -0.2735851,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "sv5",
+   "name": "Temporal Forces",
+   "baskets": 2,
+   "meanNet": -0.18395499,
+   "baseline": -0.07871862,
+   "lift": -0.10523636,
+   "medianLift": -0.10523636,
+   "positiveLift": 0.5,
+   "win": 0.32142857,
+   "loss30": 0.39285714,
+   "worstBasket": -0.29546266,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  {
+   "set": "sv6",
+   "name": "Twilight Masquerade",
+   "baskets": 1,
+   "meanNet": 0.5665135,
+   "baseline": 0.1304772,
+   "lift": 0.4360363,
+   "medianLift": 0.4360363,
+   "positiveLift": 1,
+   "win": 0.78571429,
+   "loss30": 0.07142857,
+   "worstBasket": 0.5665135,
+   "missingExits": 0,
+   "unfilled": 0
+  }
+ ],
+ "dateBootstrap": {
+  "dates": 6,
+  "lower": 0.00263116,
+  "upper": 0.08848745,
+  "note": "Exploratory date-cluster bootstrap; adjacent 12-month holdings overlap, so not a formal confidence interval."
+ },
+ "evaluationCoverage": {
+  "testObservations": 35535,
+  "cards": 4917,
+  "sets": 131,
+  "missing12": 18,
+  "holdSets": 27
+ },
+ "delayed": {
+  "missingEntries": 6,
+  "summary": {
+   "baskets": 18,
+   "meanNet": 0.38504123,
+   "baseline": 0.35486786,
+   "lift": 0.03017337,
+   "medianLift": 0.0393455,
+   "positiveLift": 0.72222222,
+   "win": 0.59092825,
+   "loss30": 0.14963206,
+   "worstBasket": 0.02576175,
+   "missingExits": 16,
+   "unfilled": 0
+  },
+  "byGrade": {
+   "raw": {
+    "baskets": 6,
+    "meanNet": 0.30112753,
+    "baseline": 0.244104,
+    "lift": 0.05702354,
+    "medianLift": 0.05484257,
+    "positiveLift": 0.83333333,
+    "win": 0.67595412,
+    "loss30": 0.07800745,
+    "worstBasket": 0.11632668,
+    "missingExits": 0,
+    "unfilled": 0
+   },
+   "grade9": {
+    "baskets": 6,
+    "meanNet": 0.33262395,
+    "baseline": 0.35174432,
+    "lift": -0.01912037,
+    "medianLift": -0.02436109,
+    "positiveLift": 0.5,
+    "win": 0.59641749,
+    "loss30": 0.14258472,
+    "worstBasket": 0.02576175,
+    "missingExits": 0,
+    "unfilled": 0
+   },
+   "psa10": {
+    "baskets": 6,
+    "meanNet": 0.5213722,
+    "baseline": 0.46875525,
+    "lift": 0.05261695,
+    "medianLift": 0.08403559,
+    "positiveLift": 0.83333333,
+    "win": 0.50041312,
+    "loss30": 0.22830401,
+    "worstBasket": 0.1188228,
+    "missingExits": 16,
+    "unfilled": 0
+   }
+  }
+ },
+ "nonoverlap": {
+  "baskets": 6,
+  "meanNet": 0.2266932,
+  "baseline": 0.1469283,
+  "lift": 0.0797649,
+  "medianLift": 0.09729234,
+  "positiveLift": 0.83333333,
+  "win": 0.53894035,
+  "loss30": 0.18654303,
+  "worstBasket": -0.02601913,
+  "missingExits": 10,
+  "unfilled": 0
+ },
+ "priceBands": {
+  "25-100": {
+   "baskets": 18,
+   "meanNet": 0.24137182,
+   "baseline": 0.14677038,
+   "lift": 0.09460145,
+   "medianLift": 0.11236033,
+   "positiveLift": 0.94444444,
+   "win": 0.53146027,
+   "loss30": 0.19387132,
+   "worstBasket": -0.07059306,
+   "missingExits": 18,
+   "unfilled": 0
+  },
+  "100-500": {
+   "baskets": 18,
+   "meanNet": 0.71035081,
+   "baseline": 0.60315629,
+   "lift": 0.10719453,
+   "medianLift": 0.07267314,
+   "positiveLift": 0.77777778,
+   "win": 0.79458944,
+   "loss30": 0.03052888,
+   "worstBasket": 0.09135593,
+   "missingExits": 0,
+   "unfilled": 0
+  },
+  "500-Infinity": {
+   "baskets": 14,
+   "meanNet": 0.90828235,
+   "baseline": 0.87734629,
+   "lift": 0.03093606,
+   "medianLift": 0.04416378,
+   "positiveLift": 0.71428571,
+   "win": 0.84086062,
+   "loss30": 0.01427605,
+   "worstBasket": 0.04398393,
+   "missingExits": 0,
+   "unfilled": 0
+  }
+ },
+ "psa10TrainingChoice": {
+  "name": "grid_1_3",
+  "w": [
+   0.25,
+   0.75,
+   0
+  ],
+  "objective": 0.02056653
+ },
+ "psa10OwnModel": {
+  "baskets": 6,
+  "meanNet": 0.43970422,
+  "baseline": 0.38764354,
+  "lift": 0.05206068,
+  "medianLift": 0.09307296,
+  "positiveLift": 0.66666667,
+  "win": 0.49140588,
+  "loss30": 0.23209587,
+  "worstBasket": 0.08949111,
+  "missingExits": 18,
+  "unfilled": 0
+ },
+ "cappedUpside": {
+  "baskets": 18,
+  "meanNet": 0.26826828,
+  "baseline": 0.23068467,
+  "lift": 0.03758361,
+  "medianLift": 0.06433323,
+  "positiveLift": 0.72222222,
+  "win": 0.59606686,
+  "loss30": 0.15097533,
+  "worstBasket": -0.02601913,
+  "missingExits": 18,
+  "unfilled": 0
+ },
+ "executionStress": {
+  "baskets": 18,
+  "meanNet": 0.09398018,
+  "baseline": 0.06952919,
+  "lift": 0.02445099,
+  "medianLift": 0.03187879,
+  "positiveLift": 0.72222222,
+  "win": 0.38904459,
+  "loss30": 0.30720741,
+  "worstBasket": -0.19146992,
+  "missingExits": 16,
+  "unfilled": 0
+ },
+ "portfolio": {
+  "candidate": {
+   "baskets": [
+    {
+     "date": "2024-03",
+     "g": "raw",
+     "positions": 18,
+     "wanted": 128,
+     "skipped": 619,
+     "fill": 0.986345,
+     "ret": 0.40412225,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.0842655
+    },
+    {
+     "date": "2024-03",
+     "g": "grade9",
+     "positions": 28,
+     "wanted": 292,
+     "skipped": 1429,
+     "fill": 0.987865,
+     "ret": 0.00924625,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.20487475
+    },
+    {
+     "date": "2024-03",
+     "g": "psa10",
+     "positions": 5,
+     "wanted": 641,
+     "skipped": 3199,
+     "fill": 0.994225,
+     "ret": 0.16281125,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.1326565
+    },
+    {
+     "date": "2024-06",
+     "g": "raw",
+     "positions": 15,
+     "wanted": 136,
+     "skipped": 662,
+     "fill": 0.99903,
+     "ret": 0.28228325,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.3923452
+    },
+    {
+     "date": "2024-06",
+     "g": "grade9",
+     "positions": 35,
+     "wanted": 295,
+     "skipped": 1440,
+     "fill": 0.99549,
+     "ret": 0.2411315,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.220443
+    },
+    {
+     "date": "2024-06",
+     "g": "psa10",
+     "positions": 10,
+     "wanted": 666,
+     "skipped": 3316,
+     "fill": 0.99494,
+     "ret": 0.001522,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.22534497
+    },
+    {
+     "date": "2024-09",
+     "g": "raw",
+     "positions": 38,
+     "wanted": 133,
+     "skipped": 627,
+     "fill": 0.9854,
+     "ret": 0.58258675,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.10709075
+    },
+    {
+     "date": "2024-09",
+     "g": "grade9",
+     "positions": 29,
+     "wanted": 297,
+     "skipped": 1455,
+     "fill": 0.99004,
+     "ret": 0.145599,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.19744475
+    },
+    {
+     "date": "2024-09",
+     "g": "psa10",
+     "positions": 13,
+     "wanted": 683,
+     "skipped": 3400,
+     "fill": 0.998935,
+     "ret": 1.35508875,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.1010715
+    },
+    {
+     "date": "2024-12",
+     "g": "raw",
+     "positions": 17,
+     "wanted": 145,
+     "skipped": 707,
+     "fill": 0.990355,
+     "ret": 0.751261,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.09996217
+    },
+    {
+     "date": "2024-12",
+     "g": "grade9",
+     "positions": 30,
+     "wanted": 304,
+     "skipped": 1486,
+     "fill": 0.986475,
+     "ret": 0.53403025,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.16954
+    },
+    {
+     "date": "2024-12",
+     "g": "psa10",
+     "positions": 24,
+     "wanted": 707,
+     "skipped": 3509,
+     "fill": 0.98666,
+     "ret": 5.03390425,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.23679401
+    },
+    {
+     "date": "2025-03",
+     "g": "raw",
+     "positions": 21,
+     "wanted": 173,
+     "skipped": 840,
+     "fill": 0.99771,
+     "ret": 0.7232555,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.13024675
+    },
+    {
+     "date": "2025-03",
+     "g": "grade9",
+     "positions": 32,
+     "wanted": 342,
+     "skipped": 1676,
+     "fill": 0.99099,
+     "ret": 0.58265525,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.13133825
+    },
+    {
+     "date": "2025-03",
+     "g": "psa10",
+     "positions": 12,
+     "wanted": 795,
+     "skipped": 3961,
+     "fill": 0.99407,
+     "ret": 0.10745,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.14535775
+    },
+    {
+     "date": "2025-06",
+     "g": "raw",
+     "positions": 18,
+     "wanted": 185,
+     "skipped": 906,
+     "fill": 0.992935,
+     "ret": 0.5676215,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.13843425
+    },
+    {
+     "date": "2025-06",
+     "g": "grade9",
+     "positions": 31,
+     "wanted": 351,
+     "skipped": 1723,
+     "fill": 0.99738,
+     "ret": 0.34157275,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.1848565
+    },
+    {
+     "date": "2025-06",
+     "g": "psa10",
+     "positions": 17,
+     "wanted": 841,
+     "skipped": 4187,
+     "fill": 0.99279,
+     "ret": 0.4457415,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.06931215
+    }
+   ],
+   "meanReturn": 0.68177128,
+   "meanFill": 0.99231306,
+   "worstDrawdown": 0.3923452,
+   "missingExit": 0,
+   "missingMarks": 0,
+   "timeToSale": null,
+   "timeToSaleNote": "Not observable: no listing or order-book history exists, so exits assume a sale at the guide price."
+  },
+  "valueOnly": {
+   "baskets": [
+    {
+     "date": "2024-03",
+     "g": "raw",
+     "positions": 25,
+     "wanted": 128,
+     "skipped": 612,
+     "fill": 0.995265,
+     "ret": 0.51691525,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.08877051
+    },
+    {
+     "date": "2024-03",
+     "g": "grade9",
+     "positions": 35,
+     "wanted": 292,
+     "skipped": 1422,
+     "fill": 0.991275,
+     "ret": -0.0712615,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.08320056
+    },
+    {
+     "date": "2024-03",
+     "g": "psa10",
+     "positions": 27,
+     "wanted": 641,
+     "skipped": 3177,
+     "fill": 0.992545,
+     "ret": 0.29783425,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.17917575
+    },
+    {
+     "date": "2024-06",
+     "g": "raw",
+     "positions": 27,
+     "wanted": 136,
+     "skipped": 650,
+     "fill": 0.99687,
+     "ret": 0.2030055,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.11189675
+    },
+    {
+     "date": "2024-06",
+     "g": "grade9",
+     "positions": 31,
+     "wanted": 295,
+     "skipped": 1444,
+     "fill": 0.986965,
+     "ret": 0.117596,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.1968305
+    },
+    {
+     "date": "2024-06",
+     "g": "psa10",
+     "positions": 16,
+     "wanted": 666,
+     "skipped": 3310,
+     "fill": 0.99888,
+     "ret": 0.25416975,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.17512621
+    },
+    {
+     "date": "2024-09",
+     "g": "raw",
+     "positions": 36,
+     "wanted": 133,
+     "skipped": 629,
+     "fill": 0.999825,
+     "ret": 0.6686975,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.10181275
+    },
+    {
+     "date": "2024-09",
+     "g": "grade9",
+     "positions": 34,
+     "wanted": 297,
+     "skipped": 1450,
+     "fill": 0.998655,
+     "ret": 0.09649775,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.21052225
+    },
+    {
+     "date": "2024-09",
+     "g": "psa10",
+     "positions": 22,
+     "wanted": 683,
+     "skipped": 3391,
+     "fill": 0.98998,
+     "ret": 0.1770395,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.2244955
+    },
+    {
+     "date": "2024-12",
+     "g": "raw",
+     "positions": 33,
+     "wanted": 145,
+     "skipped": 691,
+     "fill": 0.9942,
+     "ret": 0.75279325,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.03525125
+    },
+    {
+     "date": "2024-12",
+     "g": "grade9",
+     "positions": 29,
+     "wanted": 304,
+     "skipped": 1487,
+     "fill": 0.99529,
+     "ret": 0.25582575,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.14813325
+    },
+    {
+     "date": "2024-12",
+     "g": "psa10",
+     "positions": 15,
+     "wanted": 707,
+     "skipped": 3518,
+     "fill": 0.986515,
+     "ret": 1.243564,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.142652
+    },
+    {
+     "date": "2025-03",
+     "g": "raw",
+     "positions": 25,
+     "wanted": 173,
+     "skipped": 836,
+     "fill": 0.98592,
+     "ret": 0.61609675,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.07290525
+    },
+    {
+     "date": "2025-03",
+     "g": "grade9",
+     "positions": 30,
+     "wanted": 342,
+     "skipped": 1678,
+     "fill": 0.99982,
+     "ret": 1.0766235,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.14657725
+    },
+    {
+     "date": "2025-03",
+     "g": "psa10",
+     "positions": 13,
+     "wanted": 795,
+     "skipped": 3960,
+     "fill": 0.99055,
+     "ret": 2.80667175,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.18533413
+    },
+    {
+     "date": "2025-06",
+     "g": "raw",
+     "positions": 30,
+     "wanted": 185,
+     "skipped": 894,
+     "fill": 0.996085,
+     "ret": 0.507025,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.14651
+    },
+    {
+     "date": "2025-06",
+     "g": "grade9",
+     "positions": 40,
+     "wanted": 351,
+     "skipped": 1714,
+     "fill": 0.99801,
+     "ret": 0.65799225,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.1592895
+    },
+    {
+     "date": "2025-06",
+     "g": "psa10",
+     "positions": 20,
+     "wanted": 841,
+     "skipped": 4184,
+     "fill": 0.99703,
+     "ret": 1.49156725,
+     "missingExit": 0,
+     "missingMarks": 0,
+     "maxDrawdown": 0.01228187
+    }
+   ],
+   "meanReturn": 0.64825853,
+   "meanFill": 0.99409333,
+   "worstDrawdown": 0.2244955,
+   "missingExit": 0,
+   "missingMarks": 0,
+   "timeToSale": null,
+   "timeToSaleNote": "Not observable: no listing or order-book history exists, so exits assume a sale at the guide price."
+  },
+  "note": "Integer one-copy purchases, $2000 per basket, at most 3 per set and 2 per character; uninvested cash earns nothing."
+ },
+ "legacyReplay": {
+  "rows": [
+   {
+    "date": "2022-06-30",
+    "reconstructed": true,
+    "grades": {
+     "raw": {
+      "scored": 1,
+      "matched": 0
+     },
+     "psa9": {
+      "scored": 22,
+      "matched": 6
+     },
+     "psa10": {
+      "scored": 113,
+      "matched": 28
+     }
+    }
+   },
+   {
+    "date": "2023-06-30",
+    "reconstructed": true,
+    "grades": {
+     "raw": {
+      "scored": 1,
+      "matched": 0
+     },
+     "psa9": {
+      "scored": 80,
+      "matched": 9
+     },
+     "psa10": {
+      "scored": 252,
+      "matched": 65
+     }
+    }
+   },
+   {
+    "date": "2024-06-30",
+    "reconstructed": true,
+    "grades": {
+     "raw": {
+      "scored": 0,
+      "matched": 0
+     },
+     "psa9": {
+      "scored": 62,
+      "matched": 26
+     },
+     "psa10": {
+      "scored": 315,
+      "matched": 171
+     }
+    }
+   },
+   {
+    "date": "2025-06-30",
+    "reconstructed": true,
+    "grades": {
+     "raw": {
+      "scored": 0,
+      "matched": 0
+     },
+     "psa9": {
+      "scored": 345,
+      "matched": 243
+     },
+     "psa10": {
+      "scored": 940,
+      "matched": 606
+     }
+    }
+   }
+  ],
+  "note": "Partial reconstruction. Matched rows are selected on future coverage, so no returns are compared."
+ },
+ "exclusions": {
+  "2022-03|raw": {
+   "below-floor": 2536,
+   "history-gap": 623,
+   "flat-history": 153,
+   "too-new": 3702
+  },
+  "2022-03|grade9": {
+   "below-floor": 92,
+   "history-gap": 2649,
+   "flat-history": 214,
+   "too-new": 3600
+  },
+  "2022-03|psa10": {
+   "flat-history": 222,
+   "history-gap": 2815,
+   "below-floor": 23,
+   "too-new": 3586
+  },
+  "2022-06|raw": {
+   "below-floor": 2846,
+   "history-gap": 438,
+   "flat-history": 118,
+   "too-new": 3559
+  },
+  "2022-06|grade9": {
+   "below-floor": 214,
+   "history-gap": 2412,
+   "flat-history": 266,
+   "too-new": 3457
+  },
+  "2022-06|psa10": {
+   "history-gap": 2571,
+   "flat-history": 299,
+   "below-floor": 71,
+   "too-new": 3443
+  },
+  "2022-09|raw": {
+   "below-floor": 3069,
+   "flat-history": 122,
+   "history-gap": 298,
+   "too-new": 3415
+  },
+  "2022-09|grade9": {
+   "below-floor": 1570,
+   "flat-history": 444,
+   "history-gap": 513,
+   "too-new": 3313
+  },
+  "2022-09|psa10": {
+   "flat-history": 439,
+   "below-floor": 356,
+   "history-gap": 511,
+   "too-new": 3299
+  },
+  "2022-12|raw": {
+   "below-floor": 3279,
+   "history-gap": 213,
+   "flat-history": 118,
+   "too-new": 3253
+  },
+  "2022-12|grade9": {
+   "below-floor": 1738,
+   "flat-history": 442,
+   "history-gap": 457,
+   "too-new": 3151
+  },
+  "2022-12|psa10": {
+   "flat-history": 462,
+   "below-floor": 378,
+   "history-gap": 449,
+   "too-new": 3137
+  },
+  "2023-03|raw": {
+   "below-floor": 3421,
+   "history-gap": 182,
+   "flat-history": 102,
+   "too-new": 3125
+  },
+  "2023-03|grade9": {
+   "below-floor": 1782,
+   "flat-history": 456,
+   "history-gap": 472,
+   "too-new": 3023
+  },
+  "2023-03|psa10": {
+   "flat-history": 443,
+   "history-gap": 458,
+   "below-floor": 395,
+   "too-new": 3009
+  },
+  "2023-06|raw": {
+   "below-floor": 3596,
+   "history-gap": 152,
+   "flat-history": 103,
+   "too-new": 2966
+  },
+  "2023-06|grade9": {
+   "below-floor": 1918,
+   "flat-history": 536,
+   "history-gap": 443,
+   "too-new": 2865
+  },
+  "2023-06|psa10": {
+   "flat-history": 478,
+   "below-floor": 443,
+   "history-gap": 433,
+   "too-new": 2850
+  },
+  "2023-09|raw": {
+   "below-floor": 3832,
+   "history-gap": 135,
+   "flat-history": 109,
+   "too-new": 2757
+  },
+  "2023-09|grade9": {
+   "below-floor": 2037,
+   "flat-history": 618,
+   "history-gap": 441,
+   "too-new": 2657
+  },
+  "2023-09|psa10": {
+   "flat-history": 528,
+   "history-gap": 440,
+   "below-floor": 542,
+   "too-new": 2643
+  },
+  "2023-12|raw": {
+   "below-floor": 3991,
+   "history-gap": 77,
+   "flat-history": 133,
+   "too-new": 2621
+  },
+  "2023-12|grade9": {
+   "below-floor": 2085,
+   "flat-history": 843,
+   "history-gap": 377,
+   "too-new": 2521
+  },
+  "2023-12|psa10": {
+   "flat-history": 605,
+   "history-gap": 370,
+   "below-floor": 604,
+   "too-new": 2507
+  },
+  "2024-03|raw": {
+   "below-floor": 4244,
+   "history-gap": 300,
+   "flat-history": 133,
+   "too-new": 2121
+  },
+  "2024-03|grade9": {
+   "below-floor": 2130,
+   "flat-history": 1025,
+   "history-gap": 620,
+   "too-new": 2064
+  },
+  "2024-03|psa10": {
+   "flat-history": 747,
+   "below-floor": 657,
+   "history-gap": 606,
+   "too-new": 2056
+  },
+  "2024-06|raw": {
+   "below-floor": 4363,
+   "history-gap": 260,
+   "flat-history": 142,
+   "too-new": 1993
+  },
+  "2024-06|grade9": {
+   "below-floor": 2210,
+   "flat-history": 1135,
+   "history-gap": 540,
+   "too-new": 1936
+  },
+  "2024-06|psa10": {
+   "flat-history": 858,
+   "below-floor": 616,
+   "history-gap": 542,
+   "too-new": 1928
+  },
+  "2024-09|raw": {
+   "below-floor": 4559,
+   "history-gap": 237,
+   "flat-history": 124,
+   "too-new": 1850
+  },
+  "2024-09|grade9": {
+   "below-floor": 2348,
+   "flat-history": 1155,
+   "history-gap": 516,
+   "too-new": 1793
+  },
+  "2024-09|psa10": {
+   "flat-history": 918,
+   "below-floor": 633,
+   "history-gap": 521,
+   "too-new": 1785
+  },
+  "2024-12|raw": {
+   "below-floor": 4688,
+   "history-gap": 197,
+   "flat-history": 107,
+   "too-new": 1719
+  },
+  "2024-12|grade9": {
+   "below-floor": 2494,
+   "flat-history": 1127,
+   "history-gap": 497,
+   "too-new": 1662
+  },
+  "2024-12|psa10": {
+   "flat-history": 949,
+   "below-floor": 637,
+   "history-gap": 492,
+   "too-new": 1659
+  },
+  "2025-03|raw": {
+   "below-floor": 4869,
+   "history-gap": 171,
+   "flat-history": 87,
+   "too-new": 1447
+  },
+  "2025-03|grade9": {
+   "below-floor": 2568,
+   "flat-history": 1106,
+   "history-gap": 524,
+   "too-new": 1390
+  },
+  "2025-03|psa10": {
+   "flat-history": 905,
+   "below-floor": 501,
+   "history-gap": 504,
+   "too-new": 1387
+  },
+  "2025-06|raw": {
+   "below-floor": 4944,
+   "history-gap": 149,
+   "flat-history": 66,
+   "too-new": 1352
+  },
+  "2025-06|grade9": {
+   "below-floor": 2651,
+   "flat-history": 1143,
+   "history-gap": 453,
+   "too-new": 1295
+  },
+  "2025-06|psa10": {
+   "flat-history": 909,
+   "below-floor": 427,
+   "history-gap": 438,
+   "too-new": 1292
+  }
+ },
+ "checks": "Passed: ranks, training-label cutoff, disjoint held sets, weight sum, fee monotonicity, net-return arithmetic, missing exits and unfilled entries.",
+ "provenance": {
+  "scriptSha256": "d2d327f6b6aba1313aa09e23924c3704eed118a7e0bc0597db7a78056f14afa2",
+  "captures": {
+   "files": 149,
+   "digest": "dc37b146c65d795ec3301bc76c16a33f69ed14c6a9ca26bd4a000592fbe479a0"
+  },
+  "node": "v22.22.0"
+ }
+}
