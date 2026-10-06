@@ -56,3 +56,11 @@ Vintage printing exceptions are explicit in the catalog and the card detail: Bas
 - `node tools/research/audit-modern.mjs swsh` or `later` checks saved sale identity, grade, date, scores, and projection holdouts. Coverage and audit reports use the selected group as a suffix.
 
 Cards without one unique source product stay unpriced. Reports distinguish exposed source rows from accepted card/grade-matched sales and reported eBay sales. A public source-page snapshot is not a complete eBay sales archive, and a short historical holdout does not validate long-term investment returns.
+
+## Investment research (October 2026)
+
+- `investment-plan.md`: the research plan and its results.
+- `backtest-investment.mjs` + `investment-backtest.config.json`: the plan's experiment as separate stages (universe, features, holdout, selection, execution, integer portfolio). Writes `investment-backtest-results.json`. It reproduces the plan's figures exactly (+5.13 pp over 18 baskets; +3.02 pp delayed).
+- `train-investment-model.mjs` + `investment-model.config.json`: the regularized 12-month net-return model with purged fit / tune / calibrate / test windows, benchmarks, E10 calibration and the frozen promotion gate. Writes `site/data/investment-model.json` and `investment-model-report.json`. Current result: not promoted.
+
+Both read saved data only: `node tools/research/backtest-investment.mjs`, `node tools/research/train-investment-model.mjs` (about 15 s and 45 s).

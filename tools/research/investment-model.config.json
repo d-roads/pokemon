@@ -1,0 +1,67 @@
+{
+  "version": "netreturn-huber-v1",
+  "description": "Frozen before the test window is scored (plan.md Phase 3). Features, transforms, cost assumptions, lambda grid, horizon and the promotion gate are fixed here. Changing anything is a new model version; do not retune against the same test window until it passes.",
+  "horizonMonths": 12,
+  "entryStepMonths": 1,
+  "windows": {
+    "fit": [
+      "2021-12",
+      "2022-06"
+    ],
+    "tune": [
+      "2023-07",
+      "2023-09"
+    ],
+    "calibrate": [
+      "2023-10",
+      "2023-12"
+    ],
+    "test": [
+      "2025-01",
+      "2025-08"
+    ]
+  },
+  "lastExitMonth": "2026-08",
+  "lambdaGrid": [
+    0.1,
+    1,
+    10,
+    100
+  ],
+  "huber": {
+    "deltaMadMultiplier": 1.345,
+    "minDelta": 0.05
+  },
+  "calibrationQuantile": 0.1,
+  "costs": {
+    "shippingIn": 5,
+    "saleFeeRate": 0.15,
+    "saleFixedFee": 0,
+    "shippingOut": 5,
+    "taxRate": 0,
+    "holdingCost": 0
+  },
+  "gate": {
+    "minNetReturn": 0,
+    "minExcessOverStrongestBaseline": 0,
+    "bootstrapBlockMonths": 12,
+    "bootstrapDraws": 5000,
+    "bootstrapSeed": 20261006,
+    "bootstrapLowerQuantile": 0.05,
+    "coverageTarget": 0.9,
+    "coverageTolerance": 0.05,
+    "minCohortRows": 100,
+    "cohortMinCards": 100,
+    "cohortMinSets": 5,
+    "maxCohortShortfall": 0.02,
+    "minAnnualVintages": 3,
+    "minCards": 100,
+    "minSets": 5,
+    "matchedBasisGrades": [
+      "psa10"
+    ]
+  },
+  "changes": [
+    "2026-10-06: after the first scoring run, two checks the plan already describes were added to the gate in code: the full model must be the forecast chosen on the tune window (simplest within one standard error, including an unchanged price), and its test error must beat an unchanged price. Both only make the gate stricter; it failed before and after."
+  ]
+}

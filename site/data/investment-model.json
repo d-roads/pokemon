@@ -1,0 +1,166 @@
+{
+ "version": "netreturn-huber-v1",
+ "status": "shadow",
+ "promoted": false,
+ "note": "Did not pass the frozen promotion gate; the app keeps this model in shadow mode and shows no forecast from it.",
+ "horizonMonths": 12,
+ "trainedOn": "PriceCharting monthly guide history (guide-to-guide labels)",
+ "supportedGrades": [
+  "psa10"
+ ],
+ "supportNote": "Raw and Grade 9 guide series mix conditions or graders, so they cannot support NM or PSA 9 forecasts even after promotion.",
+ "windows": {
+  "fit": [
+   "2021-12",
+   "2022-06"
+  ],
+  "tune": [
+   "2023-07",
+   "2023-09"
+  ],
+  "calibrate": [
+   "2023-10",
+   "2023-12"
+  ],
+  "test": [
+   "2025-01",
+   "2025-08"
+  ]
+ },
+ "features": [
+  "M",
+  "V",
+  "Q",
+  "lnP",
+  "lnAge"
+ ],
+ "transforms": {
+  "M": {
+   "median": -0.2916073441,
+   "iqr": 0.6553322821,
+   "constant": false
+  },
+  "V": {
+   "median": 0.1051062253,
+   "iqr": 0.3089458668,
+   "constant": false
+  },
+  "Q": {
+   "median": -0.146703099,
+   "iqr": 0.1138744296,
+   "constant": false
+  },
+  "lnP": {
+   "median": 4.4408849917,
+   "iqr": 1.5265502526,
+   "constant": false
+  },
+  "lnAge": {
+   "median": 5.2882670307,
+   "iqr": 1.2107987694,
+   "constant": false
+  }
+ },
+ "coefficients": [
+  -0.1091044398,
+  0.1476329725,
+  -0.1253670462,
+  -0.0222659263,
+  -0.0007365555,
+  0.0356645779,
+  0.0231467994,
+  -0.0063904079,
+  0.0540428452
+ ],
+ "lambda": 100,
+ "huberDelta": 0.3698567705,
+ "forecastSelected": "constant",
+ "calibration": {
+  "q10": -0.116080391,
+  "quantile": 0.1,
+  "rows": 15699
+ },
+ "costProfile": {
+  "shippingIn": 5,
+  "saleFeeRate": 0.15,
+  "saleFixedFee": 0,
+  "shippingOut": 5,
+  "taxRate": 0,
+  "holdingCost": 0
+ },
+ "gate": {
+  "passed": false,
+  "checks": [
+   {
+    "id": "forecast-selected",
+    "label": "The full model is the forecast chosen on the tune window (simplest within one standard error, including an unchanged price)",
+    "pass": false,
+    "value": "constant"
+   },
+   {
+    "id": "forecast-error",
+    "label": "Test forecast error below the unchanged-price forecast",
+    "pass": false,
+    "value": {
+     "model": 0.1997813864,
+     "constant": 0.1517632966
+    }
+   },
+   {
+    "id": "net-return",
+    "label": "Positive net return after costs on the untouched test window",
+    "pass": true,
+    "value": 1.131564359
+   },
+   {
+    "id": "beats-strongest-baseline",
+    "label": "Beats the strongest baseline (valueOnly)",
+    "pass": true,
+    "value": 0.6277978923
+   },
+   {
+    "id": "bootstrap-lower-bound",
+    "label": "Block-bootstrap lower bound of excess above zero",
+    "pass": false,
+    "value": null,
+    "note": "Only 1 non-overlapping 12-month block in the test window; at least 2 are needed to bootstrap."
+   },
+   {
+    "id": "calibration",
+    "label": "E10 covers 90% ± 5 points of outcomes, overall and per grade",
+    "pass": false,
+    "value": 0.9852021558
+   },
+   {
+    "id": "no-cohort-failure",
+    "label": "No sized grade or era cohort trails its all-card basket by more than 2 points",
+    "pass": false,
+    "value": [
+     "era:DP",
+     "era:SM"
+    ]
+   },
+   {
+    "id": "annual-vintages",
+    "label": "At least 3 non-overlapping annual test vintages",
+    "pass": false,
+    "value": 1
+   },
+   {
+    "id": "coverage",
+    "label": "At least 100 distinct cards across 5 sets in the test",
+    "pass": true,
+    "value": {
+     "cards": 4907,
+     "sets": 132
+    }
+   }
+  ]
+ },
+ "hashes": {
+  "protocol": "ef9ec765aaafede565ca30b358badfee926d0acb62961a3ce46c4a52852cae2b",
+  "code": "e9b3450f79f26cc7c36eebfae632b11f03b34da73d78d384999a9d4f3fc68915",
+  "backtestProtocol": "d9ba81d6298642164ec86fae5bcdd1bc8db58b767d1499ebc5230addf6d07a19",
+  "captures": "dc37b146c65d795ec3301bc76c16a33f69ed14c6a9ca26bd4a000592fbe479a0"
+ }
+}

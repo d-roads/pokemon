@@ -1,0 +1,526 @@
+{
+ "version": "netreturn-huber-v1",
+ "status": "shadow",
+ "promoted": false,
+ "note": "Did not pass the frozen promotion gate; the app keeps this model in shadow mode and shows no forecast from it.",
+ "horizonMonths": 12,
+ "trainedOn": "PriceCharting monthly guide history (guide-to-guide labels)",
+ "supportedGrades": [
+  "psa10"
+ ],
+ "supportNote": "Raw and Grade 9 guide series mix conditions or graders, so they cannot support NM or PSA 9 forecasts even after promotion.",
+ "windows": {
+  "fit": [
+   "2021-12",
+   "2022-06"
+  ],
+  "tune": [
+   "2023-07",
+   "2023-09"
+  ],
+  "calibrate": [
+   "2023-10",
+   "2023-12"
+  ],
+  "test": [
+   "2025-01",
+   "2025-08"
+  ]
+ },
+ "features": [
+  "M",
+  "V",
+  "Q",
+  "lnP",
+  "lnAge"
+ ],
+ "transforms": {
+  "M": {
+   "median": -0.2916073441,
+   "iqr": 0.6553322821,
+   "constant": false
+  },
+  "V": {
+   "median": 0.1051062253,
+   "iqr": 0.3089458668,
+   "constant": false
+  },
+  "Q": {
+   "median": -0.146703099,
+   "iqr": 0.1138744296,
+   "constant": false
+  },
+  "lnP": {
+   "median": 4.4408849917,
+   "iqr": 1.5265502526,
+   "constant": false
+  },
+  "lnAge": {
+   "median": 5.2882670307,
+   "iqr": 1.2107987694,
+   "constant": false
+  }
+ },
+ "coefficients": [
+  -0.1091044398,
+  0.1476329725,
+  -0.1253670462,
+  -0.0222659263,
+  -0.0007365555,
+  0.0356645779,
+  0.0231467994,
+  -0.0063904079,
+  0.0540428452
+ ],
+ "lambda": 100,
+ "huberDelta": 0.3698567705,
+ "forecastSelected": "constant",
+ "calibration": {
+  "q10": -0.116080391,
+  "quantile": 0.1,
+  "rows": 15699
+ },
+ "costProfile": {
+  "shippingIn": 5,
+  "saleFeeRate": 0.15,
+  "saleFixedFee": 0,
+  "shippingOut": 5,
+  "taxRate": 0,
+  "holdingCost": 0
+ },
+ "gate": {
+  "passed": false,
+  "checks": [
+   {
+    "id": "forecast-selected",
+    "label": "The full model is the forecast chosen on the tune window (simplest within one standard error, including an unchanged price)",
+    "pass": false,
+    "value": "constant"
+   },
+   {
+    "id": "forecast-error",
+    "label": "Test forecast error below the unchanged-price forecast",
+    "pass": false,
+    "value": {
+     "model": 0.1997813864,
+     "constant": 0.1517632966
+    }
+   },
+   {
+    "id": "net-return",
+    "label": "Positive net return after costs on the untouched test window",
+    "pass": true,
+    "value": 1.131564359
+   },
+   {
+    "id": "beats-strongest-baseline",
+    "label": "Beats the strongest baseline (valueOnly)",
+    "pass": true,
+    "value": 0.6277978923
+   },
+   {
+    "id": "bootstrap-lower-bound",
+    "label": "Block-bootstrap lower bound of excess above zero",
+    "pass": false,
+    "value": null,
+    "note": "Only 1 non-overlapping 12-month block in the test window; at least 2 are needed to bootstrap."
+   },
+   {
+    "id": "calibration",
+    "label": "E10 covers 90% ± 5 points of outcomes, overall and per grade",
+    "pass": false,
+    "value": 0.9852021558
+   },
+   {
+    "id": "no-cohort-failure",
+    "label": "No sized grade or era cohort trails its all-card basket by more than 2 points",
+    "pass": false,
+    "value": [
+     "era:DP",
+     "era:SM"
+    ]
+   },
+   {
+    "id": "annual-vintages",
+    "label": "At least 3 non-overlapping annual test vintages",
+    "pass": false,
+    "value": 1
+   },
+   {
+    "id": "coverage",
+    "label": "At least 100 distinct cards across 5 sets in the test",
+    "pass": true,
+    "value": {
+     "cards": 4907,
+     "sets": 132
+    }
+   }
+  ]
+ },
+ "hashes": {
+  "protocol": "ef9ec765aaafede565ca30b358badfee926d0acb62961a3ce46c4a52852cae2b",
+  "code": "e9b3450f79f26cc7c36eebfae632b11f03b34da73d78d384999a9d4f3fc68915",
+  "backtestProtocol": "d9ba81d6298642164ec86fae5bcdd1bc8db58b767d1499ebc5230addf6d07a19",
+  "captures": "dc37b146c65d795ec3301bc76c16a33f69ed14c6a9ca26bd4a000592fbe479a0"
+ },
+ "purge": [
+  {
+   "earlier": "fit",
+   "later": "tune",
+   "labelsEnd": "2023-06",
+   "laterStarts": "2023-07",
+   "ok": true
+  },
+  {
+   "earlier": "fit",
+   "later": "calibrate",
+   "labelsEnd": "2023-06",
+   "laterStarts": "2023-10",
+   "ok": true
+  },
+  {
+   "earlier": "tune",
+   "later": "test",
+   "labelsEnd": "2024-09",
+   "laterStarts": "2025-01",
+   "ok": true
+  },
+  {
+   "earlier": "calibrate",
+   "later": "test",
+   "labelsEnd": "2024-12",
+   "laterStarts": "2025-01",
+   "ok": true
+  },
+  {
+   "earlier": "fit",
+   "later": "test",
+   "labelsEnd": "2023-06",
+   "laterStarts": "2025-01",
+   "ok": true
+  }
+ ],
+ "rows": {
+  "fit": 10342,
+  "tune": 15620,
+  "calibrate": 15699,
+  "test": 53251,
+  "testLabelled": 53251,
+  "testMissingExit": 0
+ },
+ "lambdaSearch": [
+  {
+   "lambda": 0.1,
+   "loss": 0.0437623608,
+   "se": 0.0031914529,
+   "blocks": 9
+  },
+  {
+   "lambda": 1,
+   "loss": 0.0437548184,
+   "se": 0.0031884101,
+   "blocks": 9
+  },
+  {
+   "lambda": 10,
+   "loss": 0.0436809459,
+   "se": 0.0031584246,
+   "blocks": 9
+  },
+  {
+   "lambda": 100,
+   "loss": 0.0430765459,
+   "se": 0.0028985569,
+   "blocks": 9
+  }
+ ],
+ "validation": {
+  "model": {
+   "tune": {
+    "loss": 0.0430765459,
+    "se": 0.0028985569,
+    "blocks": 9
+   },
+   "test": {
+    "loss": 0.1997813864,
+    "se": 0.0110367518,
+    "blocks": 24
+   }
+  },
+  "constant": {
+   "tune": {
+    "loss": 0.0373388923,
+    "se": 0.0015274918,
+    "blocks": 9
+   },
+   "test": {
+    "loss": 0.1517632966,
+    "se": 0.0051689762,
+    "blocks": 24
+   }
+  },
+  "valueOnly": {
+   "tune": {
+    "loss": 0.0448381561,
+    "se": 0.0027413199,
+    "blocks": 9
+   },
+   "test": {
+    "loss": 0.2012492667,
+    "se": 0.0108520008,
+    "blocks": 24
+   }
+  },
+  "momentumOnly": {
+   "tune": {
+    "loss": 0.0446515312,
+    "se": 0.0023624047,
+    "blocks": 9
+   },
+   "test": {
+    "loss": 0.1956403224,
+    "se": 0.0105601107,
+    "blocks": 24
+   }
+  },
+  "researchRank": {
+   "tune": {
+    "loss": 0.0421415528,
+    "se": 0.0026793634,
+    "blocks": 9
+   },
+   "test": {
+    "loss": 0.1916472541,
+    "se": 0.010388724,
+    "blocks": 24
+   }
+  }
+ },
+ "coverage": {
+  "overall": {
+   "n": 53251,
+   "share": 0.9852021558
+  },
+  "byGrade": {
+   "raw": {
+    "n": 7082,
+    "share": 0.9781135273
+   },
+   "grade9": {
+    "n": 13782,
+    "share": 0.9854883181
+   },
+   "psa10": {
+    "n": 32387,
+    "share": 0.9866304381
+   }
+  },
+  "byEra": {
+   "WOTC": {
+    "n": 11074,
+    "share": 0.990337728
+   },
+   "EX": {
+    "n": 3479,
+    "share": 0.9974130497
+   },
+   "DP": {
+    "n": 2293,
+    "share": 0.9943305713
+   },
+   "XY": {
+    "n": 8158,
+    "share": 0.9813679823
+   },
+   "BW": {
+    "n": 4417,
+    "share": 0.9728322391
+   },
+   "SM": {
+    "n": 3322,
+    "share": 0.9882600843
+   },
+   "SWSH": {
+    "n": 14461,
+    "share": 0.9868612129
+   },
+   "SV": {
+    "n": 6047,
+    "share": 0.9738713412
+   }
+  }
+ },
+ "baselines": {
+  "allCards": 0.4872009254,
+  "researchRank": 0.4956065292,
+  "valueOnly": 0.5037664667,
+  "momentumOnly": 0.4446636653,
+  "cash": 0
+ },
+ "strongestBaseline": "valueOnly",
+ "modelNet": 1.131564359,
+ "bootstrap": {
+  "blocks": 1,
+  "lower": null,
+  "reason": "Only 1 non-overlapping 12-month block in the test window; at least 2 are needed to bootstrap."
+ },
+ "cohorts": [
+  {
+   "kind": "grade",
+   "value": "raw",
+   "rows": 7082,
+   "cards": 1057,
+   "sets": 126,
+   "baskets": 8,
+   "net": 0.487756317,
+   "base": 0.2824155717,
+   "excess": 0.2053407453,
+   "sized": true
+  },
+  {
+   "kind": "grade",
+   "value": "grade9",
+   "rows": 13782,
+   "cards": 2083,
+   "sets": 130,
+   "baskets": 8,
+   "net": 1.0767135328,
+   "base": 0.5022493459,
+   "excess": 0.5744641869,
+   "sized": true
+  },
+  {
+   "kind": "grade",
+   "value": "psa10",
+   "rows": 32387,
+   "cards": 4685,
+   "sets": 132,
+   "baskets": 8,
+   "net": 1.8302232272,
+   "base": 0.6769378585,
+   "excess": 1.1532853688,
+   "sized": true
+  },
+  {
+   "kind": "era",
+   "value": "WOTC",
+   "rows": 11074,
+   "cards": 705,
+   "sets": 18,
+   "baskets": 24,
+   "net": 1.1185597501,
+   "base": 0.6471875496,
+   "excess": 0.4713722005,
+   "sized": true
+  },
+  {
+   "kind": "era",
+   "value": "EX",
+   "rows": 3479,
+   "cards": 157,
+   "sets": 16,
+   "baskets": 24,
+   "net": 1.4183058468,
+   "base": 1.3657571961,
+   "excess": 0.0525486507,
+   "sized": true
+  },
+  {
+   "kind": "era",
+   "value": "DP",
+   "rows": 2293,
+   "cards": 155,
+   "sets": 16,
+   "baskets": 24,
+   "net": 1.6690440892,
+   "base": 2.088848421,
+   "excess": -0.4198043318,
+   "sized": true
+  },
+  {
+   "kind": "era",
+   "value": "XY",
+   "rows": 8158,
+   "cards": 733,
+   "sets": 15,
+   "baskets": 24,
+   "net": 1.1100442863,
+   "base": 0.5942425326,
+   "excess": 0.5158017537,
+   "sized": true
+  },
+  {
+   "kind": "era",
+   "value": "BW",
+   "rows": 4417,
+   "cards": 378,
+   "sets": 12,
+   "baskets": 24,
+   "net": 1.0101053099,
+   "base": 0.6792275057,
+   "excess": 0.3308778043,
+   "sized": true
+  },
+  {
+   "kind": "era",
+   "value": "SM",
+   "rows": 3322,
+   "cards": 169,
+   "sets": 16,
+   "baskets": 24,
+   "net": 0.383279311,
+   "base": 0.4134629996,
+   "excess": -0.0301836886,
+   "sized": true
+  },
+  {
+   "kind": "era",
+   "value": "SWSH",
+   "rows": 14461,
+   "cards": 1773,
+   "sets": 28,
+   "baskets": 24,
+   "net": 0.2602951755,
+   "base": 0.034220986,
+   "excess": 0.2260741895,
+   "sized": true
+  },
+  {
+   "kind": "era",
+   "value": "SV",
+   "rows": 6047,
+   "cards": 837,
+   "sets": 11,
+   "baskets": 24,
+   "net": 0.2834540031,
+   "base": 0.0540367132,
+   "excess": 0.2294172899,
+   "sized": true
+  }
+ ],
+ "testYears": [
+  2025
+ ],
+ "strategies": {
+  "model": {
+   "baskets": 24,
+   "meanNet": 1.131564359
+  },
+  "researchRank": {
+   "baskets": 24,
+   "meanNet": 0.4956065292
+  },
+  "valueOnly": {
+   "baskets": 24,
+   "meanNet": 0.5037664667
+  },
+  "momentumOnly": {
+   "baskets": 24,
+   "meanNet": 0.4446636653
+  }
+ },
+ "legacyScore": {
+  "available": false,
+  "reason": "The current score cannot be replayed exactly: historical population, guides, capture availability and complete sold pages are unavailable (see the backtest legacyReplay diagnostic)."
+ }
+}
