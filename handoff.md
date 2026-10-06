@@ -5,9 +5,10 @@ Updated: October 6, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. 
 
 ## Merge note (October 6, later)
 
-- Two sessions worked in the collector's PC folder in parallel. The Wizards session (Codex) never reached GitHub (branch push got HTTP 403), while the grade-scarcity score, the reading view and the scroll fix were pushed to `main` (`dd7213c`, `39027f4`, `8336e66`).
-- **The PC folder is now the combined tree:** the Wizards work plus those three commits. The reading-view and scroll-fix changes were merged into the PC's `app.js`, `index.html`, `ui.test.mjs` and `handoff.md`; `style.css` already matched `main`. In a scratch copy of the combined tree, 115/115 tests passed and a browser check showed no page errors and 60 fps scrolling in the reading view.
-- **`main` on GitHub does not contain the Wizards work yet,** and the PC's `app.js` needs the Wizards `lib/analysis.mjs` (it reads `projection.validation`), so do not copy the PC `app.js` onto `main` without it. Next step: get the Wizards branch pushed (or push the combined tree), then `main` and the PC match again.
+- Two sessions worked in the collector's PC folder in parallel. Codex's Wizards-era work could not reach GitHub (its branch push got HTTP 403), while the grade-scarcity score, the reading view and the scroll fix were pushed to `main` (`dd7213c`, `39027f4`, `8336e66`).
+- **Resolved:** Codex's patch (`primal-watch-vintage.patch`, one commit `549e3af`, authored by Codex) was applied on `dd7213c` and merged with those commits as **`c03932c` on `main`**. The only conflicts were `site/public/app.js` (the detail panel was restructured for the reading view, so Codex's vintage printing line, source-snapshot note and projection note were carried into the new sections) and this file. The PC folder and `main` now hold the same code.
+- Checked on the merged repo: 115/115 tests, Worker build and syntax check pass; a browser check showed no page errors and 60 fps scrolling in the reading view. Secret scan before pushing found nothing; `site/data/primal-watch.sqlite*`, `.env`, zips and patches stay out of git.
+- The scratch `primal-watch-latest.zip` and `primal-watch-vintage.patch` in the PC folder are no longer needed and are not tracked.
 
 ## Wizards expansion — October 6, 2026
 
@@ -217,8 +218,10 @@ Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. 
 - `cc7fdca` — Replace the $250–$350 toggle with an advanced screener
 - `f665231` — Restyle Primal Watch as a trading terminal
 - `dd7213c` — Add PSA grade scarcity to the PSA 9 and PSA 10 investment score
-- Reading view — Expand card details into a full-page reading view
-- Scrolling fix — Remove backdrop blur from overlays
+- `39027f4` — Expand card details into a full-page reading view
+- `8336e66` — Fix low-fps scrolling by removing backdrop blur from overlays
+- `549e3af` — Codex: Add Wizards-era cards, full rare-card captures, and evidence checks
+- `c03932c` — Merge the Wizards work with the reading view and scroll fix
 - Final commit — this handoff update
 
 Previous session: `70d7339` (EX through HGSS catalog), `49f7d73` (appearance settings and era-scoped market screens).
