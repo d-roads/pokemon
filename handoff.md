@@ -2,7 +2,7 @@
 
 *Formerly Primal Watch.*
 
-Updated: October 6, 2026 Pacific. Repository: `d-roads/pokemon`. The repository is authoritative.
+Updated: October 6, 2026 (evening) Pacific. Repository: `d-roads/pokemon`. The repository is authoritative.
 
 ## Sword & Shield and modern expansions — October 6, 2026
 
@@ -12,6 +12,17 @@ Updated: October 6, 2026 Pacific. Repository: `d-roads/pokemon`. The repository 
 - Scores pass the evidence gate for 1,359 PSA 10, 1,281 PSA 9, and 2,237 raw modern cards. Historical trend holdouts pass for 201, 148, and 2 respectively; these do not validate future returns. The expanded card information view is shared by WOTC, Sword & Shield, Scarlet & Violet, and Mega Evolution cards. All 120 Node tests pass, and the Worker builds at 188.6 MB uncompressed; hosted deployment may require a smaller data-loading design. The 6:00 AM failure log remains only as task history; do not rerun the scheduled job.
 - Both branches are on GitHub: `codex/sword-shield-cards-sales` is based on `main`, and `codex/scarlet-violet-mega-cards-sales` is based on the Task 1 branch. Review them separately in that order. The GitHub integration returned HTTP 403 when asked to open a draft pull request, so no PR was created.
 
+
+
+## Charts, projections and card images — October 6, 2026 (evening)
+
+- **Merged to `main`:** `codex/scarlet-violet-mega-cards-sales` (which contains `codex/sword-shield-cards-sales`) is merged as `ceb677d`. The only conflict was the page `<head>`; the PC folder's already-resolved `index.html` was used, and the PC's newer `server.mjs` (HOST setting) was kept. `main` now matches the PC folder plus the fixes below.
+- **Why charts looked empty:** PriceCharting pages list only the most recent sold rows, so a busy modern card has about 3–10 weeks of sales (median raw near-mint span 85 days). The scatter plotted only the newest 35 sales (often a few days), and the projection needs 8 sale days over 6 months, so it almost never ran for modern cards (raw: 5 SWSH, 2 SV, 0 ME cards).
+- **Scatter (`chart()` in `app.js`):** plots every matching sale from the past year (thinned evenly above 160) and draws the source's monthly price line (dashed, with a legend) behind it.
+- **Projection (`trendProjection` in `lib/analysis.mjs`):** unchanged when sales alone qualify. Otherwise it tries `historyProjection`: the past ~13 months of the grade's monthly price history (needs 8 months over 6 months, updated in the last 75 days), log-linear fit, a chronological holdout that must beat an unchanged price, and the same extreme-trend guard. The growth rate is applied to the confident sold median, and the note says it came from the monthly history. Raw cards with a projection now: SWSH 734, SV 669, ME 111 (PSA 10: 391 / 493 / 58 including sales-based). Most remaining cards fail the holdout honestly; the panel says so and always shows the observed 12-month change in the source price.
+- **Card images:** images.pokemontcg.io has no Ascended Heroes, Perfect Order, Chaos Rising, Pitch Black, 30th Celebration (or Classic Collection), MEE, SVP 102 or four Celebrations Classic Collection images, and it returns a 640×892 card back instead of an error. The TCGdex links for MEP, SVE and later SVP were empty too. 1,017 modern card images were repointed (TCGdex for the ME main sets with a Limitless `imageAlt`, Limitless for MEE/MEP/SVE/SVP/30th Classic Collection/Celebrations CC, PriceCharting product photos for SVP 190–192, 213–215, 225 and MEP 93) and every new URL was checked to load. EX Emerald Groudon 102 and Unown ? were also fixed (legacy cards may now carry an `image`). In the page, an image that errors or is the 640×892 placeholder switches to `imageAlt`, then fades to "image unavailable".
+- Tests: 124/124 (2 new in `analysis.test.mjs`); Worker build passes at 192.0 MB. Headless Chromium check of ME/SV detail panels: no page errors.
+- Restart the local server after copying (catalog JSON and API code changed).
 
 ## FutureSight rebrand and opening animation — October 6, 2026
 
