@@ -8,6 +8,8 @@ Requires Node.js 24 or newer. No packages or installation are needed.
 
 Run `node server.mjs` in this folder (or `Start-Primal-Watch.ps1` on Windows), then open http://localhost:5173.
 
+**After copying in new files, close the Primal Watch window and start it again.** The page files are re-read on every request, but the server's API code is loaded only once at startup. A server left running will serve the new page with the old API, and features such as Investment scores will report that the server code is older than the page.
+
 Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-watch.sqlite`. Starting the server only ever adds missing tables, so existing data is kept. Local mode is a single personal workspace and listens only on the loopback address.
 
 ## What's included
@@ -94,6 +96,15 @@ A part that cannot be measured counts as 50 and is labeled. Cards under the $25 
 ## Dex valuation
 
 Each entry is valued at the current reference for its grade: the sold median when there are recent matching sales, otherwise the source guide, otherwise the latest monthly guide. Profit and loss compares that with the price paid. The value-over-time chart uses each card's monthly price history from its purchase month; PSA 9 history is PriceCharting's Grade 9 guide, which includes other graders. Fees, shipping and tax are not included.
+
+## Keeping Top movers, Investments and scores current
+
+Both lists and the investment scores are built from the sales saved in the local database. The server remembers each answer and rebuilds it as soon as any saved market record changes (or the day rolls over), and simultaneous requests share one computation. The page keeps a fetched list for 30 seconds, then asks again whenever the tab is opened or the era/period changes, swapping in a newer list without a spinner.
+
+Each of the two tabs has two buttons:
+
+- **Recalculate** re-reads the sales you have already saved and rebuilds the list, the scores and the status-bar ticker. It is instant and fetches nothing new.
+- **Update sales** fetches the newest sold prices for every rare card in the included eras (four cards per request, with progress, and Cancel at any time; what was fetched is kept), then rebuilds everything. Refreshing a single card, or a set from Browse, also clears the cached lists.
 
 ## Tests and build
 

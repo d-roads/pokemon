@@ -49,6 +49,15 @@ Updated: October 5, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. 
 - Light and Soft contrast are redefined on the same tokens. The theme key changed to `primal-watch-theme-v2`, so everyone sees the Terminal look once; Light and Soft are still in Settings.
 - The desktop fixed-height layout and per-view scrolling rules were carried over unchanged in behaviour.
 
+### Fix: "Scores could not be loaded", and Movers/Investments never refreshing
+
+- **Cause of the score error (collector's PC):** `server.mjs` loads `lib/*.mjs` once at startup but serves `public/` fresh on every request. Copying the new files over a server that was left running gave the new page with the old API, so `/api/scores` returned 404 ("Not found."). The code itself was verified against the collector's real database (537 refreshed cards): `/api/scores`, `/api/movers` and `/api/investments` all return 200 with the new code, and the 404 reproduces with the old code.
+- **What the page now does:** `request()` keeps the HTTP status. A 404 shows "Primal Watch is running older server code than this page. Close the Primal Watch window and start it again (node server.mjs)" in the card, the empty-filter message and the top banner. Other failures show the real reason and retry once after 4 s. The card has a **Try again** button that clears the banner when it succeeds.
+- **The collector must close and restart the server once** to pick up the new API. This is the only step needed for the score error.
+- **Why Movers/Investments looked frozen:** the page cached each list for the whole visit and never discarded it, and nothing told the user when sales changed. Now: lists are reused for 30 s then revalidated in the background (stale-while-revalidate, a failed refresh keeps the old list); saving a refreshed card, a set refresh or an Update sales run discards the caches; both tabs have **Recalculate** (instant rebuild from saved sales, plus scores and ticker) and **Update sales** (era-aware batch fetch with progress and Cancel).
+- **Server:** the `insight()` memo in `lib/api.mjs` now shares in-flight work between simultaneous requests, drops stale entries for the same key and is not poisoned by a failed computation. It is keyed by the market-cache count and newest `fetched_at`, so a price saved by the refresh button changes the next answer without a restart (regression test added).
+- Tests: UI (404 message and retry, 30 s expiry, background replace, failed refresh keeps the list, Recalculate, Update sales batches) and API (saved price changes movers/investments/scores). Harness `workspace()` now exposes `responses` and `calls` and accepts function and error responses.
+
 ## Earlier sessions (summary)
 
 ### EX and Diamond & Pearl through HGSS catalog and market data
@@ -114,14 +123,14 @@ Updated: October 5, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. 
 
 ## Verification
 
-- `node --test tests/*.test.mjs`: **86/86 passing** on Node 22.22 (this sandbox has no Node 24, so `--test-isolation=none` was not used; the standard Node 24 command is unchanged). New: `tests/score.test.mjs` (momentum, held highs, rating bands, real-data invariants: bounded, explained, $25 cap, compact table matches breakdown), an API test for `/api/scores` and the market breakdown, and UI tests for every filter, the era chips, sorting, removal of the old toggle, and the detail score box.
+- `node --test tests/*.test.mjs`: **90/90 passing** on Node 22.22 (this sandbox has no Node 24, so `--test-isolation=none` was not used; the standard Node 24 command is unchanged). New: `tests/score.test.mjs` (momentum, held highs, rating bands, real-data invariants: bounded, explained, $25 cap, compact table matches breakdown), an API test for `/api/scores` and the market breakdown, and UI tests for every filter, the era chips, sorting, removal of the old toggle, and the detail score box.
 - `node build.mjs` and `node --check dist/server/index.js`: pass (52.5 MB Worker; `score` added to the bundled modules).
 - Headless Chromium (1440×900 and 390×844) screenshots of Browse (unfiltered, filtered, score breakdown), Top movers, Investments, Dex, Alerts, Settings, the Light theme, the method dialog, and the phone filter drawer: no page errors. Card images and Google Fonts were blocked in the sandbox, so screenshots show placeholders and system fonts; on the collector's machine both load.
 
 ## Pending and known limits
 
 1. **eBay API keys are still pending from the collector.** Do not block other work on them. Once available, configure them locally (never in git), run an alert scan, and verify one real Browse API response and notification path.
-2. Restart the local app to load the new code: `cd site`, then `node server.mjs` with Node 24+.
+2. **Close and restart the local app** to load the new API code (`cd site`, then `node server.mjs` with Node 24+). Until then the page reports "older server code". Always restart after copying files; the server loads `lib/` only at startup.
 3. Movers and investments are only as fresh as the sales data. After about a week without **Refresh sales**, the weekly lists empty out by design. A refreshed card is measured to its own new check date; cards more than 7 days (movers) or 14 days (investments) behind the newest check are excluded.
 4. PSA 9 monthly highs (the Recovering signal) use PriceCharting's Grade 9 guide, which mixes graders. This is labeled in the UI.
 5. The Cheap and Recovering signals rarely fire on the current snapshot because many XY-era cards are near their highs. That is expected, not a bug. The thresholds are the `INVEST_RULES` constants if the collector wants them looser.
