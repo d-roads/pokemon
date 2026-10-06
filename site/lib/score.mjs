@@ -30,7 +30,7 @@ export const SCORE_RULES={
 export const SCORE_PARTS=[['demand','Character demand'],['momentum','Price momentum'],['value','Value'],['liquidity','Liquidity'],['stability','Price stability'],['scarcity','Grade scarcity']];
 export const weightsFor=(grade,rules=SCORE_RULES)=>grade==='raw'?rules.weights:rules.gradedWeights;
 export const partsFor=(grade,rules=SCORE_RULES)=>SCORE_PARTS.filter(([k])=>k in weightsFor(grade,rules));
-const SC_ERA={EX:'EX-era',DP:'Diamond & Pearl–HGSS',BW:'Black & White',XY:'XY',SM:'Sun & Moon'};
+const SC_ERA={WOTC:'Wizards of the Coast',EX:'EX-era',DP:'Diamond & Pearl–HGSS',BW:'Black & White',XY:'XY',SM:'Sun & Moon',SWSH:'Sword & Shield',SV:'Scarlet & Violet',ME:'Mega Evolution'};
 
 // Share of PSA-graded copies at this grade: PSA 10s for psa10, 9-or-better for psa9.
 export function gradeShare(pop,grade,rules=SCORE_RULES.scarcity){

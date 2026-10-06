@@ -1,0 +1,55 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {cards,sets,series} from '../data/catalog.mjs';
+import {matchesCard} from '../lib/sales.mjs';
+import {parseMarket} from '../lib/provider.mjs';
+import {charactersOf} from '../lib/invest.mjs';
+
+test('Sword & Shield includes English main sets, special sets, galleries, vault, and promos',()=>{
+ const s=sets.filter(x=>x.series==='SWSH'),c=cards.filter(x=>x.series==='SWSH');
+ assert.equal(s.length,28);assert.equal(c.length,3712);assert.equal(c.filter(x=>x.eligible).length,2290);
+ assert.ok(series.some(x=>x.id==='SWSH'));
+ assert.equal(new Set(c.map(x=>x.id)).size,c.length);
+ for(const set of s)assert.equal(c.filter(x=>x.setId===set.id).length,set.total);
+ assert.equal(c.find(x=>x.id==='swsh45sv-SV001').numberLabel,'SV001/SV122');
+ assert.equal(c.find(x=>x.id==='swsh9tg-TG01').numberLabel,'TG01/TG30');
+ assert.equal(c.find(x=>x.id==='swsh12pt5gg-GG01').numberLabel,'GG01/GG70');
+ assert.equal(c.find(x=>x.id==='swshp-SWSH001').numberLabel,'SWSH001');
+ assert.equal(c.find(x=>x.id==='mcd21-25').printing,'Standard / non-holo');
+ assert.equal(c.find(x=>x.id==='mcd22-7').printing,'Standard / holo');
+ assert.equal(c.find(x=>x.id==='mcd22-1').printing,'Standard / non-holo');
+ assert.equal(c.filter(x=>x.setId==='cel25c'&&x.eligible).length,25);
+ for(const id of ['fut20','mcd21','cel25','cel25c','pgo','mcd22'])assert.ok(s.some(x=>x.id===id),id);
+});
+test('Modern pricing requires an exact source and a matching identity',()=>{
+ const card=cards.find(x=>x.id==='swsh7-215');
+ assert.throws(()=>parseMarket('PriceCharting',{...card,sourceVerified:false}),/exact source/);
+ assert.ok(matchesCard('Umbreon VMAX 215/203 Evolving Skies PSA 10',card));
+ assert.ok(matchesCard('Celebi V #1 Pokemon Sword & Shield',cards.find(x=>x.id==='swsh1-1')));
+ assert.equal(matchesCard('Rayquaza VMAX 215/203 Evolving Skies PSA 10',card),false);
+ assert.equal(matchesCard('Umbreon VMAX 216/203 Evolving Skies PSA 10',card),false);
+ assert.ok(matchesCard('Hisuian Voltorb GG01/GG70 Crown Zenith PSA 9',cards.find(x=>x.id==='swsh12pt5gg-GG01')));
+ assert.ok(matchesCard('Electric Energy #235 Pokemon Evolving Skies',cards.find(x=>x.id==='swsh7-235')));
+ const classicCharizard=cards.find(x=>x.setId==='cel25c'&&x.name==='Charizard');
+ assert.ok(matchesCard('Charizard 4/102 Celebrations Classic Collection PSA 9',classicCharizard));
+ assert.equal(matchesCard('Charizard 4/102 Base Set 1999 PSA 9',classicCharizard),false);
+ const mcdPikachu=cards.find(x=>x.id==='mcd21-25');
+ assert.ok(matchesCard('Pikachu #25 Pokemon McDonalds 2021 NM',mcdPikachu));
+ assert.equal(matchesCard('Pikachu Holo #25 Pokemon McDonalds 2021 NM',mcdPikachu),false);
+ const mcd22Pikachu=cards.find(x=>x.id==='mcd22-7');
+ assert.ok(matchesCard('Pikachu Holo #7 Pokemon McDonalds 2022 NM',mcd22Pikachu));
+ assert.equal(matchesCard('Pikachu non-holo #7 Pokemon McDonalds 2022 NM',mcd22Pikachu),false);
+ const snowflake=cards.find(x=>x.id==='swshp-SWSH153');
+ assert.equal(snowflake.printing,'Snowflake stamp');
+ assert.ok(matchesCard('Pikachu Snowflake Stamp SWSH153 PSA 10',snowflake));
+ assert.equal(matchesCard('Pikachu SWSH153 PSA 10',snowflake),false);
+ const zacian=cards.find(x=>x.id==='swshp-SWSH135');
+ assert.ok(zacian.nameAliases.includes('Zacian LV'));
+ assert.ok(matchesCard('Zacian LV #SWSH135 Pokemon Celebrations PSA 9',zacian));
+});
+test('Modern forms and mechanics share character demand with their base Pokémon',()=>{
+ for(const name of ['Umbreon V','Umbreon VMAX','Umbreon VSTAR','Umbreon ex'])assert.deepEqual(charactersOf(name),['Umbreon']);
+ assert.deepEqual(charactersOf('Galarian Articuno V'),['Articuno']);
+ assert.deepEqual(charactersOf('Radiant Charizard'),['Charizard']);
+ assert.deepEqual(charactersOf('Pikachu V-UNION'),['Pikachu']);
+});

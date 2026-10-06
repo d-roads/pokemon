@@ -6,3 +6,5 @@ site/localhost-*.log
 .DS_Store
 .env
 .lighthouseci/
+tasks/*run*.log
+tasks/*run*status.json

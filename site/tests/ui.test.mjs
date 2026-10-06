@@ -44,7 +44,7 @@ test('Set picker, all-set search, and Radiant Collection render correct cards',a
  ui.e('#set-select').onchange({target:{value:'g1'}});assert.equal(ui.e('#page-title').textContent,'Generations');assert.match(ui.e('#set-count').innerHTML,/37/);
  ui.e('#grade').onchange({target:{value:'raw'}});ui.e('#search').oninput({target:{value:'RC30'}});assert.match(ui.e('#card-list').innerHTML,/Gardevoir/);assert.match(ui.e('#card-list').innerHTML,/RC30\/RC32/);assert.doesNotMatch(ui.e('#card-list').innerHTML,/\/160/);
  ui.e('#set-select').onchange({target:{value:'all'}});ui.run("state.category='all';updateView();");ui.e('#search').oninput({target:{value:'Flashfire'}});
- assert.equal(ui.run('filteredCards().length'),46);assert.match(ui.e('#set-count').innerHTML,/5001/);
+ assert.equal(ui.run('filteredCards().length'),46);assert.match(ui.e('#set-count').innerHTML,new RegExp(String(cards.filter(c=>c.eligible).length)));
  ui.e('#search').oninput({target:{value:''}});ui.e('#set-select').onchange({target:{value:'era:EX'}});assert.match(ui.e('#set-count').innerHTML,/687/);assert.equal(ui.e('#page-title').textContent,'Explore the EX era');
  ui.e('#set-select').onchange({target:{value:'col1'}});ui.e('#search').oninput({target:{value:'SL10'}});assert.match(ui.e('#card-list').innerHTML,/Rayquaza/);assert.match(ui.e('#card-list').innerHTML,/#SL10 · Shiny rare/);
  ui.e('#search').oninput({target:{value:''}});ui.e('#set-select').onchange({target:{value:'era:BW'}});assert.match(ui.e('#set-count').innerHTML,/553/);assert.equal(ui.e('#page-title').textContent,'Explore the Black & White era');
@@ -148,7 +148,7 @@ test('Advanced filters screen by era, price, activity and investment score, and 
  const ui=workspace();await ui.run('init()');await ui.run('loadScores()');
  assert.doesNotMatch(readFileSync(new URL('../public/index.html',import.meta.url),'utf8'),/budget|250–\$350/);
  ui.e('#set-select').onchange({target:{value:'all'}});ui.run("state.category='all';updateView();");
- const total=ui.run('filteredCards().length');assert.equal(total,5001);
+ const total=ui.run('filteredCards().length');assert.equal(total,cards.filter(c=>c.eligible).length);
  // Price range for the selected grade
  ui.run("state.filters.min=100;state.filters.max=500;applyFilters();");
  const priced=ui.run("filteredCards().map(c=>analyze(state.markets[c.id],state.grade).current)");
@@ -163,12 +163,12 @@ test('Advanced filters screen by era, price, activity and investment score, and 
  // Sorting by investment score
  ui.e('#sort').onchange({target:{value:'invest'}});const sorted=ui.run('filteredCards().map(c=>scoreOf(c.id))');assert.deepEqual(sorted,[...sorted].sort((a,b)=>b-a));
  // Era chips: removing eras narrows the screen, and the last era can't be removed
- ui.run("toggleEra('WOTC');toggleEra('EX');toggleEra('DP');toggleEra('BW');toggleEra('SM');");assert.equal(ui.run('state.setId'),'era:XY');
+ ui.run("for(const e of [...state.eras])if(e!=='XY')toggleEra(e);");assert.equal(ui.run('state.setId'),'era:XY');
  assert.ok(ui.run("filteredCards().every(c=>c.series==='XY')"));ui.run("toggleEra('XY')");assert.equal(ui.run('state.setId'),'era:XY');
  ui.run("toggleEra('SM')");assert.equal(ui.run('state.setId'),'all');assert.equal(ui.run('state.eras.join()'),'XY,SM');
  assert.ok(ui.run("filteredCards().every(c=>['XY','SM'].includes(c.series))"));assert.equal(ui.e('#page-title').textContent,'Explore 2 eras');
  // Clearing restores everything
- ui.e('#reset-filters').onclick();assert.equal(ui.run('filterCount()'),0);assert.equal(ui.run('state.eras.length'),6);
+ ui.e('#reset-filters').onclick();assert.equal(ui.run('filterCount()'),0);assert.equal(ui.run('state.eras.length'),ui.run('state.series.length'));
 });
 test('Card detail shows the investment score with its breakdown',async()=>{
  const ui=workspace();await ui.run('init()');await ui.run('loadScores()');
@@ -194,6 +194,16 @@ test('Card details expand into a reading view with grade tabs, previous/next and
  ui.e('#focus-next').onclick();await new Promise(r=>setImmediate(r));assert.equal(ui.run('state.selected'),list[i+1]);assert.equal(ui.run('state.focus'),true,'stays expanded while stepping');
  ui.run("state.view='dex';updateView()");assert.equal(ui.run('state.focus'),false,'leaving Browse closes the reading view');
  ui.run("state.view='browse';updateView();setFocus(true);setFocus(false)");assert.equal(ui.e('#detail-backdrop').hidden,true);assert.doesNotMatch(ui.e('#detail').innerHTML,/focus-bar/);
+});
+test('Wizards and Sword & Shield cards use the same expanded information view',async()=>{
+ const ui=workspace();await ui.run('init()');
+ for(const [id,name] of [['base1-4','Charizard'],['swsh7-215','Umbreon VMAX']]){
+  ui.run(`state.selected=${JSON.stringify(id)};renderDetail();setFocus(true)`);
+  const html=ui.e('#detail').innerHTML;
+  assert.match(html,/class="focus-grid"/);assert.match(html,new RegExp(name));
+  for(const part of ['Investment score','Reported sales','Sales coverage','Five-year scenarios'])assert.ok(html.includes(part),part);
+  ui.run('setFocus(false)');
+ }
 });
 
 test('Stylesheet avoids backdrop-filter, which made scrolling over overlays run at about 20 fps',()=>{

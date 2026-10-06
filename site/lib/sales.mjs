@@ -22,12 +22,20 @@ export function conditionOf(title){
 }
 export function matchesCard(title,card){
  let checkedTitle=card.nativeReverse?title.replace(/reverse[ -]?(?:holo|foil)/gi,''):title;
+ if(card.nativeStamp==='Snowflake'){
+  if(!/snowflake/i.test(title))return false;
+  checkedTitle=checkedTitle.replace(/\bstamp(?:ed)?\b/gi,'');
+ }
  if(card.setId==='bp'){
   if(card.nativeWinner){if(!/\bwinners?\b/i.test(title)||/\bnon[ -]?winner/i.test(title))return false;checkedTitle=checkedTitle.replace(/\bwinners?\b/gi,'');}
   else checkedTitle=checkedTitle.replace(/\bnon[ -]?winner/gi,'');
   checkedTitle=checkedTitle.replace(/\bstamp(?:ed)?\b/gi,'');
  }
  if(EXCLUDED_LISTING.test(checkedTitle))return false;
+ if(card.modern){const words=s=>String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f'’‘]/g,'').replace(/[^a-z0-9]+/g,' ').trim();if(![card.name,...(card.nameAliases||[])].some(name=>(' '+words(title)+' ').includes(' '+words(name)+' ')))return false;}
+ if(card.nativeNonHolo&&/\bholo(?:graphic)?\b/i.test(title.replace(/\bnon[ -]?holo\b/gi,'')))return false;
+ if(card.nativeHolo&&/\bnon[ -]?holo\b/i.test(title))return false;
+ if(card.category==='Classic Collection'&&!/celebrations|celebration|25th|30th|25 year|30 year|2021.*reprint|2026.*reprint|classic collection/i.test(title))return false;
  if(card.vintage){
   const firstEdition=/\b1st\b|\b(?:first|1\.?)[ -]*(?:ed(?:ition)?\.?|print(?:ing)?)\b/i.test(title);
   if(firstEdition!==!!card.nativeFirstEdition)return false;
@@ -47,11 +55,13 @@ export function matchesCard(title,card){
    if(!new RegExp('(?:#\\s*0*'+mark+'|\\b0*'+mark+'\\b)','i').test(title.replace(/\bPSA\s*\d+/gi,'')))return false;
   }
  }
- const titleAnd=(title.match(/\s&\s/g)||[]).length,nameAnd=(String(card.name||'').match(/\s&\s/g)||[]).length;if(titleAnd>nameAnd)return false;
+ const titleAnd=(title.match(/\s&\s/g)||[]).length,nameAnd=(String(card.name||'').match(/\s&\s/g)||[]).length;
+ const setAnd=card.modern&&title.toLowerCase().includes(String(card.setName||'').toLowerCase())?(String(card.setName).match(/\s&\s/g)||[]).length:0;
+ if(titleAnd>nameAnd+setAnd)return false;
  const expected=collector(card.number),prefix=expected.match(/^[A-Z]+/)?.[0]||'',total=prefix+card.printedTotal;
  if(/^[A-Z!?]$/.test(expected)){const mark=expected.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return new RegExp('(?:\\[\\s*'+mark+'\\s*\\]|(?:^|[^A-Z0-9])'+mark+'\\s*\\/\\s*'+card.printedTotal+'(?!\\d))','i').test(title);}
- const numbered=[...title.matchAll(/\b((?:XY|RC|SV|SH|SL|AR|H)?\s*\d+[a-z]?)\s*\/\s*((?:XY|RC|SV|SH|SL|AR|H)?\s*\d+[a-z]?)\b/gi)];
- if(!expected.startsWith('XY')&&numbered.length)return numbered.every(m=>collector(m[1])===expected&&collector(m[2])===total);
+ const numbered=[...title.matchAll(/\b((?:SWSH|GG|TG|XY|RC|SV|SH|SL|AR|H)?\s*\d+[a-z]?)\s*\/\s*((?:SWSH|GG|TG|XY|RC|SV|SH|SL|AR|H)?\s*\d+[a-z]?)\b/gi)];
+ if(!expected.startsWith('XY')&&numbered.length)return numbered.every(m=>collector(m[1])===expected&&(!card.modern||card.printedTotal!=null?collector(m[2])===total:true));
  if(expected.startsWith('XY'))return [...title.matchAll(/\bXY\s*0*(\d+)(?![a-z\d])/gi)].some(m=>'XY'+Number(m[1])===expected);
  const parts=expected.match(/^([A-Z]*)(\d+)([A-Z]?)$/);return parts?new RegExp('#?\\s*'+parts[1]+'\\s*0*'+parts[2]+parts[3]+'(?![a-z0-9])','i').test(title):false;
 }

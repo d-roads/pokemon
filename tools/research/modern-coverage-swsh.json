@@ -1,0 +1,376 @@
+{
+  "sets": {
+    "swsh7": {
+      "name": "Evolving Skies",
+      "eligible": 144,
+      "mapped": 144,
+      "captured": 144,
+      "unmatched": [],
+      "errors": [],
+      "sales": 6701,
+      "ebaySales": 2449,
+      "sourceRows": 14109,
+      "listingPages": 3
+    },
+    "swshp": {
+      "name": "SWSH Black Star Promos",
+      "eligible": 304,
+      "mapped": 301,
+      "captured": 300,
+      "unmatched": [
+        {
+          "id": "swshp-SWSH016",
+          "name": "Inteleon V",
+          "reason": "Ambiguous product matches"
+        },
+        {
+          "id": "swshp-SWSH112",
+          "name": "Cinderace",
+          "reason": "No exact standard-print product"
+        },
+        {
+          "id": "swshp-SWSH167",
+          "name": "Professor Burnet",
+          "reason": "Ambiguous product matches"
+        }
+      ],
+      "errors": [
+        {
+          "id": "swshp-SWSH195",
+          "error": "The source page does not match this card and printing."
+        }
+      ],
+      "sales": 12816,
+      "ebaySales": 7109,
+      "sourceRows": 23465,
+      "listingPages": 19
+    },
+    "swsh1": {
+      "name": "Sword & Shield",
+      "eligible": 100,
+      "mapped": 100,
+      "captured": 100,
+      "unmatched": [],
+      "errors": [],
+      "sales": 8688,
+      "ebaySales": 5696,
+      "sourceRows": 9226,
+      "listingPages": 4
+    },
+    "swsh2": {
+      "name": "Rebel Clash",
+      "eligible": 108,
+      "mapped": 108,
+      "captured": 108,
+      "unmatched": [],
+      "errors": [],
+      "sales": 5527,
+      "ebaySales": 2291,
+      "sourceRows": 9372,
+      "listingPages": 3
+    },
+    "swsh3": {
+      "name": "Darkness Ablaze",
+      "eligible": 98,
+      "mapped": 98,
+      "captured": 98,
+      "unmatched": [],
+      "errors": [],
+      "sales": 5120,
+      "ebaySales": 2184,
+      "sourceRows": 9212,
+      "listingPages": 3
+    },
+    "swsh35": {
+      "name": "Champion's Path",
+      "eligible": 36,
+      "mapped": 36,
+      "captured": 36,
+      "unmatched": [],
+      "errors": [],
+      "sales": 3433,
+      "ebaySales": 2357,
+      "sourceRows": 4239,
+      "listingPages": 2
+    },
+    "swsh4": {
+      "name": "Vivid Voltage",
+      "eligible": 113,
+      "mapped": 113,
+      "captured": 113,
+      "unmatched": [],
+      "errors": [],
+      "sales": 6156,
+      "ebaySales": 2805,
+      "sourceRows": 11435,
+      "listingPages": 3
+    },
+    "swsh45": {
+      "name": "Shining Fates",
+      "eligible": 42,
+      "mapped": 41,
+      "captured": 41,
+      "unmatched": [
+        {
+          "id": "swsh45-60",
+          "name": "Professor's Research",
+          "reason": "No exact standard-print product"
+        }
+      ],
+      "errors": [],
+      "sales": 2066,
+      "ebaySales": 837,
+      "sourceRows": 4141,
+      "listingPages": 2
+    },
+    "swsh45sv": {
+      "name": "Shining Fates Shiny Vault",
+      "eligible": 122,
+      "mapped": 122,
+      "captured": 122,
+      "unmatched": [],
+      "errors": [],
+      "sales": 9880,
+      "ebaySales": 6258,
+      "sourceRows": 12303,
+      "listingPages": 2
+    },
+    "swsh5": {
+      "name": "Battle Styles",
+      "eligible": 96,
+      "mapped": 96,
+      "captured": 96,
+      "unmatched": [],
+      "errors": [],
+      "sales": 4598,
+      "ebaySales": 1724,
+      "sourceRows": 8398,
+      "listingPages": 3
+    },
+    "swsh6": {
+      "name": "Chilling Reign",
+      "eligible": 144,
+      "mapped": 143,
+      "captured": 143,
+      "unmatched": [
+        {
+          "id": "swsh6-118",
+          "name": "Porygon-Z",
+          "reason": "Ambiguous product matches"
+        }
+      ],
+      "errors": [],
+      "sales": 6944,
+      "ebaySales": 2697,
+      "sourceRows": 13295,
+      "listingPages": 3
+    },
+    "swsh8": {
+      "name": "Fusion Strike",
+      "eligible": 112,
+      "mapped": 112,
+      "captured": 112,
+      "unmatched": [],
+      "errors": [],
+      "sales": 5433,
+      "ebaySales": 2115,
+      "sourceRows": 10160,
+      "listingPages": 4
+    },
+    "swsh9": {
+      "name": "Brilliant Stars",
+      "eligible": 98,
+      "mapped": 98,
+      "captured": 98,
+      "unmatched": [],
+      "errors": [],
+      "sales": 4609,
+      "ebaySales": 1737,
+      "sourceRows": 9197,
+      "listingPages": 3
+    },
+    "swsh9tg": {
+      "name": "Brilliant Stars Trainer Gallery",
+      "eligible": 30,
+      "mapped": 30,
+      "captured": 30,
+      "unmatched": [],
+      "errors": [],
+      "sales": 2771,
+      "ebaySales": 1882,
+      "sourceRows": 3525,
+      "listingPages": 3
+    },
+    "swsh10": {
+      "name": "Astral Radiance",
+      "eligible": 129,
+      "mapped": 129,
+      "captured": 129,
+      "unmatched": [],
+      "errors": [],
+      "sales": 6231,
+      "ebaySales": 2465,
+      "sourceRows": 11585,
+      "listingPages": 3
+    },
+    "swsh10tg": {
+      "name": "Astral Radiance Trainer Gallery",
+      "eligible": 30,
+      "mapped": 30,
+      "captured": 30,
+      "unmatched": [],
+      "errors": [],
+      "sales": 2740,
+      "ebaySales": 1848,
+      "sourceRows": 3546,
+      "listingPages": 3
+    },
+    "swsh11": {
+      "name": "Lost Origin",
+      "eligible": 118,
+      "mapped": 118,
+      "captured": 118,
+      "unmatched": [],
+      "errors": [],
+      "sales": 6062,
+      "ebaySales": 2685,
+      "sourceRows": 10328,
+      "listingPages": 4
+    },
+    "swsh11tg": {
+      "name": "Lost Origin Trainer Gallery",
+      "eligible": 30,
+      "mapped": 30,
+      "captured": 30,
+      "unmatched": [],
+      "errors": [],
+      "sales": 2986,
+      "ebaySales": 2089,
+      "sourceRows": 3548,
+      "listingPages": 4
+    },
+    "swsh12": {
+      "name": "Silver Tempest",
+      "eligible": 106,
+      "mapped": 106,
+      "captured": 106,
+      "unmatched": [],
+      "errors": [],
+      "sales": 5386,
+      "ebaySales": 2208,
+      "sourceRows": 10296,
+      "listingPages": 3
+    },
+    "swsh12tg": {
+      "name": "Silver Tempest Trainer Gallery",
+      "eligible": 30,
+      "mapped": 30,
+      "captured": 30,
+      "unmatched": [],
+      "errors": [],
+      "sales": 2681,
+      "ebaySales": 1786,
+      "sourceRows": 3558,
+      "listingPages": 3
+    },
+    "swsh12pt5": {
+      "name": "Crown Zenith",
+      "eligible": 89,
+      "mapped": 89,
+      "captured": 89,
+      "unmatched": [],
+      "errors": [],
+      "sales": 4496,
+      "ebaySales": 1837,
+      "sourceRows": 7858,
+      "listingPages": 3
+    },
+    "swsh12pt5gg": {
+      "name": "Crown Zenith Galarian Gallery",
+      "eligible": 70,
+      "mapped": 70,
+      "captured": 70,
+      "unmatched": [],
+      "errors": [],
+      "sales": 6614,
+      "ebaySales": 4533,
+      "sourceRows": 8393,
+      "listingPages": 3
+    },
+    "fut20": {
+      "name": "Pokémon Futsal Collection",
+      "eligible": 5,
+      "mapped": 5,
+      "captured": 5,
+      "unmatched": [],
+      "errors": [],
+      "sales": 507,
+      "ebaySales": 380,
+      "sourceRows": 596,
+      "listingPages": 18
+    },
+    "mcd21": {
+      "name": "McDonald's Collection 2021",
+      "eligible": 25,
+      "mapped": 25,
+      "captured": 25,
+      "unmatched": [],
+      "errors": [],
+      "sales": 1376,
+      "ebaySales": 1136,
+      "sourceRows": 1589,
+      "listingPages": 1
+    },
+    "cel25": {
+      "name": "Celebrations",
+      "eligible": 25,
+      "mapped": 25,
+      "captured": 25,
+      "unmatched": [],
+      "errors": [],
+      "sales": 2766,
+      "ebaySales": 2016,
+      "sourceRows": 2996,
+      "listingPages": 1
+    },
+    "cel25c": {
+      "name": "Celebrations: Classic Collection",
+      "eligible": 25,
+      "mapped": 25,
+      "captured": 25,
+      "unmatched": [],
+      "errors": [],
+      "sales": 2089,
+      "ebaySales": 2086,
+      "sourceRows": 2994,
+      "listingPages": 1
+    },
+    "pgo": {
+      "name": "Pokémon GO",
+      "eligible": 46,
+      "mapped": 46,
+      "captured": 46,
+      "unmatched": [],
+      "errors": [],
+      "sales": 4563,
+      "ebaySales": 3184,
+      "sourceRows": 5014,
+      "listingPages": 2
+    },
+    "mcd22": {
+      "name": "McDonald's Collection 2022",
+      "eligible": 15,
+      "mapped": 15,
+      "captured": 15,
+      "unmatched": [],
+      "errors": [],
+      "sales": 960,
+      "ebaySales": 510,
+      "sourceRows": 987,
+      "listingPages": 1
+    }
+  },
+  "checkedAt": "2026-10-06T08:52:27.944Z",
+  "completeEbayHistory": false,
+  "scope": "Every exact-matched rare/promo; all rows exposed on each public source page. Earlier and unreported eBay sales may be absent."
+}
