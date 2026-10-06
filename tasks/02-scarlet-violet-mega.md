@@ -11,3 +11,5 @@ Match every eligible rare/promo to its exact standard-print PriceCharting produc
 Report set/card/capture/sale counts and any gaps separately from Task 1.
 
 Result on October 6, 2026: 26 released English sets and subsets, 4,765 cards, and 2,294 eligible browse entries. The final coverage and audit reports have 2,293 exact product captures, 200,969 accepted sales, 137,069 reported eBay sales, and zero invalid accepted rows. Paradise Resort SVP 045 is the sole gap because the public listing offers only a Quarter Finalist stamped product. Scores are supported for 1,359 PSA 10, 1,281 PSA 9, and 2,237 raw cards; historical trend holdouts pass for 201, 148, and 2 respectively, without validating future returns. The expanded information view passes on WOTC, SV, and ME examples. All 120 Node tests and the Worker build pass. The uncompressed Worker is 188.6 MB.
+
+The work is committed and pushed to `codex/scarlet-violet-mega-cards-sales`, stacked on the pushed Task 1 branch `codex/sword-shield-cards-sales`. The GitHub integration returned HTTP 403 when opening a draft pull request; the branches are available for separate review.
