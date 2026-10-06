@@ -191,3 +191,8 @@ test('Card details expand into a reading view with grade tabs, previous/next and
  ui.run("state.view='browse';updateView();setFocus(true);setFocus(false)");assert.equal(ui.e('#detail-backdrop').hidden,true);assert.doesNotMatch(ui.e('#detail').innerHTML,/focus-bar/);
 });
 
+test('Stylesheet avoids backdrop-filter, which made scrolling over overlays run at about 20 fps',()=>{
+ const css=readFileSync(new URL('../public/style.css',import.meta.url),'utf8');
+ assert.doesNotMatch(css,/backdrop-filter/,'blur behind a scrolling layer is re-computed every frame');
+});
+

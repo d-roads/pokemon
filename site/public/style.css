@@ -415,7 +415,7 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
 
 /* ---------- Dialogs and forms ---------- */
 dialog{width:calc(100% - 32px);max-width:660px;max-height:85vh;padding:0;border:1px solid var(--line-strong);border-radius:12px;background:var(--panel);color:var(--ink);box-shadow:0 30px 80px #00000080}
-dialog::backdrop{background:#000000a6;backdrop-filter:blur(3px)}
+dialog::backdrop{background:#000000bd}
 #dex-dialog{max-width:560px}
 .dialog-heading{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:16px 22px;background:var(--panel);border-bottom:1px solid var(--line)}
 .dialog-heading h2{font-size:18px;font-weight:650;letter-spacing:-.3px;margin:0}
@@ -785,14 +785,15 @@ dialog[open]::backdrop{animation:fade-in .22s ease-out}
 }
 
 /* ---- Reading view: the card panel expanded over the page ---- */
+/* No blur filters behind scrolling layers: they re-blur every frame (20 fps in testing vs 60 without). */
 .eyebrow-end{display:flex;align-items:center;gap:10px}
 .expand-button{width:26px;height:26px;margin:-5px 0}
 .expand-button .icon{width:14px;height:14px}
-.detail-backdrop{position:fixed;inset:0;z-index:55;background:#000000b3;backdrop-filter:blur(4px)}
+.detail-backdrop{position:fixed;inset:0;z-index:55;background:#000000c4}
 body.detail-open{overflow:hidden}
 .detail-panel.focus{position:fixed;inset:max(18px,3vh) max(18px,3.5vw);top:max(18px,3vh);margin:0 auto;max-width:1440px;height:auto;max-height:none;z-index:60;display:block;overflow-y:auto;overscroll-behavior:contain;background:var(--panel);border-color:var(--line-strong);box-shadow:0 30px 80px #000000a0;animation:focus-in .22s cubic-bezier(.2,.7,.2,1)}
 @keyframes focus-in{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
-.focus-bar{position:sticky;top:0;z-index:4;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:18px;padding:12px 28px;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.focus-bar{position:sticky;top:0;z-index:4;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:18px;padding:12px 28px;background:color-mix(in srgb,var(--panel) 97%,transparent);border-bottom:1px solid var(--line)}
 .focus-title{display:flex;align-items:baseline;gap:10px;min-width:0;white-space:nowrap;overflow:hidden}
 .focus-label{font:600 10px var(--mono);letter-spacing:1.2px;color:var(--faint)}
 .focus-title strong{font-size:15px;font-weight:650;overflow:hidden;text-overflow:ellipsis}

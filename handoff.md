@@ -91,6 +91,13 @@ Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. 
 - Verified in headless Chromium at 1440×900, 1280×800 (Light) and 390×844: no page errors. New UI test; 102/102 passing.
 - Noticed, not changed: the "Simple trend projection" can show $0.00 for 1Y–3Y when one outlier sale drags the straight-line slope far negative (e.g. Wailord EX PSA 9, −$300/yr, floored at 0). Same in the normal panel. Candidate fix: project on log price or drop the outlier band the score's momentum already ignores.
 
+### Scrolling performance fix (October 6)
+
+- Collector reported low-fps scrolling. Measured in headless Chromium (software rendering, 120 wheel-style scroll steps, rAF frame times): card list and normal detail panel were 60 fps, but the **reading view ran at about 20 fps** and the **method dialog at about 22 fps**.
+- Cause: the full-viewport `backdrop-filter: blur()` behind scrolling overlays (`.detail-backdrop`, `dialog::backdrop`), which is re-blurred every frame. Removing it alone restored 60 fps; pausing animations, removing the big shadow, or removing the sticky bar blur did not matter on their own.
+- Fix: no `backdrop-filter` anywhere in `site/public/style.css`; overlays use a slightly darker solid dim instead (`#000000c4` reading view, `#000000bd` dialogs), and the reading-view top bar is 97% opaque. A unit test fails if `backdrop-filter` returns. 103/103 tests passing.
+- Rule for future UI work: do not put blur effects behind anything that scrolls.
+
 ## Earlier sessions (summary)
 
 ### EX and Diamond & Pearl through HGSS catalog and market data
@@ -193,6 +200,7 @@ Goal was to add Sharp, Framer Motion, Lighthouse CI, Sentry, RemixIcon and Zod. 
 - `f665231` — Restyle Primal Watch as a trading terminal
 - `dd7213c` — Add PSA grade scarcity to the PSA 9 and PSA 10 investment score
 - Reading view — Expand card details into a full-page reading view
+- Scrolling fix — Remove backdrop blur from overlays
 - Final commit — this handoff update
 
 Previous session: `70d7339` (EX through HGSS catalog), `49f7d73` (appearance settings and era-scoped market screens).
