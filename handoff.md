@@ -1,28 +1,55 @@
 # Primal Watch — session handoff
 
-Updated: October 2, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. The repository is authoritative.
+Updated: October 5, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. The repository is authoritative.
 
 ## Product goals
 
-1. Keep the current clean, smooth collector UI.
+1. Keep the UI smooth and readable. **New (Oct 5):** the look is now a dark trading terminal, based on the collector's BlockTrade reference screenshot.
 2. Show defensible prices and buy targets from reported sales for raw near-mint, PSA 9, and PSA 10 cards. Never fabricate prices when evidence is missing.
 3. Cover rare/chase cards from the EX era through Sun & Moon, including requested special sets.
 4. Preserve the watchlist, buy limits, Dex, and listing alerts.
 5. **New:** Show weekly and monthly top movers by percentage increase (top 20 each for PSA 10, PSA 9, and raw). Leave out any move the data can't confirm.
 6. **New:** Offer a Potential investments tab built only from the app's sales data, weighted toward characters with real collector demand.
 7. Let collectors include or exclude eras independently in Top movers and Investments.
-8. Provide Light, Dark, and Soft contrast appearances through a dedicated Settings page.
-9. Commit each integration separately and leave an updated handoff after every session.
-10. **Standard finish (collector's rule):** commit and push to git, copy the changed files into the collector's local folder (`C:\Users\b345t\.codex\.chatgpt-projects\g-p-6a72b895d6288191b4624c5f5479fcae\primal-watch`, via the desktop link; git is not installed there), and post the handoff to the claude.ai Project.
+8. Provide appearances through a dedicated Settings page: Terminal (default dark), Light, and Soft contrast.
+9. **New:** An advanced filter system (screener) in Browse: era, set, min/max price, minimum activity score, minimum investment score. It replaces the old $250–$350 toggle.
+10. **New:** An investment score out of 100 in each card's information section, also usable as a filter and a sort.
+11. Commit each integration separately and leave an updated handoff after every session.
+12. **Standard finish (collector's rule):** commit and push to git, copy the changed files into the collector's local folder (`C:\Users\b345t\.codex\.chatgpt-projects\g-p-6a72b895d6288191b4624c5f5479fcae\primal-watch`, via the desktop link; git is not installed there), and post the handoff to the claude.ai Project.
 
 ## Current state
 
 - **Catalog:** 9,526 cards in 75 sets; 4,260 are browsable rare/chase cards (EX 687, Diamond & Pearl through HGSS 738, Black & White 553, XY 902, Sun & Moon 1,380).
 - **Market data:** 1,947 full PriceCharting captures with 132,454 classified sales. Of 1,425 eligible legacy cards, 1,317 have exact guide matches and 320 have full captures. The snapshot was checked October 2, 2026.
-- **Navigation:** Browse sets · **Top movers** · **Investments** · Watchlist · Dex · Alerts · **Settings**.
+- **Navigation:** a top bar (no sidebar) with Browse sets · Top movers · Investments · Watchlist · Dex · Alerts · Settings. A status bar at the bottom shows the sales-check date and a ticker of this week's confirmed movers.
+- **Investment scores:** 462 PSA 10, 719 PSA 9 and 1,799 raw cards are scored on the current snapshot (medians about 59–60, range 27–89).
 - Local user data lives in `site/data/primal-watch.sqlite` and is gitignored. It must never be committed because this is a public repository.
 
-## Work completed this session
+## Work completed this session (October 5)
+
+### Investment score (`d498731`)
+
+- New module `site/lib/score.mjs`. Each card gets a 0–100 score per grade, from the app's sales only, reusing `marketContext` and the signals in `invest.mjs`.
+- Parts and weights: character demand 30%, price momentum 25% (trailing-year log regression, full credit only when t ≥ 3; >150%/yr counts as overheated), value 20% (vs. same-set, same-rarity cards of no more popular characters, plus distance below a held multi-year high, with a penalty if still falling), liquidity 15% (activity score), stability 10%.
+- Fail-closed: no score without a confident sold price and up-to-date data; the reason is shown instead. Cards under $25 are capped at 59. Unmeasurable parts count as 50 and are labeled "Not measured".
+- Bands: 80+ Strong, 65–79 Good, 50–64 Fair, 35–49 Weak, <35 Poor.
+- API: `GET /api/scores` (compact `{id:[psa10,psa9,raw]}`), and `/api/market?id=` now includes `score` with the breakdown. Memoised with the same cache as movers/investments; the first computation is about 1 s.
+
+### Advanced filters and score UI (`cc7fdca`)
+
+- The `$250–$350` checkbox is gone. A **Screener** panel above the card list has era chips (EX, DP–HGSS, BW, XY, SM; multi-select, the last era can't be removed), the set picker, min/max price for the grade in view, a minimum activity score slider, a minimum investment score slider, and quick screens (Score 80+, Score 65+, Liquid, Under $100, $100–$500, $500+). Active filters show as removable chips above the list; "Clear filters" resets everything.
+- The "Demand estimate" metric is renamed **Activity score**, matching the filter (same calculation).
+- Each list row has an **INV** score pill; the detail panel has an **Investment score** box with rating, meter, the five parts with their evidence, any Investments signals met, and "not a forecast" wording. Sort now includes "Investment score". Investments picks also show their score.
+- On phones the screener collapses behind a **Filters** button with a count badge.
+- Refresh sales with a partial era selection refreshes each selected era in turn.
+
+### Terminal design (`f665231`)
+
+- `site/public/style.css` was rewritten from scratch around colour tokens: near-black panels, neon-green accents and primary buttons, red for losses, JetBrains Mono for figures, Inter for text (both from Google Fonts). Charts now use the theme tokens.
+- Light and Soft contrast are redefined on the same tokens. The theme key changed to `primal-watch-theme-v2`, so everyone sees the Terminal look once; Light and Soft are still in Settings.
+- The desktop fixed-height layout and per-view scrolling rules were carried over unchanged in behaviour.
+
+## Earlier sessions (summary)
 
 ### EX and Diamond & Pearl through HGSS catalog and market data
 
@@ -87,10 +114,9 @@ Updated: October 2, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. 
 
 ## Verification
 
-- `node --test --test-isolation=none tests/*.test.mjs`: **79/79 passing** on Node 24.19. New coverage includes the full five-era catalog, saved market coverage totals, legacy chase categories, exact source URLs, legacy letter/shiny collector-number isolation, series-scoped Movers and Investments APIs, invalid scopes, five-era navigation, and persistent appearance choices.
-- `node build.mjs`: pass (52.5 MB dependency-free Worker plus public assets).
-- A live-server endpoint check confirmed `series=EX,DP` response scopes and current result counts; unsupported series return 400.
-- The in-app browser harness could not initialize in this session because its runtime was blocked from importing a required Node built-in module. No visual browser result is claimed for this session; the Settings and filter interactions are covered by UI tests, but desktop/mobile screenshots should be checked once the browser harness is available.
+- `node --test tests/*.test.mjs`: **86/86 passing** on Node 22.22 (this sandbox has no Node 24, so `--test-isolation=none` was not used; the standard Node 24 command is unchanged). New: `tests/score.test.mjs` (momentum, held highs, rating bands, real-data invariants: bounded, explained, $25 cap, compact table matches breakdown), an API test for `/api/scores` and the market breakdown, and UI tests for every filter, the era chips, sorting, removal of the old toggle, and the detail score box.
+- `node build.mjs` and `node --check dist/server/index.js`: pass (52.5 MB Worker; `score` added to the bundled modules).
+- Headless Chromium (1440×900 and 390×844) screenshots of Browse (unfiltered, filtered, score breakdown), Top movers, Investments, Dex, Alerts, Settings, the Light theme, the method dialog, and the phone filter drawer: no page errors. Card images and Google Fonts were blocked in the sandbox, so screenshots show placeholders and system fonts; on the collector's machine both load.
 
 ## Pending and known limits
 
@@ -103,19 +129,24 @@ Updated: October 2, 2026 Pacific. Repository: `d-roads/pokemon`, branch `main`. 
 7. The remaining 271 Sun & Moon rares and 108 legacy rares lack exact PriceCharting matches. Only 172 Sun & Moon and 320 legacy cards have full captures, so cards without full sales histories contribute less to movers, investments and demand scores.
 8. Alerts run only while `server.mjs` is running and alert once per listing.
 9. The 52.5 MB Worker bundle is too large for a typical Cloudflare deployment; hosted use needs market data in D1/KV.
-10. Trend projections, movers and investment signals describe past sales. They must not be presented as forecasts or investment advice.
+10. Trend projections, movers, investment signals and investment scores describe past sales. They must not be presented as forecasts or investment advice.
+11. Filters are not remembered between visits; they reset on reload. Saving them in the browser is a small follow-up if wanted.
 
 ## Suggested next session
 
-1. Do a visual pass of Settings, the seven-item navigation, and era-filtered Top movers/Investments at desktop and 390px once browser automation is available; verify real card images on the collector's machine.
-2. Review the 108 unmatched legacy PriceCharting products manually and add only exact matches. Expand full captures beyond 10 per legacy set if broader investment coverage is wanted.
-3. Ask whether the $25 floor, top-quarter demand cut, 3-per-character cap, and compact era labels feel right across the much larger catalog.
-4. Consider "watch" and "add to Dex" buttons directly on mover and investment rows, plus a "falling" movers list if wanted.
-5. Expand Sun & Moon full captures (`tools/research/capture-new-sets.mjs`) so demand scores and movers cover more SM cards.
-6. When the eBay keys arrive, perform a real alert integration test and document the result without exposing secrets.
+1. Ask the collector how the terminal look, the screener layout and the score weights feel with real images. Tune `SCORE_RULES` in `site/lib/score.mjs` if wanted (weights, $25 cap, momentum cap).
+2. Check the redesign on the collector's own desktop and phone with real card images and fonts (sandbox screenshots used placeholders).
+3. Review the 108 unmatched legacy PriceCharting products manually and add only exact matches. Expand full captures beyond 10 per legacy set if broader investment coverage is wanted.
+4. Ask whether the $25 floor, top-quarter demand cut, 3-per-character cap, and compact era labels feel right across the much larger catalog.
+5. Consider "watch" and "add to Dex" buttons directly on mover and investment rows, plus a "falling" movers list if wanted.
+6. Expand Sun & Moon full captures (`tools/research/capture-new-sets.mjs`) so demand scores and movers cover more SM cards.
+7. When the eBay keys arrive, perform a real alert integration test and document the result without exposing secrets.
 
 ## Commits this session
 
-- `70d7339` — Add EX through HGSS catalog and market research
-- `49f7d73` — Add appearance settings and era-scoped market screens
+- `d498731` — Add a 0–100 investment score for every card and grade
+- `cc7fdca` — Replace the $250–$350 toggle with an advanced screener
+- `f665231` — Restyle Primal Watch as a trading terminal
 - Final commit — this handoff update
+
+Previous session: `70d7339` (EX through HGSS catalog), `49f7d73` (appearance settings and era-scoped market screens).
