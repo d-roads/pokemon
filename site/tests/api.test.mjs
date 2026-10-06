@@ -111,3 +111,16 @@ test('Movers, investments and scores follow newly saved prices without a server 
  assert.notEqual(after.inv.checkedAt,before.inv.checkedAt);
  assert.equal(after.sc.checkedAt,stamp);
 });
+
+test('Research: market view and scores in shadow mode; legacy mode rolls back; investments agree with cards',async()=>{
+ const m=await (await api(req('/api/market?id=xy5-151'),env)).json();
+ for(const g of ['raw','psa9','psa10']){const v=m.investment[g];assert.ok(v);assert.equal(v.mode,'shadow');assert.equal(v.forecast,null);assert.equal(v.probability,null);assert.ok(['supported','limited','insufficient','unsupported'].includes(v.evidenceStatus));for(const k of ['modelVersion','asOf','horizonMonths','rank','forecastBasis','netReturnQuantiles','maxBuyPrice','costAssumptions','reasons'])assert.ok(k in v,k);}
+ const s=await (await api(req('/api/scores'),env)).json();assert.ok(Object.keys(s.research.ranks).length>1000);assert.equal(s.research.gate.promoted,false);
+ const archived=await DB.prepare('SELECT COUNT(*) AS n FROM score_observations').first();assert.ok(archived.n>1000);
+ const runs=await DB.prepare('SELECT COUNT(*) AS n FROM model_runs').first();await api(req('/api/scores'),env);assert.equal((await DB.prepare('SELECT COUNT(*) AS n FROM model_runs').first()).n,runs.n,'archived once per day');
+ const inv=await (await api(req('/api/investments'),env)).json();
+ for(const [g,col] of Object.entries(inv.grades))for(const p of col.picks){const card=await (await api(req('/api/market?id='+p.card_id),env)).json();assert.equal(p.research.rank,card.investment[g].rank);assert.equal(p.research.evidenceStatus,card.investment[g].evidenceStatus);break;}
+ const legacy={...env,FUTURESIGHT_SCORE_MODEL:'legacy'};
+ assert.equal((await (await api(req('/api/market?id=xy5-151'),legacy)).json()).investment,null);assert.equal((await (await api(req('/api/scores'),legacy)).json()).research,null);
+ const cand=await (await api(req('/api/market?id=xy5-151'),{...env,FUTURESIGHT_SCORE_MODEL:'candidate'})).json();assert.equal(cand.investment.psa10.mode,'shadow','an unpromoted model cannot be switched on');
+});

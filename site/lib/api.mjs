@@ -1,5 +1,5 @@
 import {cards,sets,series} from '../data/catalog.mjs';
-import {snapshots} from '../data/market.mjs';
+import {snapshots,observedAt} from '../data/market.mjs';
 import {database} from './db.mjs';
 import {parseMarket,parseSet,sourceFetch} from './provider.mjs';
 import {mergeMarket} from './sales.mjs';
@@ -11,6 +11,10 @@ import {validateEntry} from './portfolio.mjs';
 import {DEFAULT_SETTINGS,normalizeSettings,updateSettings,publicSettings,hasEbayKeys,runScan,sendNotifications,ebaySearchUrl,alertLimit} from './alerts.mjs';
 import {isPlainObject,oneOf,optionalPrice,boundedText,optionalText,shapeError} from './schema.mjs';
 import {reportError} from './report.mjs';
+import {analyze} from './analysis.mjs';
+import {recordObservations} from './observations.mjs';
+import {investmentTable,investmentView,scoreMode,modelVersion,archiveScores} from './investment.mjs';
+import {DEFAULT_COSTS,maxBuyPrice,netReturn,COST_PROFILE_VERSION} from './investment-costs.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const cardById=new Map(cards.map(c=>[c.id,c]));
 const seriesIds=series.map(item=>item.id);
@@ -19,6 +23,8 @@ async function cachedMarkets(db){const r=await db.prepare('SELECT card_id,payloa
 async function cachedMarket(db,id){const row=await db.prepare('SELECT payload FROM market_cache WHERE card_id = ?').bind(id).first();return row?JSON.parse(row.payload):null;}
 async function readWatch(db,user){const r=await db.prepare('SELECT card_id,grade,target,created_at FROM watchlist WHERE user_id = ? ORDER BY created_at DESC').bind(user).all();return r.results||[];}
 async function readCollection(db,user){const r=await db.prepare('SELECT id,card_id,grade,quantity,purchase_price,purchase_date,notes,created_at,updated_at FROM collection WHERE user_id = ? ORDER BY COALESCE(purchase_date,substr(created_at,1,10)) DESC,id DESC').bind(user).all();return r.results||[];}
+// Every capture is also appended to the observation log (best effort: a logging failure never blocks a refresh).
+async function logCapture(db,env,ctx,card,captured){try{await recordObservations(db,card,captured);}catch(e){console.error('Observation log:',e.message);ctx?.waitUntil?.(reportError(env,e,{source:'observations'}));}}
 async function saveMarket(db,card,market){await db.prepare('INSERT INTO market_cache (card_id,payload,fetched_at) VALUES (?,?,?) ON CONFLICT(card_id) DO UPDATE SET payload=excluded.payload,fetched_at=excluded.fetched_at').bind(card.id,JSON.stringify(market),market.observedAt).run();}
 async function input(request){if(!request.headers.get('Content-Type')?.includes('application/json'))throw new Error('Send JSON data.');const raw=await request.text();if(raw.length>8192)throw new Error('The request was too large.');const body=JSON.parse(raw);if(!isPlainObject(body))throw new Error('Send a JSON object.');return body;}
 export async function readSettings(db,user){const row=await db.prepare('SELECT payload FROM alert_settings WHERE user_id = ?').bind(user).first();return normalizeSettings(row?JSON.parse(row.payload):DEFAULT_SETTINGS);}
@@ -36,6 +42,26 @@ async function insight(db,key,compute){
  return insightMemo.get(stamp);
 }
 const scoreTable=db=>insight(db,'scores',entries=>investmentScores(entries));
+// Research cache keys carry the model version, cost profile, horizon and bundled dataset revision;
+// the market-cache count, newest capture and day are added by insight().
+const RELEASE=Object.fromEntries(sets.map(s=>[s.id,s.release]));
+const DATASET_REVISION=observedAt+'|'+cards.length;
+const researchFor=(db,mode)=>insight(db,['research',modelVersion(),mode,COST_PROFILE_VERSION,'h12',DATASET_REVISION].join(':'),entries=>investmentTable(entries,{release:RELEASE,mode}));
+// Shadow evaluation: archive both systems' outputs once per model and day, before outcomes exist.
+const archived=new Set();
+async function archiveOnce(db,env,ctx,table){
+ const key=table.modelVersion+'|'+table.asOf.slice(0,10);if(archived.has(key))return;archived.add(key);
+ const task=(async()=>{
+  const seen=await db.prepare('SELECT 1 AS x FROM score_observations WHERE model_version = ? AND as_of = ? LIMIT 1').bind(table.modelVersion,table.asOf.slice(0,10)).first();
+  if(!seen)await archiveScores(db,table,await scoreTable(db),{runInfo:{datasetRevision:DATASET_REVISION}});
+ })().catch(e=>{archived.delete(key);console.error('Score archive:',e.message);return reportError(env,e,{source:'archive'});});
+ if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
+}
+function marketInvestment(table,card,market){
+ if(!table)return null;
+ const out={};for(const g of ['raw','psa9','psa10']){const a=analyze(market,g);out[g]=investmentView(table,card.id,g,{reference:a.fair,referenceLabel:a.fair?a.priceLabel:null});}
+ return out;
+}
 export async function fullMarket(db,id){return mergeMarket(snapshots[id],await cachedMarket(db,id))||null;}
 async function alertState(db,user){
  const settings=await readSettings(db,user);
@@ -136,26 +162,45 @@ export async function api(request,env,ctx){
   }
   if(path==='/api/investments' && request.method==='GET'){
    const included=insightSeries(url);if(!included)return json({error:'Choose one or more supported eras.'},400);const selected=new Set(included),key=included.join(',');
-   const result=await insight(db,'investments:'+key,entries=>potentialInvestments(entries.filter(([card])=>selected.has(card.series))));return json({...result,series:included});
+   const result=await insight(db,'investments:'+key,entries=>potentialInvestments(entries.filter(([card])=>selected.has(card.series)))),mode=scoreMode(env);
+   if(mode==='legacy')return json({...result,series:included});
+   // The shortlist and the card panel read the same research table, so they cannot disagree.
+   const t=await researchFor(db,mode),grades={};
+   for(const [g,col] of Object.entries(result.grades)){
+    let removed=0;const picks=[];
+    for(const p of col.picks){
+     const card=cardById.get(p.card_id),v=investmentView(t,p.card_id,g,{reference:p.price,referenceLabel:p.priceLabel});
+     const research=v?{rank:v.rank,evidenceStatus:v.evidenceStatus,breakEven:maxBuyPrice(p.price,DEFAULT_COSTS,0),forecast:v.forecast?{conservativeExit:v.forecast.conservativeExit,maxBuyPrice:v.forecast.maxBuyPrice}:null}:null;
+     // With a validated forecast, a pick that cannot clear the hurdle at its own price is dropped.
+     if(mode==='candidate'&&v?.forecast&&!(netReturn(p.price,v.forecast.conservativeExit,DEFAULT_COSTS)>DEFAULT_COSTS.hurdle)){removed++;continue;}
+     if(card)picks.push({...p,research});
+    }
+    grades[g]={...col,picks,removedByNetReturn:removed};
+   }
+   return json({...result,grades,series:included,research:{modelVersion:t.modelVersion,mode:t.mode,gate:t.gate}});
   }
   if(path==='/api/scores' && request.method==='GET'){
-   const {checkedAt,grades,scores}=await scoreTable(db);return json({checkedAt,grades,scores});
+   const {checkedAt,grades,scores}=await scoreTable(db),mode=scoreMode(env);
+   if(mode==='legacy')return json({checkedAt,grades,scores,research:null});
+   const t=await researchFor(db,mode);await archiveOnce(db,env,ctx,t);
+   return json({checkedAt,grades,scores,research:{modelVersion:t.modelVersion,mode:t.mode,asOf:t.asOf,horizonMonths:t.horizonMonths,ranks:t.ranks,status:t.status,gate:t.gate}});
   }
   if(path==='/api/market' && request.method==='GET'){
    const card=cardById.get(url.searchParams.get('id'));if(!card)return json({error:'That card is not in the catalog.'},404);
-   let market=await fullMarket(db,card.id);
+   let market=await fullMarket(db,card.id);const mode=scoreMode(env);
+   const extras=async()=>({score:(await scoreTable(db)).full.get(card.id)||null,investment:mode==='legacy'?null:marketInvestment(await researchFor(db,mode),card,market)});
    if(url.searchParams.get('refresh')==='1'){
-    try{const live=parseMarket(await sourceFetch(card.source,env),card);market=mergeMarket(market,live);await saveMarket(db,card,market);return json({market,refreshed:true,score:(await scoreTable(db)).full.get(card.id)||null});}
-    catch(e){return json({market,refreshed:false,warning:e.message,score:(await scoreTable(db)).full.get(card.id)||null});}
+    try{const live=parseMarket(await sourceFetch(card.source,env),card);market=mergeMarket(market,live);await saveMarket(db,card,market);await logCapture(db,env,ctx,card,live);return json({market,refreshed:true,...await extras()});}
+    catch(e){return json({market,refreshed:false,warning:e.message,...await extras()});}
    }
-   return json({market,refreshed:false,score:(await scoreTable(db)).full.get(card.id)||null});
+   return json({market,refreshed:false,...await extras()});
   }
   if(path==='/api/refresh' && request.method==='POST'){
    const set=sets.find(s=>s.id===(url.searchParams.get('set')||'xy5'));
    if(!set)return json({error:'Choose a set to refresh.'},400);
    try{
     const guides=parseSet(await sourceFetch(set.marketSource,env),cards.filter(c=>c.setId===set.id&&c.eligible)),cached=await cachedMarkets(db),markets={};
-    for(const [id,g] of Object.entries(guides)){const previous=mergeMarket(snapshots[id],cached[id]);markets[id]=mergeMarket(previous,g);}
+    for(const [id,g] of Object.entries(guides)){const previous=mergeMarket(snapshots[id],cached[id]);markets[id]=mergeMarket(previous,g);await logCapture(db,env,ctx,cardById.get(id),g);}
     await db.batch(Object.entries(markets).map(([id,m])=>db.prepare('INSERT INTO market_cache (card_id,payload,fetched_at) VALUES (?,?,?) ON CONFLICT(card_id) DO UPDATE SET payload=excluded.payload,fetched_at=excluded.fetched_at').bind(id,JSON.stringify(m),m.observedAt)));
     return json({markets:Object.fromEntries(Object.entries(markets).map(([id,m])=>[id,lightMarket(m)])),refreshed:true,count:Object.keys(markets).length});
    }catch(e){return json({refreshed:false,warning:e.message});}
@@ -169,7 +214,7 @@ export async function api(request,env,ctx){
    if(!Number.isInteger(offset)||offset<0||offset>scope.length)return json({error:'Invalid sales batch.'},400);
    if(env.NETWORK_DISABLED)return json({refreshed:false,attempted:0,total:scope.length,done:true,warning:'Live sales refresh is unavailable in this workspace. Showing the last researched sales.'});
    const batch=scope.slice(offset,offset+4),cached=await cachedMarkets(db),markets={},failures=[];
-   await Promise.all(batch.map(async card=>{try{const market=mergeMarket(mergeMarket(snapshots[card.id],cached[card.id]),parseMarket(await sourceFetch(card.source,env),card));await saveMarket(db,card,market);markets[card.id]=lightMarket(market);}catch(e){failures.push({card_id:card.id,message:e.message});}}));
+   await Promise.all(batch.map(async card=>{try{const live=parseMarket(await sourceFetch(card.source,env),card),market=mergeMarket(mergeMarket(snapshots[card.id],cached[card.id]),live);await saveMarket(db,card,market);await logCapture(db,env,ctx,card,live);markets[card.id]=lightMarket(market);}catch(e){failures.push({card_id:card.id,message:e.message});}}));
    const nextOffset=offset+batch.length;
    return json({refreshed:Object.keys(markets).length>0,markets,count:Object.keys(markets).length,attempted:batch.length,nextOffset,total:scope.length,done:nextOffset>=scope.length,failures});
   }

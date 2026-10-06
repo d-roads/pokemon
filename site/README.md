@@ -133,6 +133,17 @@ Every rare card gets a 0–100 score per grade (`site/lib/score.mjs`), from the 
 
 A part that cannot be measured counts as 50 and is labeled. Cards under the $25 floor are capped at 59. Bands: 80+ Strong, 65–79 Good, 50–64 Fair, 35–49 Weak, under 35 Poor. `GET /api/scores` returns `{card_id: [psa10, psa9, raw]}`; `GET /api/market?id=` includes each grade's breakdown. Before the Wizards expansion, 462 PSA 10, 719 PSA 9 and 1,799 raw cards are scored, with medians near 60; grade scarcity is measured for 1,066 of the 1,181 scored graded card-grades.
 
+## Research rank, evidence and price check (shadow mode)
+
+A new investment system from the October 2026 research plan (`tools/research/investment-plan.md`) runs next to the investment score so both can be compared. It does not replace the score.
+
+- **Research rank** (`lib/investment-features.mjs`): `100 × (0.75 × PR(V) + 0.25 × PR(M))` on the last 13 completed months, where V is the discount to the 13-month median and M the momentum from 12 months back to last month; PR is the tie-averaged percentile within the grade and month. Weights were chosen on 2022 data and frozen. It is an uncalibrated historical ranking, never a probability. Matching-sale months are used once a card has 13 of them and the pool has 50+ cards; otherwise the guide history, labelled honestly (raw = ungraded mixed condition, PSA 9 = Grade 9 PSA+BGS mixed). Mega Evolution and sets under 12 months old are not ranked.
+- **Evidence status**: Supported / Limited / Insufficient / Not supported, with reasons. Supported needs a grade-matched basis, 8+ sale days in 180 (one in the last 30, across 6 of the last 12 months), fresh data and varied prices.
+- **Price check** (`lib/investment-costs.mjs`, also served to the page): break-even and hurdle prices at today's sold median after editable fees, shipping and tax (default: 15% fees, $5 in, $5 out, no tax). Arithmetic on today's price, not a forecast.
+- **Forecast**: a regularized 12-month model is trained offline (`tools/research/train-investment-model.mjs`) and stored in `data/investment-model.json`. It did not pass its promotion gate (an unchanged price forecast better on held-out data, one test vintage, cohort failures), so the app shows no forecast and no maximum buy price from it.
+- **Switch** (`FUTURESIGHT_SCORE_MODEL` in `site/.env`): `shadow` (default), `legacy` (rollback: hides the research panel) or `candidate` (shows the forecast only if the artifact is promoted; otherwise behaves as shadow).
+- **Logs**: every refresh is also appended to `market_observations`, `sales_observations`, `guide_observations` and `population_observations` (never updated; corrections are new rows; availability is the capture time, never backdated). Each day's research and heuristic scores are archived once to `score_observations` with a `model_runs` entry, so they can be checked against later prices. `lib/as-of.mjs` replays what was known at a date.
+
 ## Dex valuation
 
 Each entry is valued at the current reference for its grade: the sold median when there are recent matching sales, otherwise the source guide, otherwise the latest monthly guide. Profit and loss compares that with the price paid. The value-over-time chart uses each card's monthly price history from its purchase month; PSA 9 history is PriceCharting's Grade 9 guide, which includes other graders. Fees, shipping and tax are not included.

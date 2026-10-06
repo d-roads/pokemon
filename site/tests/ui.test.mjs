@@ -9,6 +9,8 @@ import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE} fro
 import {topMovers} from '../lib/movers.mjs';
 import {potentialInvestments} from '../lib/invest.mjs';
 import {investmentScores} from '../lib/score.mjs';
+import {normalizeCosts,costSummary,netReturn,maxBuyPrice,DEFAULT_COSTS} from '../lib/investment-costs.mjs';
+import {investmentTable,investmentView} from '../lib/investment.mjs';
 const investData=potentialInvestments(cards.map(c=>[c,snapshots[c.id]]));
 const moverData=topMovers(cards.map(c=>[c,snapshots[c.id]]),'week');
 const scoreData=investmentScores(cards.map(c=>[c,snapshots[c.id]]));
@@ -28,7 +30,7 @@ function workspace(){
  const document={querySelector:s=>elements.get(s)||null,querySelectorAll:s=>s==='[data-category]'?categories:[]};
  const responses={'/api/catalog':{cards,sets,series,markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/movers':moverData,'/api/investments':investData,'/api/scores':{grades:scoreData.grades,scores:scoreData.scores},'/api/market':{market:null,score:null},'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
  const calls=[];
- const context=vm.createContext({document,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,calls,fetch:async url=>{const path=url.split('?')[0];calls.push(url);let r=responses[path];if(typeof r==='function')r=r(url);if(r&&r.__status)return {ok:false,status:r.__status,json:async()=>r.body};return {ok:true,json:async()=>r||{}};}});
+ const context=vm.createContext({document,normalizeCosts,costSummary,netReturn,maxBuyPrice,DEFAULT_COSTS,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,calls,fetch:async url=>{const path=url.split('?')[0];calls.push(url);let r=responses[path];if(typeof r==='function')r=r(url);if(r&&r.__status)return {ok:false,status:r.__status,json:async()=>r.body};return {ok:true,json:async()=>r||{}};}});
  const source=readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/^import .*;\s*$/gm,'').replace(/init\(\);\s*$/,'');
  vm.runInContext(source,context);
  return {context,responses,calls,e:s=>elements.get(s),run:s=>vm.runInContext(s,context)};
@@ -227,4 +229,21 @@ test('Settings shows the opening animation controls when the intro script is pre
  let inserted='';ui.e('#settings-view').insertAdjacentHTML=(where,markup)=>{inserted+=markup;};
  ui.run("globalThis.futureSightIntro={enabled:()=>false,setEnabled(){},play(){}};renderSettings()");
  assert.match(inserted,/Opening animation/);assert.match(inserted,/id="intro-replay"/);assert.doesNotMatch(inserted,/id="intro-enabled" checked/);
+});
+
+test('Research rank panel: shadow label, evidence, price check and withheld forecast',async()=>{
+ const NOW=Date.parse('2026-10-06T20:00:00Z'),release=Object.fromEntries(sets.map(s=>[s.id,s.release]));
+ const t=investmentTable(cards.filter(c=>c.setId==='xy5').map(c=>[c,snapshots[c.id]]),{now:NOW,release}),id='xy5-151';
+ const inv=Object.fromEntries(['raw','psa9','psa10'].map(g=>{const a=analyze(snapshots[id],g,15,NOW);return [g,investmentView(t,id,g,{reference:a.fair,referenceLabel:a.priceLabel})];}));
+ const ui=workspace();ui.responses['/api/scores']={grades:scoreData.grades,scores:scoreData.scores,research:{modelVersion:t.modelVersion,mode:'shadow',ranks:t.ranks,status:t.status,gate:t.gate}};
+ ui.responses['/api/market']={market:snapshots[id],score:null,investment:inv};
+ await ui.run('init()');await ui.run(`select('${id}')`);ui.run("state.grade='psa9';renderDetail()");
+ let html=ui.e('#detail').innerHTML;
+ assert.match(html,/Research rank/);assert.match(html,/Shadow · unvalidated/);assert.match(html,/Limited evidence/);assert.match(html,/PSA and BGS mixed/);
+ assert.match(html,/Break-even price/);assert.match(html,/validation gate/);assert.doesNotMatch(html,/chance of profit:/);
+ assert.match(html,/not been validated against later prices/);
+ // Typing an asking price updates the check without a re-render.
+ ui.e('#ask-price').value='5000';ui.e('#ask-price').oninput();assert.match(ui.e('#cost-out').innerHTML,/At \$5,000\.00 asking/);assert.match(ui.e('#cost-out').innerHTML,/class="down"/);
+ // Legacy mode (rollback) hides the panel entirely.
+ ui.run("state.research={mode:'legacy'};renderDetail()");assert.doesNotMatch(ui.e('#detail').innerHTML,/Research rank/);
 });

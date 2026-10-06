@@ -1,5 +1,6 @@
 import {analyze as computeAnalysis,gradeNames,trendProjection} from '/analysis.mjs';
 import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE} from '/portfolio.mjs';
+import {normalizeCosts,costSummary,netReturn,maxBuyPrice,DEFAULT_COSTS} from '/investment-costs.mjs';
 const analysisCache=new WeakMap();
 const analyze=(market,grade)=>{if(!market)return computeAnalysis(market,grade);const day=Math.floor(Date.now()/86400000);let cache=analysisCache.get(market);if(!cache||cache.day!==day){cache={day,grades:{}};analysisCache.set(market,cache);}return cache.grades[grade]??=(computeAnalysis(market,grade));};
 const $=s=>document.querySelector(s);
@@ -18,7 +19,7 @@ const ago=iso=>{const m=Math.round((Date.now()-Date.parse(iso))/60000);return m<
 const signed=v=>v==null?'—':(v>0?'+':v<0?'−':'')+money(Math.abs(v));
 const pct=v=>v==null?'':(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(1)+'%';
 const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
-const state={sets:[],series:[],marketSeries:[],setId:'xy5',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'chase',query:'',sort:'featured',view:'browse',selected:'xy5-147',limit:18,expanded:false,focus:false,eras:[],filters:{min:null,max:null,activity:0,invest:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,ticker:null,appearance:savedAppearance(),
+const state={sets:[],series:[],marketSeries:[],setId:'xy5',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'chase',query:'',sort:'featured',view:'browse',selected:'xy5-147',limit:18,expanded:false,focus:false,eras:[],filters:{min:null,max:null,activity:0,invest:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
  dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
 // Crashes in the page are sent to the server, which forwards them to Sentry only when SENTRY_DSN is set. At most 5 per page load.
@@ -155,6 +156,55 @@ const SERVER_OLD='FutureSight is running older server code than this page. Close
 const scoreProblem=()=>{const e=state.scoreError;return !e?'':e.status===404?SERVER_OLD:'Scores could not be loaded ('+e.message+').';};
 const PART_SHORT={demand:'Demand',momentum:'Momentum',value:'Value',liquidity:'Liquidity',stability:'Stability',scarcity:'Scarcity'};
 const SIGNAL_NAMES={uptrend:'Steady uptrend',recovering:'Recovering from highs',cheap:'Cheap vs. similar cards'};
+// Research rank (shadow): a historical ranking, an evidence status, and a cost calculator. The
+// 12-month forecast stays withheld until the model passes its validation gate.
+const COST_KEY='futuresight-costs';
+function savedCosts(){try{const v=typeof localStorage==='undefined'?null:JSON.parse(localStorage.getItem(COST_KEY)||'null');return v&&typeof v==='object'&&!Array.isArray(v)?v:{};}catch{return {};}}
+function storeCosts(v){state.costs=v;try{localStorage.setItem(COST_KEY,JSON.stringify(v));}catch{}}
+const userCosts=()=>normalizeCosts(state.costs).costs;
+const EVIDENCE={supported:'Supported',limited:'Limited evidence',insufficient:'Insufficient evidence',unsupported:'Not supported'};
+const EVIDENCE_FROM={S:'supported',L:'limited',I:'insufficient',U:'unsupported'};
+const RANK_INDEX={psa10:0,psa9:1,raw:2};
+const researchRankOf=(id,grade=state.grade)=>state.research?.ranks?.[id]?.[RANK_INDEX[grade]]??null;
+const researchStatusOf=(id,grade=state.grade)=>EVIDENCE_FROM[state.research?.status?.[id]?.[RANK_INDEX[grade]]]||null;
+const monthText=ym=>ym?new Date(ym+'-15T00:00:00Z').toLocaleDateString('en-US',{month:'short',year:'numeric',timeZone:'UTC'}):'';
+const COST_FIELDS=[['saleFeeRate','Selling fees','%',100],['saleFixedFee','Fixed fee per sale','$',1],['shippingIn','Shipping to you','$',1],['shippingOut','Shipping to buyer','$',1],['taxRate','Sales tax','%',100],['hurdle','Return you want','%',100]];
+function costOutput(inv,c){
+ const costs=userCosts(),ref=inv?.priceReference?.price??null,ask=state.asks[c.id+'|'+state.grade]??null,sum=costSummary({ask,reference:ref,costs});
+ const lines=[];
+ if(ref>0){
+  lines.push(`<div><span>Today's sold median</span><strong>${money(ref)}</strong><small>${esc(inv.priceReference.label||'')}</small></div>`);
+  lines.push(`<div><span>Break-even price</span><strong>${sum.breakEven!=null?money(sum.breakEven):'None'}</strong><small>Most you could pay and still get your money back reselling at today's median, after fees and shipping.</small></div>`);
+  if(costs.hurdle>0)lines.push(`<div><span>For a ${Math.round(costs.hurdle*100)}% return</span><strong>${sum.maxForHurdle!=null?money(sum.maxForHurdle):'None'}</strong><small>Highest price that still clears your return at today's median.</small></div>`);
+  if(ask>0){const r=sum.netReturnAtReference;lines.push(`<div><span>At ${money(ask)} asking</span><strong class="${r>0?'up':r<0?'down':''}">${r==null?'—':pct(r)}</strong><small>All-in cost ${money(sum.acquisition)}; return if resold at today's median.</small></div>`);}
+ }else lines.push('<div class="wide"><span>No confident sold price</span><small>A break-even price needs at least 3 matching sales in 180 days, including one in the last 90.</small></div>');
+ const f=inv?.forecast;
+ if(f){const at=ask>0?ask:ref,r10=at>0?netReturn(at,f.conservativeExit,costs):null,b=maxBuyPrice(f.conservativeExit,costs);lines.push(`<div><span>Conservative 12-month exit</span><strong>${money(f.conservativeExit)}</strong><small>${r10!=null?pct(r10)+' net at '+money(at)+'. ':''}Max buy ${b!=null?money(b):'none'}. ${esc(f.note)}</small></div>`);}
+ return lines.join('');
+}
+function researchBox(c){
+ if(state.research?.mode==='legacy')return '';
+ const inv=state.investDetail[c.id]?.[state.grade],rank=inv?inv.rank:researchRankOf(c.id),status=inv?.evidenceStatus||researchStatusOf(c.id);
+ if(!inv&&!state.research)return '';
+ const tag=`<span class="rating-tag research-tag" title="Shown for comparison while the new system is evaluated">Shadow · unvalidated</span>`;
+ const head=`<div class="score-head-row"><span class="metric-label">Research rank</span>${tag}</div>`;
+ const main=`<div class="score-main"><strong>${rank??'—'}</strong><em>/ 100</em>${status?`<span class="evidence-chip ${status}">${EVIDENCE[status]}</span>`:''}</div>`;
+ if(!inv)return `<div class="research-box">${head}${main}<p class="score-note">Loading evidence…</p></div>`;
+ const what=rank!=null?`<p class="score-note">Percentile among ${inv.reference?.size?.toLocaleString('en-US')||'the'} ${gradeNames[state.grade]} cards ranked on ${monthText(inv.rankMonth)} prices: 75% how far below its 13-month median it sits, 25% momentum. A ranking of past prices, not a chance of profit.</p>${inv.basis?`<p class="score-note">Basis: ${esc(inv.basis.label)}.</p>`:''}`:'';
+ const reasons=inv.reasons.length?`<ul class="evidence-reasons">${inv.reasons.map(r=>`<li>${esc(r.text)}</li>`).join('')}</ul>`:'';
+ const costs=userCosts(),fields=COST_FIELDS.map(([k,label,unit,scale])=>`<label>${label}<span class="unit-input">${unit==='$'?'<i>$</i>':''}<input type="number" step="any" min="0" data-cost="${k}" value="${+(costs[k]*scale).toFixed(4)}">${unit==='%'?'<i>%</i>':''}</span></label>`).join('');
+ const calc=`<div class="cost-calc"><h4>Price check</h4><label class="ask-label">Asking price (USD)<input id="ask-price" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="e.g. ${inv.priceReference?.price?Math.round(inv.priceReference.price):'100'}" value="${state.asks[c.id+'|'+state.grade]??''}"></label><div class="cost-out" id="cost-out">${costOutput(inv,c)}</div>
+  <details class="cost-assumptions"><summary>Cost assumptions${state.costs&&Object.keys(state.costs).length?' · custom':''}</summary><div class="cost-fields">${fields}</div><p class="score-note">${esc(normalizeCosts(state.costs).costs.label)}. Fees vary by marketplace and account and may apply to shipping and tax too. <button class="link-button" id="cost-reset">Use defaults</button></p></details></div>`;
+ const forecast=`<p class="forecast-note">${inv.forecast?'12-month forecast shown above (validated model).':esc(inv.forecastWithheld||'')}</p>`;
+ return `<div class="research-box ${status||''}">${head}${main}${what}${reasons}${calc}${forecast}</div>`;
+}
+function wireResearch(c){
+ const ask=$('#ask-price');if(!ask)return;
+ const update=()=>{const out=$('#cost-out');if(out)out.innerHTML=costOutput(state.investDetail[c.id]?.[state.grade],c);};
+ ask.oninput=()=>{const v=Number(ask.value);state.asks[c.id+'|'+state.grade]=ask.value&&v>0?v:null;update();};
+ $('#detail').querySelectorAll('[data-cost]').forEach(input=>input.oninput=()=>{const field=COST_FIELDS.find(f=>f[0]===input.dataset.cost),v=Number(input.value);if(input.value===''||!Number.isFinite(v))return;const next={...state.costs,[field[0]]:v/field[3]};if(normalizeCosts(next).errors.length)return;storeCosts(next);update();});
+ if($('#cost-reset'))$('#cost-reset').onclick=()=>{storeCosts({});renderDetail();};
+}
 function scoreBox(c){
  const quick=scoreOf(c.id),detail=state.scoreDetail[c.id]?.[state.grade],v=detail?detail.score:quick,cls=ratingClass(v);
  const head=`<div class="score-head-row"><span class="metric-label">Investment score</span>${v!=null?`<span class="rating-tag ${cls}">${ratingOf(v)}</span>`:''}</div>`;
@@ -164,7 +214,7 @@ function scoreBox(c){
  }
  const parts=detail?`<ul class="score-parts">${detail.parts.map(p=>`<li><span class="part-name">${PART_SHORT[p.key]||esc(p.label)}<small>${Math.round(p.weight*100)}%</small></span><span class="part-bar ${ratingClass(p.score)}"><i style="width:${Math.max(2,p.score)}%"></i></span><b>${p.score}</b><small class="part-detail">${esc(p.detail)}${p.neutral?' <em>Not measured</em>':''}</small></li>`).join('')}</ul>`:'<p class="score-note">Loading the breakdown…</p>';
  const signals=detail?.signals?.length?`<p class="score-signals">Investments signals met: ${detail.signals.map(t=>`<span class="signal ${t==='uptrend'?'up':t==='recovering'?'rec':'cheap'}">${SIGNAL_NAMES[t]}</span>`).join(' ')}</p>`:'';
- return `<div class="score-box ${cls}">${head}<div class="score-main"><strong>${v}</strong><em>/ 100</em><div class="score-meter" role="img" aria-label="Investment score ${v} out of 100" style="--v:${v}%"><span style="left:35%"></span><span style="left:50%"></span><span style="left:65%"></span><span style="left:80%"></span></div></div>${detail?.belowFloor?'<p class="score-note warn-note">Under the $25 investment floor, so capped at 59.</p>':''}${parts}${signals}<p class="score-note">From this app's ${gradeNames[state.grade]} sales only. Describes past sales, not a forecast or investment advice. <button class="link-button" id="score-method">How it's scored</button></p></div>`;
+ return `<div class="score-box ${cls}">${head}<div class="score-main"><strong>${v}</strong><em>/ 100</em><div class="score-meter" role="img" aria-label="Investment score ${v} out of 100" style="--v:${v}%"><span style="left:35%"></span><span style="left:50%"></span><span style="left:65%"></span><span style="left:80%"></span></div></div>${detail?.belowFloor?'<p class="score-note warn-note">Under the $25 investment floor, so capped at 59.</p>':''}${parts}${signals}<p class="score-note">From this app's ${gradeNames[state.grade]} sales only. Describes past sales, not a forecast or investment advice. The Strong/Good/Fair bands are fixed thresholds that have not been validated against later prices. <button class="link-button" id="score-method">How it's scored</button></p></div>`;
 }
 function renderDetail(){
  const c=cardById(state.selected);if(!c){$('#detail').innerHTML='<div class="empty-state"><strong>Select a card</strong><p>Card insights will appear here.</p></div>';return;}
@@ -182,7 +232,7 @@ function renderDetail(){
  const top=`<div class="detail-top"><div class="detail-eyebrow"><span>CARD INSIGHT</span><span class="eyebrow-end"><span>${gradeNames[state.grade]}</span><button class="icon-button expand-button" id="detail-focus" aria-label="Expand card details" title="Expand (reading view)">${icon('expand')}</button></span></div><div class="detail-identity"><div class="detail-image-wrap"><img class="detail-image" src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="${esc(c.name)} ${c.numberLabel}"></div><div><h2>${esc(c.name)}</h2><p>${esc(c.setName)} · #${c.numberLabel}<br>${esc(c.category)}</p><span class="type-pill">${esc(c.type)}</span>${mine.length?`<span class="type-pill owned-pill">In your Dex · ${mine.reduce((n,e)=>n+(e.quantity||1),0)}</span>`:''}</div></div></div>`;
  const buy=`<div class="buy-box ${target==null?'insufficient':''}"><div class="eyebrow">${w?.target!=null?'YOUR BUY TARGET':'SUGGESTED MAXIMUM PRICE'}</div><div class="buy-amount"><strong>${target==null?'Waiting for evidence':money(target)}</strong>${a.target!=null && w?.target==null?'<span class="discount-tag">15% below median</span>':''}</div><p>${w?.target!=null?'Your saved limit, before shipping and tax.':esc(a.reason)}</p></div>`;
  const metrics=`<div class="detail-metrics"><div><span class="metric-label">Current reference</span><strong>${money(a.current)}</strong><small>${esc(a.priceLabel)}</small>${state.grade==='psa9'&&a.guidePrice?`<small>Mixed Grade 9 guide: ${money(a.guidePrice)}</small>`:''}${a.sampleCount?`<span class="sample-badge">${a.sampleCount} matching sales</span>`:''}</div><div><span class="metric-label">Activity score</span><div class="demand-wrap"><strong>${a.score??'—'}</strong><em>/ 100</em></div><div class="demand-bar"><span style="width:${a.score??0}%"></span></div><small>Sales activity · ${conf.toLowerCase()}</small></div></div>`;
- const scoreHtml=`${scoreBox(c)}`;
+ const scoreHtml=`${scoreBox(c)}${researchBox(c)}`;
  const chartSec=`<div class="detail-chart"><div class="section-heading"><h3>Reported sales</h3><small>${gradeNames[state.grade]}</small></div><div class="trend-layout"><div>${chart(a,f,history)}</div><aside class="trend-projection" aria-label="Simple trend projection"><span>Simple trend projection</span>${projection.available?['1Y','2Y','3Y'].map((label,i)=>`<div><b>${label}</b><strong>${money(projection.values[i])}</strong></div>`).join(''):`<p>${esc(projection.historyReason&&/held-out/.test(projection.historyReason)?'No reliable trend: neither recent sales nor the monthly price history beat an unchanged price in a held-out test.':projection.historyReason&&/Needs 8 months/.test(projection.historyReason)&&/Needs 8 sale days/.test(projection.reason)?'Not enough history yet: needs 6+ months of sales or monthly source prices.':projection.reason)}</p>`}${pastChange(history)}</aside></div><p class="chart-caption">${a.usable.length} matching sales · ${a.windowDays} days · ${conf}${projection.available?` · ${signed(projection.annualIncrease)} / year trend`:''}</p><p class="sales-note">${projection.available&&projection.basis==='history'?`Projection applies the source's monthly ${state.grade==='psa9'?'Grade 9 (all graders) ':''}price trend over ${projection.months} months (${projection.annualRate>=0?'+':'−'}${Math.abs(Math.round(projection.annualRate*100))}% a year) to the sold median, because the source lists only recent sales. Held-out test: last ${projection.validation.months} months, ${Math.round(projection.validation.mape*100)}% average error (${Math.round(projection.validation.baselineMape*100)}% for unchanged prices). `:`Projection uses daily sold medians from the past year${projection.historyReason?'; the monthly source history was also checked':''}. ${projection.available?`Held-out test: ${Math.round(projection.validation.spanDays)} days, ${Math.round(projection.validation.mape*100)}% average error (${Math.round(projection.validation.baselineMape*100)}% for unchanged prices). `:''}`}The 1–3 year extrapolation is illustrative; its future accuracy is unverified. This is not investment advice.</p></div>`;
  const actions=`<div class="detail-actions"><button class="button primary" id="detail-watch">${w?icon('star-fill')+' Watching':icon('star')+' Add to watchlist'}</button><button class="button" id="detail-dex" aria-label="Add ${esc(c.name)} to your Dex">${icon('plus')} Dex</button><button class="button" id="refresh-card" aria-label="Refresh this card">${icon('refresh')}</button></div>`;
  const limitSec=`${w?`<div class="detail-section"><h3>Your buy limit</h3><form id="target-form" class="target-form"><label for="custom-target">Maximum price (USD)<input id="custom-target" type="number" min="0.01" max="1000000" step="0.01" value="${w.target??a.target??''}" placeholder="Set a price" required></label><button class="button" type="submit">Save</button></form><button id="reset-target" class="remove-watch">Use suggested target</button><p class="sales-note">Alerts fire when this card is listed at or under ${target!=null?money(target):'your limit'} including shipping. <button class="link-button" id="open-alerts">Alert settings</button></p></div>`:''}`;
@@ -202,7 +252,7 @@ function renderDetail(){
  if($('#score-method'))$('#score-method').onclick=()=>$('#method-dialog').showModal();
  if($('#score-retry'))$('#score-retry').onclick=()=>{state.scoreError=null;renderDetail();loadScores();};
  if(w){$('#target-form').onsubmit=e=>{e.preventDefault();saveTarget(c.id,Number($('#custom-target').value));};$('#reset-target').onclick=()=>saveTarget(c.id,null);$('#open-alerts').onclick=()=>{state.view='alerts';updateView();};}
- wireImages();wireCharts($('#detail'));
+ wireResearch(c);wireImages();wireCharts($('#detail'));
  if(f){const again=keep&&document.getElementById?.(keep);(again||$('#focus-close'))?.focus?.();}
 }
 // Reading view: the card panel expanded over the page, with grade tabs and previous/next.
@@ -229,10 +279,10 @@ function setFocus(on){
  if(!on)$('#detail-focus')?.focus?.();
 }
 async function select(id){state.selected=id;state.expanded=false;renderList();renderDetail();$('#detail').scrollTop=0;if(!state.full[id])await loadCard(id);}
-async function loadCard(id){selectionController?.abort();selectionController=new AbortController();try{const r=await request(`/api/market?id=${encodeURIComponent(id)}`,{signal:selectionController.signal});if(r.market){state.markets[id]=r.market;state.full[id]=true;}if(r.score)state.scoreDetail[id]=r.score;if(state.selected===id)renderDetail();}catch(e){if(e.name!=='AbortError')toast('Could not load this card. Try Refresh.');}}
+async function loadCard(id){selectionController?.abort();selectionController=new AbortController();try{const r=await request(`/api/market?id=${encodeURIComponent(id)}`,{signal:selectionController.signal});if(r.market){state.markets[id]=r.market;state.full[id]=true;}if(r.score)state.scoreDetail[id]=r.score;if(r.investment)state.investDetail[id]=r.investment;if(state.selected===id)renderDetail();}catch(e){if(e.name!=='AbortError')toast('Could not load this card. Try Refresh.');}}
 async function toggleWatch(id,button){const w=matchingWatch(id),grade=state.grade;button.disabled=true;try{const r=await send('/api/watchlist',w?'DELETE':'POST',{card_id:id,grade,target:null});state.watch=r.watchlist;toast(w?'Removed from watchlist.':'Saved to your watchlist.');stats();renderList();renderDetail();}catch(e){error(e.message);button.disabled=false;}}
 async function saveTarget(id,target){const button=$('#target-form button');if(button)button.disabled=true;try{const r=await send('/api/watchlist','POST',{card_id:id,grade:state.grade,target});state.watch=r.watchlist;renderList();renderDetail();toast(target==null?'Using the suggested target.':'Your buy limit is saved.');}catch(e){error(e.message);if(button)button.disabled=false;}}
-async function refreshCard(c){const b=$('#refresh-card');b.disabled=true;b.textContent='…';try{const r=await request(`/api/market?id=${encodeURIComponent(c.id)}&refresh=1`);if(r.market){state.markets[c.id]=r.market;state.full[c.id]=true;}if(r.score){state.scoreDetail[c.id]=r.score;if(state.scores)state.scores[c.id]=['psa10','psa9','raw'].map(g=>r.score[g]?.score??null);}if(r.refreshed)dropMarketCaches();toast(r.refreshed?'Latest source data saved.':r.warning||'The source is unavailable. Showing saved observations.');renderList();renderDetail();stats();}catch(e){toast(e.message);b.disabled=false;b.innerHTML=icon('refresh');}}
+async function refreshCard(c){const b=$('#refresh-card');b.disabled=true;b.textContent='…';try{const r=await request(`/api/market?id=${encodeURIComponent(c.id)}&refresh=1`);if(r.market){state.markets[c.id]=r.market;state.full[c.id]=true;}if(r.investment)state.investDetail[c.id]=r.investment;if(r.score){state.scoreDetail[c.id]=r.score;if(state.scores)state.scores[c.id]=['psa10','psa9','raw'].map(g=>r.score[g]?.score??null);}if(r.refreshed)dropMarketCaches();toast(r.refreshed?'Latest source data saved.':r.warning||'The source is unavailable. Showing saved observations.');renderList();renderDetail();stats();}catch(e){toast(e.message);b.disabled=false;b.innerHTML=icon('refresh');}}
 let refreshRun;
 // Fetch the newest sold prices for one or more scopes ('all', 'era:XY' or a set id), a few cards at a time.
 // What is fetched is saved as it goes, so cancelling keeps the progress.
@@ -253,7 +303,7 @@ async function refreshSales(scopes){
    let offset=0;
    for(;;){
     const r=await request('/api/research?set='+encodeURIComponent(part)+'&offset='+offset,{method:'POST',signal:controller.signal});
-    if(r.markets)for(const [id,m] of Object.entries(r.markets)){state.markets[id]=expandMarket(m);delete state.full[id];delete state.scoreDetail[id];}
+    if(r.markets)for(const [id,m] of Object.entries(r.markets)){state.markets[id]=expandMarket(m);delete state.full[id];delete state.scoreDetail[id];delete state.investDetail[id];}
     updated+=r.count||0;
     if(state.view==='browse'||state.view==='watch'){stats();renderList();renderDetail();}
     if(r.warning){toast(r.warning);return;}
@@ -497,7 +547,7 @@ function renderInvest(){
   const col=d.grades[g],picks=col.picks;
   view.innerHTML=head+marketFilterView()+`<section class="panel invest-panel" aria-label="${gradeNames[g]} potential investments"><div class="panel-head"><div><h2><span class="grade-chip ${g}">${shortGrade(g)}</span> ${picks.length?picks.length+' pick'+(picks.length===1?'':'s'):'No picks'}</h2><p>${col.qualified} of ${col.screened} high-demand cards with a confident price met at least one signal.${col.qualified>picks.length?' Strongest shown, at most 3 per character.':''}</p></div></div>
   ${picks.length?`<div class="invest-list">${picks.map(p=>{const c=cardById(p.card_id);if(!c)return '';const dm=p.demand;return `<article class="invest-row"><button class="invest-card" data-invest="${c.id}" data-grade="${g}" aria-label="Open ${esc(c.name)} ${gradeNames[g]}"><img src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><b>${esc(c.name)}</b><small>${esc(c.setName)} · #${esc(c.numberLabel)} · ${esc(c.category)}</small></span></button>
-   <div class="invest-price"><strong>${money(p.price)}</strong><small>${esc(p.priceLabel)}</small>${scoreOf(c.id,g)!=null?`<span class="score-pill ${ratingClass(scoreOf(c.id,g))}" title="Investment score">${scoreOf(c.id,g)}<small>/100</small></span>`:''}</div>
+   <div class="invest-price"><strong>${money(p.price)}</strong><small>${esc(p.priceLabel)}</small>${scoreOf(c.id,g)!=null?`<span class="score-pill ${ratingClass(scoreOf(c.id,g))}" title="Investment score">${scoreOf(c.id,g)}<small>/100</small></span>`:''}${p.research?`<small class="research-line" title="Research rank: historical percentile, not validated">Research ${p.research.rank??'—'} · ${EVIDENCE[p.research.evidenceStatus]||''}${p.research.breakEven!=null?' · break-even '+money(p.research.breakEven):''}</small>`:''}</div>
    <div class="invest-why"><h3>Why it's listed</h3><p class="invest-thesis">${esc(p.thesis)}</p><ul class="invest-signals">${(p.checks||p.signals.map(x=>({type:x.type,hit:true}))).map(ch=>{const sig=p.signals.find(x=>x.type===ch.type);if(!sig)return `<li class="miss"><span class="check" aria-hidden="true">–</span><span class="signal-name">${esc(ch.label)}</span><b>Not met</b></li>`;const v=signalView(sig);return `<li class="hit"><span class="check" aria-hidden="true">✓</span><span class="signal ${v.cls}">${v.label}</span><b>${v.value}</b><small>${v.detail}</small></li>`;}).join('')}</ul></div>
    <div class="invest-demand"><span class="metric-label">${esc(dm.character)} demand</span><div class="demand-wrap"><strong>${dm.score}</strong><em>/ 100</em></div><div class="demand-bar"><span style="width:${dm.score}%"></span></div><small>Cards sell ~${dm.premium.toFixed(1)}× similar cards${dm.activity!=null?' · '+Math.round(dm.activity)+' sales per card in 6 months':''}</small></div></article>`;}).join('')}</div>`:`<div class="chart-empty tall">No ${gradeNames[g]} card met every rule in the current data. That's expected when the market is at or near its highs. Try another grade, or refresh sales.</div>`}
   <div class="panel-foot">Signals use matching sales only (raw: near mint). PSA 9 highs use PriceCharting's Grade 9 guide, which includes other graders. Past sales don't guarantee future prices. <button class="link-button" id="invest-method">How picks are chosen</button></div></section>`;
@@ -572,7 +622,7 @@ function wireScreener(){
  $('#filters-toggle').onclick=()=>{state.filtersOpen=!state.filtersOpen;syncScreener();};
 }
 async function loadScores(retry=true){
- try{const r=await request('/api/scores');state.scores=r.scores||{};state.scoreError=null;if($('#error-banner').textContent===SERVER_OLD)error('');}
+ try{const r=await request('/api/scores');state.scores=r.scores||{};state.research=r.research||(r.research===null?{mode:'legacy'}:null);state.scoreError=null;if($('#error-banner').textContent===SERVER_OLD)error('');}
  catch(e){state.scoreError={message:e.message,status:e.status||0};
   if(e.status===404)error(SERVER_OLD);
   else if(retry)setTimeout(()=>loadScores(false),4000);}
