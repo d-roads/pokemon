@@ -8,3 +8,4 @@ site/localhost-*.log
 .lighthouseci/
 tasks/*run*.log
 tasks/*run*status.json
+site/.tools/

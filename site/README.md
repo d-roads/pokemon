@@ -21,6 +21,10 @@ Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-wa
 - **Home network:** `Start-FutureSight.ps1` listens on the network (`HOST=0.0.0.0`) and prints the address others should open, such as `http://192.168.1.20:5173`. Windows may ask once whether Node.js can use private networks; choose Allow. Traffic is plain HTTP, so use this only on a network you trust.
 - Listing alerts run in the background for every account that has turned them on.
 
+### Sharing outside your network (Cloudflare Quick Tunnel)
+
+`server.mjs` also accepts requests from a Cloudflare Quick Tunnel (`cloudflared tunnel --url http://127.0.0.1:5173`): only HTTPS requests for a `*.trycloudflare.com` address arriving from the tunnel on this computer are allowed (`lib/origin.mjs`), and sign-in cookies are then marked `Secure`. Anyone with the tunnel link reaches the sign-in page, so use real passwords before sharing it. `cloudflared.exe` can live in `site/.tools/` (ignored by git).
+
 ## Opening animation
 
 When you open FutureSight in a new tab, Glint (the mascot, an original comet sprite drawn for this app) flies around the screen, does a twirl with a sparkle burst and settles into the logo at the top left. It plays once per tab, any click or key skips it, and it never plays when your system asks for reduced motion. Turn it off or replay it under **Settings → Opening animation**. The code is `public/intro.js`; the artwork is the `fs-glint` symbol in `public/index.html`, shared by the logo and the animation.

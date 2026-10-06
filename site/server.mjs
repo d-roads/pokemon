@@ -8,6 +8,7 @@ import {api,readSettings,scanForUser} from './lib/api.mjs';
 import {hasEbayKeys} from './lib/alerts.mjs';
 import {reportError} from './lib/report.mjs';
 import {accountStore,seedAdmin,readCookie,sessionCookie,clearCookie,attemptLimiter,usernameProblem,passwordProblem} from './lib/accounts.mjs';
+import {requestLocation} from './lib/origin.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
 // Optional settings (such as SENTRY_DSN for error reporting) can live in a .env file next to this one; it is never committed.
 try{process.loadEnvFile(path.join(root,'.env'));}catch{}
@@ -32,13 +33,13 @@ const SHARED_MODULES=new Set(['analysis.mjs','portfolio.mjs','investment-costs.m
 const PAGE_HEADERS={'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'same-origin','Cache-Control':'no-store'};
 function sendJson(res,status,body,extra={}){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...extra});res.end(JSON.stringify(body));}
 const clientAddress=req=>req.socket.remoteAddress||'unknown';
-async function auth(req,res,url,raw,token,user){
+async function auth(req,res,url,raw,token,user,tunnel){
  const route=url.pathname.slice('/api/auth/'.length);
  if(route==='me'&&req.method==='GET'){if(!user)return sendJson(res,401,{error:'Not signed in.',signedOut:true});return sendJson(res,200,{user:{username:user.username}});}
  if(req.method!=='POST')return sendJson(res,405,{error:'Unsupported request.'});
  // Sign-in forms must be posted from this site's own page.
  if(req.headers.origin!==url.origin)return sendJson(res,403,{error:'Sign in from the FutureSight page.'});
- if(route==='logout'){accounts.endSession(token);return sendJson(res,200,{ok:true},{'Set-Cookie':clearCookie()});}
+ if(route==='logout'){accounts.endSession(token);return sendJson(res,200,{ok:true},{'Set-Cookie':clearCookie(tunnel)});}
  if(!/^application\/json\b/.test(req.headers['content-type']||''))return sendJson(res,415,{error:'Unsupported request.'});
  let body;try{body=JSON.parse(raw.toString('utf8'));}catch{return sendJson(res,400,{error:'The request was invalid.'});}
  if(!body||typeof body!=='object')return sendJson(res,400,{error:'The request was invalid.'});
@@ -48,7 +49,7 @@ async function auth(req,res,url,raw,token,user){
   const account=accounts.authenticate(body.username,body.password);
   if(!account){loginLimit.fail(ip);return sendJson(res,401,{error:'That username and password do not match.'});}
   loginLimit.clear(ip);
-  return sendJson(res,200,{user:{username:account.username}},{'Set-Cookie':sessionCookie(accounts.startSession(account.id))});
+  return sendJson(res,200,{user:{username:account.username}},{'Set-Cookie':sessionCookie(accounts.startSession(account.id),tunnel)});
  }
  if(route==='signup'){
   const wait=signupLimit.blocked(ip);if(wait)return sendJson(res,429,{error:'Too many new accounts from this device. Try again later.'});
@@ -57,25 +58,26 @@ async function auth(req,res,url,raw,token,user){
   if(r.error)return sendJson(res,r.status||400,{error:r.error});
   signupLimit.fail(ip);
   console.log(`New account: ${r.account.username}`);
-  return sendJson(res,201,{user:{username:r.account.username}},{'Set-Cookie':sessionCookie(accounts.startSession(r.account.id))});
+  return sendJson(res,201,{user:{username:r.account.username}},{'Set-Cookie':sessionCookie(accounts.startSession(r.account.id),tunnel)});
  }
  return sendJson(res,404,{error:'Not found.'});
 }
 const server=createServer(async(req,res)=>{
  try{
-  const host=req.headers.host;
-  const allowedHosts=new Set([`localhost:${PORT}`,`127.0.0.1:${PORT}`]);
-  const allowedByPort=HOST==='0.0.0.0'&&host?.endsWith(`:${PORT}`);
-  if(!allowedHosts.has(host)&&!allowedByPort){res.writeHead(400);res.end('Invalid host');return;}
-  const url=new URL(req.url,'http://'+host),gzip=/\bgzip\b/.test(req.headers['accept-encoding']||'');
+  const location=requestLocation(req,PORT,HOST);
+  if(!location){console.error('Rejected request location',{host:req.headers.host,remoteAddress:req.socket.remoteAddress,forwardedProto:req.headers['x-forwarded-proto'],path:req.url?.split('?')[0]});res.writeHead(400);res.end('Invalid host');return;}
+  const {url,tunnel}=location,gzip=/\bgzip\b/.test(req.headers['accept-encoding']||'');
   const token=readCookie(req.headers.cookie),user=token?accounts.sessionUser(token):null;
   if(url.pathname.startsWith('/api/')){
+   const catalogStarted=url.pathname==='/api/catalog'?Date.now():null;
+   if(catalogStarted)console.log('Catalog request started');
    const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>8192){res.writeHead(413);res.end();return;}chunks.push(chunk);}
-   if(url.pathname.startsWith('/api/auth/')){await auth(req,res,url,Buffer.concat(chunks),token,user);return;}
+   if(url.pathname.startsWith('/api/auth/')){await auth(req,res,url,Buffer.concat(chunks),token,user,tunnel);return;}
    if(!user){sendJson(res,401,{error:'Sign in to use FutureSight.',signedOut:true});return;}
    // The account's storage key stands in for the single local user the API was written for.
    const request=new Request(url,{method:req.method,headers:req.headers,...(!['GET','HEAD'].includes(req.method)?{body:Buffer.concat(chunks)}:{})});
    const result=await api(request,{...env,LOCAL_USER_ID:user.user_key}),headers=Object.fromEntries(result.headers),body=Buffer.from(await result.arrayBuffer());
+   if(catalogStarted)console.log('Catalog response',result.status,body.length+' bytes',Date.now()-catalogStarted+' ms');
    if(gzip&&body.length>2048){headers['Content-Encoding']='gzip';headers['Vary']='Accept-Encoding';res.writeHead(result.status,headers);res.end(gzipSync(body));return;}
    res.writeHead(result.status,headers);res.end(body);return;
   }

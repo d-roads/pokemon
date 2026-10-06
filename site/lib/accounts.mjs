@@ -118,8 +118,8 @@ export function readCookie(header,name=COOKIE){
  for(const part of String(header||'').split(';')){const i=part.indexOf('=');if(i>0&&part.slice(0,i).trim()===name)return part.slice(i+1).trim();}
  return null;
 }
-export const sessionCookie=token=>`${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${SESSION_DAYS*86400}`;
-export const clearCookie=()=>`${COOKIE}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0`;
+export const sessionCookie=(token,secure=false)=>`${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${SESSION_DAYS*86400}${secure?'; Secure':''}`;
+export const clearCookie=(secure=false)=>`${COOKIE}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0${secure?'; Secure':''}`;
 
 // Failed sign-ins are limited per address: 8 tries per 10 minutes.
 export function attemptLimiter({max=8,windowMs=600000,now=()=>Date.now()}={}){
