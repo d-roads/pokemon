@@ -2,7 +2,7 @@
 
 *Formerly Primal Watch.*
 
-Updated: October 6, 2026 (evening) Pacific. Repository: `d-roads/pokemon`. The repository is authoritative.
+Updated: October 6, 2026 (late) Pacific. Repository: `d-roads/pokemon`. The repository is authoritative.
 
 ## Sword & Shield and modern expansions — October 6, 2026
 
@@ -13,6 +13,21 @@ Updated: October 6, 2026 (evening) Pacific. Repository: `d-roads/pokemon`. The r
 - Both branches are on GitHub: `codex/sword-shield-cards-sales` is based on `main`, and `codex/scarlet-violet-mega-cards-sales` is based on the Task 1 branch. Review them separately in that order. The GitHub integration returned HTTP 403 when asked to open a draft pull request, so no PR was created.
 
 
+
+
+## Accounts and the sign-in landing page — October 6, 2026 (late)
+
+- **Why:** the collector wants people on the home network to test the site, each with their own data.
+- **Server (`site/lib/accounts.mjs`, `site/server.mjs`):** `accounts` and `sessions` tables live in the same SQLite file (created on start; existing tables untouched). Every `/api/*` call needs a signed-in session; the account's `user_key` is passed to the API as `LOCAL_USER_ID`, so the API code itself did not change. Routes: `POST /api/auth/signup`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`. `/` serves `login.html` until someone signs in; `/login` always shows it.
+- **Rules:** usernames 3–20 of `A–Z a–z 0–9`, with `. - _` only between letters/numbers (no doubles), unique case-insensitively. Passwords 5–64 printable ASCII, no spaces and none of `< > " ' ` \ ; &`, repeated on sign-up. Same checks in `login.js` and on the server.
+- **Security:** salted scrypt hashes, timing-safe compare (unknown usernames take as long as wrong passwords), 32-byte session tokens stored only as SHA-256, 30-day HttpOnly SameSite=Strict cookie, auth POSTs must carry this site's Origin, 8 failed sign-ins per device per 10 minutes, 6 new accounts per device per hour. Plain HTTP on the LAN, so no `Secure` flag.
+- **Admin:** `FUTURESIGHT_ADMIN_PASSWORD` in `site/.env` creates `admin` once, with `user_key` `local-owner`, so it owns the watchlist (10), Dex (2) and alerts saved before accounts. The collector's `.env` has `FUTURESIGHT_ADMIN_PASSWORD=test1` (requested; weak, fine for a home test). The password is not in git.
+- **Alerts:** the background scan now loops over every account with alerts turned on.
+- **LAN:** `Start-FutureSight.ps1` sets `HOST=0.0.0.0` and prints the network address(es). Windows asks once to allow Node.js on private networks.
+- **Landing page (`public/login.html`, `login.css`, `login.js`, `glint.svg`):** night-indigo card vault. Canvas background of drifting, flipping holo card silhouettes (front: little price chart; back: Glint's star gem), twinkling stars and occasional comets; the form is a holographic "Collector pass" card with a pointer-reactive foil edge and tilt, an art window where Glint rides a self-drawing price line, and a tape of real set names along the bottom. Bricolage Grotesque + Inter. Pauses when the tab is hidden; `prefers-reduced-motion` gets a still frame. Glint transparent copy is `glint.svg` (favicon minus its tile).
+- **App:** account chip with the username and **Sign out** in the top bar; any `401 signedOut` sends the page back to `/login`.
+- Tests: 130/130 (6 new in `tests/accounts.test.mjs`). Checked end to end with the collector's database copy: admin sees 10 watchlist entries and 2 Dex entries; a new account starts empty; duplicate (any case), bad characters, mismatched passwords and cross-site posts are refused.
+- **Not done:** password change/reset and account deletion (an admin can only be reset by editing the database). The Cloudflare Worker build still uses its platform sign-in and does not include accounts.
 
 ## Charts, projections and card images — October 6, 2026 (evening)
 

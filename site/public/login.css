@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap');
+
+/* Landing page: a night-sky card vault. Colours are tokens so the page can be retuned in one place. */
+:root{
+ --night:#0c0f2b;--deep:#151a45;--deeper:#090b20;--panel:#121640e6;--line:#2d347a;
+ --ink:#eef0ff;--muted:#a3a9d9;--faint:#6f76b0;
+ --teal:#7cf3d6;--violet:#9b8cff;--gold:#ffd36e;--coral:#ff7a8a;
+ --display:'Bricolage Grotesque','Inter',system-ui,sans-serif;--body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+ color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:radial-gradient(120% 90% at 78% 8%,#26246b 0%,var(--night) 46%,var(--deeper) 100%) fixed;color:var(--ink);font:400 16px/1.5 var(--body);overflow-x:hidden}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+
+.stage{position:relative;z-index:1;min-height:100vh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,400px);align-items:center;gap:clamp(32px,6vw,96px);max-width:1180px;margin:0 auto;padding:56px clamp(16px,5vw,48px) 96px}
+
+/* Pitch */
+.mark{display:inline-flex;align-items:center;gap:12px;color:var(--ink);text-decoration:none;margin-bottom:40px}
+.mark .glint{width:56px;height:56px;animation:bob 5s ease-in-out infinite}
+.word{font:700 30px/1 var(--display);letter-spacing:-.02em}
+.word b{font-weight:800;background:linear-gradient(100deg,var(--teal),var(--violet) 55%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+h1{font:800 clamp(38px,5.2vw,68px)/1.02 var(--display);letter-spacing:-.035em;margin:0 0 22px;max-width:13ch;text-wrap:balance}
+.lede{color:var(--muted);font-size:clamp(16px,1.4vw,18px);max-width:46ch;margin:0 0 36px}
+.facts{display:flex;gap:clamp(20px,4vw,48px);margin:0;flex-wrap:wrap}
+.facts div{border-left:2px solid var(--line);padding-left:14px}
+.facts dt{color:var(--faint);font-size:13px}
+.facts dd{margin:2px 0 0;font:700 28px/1.1 var(--display);letter-spacing:-.02em}
+
+/* The sign-in form is a holographic trading card. */
+.pass{position:relative;border-radius:22px;padding:2px;transform:perspective(1100px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s ease-out;--mx:50%;--my:30%;animation:deal .9s cubic-bezier(.2,.8,.2,1) both .15s}
+.foil{position:absolute;inset:0;border-radius:inherit;background:conic-gradient(from var(--spin,0deg) at var(--mx) var(--my),var(--teal),var(--violet),var(--gold),#ff9bd2,var(--teal));opacity:.95}
+.pass::after{content:"";position:absolute;inset:2px;border-radius:20px;pointer-events:none;background:radial-gradient(240px 200px at var(--mx) var(--my),#ffffff1f,transparent 70%);mix-blend-mode:screen}
+.pass-inner{position:relative;border-radius:20px;background:linear-gradient(170deg,#1a1f55 0%,#11143b 60%,#0d1031 100%);padding:20px 22px 18px}
+.pass-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.pass-head h2{font:700 20px/1 var(--display);margin:0;letter-spacing:-.01em}
+.pass-no{font:600 12px/1 var(--body);color:var(--gold)}
+.window{position:relative;height:118px;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#232a72,#141846);border:1px solid #ffffff14;margin-bottom:18px}
+.window-chart{position:absolute;inset:8px 0 0;width:100%;height:calc(100% - 8px)}
+.window-glint{position:absolute;width:44px;height:44px;left:0;top:0;transform:translate(var(--gx,20px),var(--gy,40px));will-change:transform}
+
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:12px;background:#0a0d2a;margin-bottom:16px}
+.tabs button{appearance:none;border:0;border-radius:9px;padding:9px 6px;background:transparent;color:var(--muted);font:600 14px/1 var(--body);cursor:pointer}
+.tabs button[aria-selected=true]{background:#262d78;color:var(--ink)}
+.form{display:grid;gap:12px}
+.form label{display:grid;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
+.form input{width:100%;font:500 16px/1.2 var(--body);color:var(--ink);background:#0b0e2b;border:1px solid var(--line);border-radius:10px;padding:12px 13px;outline:none;transition:border-color .15s}
+.form input:focus{border-color:var(--teal);box-shadow:0 0 0 3px #7cf3d633}
+.form input[aria-invalid=true]{border-color:var(--coral)}
+.hint{color:var(--faint);font-size:12px;margin:-6px 0 0}
+.hint code{font:inherit;color:var(--muted);letter-spacing:.06em}
+.msg{min-height:20px;margin:0;font-size:13px;color:var(--coral)}
+.msg.ok{color:var(--teal)}
+.go{appearance:none;border:0;border-radius:11px;padding:13px;font:700 16px/1 var(--display);letter-spacing:.01em;color:#0b0e2b;background:linear-gradient(100deg,var(--teal),#b6f8e8 50%,var(--gold));cursor:pointer;transition:transform .12s,filter .12s}
+.go:hover{filter:brightness(1.06)}
+.go:active{transform:translateY(1px)}
+.go[disabled]{opacity:.6;cursor:wait}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.pass-foot{margin-top:14px;color:var(--faint);font-size:12px;text-align:center}
+
+/* Set names scrolling along the bottom edge. */
+.tape{position:fixed;left:0;right:0;bottom:0;z-index:1;height:38px;overflow:hidden;background:#090b20d9;border-top:1px solid #ffffff12;display:flex;align-items:center}
+.tape-track{display:flex;gap:34px;white-space:nowrap;padding-left:34px;animation:tape 120s linear infinite;color:var(--faint);font-size:13px}
+.tape-track span b{color:var(--muted);font-weight:600;margin-right:6px}
+.tape-track span i{font-style:normal;color:var(--gold);margin-right:6px}
+
+@keyframes tape{to{transform:translateX(-50%)}}
+@keyframes bob{50%{transform:translateY(-6px) rotate(-4deg)}}
+@keyframes deal{from{opacity:0;transform:perspective(1100px) translateY(40px) rotateX(18deg) rotateZ(-4deg)}}
+.shake{animation:shake .35s}
+@keyframes shake{25%{translate:-6px 0}75%{translate:6px 0}}
+
+@media (max-width:860px){
+ .stage{grid-template-columns:1fr;padding-top:28px;gap:28px}
+ .mark{margin-bottom:22px}
+ h1{max-width:none}
+ .facts{display:none}
+ .lede{margin-bottom:0}
+ .pass{max-width:440px;width:100%;justify-self:center}
+}
+@media (prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation:none!important;transition:none!important}
+ .pass{transform:none}
+}
+.form[hidden]{display:none}

@@ -12,6 +12,15 @@ Run `node server.mjs` in this folder (or `Start-FutureSight.ps1` on Windows), th
 
 Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-watch.sqlite` (the file keeps its name from before the FutureSight rename, so nothing needs moving). Starting the server only ever adds missing tables, so existing data is kept. Local mode is a single personal workspace and listens only on the loopback address.
 
+## Accounts and sharing on your home network
+
+- Everyone signs in on the landing page (`public/login.html`). Each account has its own watchlist, Dex and alerts; prices and the catalog are shared.
+- **Create account** asks for a username, a password and the password again. Usernames are 3–20 letters or numbers, with `.` `-` `_` allowed only between them, and are unique regardless of capital letters. Passwords are 5–64 standard keyboard characters with no spaces and none of `< > " ' ` \ ; &`. The server checks the same rules (`lib/accounts.mjs`).
+- Passwords are stored as salted scrypt hashes. Sessions last 30 days in an HttpOnly, SameSite=Strict cookie; the database keeps only a hash of each session token. Sign-in and sign-up forms must come from FutureSight's own page, and repeated failed sign-ins from one device are paused for 10 minutes.
+- **Admin account:** set `FUTURESIGHT_ADMIN_PASSWORD` in `site/.env` and the server creates `admin` on its next start (only if it does not exist yet). Admin takes over the watchlist, Dex and alerts saved before accounts existed (stored under `local-owner`). Removing the line afterwards does not change the account.
+- **Home network:** `Start-FutureSight.ps1` listens on the network (`HOST=0.0.0.0`) and prints the address others should open, such as `http://192.168.1.20:5173`. Windows may ask once whether Node.js can use private networks; choose Allow. Traffic is plain HTTP, so use this only on a network you trust.
+- Listing alerts run in the background for every account that has turned them on.
+
 ## Opening animation
 
 When you open FutureSight in a new tab, Glint (the mascot, an original comet sprite drawn for this app) flies around the screen, does a twirl with a sparkle burst and settles into the logo at the top left. It plays once per tab, any click or key skips it, and it never plays when your system asks for reduced motion. Turn it off or replay it under **Settings → Opening animation**. The code is `public/intro.js`; the artwork is the `fs-glint` symbol in `public/index.html`, shared by the logo and the animation.
