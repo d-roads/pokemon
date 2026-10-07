@@ -64,7 +64,9 @@ export function matchJapaneseListing(rows,cards){
   const bySpecies=species&&!named.length?pool.filter(r=>(' '+jaWords(r.name)+' ').includes(' '+species+' ')):[];
   if(named.length===1){pick=named[0];rule='number+name';}
   else if(bySpecies.length===1){pick=bySpecies[0];rule='number+species';}
-  else if(!named.length&&pool.length===1&&(card.nameIsJapanese||!forms.length)&&!dexListed(card)){pick=pool[0];rule='number-only';}
+  // Number alone only for cards with no Pokémon to check (trainers, energies) and no English name:
+  // a Pokémon must never be matched to a product that names another Pokémon.
+  else if(!named.length&&pool.length===1&&(card.nameIsJapanese||!forms.length)&&!card.dexId?.length&&!dexListed(card)){pick=pool[0];rule='number-only';}
   if(!pick||used.has(pick.productId)){unmatched.push({id:card.id,number:card.number,reason:!pool.length?'no product with this number':named.length>1?'several products with this name and number':pick?'product already used':'name differs: '+pool.map(r=>r.name).slice(0,3).join(' / ')});continue;}
   used.add(pick.productId);matches.set(card.id,{...pick,rule});
  }
