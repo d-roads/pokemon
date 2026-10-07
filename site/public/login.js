@@ -159,3 +159,6 @@ function frame(t){
 addEventListener('resize',()=>{resize();if(reduce)frame(performance.now());});
 document.addEventListener('visibilitychange',()=>{running=!document.hidden;if(running&&!reduce){last=0;requestAnimationFrame(frame);}});
 resize();requestAnimationFrame(frame);
+
+// Build label (beta vs. local test), the same one shown beside the logo after sign-in.
+fetch('/api/version',{credentials:'same-origin',cache:'no-store'}).then(r=>r.ok?r.json():null).then(b=>{const el=document.getElementById('build-badge');if(!el||!b?.label)return;el.textContent=b.label;el.className='build-badge '+(b.channel||'local');el.hidden=false;}).catch(()=>{});

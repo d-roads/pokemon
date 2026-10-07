@@ -54,7 +54,10 @@ test('Wizards era and vintage card coverage render in Browse',async()=>{
 });
 test('Set picker, all-set search, and Radiant Collection render correct cards',async()=>{
  const ui=workspace();await ui.run('init()');
- assert.match(ui.e('#set-select').innerHTML,/Evolutions/);assert.equal(ui.e('#page-title').textContent,'Primal Clash');
+ assert.match(ui.e('#set-select').innerHTML,/Evolutions/);assert.equal(ui.e('#page-title').textContent,'Explore every set');
+ // The first view is every set and every rare, not one set.
+ assert.equal(ui.run('state.setId'),'all');assert.equal(ui.run('state.category'),'all');assert.equal(ui.e('#set-select').value,'all');
+ assert.equal(ui.run('filteredCards().length'),ui.run('state.cards.filter(c=>c.eligible).length'));
  ui.e('#set-select').onchange({target:{value:'g1'}});assert.equal(ui.e('#page-title').textContent,'Generations');assert.match(ui.e('#set-count').innerHTML,/37/);
  ui.e('#grade').onchange({target:{value:'raw'}});ui.e('#search').oninput({target:{value:'RC30'}});assert.match(ui.e('#card-list').innerHTML,/Gardevoir/);assert.match(ui.e('#card-list').innerHTML,/RC30\/RC32/);assert.doesNotMatch(ui.e('#card-list').innerHTML,/\/160/);
  ui.e('#set-select').onchange({target:{value:'all'}});ui.run("state.category='all';updateView();");ui.e('#search').oninput({target:{value:'Flashfire'}});

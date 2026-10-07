@@ -19,7 +19,7 @@ const ago=iso=>{const m=Math.round((Date.now()-Date.parse(iso))/60000);return m<
 const signed=v=>v==null?'—':(v>0?'+':v<0?'−':'')+money(Math.abs(v));
 const pct=v=>v==null?'':(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(1)+'%';
 const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
-const state={sets:[],series:[],marketSeries:[],setId:'xy5',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'chase',query:'',sort:'featured',view:'browse',selected:'xy5-147',limit:18,expanded:false,focus:false,eras:[],filters:{min:null,max:null,activity:0,invest:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
+const state={sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],filters:{min:null,max:null,activity:0,invest:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
  dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
 // Crashes in the page are sent to the server, which forwards them to Sentry only when SENTRY_DSN is set. At most 5 per page load.
@@ -75,7 +75,7 @@ function filteredCards(){
  if(f.min!=null||f.max!=null)list=list.filter(c=>{const p=get(c).current;return p!=null&&(f.min==null||p>=f.min)&&(f.max==null||p<=f.max);});
  if(f.activity>0)list=list.filter(c=>(get(c).score??-1)>=f.activity);
  if(f.invest>0)list=list.filter(c=>(scoreOf(c.id)??-1)>=f.invest);
- const featured=c=>priority.includes(c.id)?priority.indexOf(c.id):get(c).current!=null?10:100;
+ const featured=c=>state.setId==='xy5'&&priority.includes(c.id)?priority.indexOf(c.id):get(c).current!=null?10:100;
  const setOrder=c=>state.sets.findIndex(s=>s.id===c.setId);
  return list.sort((a,b)=>state.sort==='number'?(setOrder(a)-setOrder(b))||cardNumber(a)-cardNumber(b):state.sort==='price'?(get(b).current??-1)-(get(a).current??-1):state.sort==='activity'?(get(b).score??-1)-(get(a).score??-1):state.sort==='invest'?(scoreOf(b.id)??-1)-(scoreOf(a.id)??-1)||(get(b).current??-1)-(get(a).current??-1):featured(a)-featured(b)||(state.setId!=='xy5'?(get(b).current??-1)-(get(a).current??-1):0)||cardNumber(a)-cardNumber(b));
 }
@@ -729,6 +729,10 @@ document.addEventListener?.('keydown',e=>{
 });
 if($('#detail-backdrop'))$('#detail-backdrop').onclick=()=>setFocus(false);
 init();
+
+// Build label beside the logo: "Beta · v1.0.0" or "Local test · v1.1.0-dev", so copies are never confused.
+async function loadBuild(){try{const r=await fetch('/api/version',{credentials:'same-origin',cache:'no-store'});if(!r.ok)return;const b=await r.json(),el=$('#build-badge');if(!el||!b?.label)return;el.textContent=b.label;el.className='build-badge '+(b.channel||'local');el.title=b.channel==='beta'?'This is the build beta testers use.':b.channel==='local-test'?'Local test copy: changes here do not reach beta testers.':'Local copy';el.hidden=false;if(b.channel!=='beta'&&typeof document!=='undefined')document.title=document.title.replace(/^(\[[^\]]*\] )?/,b.channel==='local-test'?'[Local test] ':'');}catch{}}
+loadBuild();
 
 // Signed-in account: name in the navigation and a sign-out button.
 (async()=>{

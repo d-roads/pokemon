@@ -83,3 +83,7 @@ h1{font:800 clamp(38px,5.2vw,68px)/1.02 var(--display);letter-spacing:-.035em;ma
  .pass{transform:none}
 }
 .form[hidden]{display:none}
+
+.build-badge{display:inline-block;margin-left:6px;padding:1px 7px;border:1px solid #ffffff33;border-radius:999px;font:600 11px/1.5 ui-monospace,monospace;color:#c9c6ff;white-space:nowrap}
+.build-badge.local-test{color:#ffd27a;border-color:#ffd27a66;background:#ffd27a14}
+.build-badge.beta{color:#7dfbcd;border-color:#7dfbcd55}

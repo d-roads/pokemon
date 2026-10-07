@@ -9,12 +9,15 @@ import {hasEbayKeys} from './lib/alerts.mjs';
 import {reportError} from './lib/report.mjs';
 import {accountStore,seedAdmin,readCookie,sessionCookie,clearCookie,attemptLimiter,usernameProblem,passwordProblem} from './lib/accounts.mjs';
 import {requestLocation} from './lib/origin.mjs';
+import {buildInfo} from './lib/build-info.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
 // Optional settings (such as SENTRY_DSN for error reporting) can live in a .env file next to this one; it is never committed.
 try{process.loadEnvFile(path.join(root,'.env'));}catch{}
 mkdirSync(path.join(root,'data'),{recursive:true});
 // Your watchlist, buy limits, Dex and alerts live in this file. New tables are only ever added.
-const sqlite=new DatabaseSync(path.join(root,'data','primal-watch.sqlite'));
+// FUTURESIGHT_DB points a test copy at its own database file, so testing never touches the beta's data.
+const dbFile=process.env.FUTURESIGHT_DB?path.resolve(root,process.env.FUTURESIGHT_DB):path.join(root,'data','primal-watch.sqlite');
+const sqlite=new DatabaseSync(dbFile);
 sqlite.exec('PRAGMA journal_mode = WAL');
 sqlite.exec(readFileSync(path.join(root,'db/schema.sql'),'utf8'));
 const wrap=sql=>({bind(...values){return statement(sql,values)},...statement(sql,[])});
@@ -27,6 +30,8 @@ if(seeded)console.log('Created the admin account; it holds the watchlist, Dex an
 const loginLimit=attemptLimiter(),signupLimit=attemptLimiter({max:6,windowMs:3600000});
 const PORT=Number(process.env.PORT||5173);
 const HOST=process.env.HOST||'127.0.0.1';
+// Which build this is, shown in the page so the beta and a local test copy can't be confused.
+const BUILD=buildInfo(JSON.parse(readFileSync(path.join(root,'package.json'),'utf8')).version,process.env.FUTURESIGHT_CHANNEL);
 const env={DB,SENTRY_DSN:process.env.SENTRY_DSN,SENTRY_ENV:process.env.SENTRY_ENV,FUTURESIGHT_SCORE_MODEL:process.env.FUTURESIGHT_SCORE_MODEL,NETWORK_DISABLED:/127\.0\.0\.1:9\b/.test(process.env.HTTPS_PROXY||process.env.HTTP_PROXY||'')};
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.json':'application/json'};
 const SHARED_MODULES=new Set(['analysis.mjs','portfolio.mjs','investment-costs.mjs']);
@@ -76,6 +81,7 @@ const server=createServer(async(req,res)=>{
   const token=readCookie(req.headers.cookie),user=token?accounts.sessionUser(token):null;
   if(url.pathname.startsWith('/api/')){
    const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>8192){res.writeHead(413);res.end();return;}chunks.push(chunk);}
+   if(url.pathname==='/api/version'&&req.method==='GET'){sendJson(res,200,BUILD);return;}
    if(url.pathname.startsWith('/api/auth/')){await auth(req,res,url,Buffer.concat(chunks),token,user,tunnel);return;}
    if(!user){sendJson(res,401,{error:'Sign in to use FutureSight.',signedOut:true});return;}
    // The account's storage key stands in for the single local user the API was written for.
@@ -121,5 +127,5 @@ async function scheduledScan(){
 }
 const timer=setInterval(scheduledScan,60000);setTimeout(scheduledScan,15000);
 
-server.listen(PORT,HOST,()=>console.log(`FutureSight is ready at http://${HOST==='0.0.0.0'?'127.0.0.1':HOST}:${PORT}`));
+server.listen(PORT,HOST,()=>console.log(`FutureSight ${BUILD.label} is ready at http://${HOST==='0.0.0.0'?'127.0.0.1':HOST}:${PORT}`+(process.env.FUTURESIGHT_DB?` (database: ${dbFile})`:'')));
 for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>{clearInterval(timer);server.close(()=>{sqlite.close();process.exit(0)});});

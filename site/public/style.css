@@ -990,3 +990,8 @@ html.intro-pending .brand-mark,html.intro-playing .brand-mark{visibility:hidden}
 .unit-input{display:flex;align-items:center;gap:4px}.unit-input i{font-style:normal;color:var(--muted);font-size:12px}
 .forecast-note{margin:12px 0 0;font-size:12px;color:var(--muted);line-height:1.45}
 .research-line{display:block;margin-top:4px;font-size:11px;color:var(--muted)}
+
+/* Build label: which copy of FutureSight this is (beta vs. local test). */
+.build-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 7px;border:1px solid var(--line);border-radius:999px;font:600 10.5px/1.4 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.02em;color:var(--muted);white-space:nowrap;align-self:center}
+.build-badge.beta{color:var(--accent-text);background:var(--accent-soft);border-color:var(--accent-line)}
+.build-badge.local-test{color:var(--warn);background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}

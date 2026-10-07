@@ -23,7 +23,7 @@ Get-Process cloudflared -ErrorAction SilentlyContinue | ForEach-Object { Write-H
 Start-Sleep -Seconds 1
 
 # The app, in its own minimized window (its messages appear there). It also stays reachable on the home network.
-$serverCmd = "`$env:HOST='0.0.0.0'; `$env:PORT='$port'; Set-Location -LiteralPath '$PSScriptRoot'; node server.mjs"
+$serverCmd = "`$env:HOST='0.0.0.0'; `$env:PORT='$port'; `$env:FUTURESIGHT_CHANNEL='beta'; Set-Location -LiteralPath '$PSScriptRoot'; node server.mjs"
 Start-Process powershell -WindowStyle Minimized -ArgumentList '-NoExit', '-Command', $serverCmd | Out-Null
 Write-Host 'Starting FutureSight...'
 $ready = $false
