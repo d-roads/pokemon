@@ -1,3 +1,19 @@
+# FutureSight — October 7, 2026: manual eBay searches and EPN preparation (dev)
+
+Owner entered a SerpApi key and requested polished manual searching and affiliate support. They confirmed **no EPN campaign ID yet**; tracking remains disabled until they obtain and configure an approved campaign. No credentials or database rows were modified.
+
+- Added Alerts → Find a card on eBay for **any catalog card**, without a watchlist requirement. Choose the printing/grade, edit the generated query, set an optional item-price cap or include auctions. Broaden removes the set and price cap; Reset restores the template. Watched rows can populate the editor and have separate unrestricted Search eBay and At my limit links.
+- Shared `site/lib/ebay-links.mjs` builds the default **Pokemon + full card name + set + printed number + grade** query for server and browser. EX/GX/ex/VMAX identifiers are retained; M/Mega and PSA 9/PSA9 spellings are OR alternatives. Raw uses NM/near mint and excludes slabs; proxies/replicas/lots/bundles are excluded. Promo codes, padded numbers and vintage Japanese Pokédex numbering are handled. A fraction is not mandatory because many titles omit its denominator. Best Match/Buy It Now are defaults. This is a precision/recall design based on published eBay syntax, not a claim of universally optimal live ranking.
+- Manual links consume no SerpApi credits. Item-price caps keep cents and do not include shipping. Automated listing retrieval queries and validation are unchanged. Users must inspect manual results; manual eBay links do not guarantee the exact title/grade/printing filters used for in-app alerts.
+- EPN support uses `EBAY_EPN_CAMPAIGN_ID` (owner's approved campaign) and optional `EBAY_EPN_CUSTOM_ID` placement label in `site/.env` / Worker environment. Documented US click-link parameters are appended only to manual eBay search URLs; no fake default campaign, automatic redirect, impression request or personal tracking identifier. Sponsored attributes and adjacent disclosures appear only when tracking is configured. SerpApi keys and EPN IDs are separate.
+- EPN signup/link tools: https://partnernetwork.ebay.com/ ; link construction: https://developer.ebay.com/api-docs/buy/static/ref-epn-link.html ; disclosure: https://partnernetwork.ebay.com/resources/affiliate-disclosure-faq. Approval/attribution and real revenue remain unverified. Current manual links are unmonetized.
+- Validation: **206/206 tests pass** (`npm test`, Node 24.21); build and bundled server syntax check pass (249.2 MB Worker). Unit checks cover templates, Japanese/promo/vintage numbers, raw/PSA variants, decimal caps, affiliate opt-in, preserved filters and URL boundaries; UI/API tests exercise the editor and optional tracking. eBay live search pages could not be opened through the available web tool, and this sandbox cannot host a listening server. No live result comparison or earnings claim.
+- Restart the Ubuntu dev server to load the new API and shared module. Existing database, watchlist, SerpApi settings and automated scanning settings are preserved. Configure the EPN campaign only after approval; no additional package installation is needed.
+
+This entry is included in the dev manual-search commit. Prior history follows.
+
+---
+
 # FutureSight — October 7, 2026: live eBay alerts through SerpApi (dev)
 
 Owner's eBay developer registration was rejected. They requested a working live listing source and explicitly chose live listings rather than a demo. No public/shared credentials were downloaded or used.

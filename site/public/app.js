@@ -1,3 +1,4 @@
+import {manualSearchQuery,manualSearchUrl} from '/ebay-links.mjs';
 import {analyze as computeAnalysis,gradeNames,trendProjection} from '/analysis.mjs';
 import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE} from '/portfolio.mjs';
 import {normalizeCosts,costSummary,netReturn,maxBuyPrice,DEFAULT_COSTS} from '/investment-costs.mjs';
@@ -521,11 +522,46 @@ function applyDex(r){state.dex.entries=r.collection;state.dex.markets={...state.
 // ---------- Alerts ----------
 async function loadAlerts(quiet){try{const r=await request('/api/alerts');applyAlerts(r,quiet);}catch(e){if(!quiet)error(e.message);}}
 function applyAlerts(r,quiet){
- const before=state.alerts.known;r.searches=r.searches||state.alerts.data?.searches||[];state.alerts.data=r;state.alerts.known=new Set(r.alerts.map(a=>a.id));
+ const before=state.alerts.known;r.affiliate=r.affiliate||state.alerts.data?.affiliate;r.searches=r.searches||state.alerts.data?.searches||[];state.alerts.data=r;state.alerts.known=new Set(r.alerts.map(a=>a.id));
  const badge=$('#alert-count');badge.textContent=r.unseen;badge.hidden=!r.unseen;
  if(before&&quiet){const fresh=r.alerts.filter(a=>!before.has(a.id)&&!a.seen);if(fresh.length){const a=fresh[0],c=cardById(a.card_id);toast((fresh.length>1?fresh.length+' new alerts: ':'New alert: ')+(c?.name||'')+' '+money(a.total));
   if(typeof Notification!=='undefined'&&Notification.permission==='granted')for(const x of fresh.slice(0,3)){const cc=cardById(x.card_id);const n=new Notification((cc?.name||'Watched card')+' · '+gradeNames[x.grade]+' at '+money(x.total),{body:x.title,icon:cc?.image});n.onclick=()=>window.open(x.url,'_blank','noopener');}}}
  if(state.view==='alerts')renderAlerts();
+}
+function chooseManualCard(id,grade){
+ const card=cardById(id);if(!card)return;
+ const m=state.alerts.manual||={grade:'psa9',price:'',auctions:false};
+ Object.assign(m,{cardId:id,grade:grade||m.grade,query:manualSearchQuery(card,grade||m.grade),price:'',text:''});
+ renderManualSearch();
+}
+function renderManualSearch(){
+ const panel=$('#manual-search-panel');if(!panel)return;
+ const m=state.alerts.manual||={cardId:null,grade:state.grade,price:'',auctions:false,text:'',query:''};
+ const card=cardById(m.cardId),affiliate=state.alerts.data?.affiliate;
+ panel.innerHTML=`<h3>Find a card on eBay</h3><p class="sales-note">Pokemon + card name + set + number + grade. Choose any catalog card; it does not need to be watched.</p>
+  <label class="field">Find a card<input id="manual-card-search" type="search" value="${esc(m.text)}" placeholder="Name, set or card number" autocomplete="off" aria-describedby="manual-card-hint"></label><div class="dex-results" id="manual-card-results"></div><p class="field-hint" id="manual-card-hint">Type at least two characters to choose a printing.</p>
+  ${card?`<div class="dex-picked"><img src="${card.image}" alt="" loading="lazy"><div><strong>${esc(card.name)}${card.japanese?' · Japanese':''}</strong><span>${esc(card.setName)} · ${numberCaption(card)}</span></div></div>
+  <div class="manual-search-controls"><label class="field">Grade<select id="manual-grade">${['psa10','psa9','raw'].map(g=>`<option value="${g}" ${m.grade===g?'selected':''}>${gradeNames[g]}</option>`).join('')}</select></label><label class="field">Max item price (optional)<input id="manual-price" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(m.price)}" placeholder="Any price"></label></div>
+  <label class="field">Search terms<input id="manual-ebay-query" type="text" maxlength="1000" value="${esc(m.query)}"></label><label class="toggle"><input id="manual-auctions" type="checkbox" ${m.auctions?'checked':''}><span>Include auctions</span></label>
+  <div class="inline-actions"><a class="button primary" id="manual-open" target="_blank" rel="noopener noreferrer${affiliate?.enabled?' sponsored':''}" href="${esc(manualSearchUrl(card,m.grade,m.price,{query:m.query,auctions:m.auctions,affiliate}))}">Search eBay</a><button type="button" class="button" id="manual-broaden">Broaden search</button><button type="button" class="link-button" id="manual-reset">Reset template</button></div>
+  <p class="field-hint">Broaden removes the set name. Raw uses NM / near mint and excludes graded cards. Best Match is the default; price filters exclude shipping. Verify the photos, printing and total before buying. Manual searches use no API credits.</p>${affiliate?.enabled?'<p class="sales-note">Affiliate link: we may earn a commission from qualifying purchases.</p>':''}`:''}`;
+ $('#manual-card-search').oninput=()=>{
+  m.text=$('#manual-card-search').value;
+  const words=m.text.toLowerCase().trim().split(/\s+/).filter(Boolean);
+  const result=m.text.trim().length<2?[]:state.cards.filter(c=>words.every(w=>(c.name+' '+(c.nameJa||'')+' '+c.setName+' '+c.numberLabel+' '+c.id+(c.japanese?' japanese jp':' english')).toLowerCase().includes(w))).sort((a,b)=>Number(b.eligible)-Number(a.eligible)).slice(0,8);
+  $('#manual-card-results').innerHTML=result.map(c=>`<button type="button" data-manual-pick="${c.id}"><img src="${c.image}" alt="" loading="lazy"><span><b>${esc(c.name)}${c.japanese?' · JP':''}</b><small>${esc(c.setName)} · ${numberCaption(c)}</small></span></button>`).join('')||(m.text.trim().length>=2?'<p class="field-hint">No cards match. Try the name and number.</p>':'');
+  $('#manual-card-results').querySelectorAll('[data-manual-pick]').forEach(b=>b.onclick=()=>chooseManualCard(b.dataset.manualPick));wireImages();
+ };
+ if(card){
+  const updateLink=()=>{$('#manual-open').href=manualSearchUrl(card,m.grade,m.price,{query:m.query,auctions:m.auctions,affiliate});};
+  $('#manual-grade').onchange=()=>{m.grade=$('#manual-grade').value;m.query=manualSearchQuery(card,m.grade);renderManualSearch();};
+  $('#manual-price').oninput=()=>{m.price=$('#manual-price').value;updateLink();};
+  $('#manual-ebay-query').oninput=()=>{m.query=$('#manual-ebay-query').value;updateLink();};
+  $('#manual-auctions').onchange=()=>{m.auctions=$('#manual-auctions').checked;updateLink();};
+  $('#manual-broaden').onclick=()=>{m.query=manualSearchQuery(card,m.grade,{broad:true});m.price='';renderManualSearch();};
+  $('#manual-reset').onclick=()=>{m.query=manualSearchQuery(card,m.grade);renderManualSearch();};
+ }
+ wireImages();
 }
 function renderAlerts(){
  const view=$('#alerts-view'),d=state.alerts.data;
@@ -536,8 +572,9 @@ function renderAlerts(){
  <section class="panel alerts-main" aria-label="Listings at or under your limit"><div class="panel-head"><div><h2>Listings at your price</h2><p class="status-line">${status}${run?.error?` <span class="warn">· ${esc(run.error)}</span>`:''}</p></div><div class="holdings-tools"><button class="button" id="alerts-seen" ${d.unseen?'':'disabled'}>Mark all seen</button><button class="button primary" id="alerts-scan" ${configured?'':'disabled'}>${state.alerts.busy?'Scanning…':'Scan now'}</button></div></div>
   ${d.alerts.length?`<div class="alert-list">${d.alerts.map(a=>{const c=cardById(a.card_id),under=a.market_price>0?(1-a.total/a.market_price):null;return `<article class="alert-row ${a.seen?'':'unseen'}"><img src="${esc(a.image||c?.image||'')}" alt="" loading="lazy"><div class="alert-body"><div class="alert-top"><strong>${esc(c?.name||a.card_id)}</strong><span class="grade-chip ${a.grade}">${gradeNames[a.grade].replace(' · near mint','')}</span>${a.seen?'':'<span class="new-chip">New</span>'}</div><p class="alert-title">${esc(a.title)}</p><p class="alert-meta">${esc(c?.setName||'')} · #${esc(c?.numberLabel||'')} · ${esc(a.buying_option||'')}${a.seller?' · '+esc(a.seller):''} · found ${ago(a.found_at)}</p></div><div class="alert-price"><strong>${money(a.total)}</strong><small>${a.shipping==null?'+ shipping':a.shipping>0?'incl. '+money(a.shipping)+' shipping':'free shipping'}</small><small>Limit ${money(a.limit_price)}${under>0?` · <b class="pl up">${Math.round(under*100)}% under market</b>`:''}</small><div class="alert-actions"><a class="button primary" href="${esc(a.url)}" target="_blank" rel="noopener noreferrer" data-open-alert="${a.id}">View listing</a><button class="button" data-dismiss="${a.id}" aria-label="Dismiss alert for ${esc(a.title)}">Dismiss</button></div></div></article>`;}).join('')}</div>`
   :`<div class="empty-state"><strong>${configured?'No listings at your price yet.':'Alerts are ready when you are.'}</strong><p>${configured?'New listings of your watched cards at or under your limit will appear here.':'Choose SerpApi in settings if your eBay developer registration is unavailable. Add your own provider key to scan live listings.'}</p></div>`}
-  <div class="panel-sub"><h3>Your watched searches</h3><p class="sales-note">Each watched card and grade, the price an alert uses, and a ready-made eBay search (newest first, Buy It Now, up to your limit). These links work without API keys.</p>
-  ${d.searches.length?`<div class="search-list">${d.searches.map(x=>{const c=cardById(x.card_id);return c?`<div class="search-row"><img src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><b>${esc(c.name)}</b><small>${esc(c.setName)} · ${numberCaption(c)} · ${gradeNames[x.grade]}</small></span><span class="search-limit">${x.limit!=null?money(x.limit)+'<small>'+esc(x.limit_source)+'</small>':'<small>No limit yet</small>'}</span><a class="button" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">Search eBay</a></div>`:'';}).join('')}</div>`:'<p class="sales-note">Star a card in Browse to watch it.</p>'}</div>
+  <div class="panel-sub" id="manual-search-panel"></div>
+  <div class="panel-sub"><h3>Your watched searches</h3><p class="sales-note">Search the exact card and grade, or use your limit as an item-price filter. Best Match and Buy It Now are the defaults. Manual searches use no SerpApi credits. Check shipping and the card photos before buying.</p>
+  ${d.searches.length?`<div class="search-list">${d.searches.map(x=>{const c=cardById(x.card_id);return c?`<div class="search-row"><img src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><b>${esc(c.name)}</b><small>${esc(c.setName)} · ${numberCaption(c)} · ${gradeNames[x.grade]}</small><button type="button" class="link-button" data-edit-search="${c.id}" data-search-grade="${x.grade}">Edit search</button></span><span class="search-limit">${x.limit!=null?money(x.limit)+'<small>'+esc(x.limit_source)+'</small>':'<small>No limit yet</small>'}</span><a class="button" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer${d.affiliate?.enabled?' sponsored':''}">Search eBay</a>${x.limitedUrl?`<a class="link-button search-at-limit" href="${esc(x.limitedUrl)}" target="_blank" rel="noopener noreferrer${d.affiliate?.enabled?' sponsored':''}">At my limit</a>`:''}</div>`:'';}).join('')}</div>`:'<p class="sales-note">Star a card in Browse to watch it.</p>'}${d.affiliate?.enabled?'<p class="sales-note">Affiliate links: we may earn a commission from qualifying purchases.</p>':''}</div>
  </section>
  <aside class="panel alerts-side" aria-label="Alert settings"><h2>Alert settings</h2>
   <form id="alert-settings" class="settings-form">
@@ -559,6 +596,8 @@ function renderAlerts(){
    <p class="form-error" id="al-error" role="alert" hidden></p>
    <button type="submit" class="button primary" id="al-save">Save settings</button>
   </form></aside></div>`;
+ renderManualSearch();
+ view.querySelectorAll('[data-edit-search]').forEach(b=>b.onclick=()=>chooseManualCard(b.dataset.editSearch,b.dataset.searchGrade));
  const fail=t=>{const e=$('#al-error');e.textContent=t;e.hidden=!t;};
  $('#alert-settings').onsubmit=async e=>{e.preventDefault();fail('');const body={provider:$('#al-provider').value||s.provider||'ebay',enabled:$('#al-enabled').checked,intervalMinutes:Number($('#al-interval').value),useSuggested:$('#al-suggested').checked,includeAuctions:$('#al-auctions').checked,notify:{ntfy:$('#al-ntfy').value.trim(),discord:$('#al-discord').value.trim()}};
   const serpKey=$('#al-serpapi').value.trim();if(serpKey)body.serpapi={apiKey:serpKey};

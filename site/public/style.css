@@ -493,6 +493,11 @@ dialog::backdrop{background:#000000bd}
 .search-row small{display:block;font-size:11px;color:var(--muted)}
 .search-limit{text-align:right;font:600 13px var(--mono)}
 .search-row .button{padding:6px 10px;font-size:12px}
+.search-at-limit{grid-column:4;justify-self:start}
+#manual-search-panel .field{margin-top:12px}
+.manual-search-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#manual-search-panel .inline-actions{flex-wrap:wrap}
+#manual-ebay-query{width:100%}
 .alerts-side{padding:16px 18px 18px}
 .alerts-side h2{font-size:16px;margin:0 0 12px}
 .settings-form{display:flex;flex-direction:column;gap:12px}
@@ -774,6 +779,8 @@ dialog::backdrop{background:#000000bd}
  .alert-actions{justify-content:flex-start}
  .search-row{grid-template-columns:30px minmax(0,1fr) auto}
  .search-row .button{grid-column:2/-1;justify-self:start}
+ .search-at-limit{grid-column:2/-1}
+ .manual-search-controls{grid-template-columns:1fr}
  .chart-legend{padding:0 14px 4px}
  .line-chart{padding:0 6px 4px}
  .panel-sub{padding:14px}

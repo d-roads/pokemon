@@ -6,6 +6,7 @@
 import {gradeOf,conditionOf,collector,EXCLUDED_LISTING} from './sales.mjs';
 import {japaneseTitleMatches} from './japanese.mjs';
 import {analyze} from './analysis.mjs';
+import {manualSearchUrl} from './ebay-links.mjs';
 
 export const EBAY_CATEGORY='183454';
 export const DEFAULT_SETTINGS={enabled:false,provider:'ebay',intervalMinutes:30,includeAuctions:false,useSuggested:true,ebay:{clientId:'',clientSecret:''},serpapi:{apiKey:''},notify:{ntfy:'',discord:''}};
@@ -96,11 +97,8 @@ export function listingPrice(item){
  return {price,shipping,total:Math.round((price+(shipping??0))*100)/100};
 }
 
-export function ebaySearchUrl(card,grade,limit,{auctions=false}={}){
- const p=new URLSearchParams({_nkw:searchQuery(card,grade),_sacat:EBAY_CATEGORY,_sop:'10'});
- if(limit>0)p.set('_udhi',String(Math.floor(limit)));
- if(!auctions)p.set('LH_BIN','1');
- return 'https://www.ebay.com/sch/i.html?'+p.toString();
+export function ebaySearchUrl(card,grade,limit,options={}){
+ return manualSearchUrl(card,grade,limit,options);
 }
 
 let tokenCache=null;

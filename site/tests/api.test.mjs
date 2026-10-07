@@ -89,6 +89,16 @@ test('SerpApi can enable live scans without an eBay account and keeps its key se
  assert.equal((await post({provider:'unknown'})).status,400);
  const cleared=await(await post({enabled:false,serpapi:{clear:true}})).json();assert.equal(cleared.settings.configured,false);
 });
+test('Manual searches expose exact templates, separate price caps and opt-in affiliate tracking',async()=>{
+ await api(req('/api/watchlist','POST',{card_id:'xy5-151',grade:'psa9',target:1499.95},'manual-user'),env);
+ const plain=await(await api(req('/api/alerts','GET',null,'manual-user'),env)).json();
+ assert.equal(plain.affiliate.enabled,false);assert.match(plain.searches[0].query,/Primal Groudon EX Primal Clash 151/);
+ assert.equal(new URL(plain.searches[0].url).searchParams.has('_udhi'),false);
+ assert.equal(new URL(plain.searches[0].limitedUrl).searchParams.get('_udhi'),'1499.95');
+ const affiliate=await(await api(req('/api/alerts','GET',null,'manual-user'),{...env,EBAY_EPN_CAMPAIGN_ID:'5331234567'})).json();
+ assert.equal(affiliate.affiliate.enabled,true);
+ for(const key of ['url','limitedUrl'])assert.equal(new URL(affiliate.searches[0][key]).searchParams.get('campid'),'5331234567');
+});
 test('Movers endpoint returns per-grade lists and rejects unknown periods',async()=>{
  const r=await api(req('/api/movers?period=month'),env);assert.equal(r.status,200);const d=await r.json();
  assert.deepEqual(Object.keys(d.grades),['psa10','psa9','raw']);assert.equal(d.period,'month');assert.ok(d.grades.psa10.movers.length<=20);

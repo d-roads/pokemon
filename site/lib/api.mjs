@@ -1,3 +1,4 @@
+import {manualSearchQuery,affiliateOptions} from './ebay-links.mjs';
 import {cards,sets,series} from '../data/catalog.mjs';
 import {snapshots,observedAt} from '../data/market.mjs';
 import {database} from './db.mjs';
@@ -212,8 +213,9 @@ export async function api(request,env,ctx){
    }else if(request.method!=='GET')return json({error:'Method not allowed.'},405);
    const state=await alertState(db,user),watch=await readWatch(db,user),settings=await readSettings(db,user);
    const cached=await cachedMarkets(db);
-   const searches=watch.map(w=>{const card=cardById.get(w.card_id);if(!card)return null;const limit=alertLimit(w,mergeMarket(snapshots[w.card_id],cached[w.card_id]),settings);return {card_id:w.card_id,grade:w.grade,limit:limit?.limit??null,limit_source:limit?.source??null,url:ebaySearchUrl(card,w.grade,limit?.limit,{auctions:settings.includeAuctions})};}).filter(Boolean);
-   return json({...state,searches});
+   const affiliate=affiliateOptions(env);
+   const searches=watch.map(w=>{const card=cardById.get(w.card_id);if(!card)return null;const limit=alertLimit(w,mergeMarket(snapshots[w.card_id],cached[w.card_id]),settings);return {card_id:w.card_id,grade:w.grade,limit:limit?.limit??null,limit_source:limit?.source??null,query:manualSearchQuery(card,w.grade),url:ebaySearchUrl(card,w.grade,null,{auctions:settings.includeAuctions,affiliate}),limitedUrl:limit?ebaySearchUrl(card,w.grade,limit.limit,{auctions:settings.includeAuctions,affiliate}):null};}).filter(Boolean);
+   return json({...state,searches,affiliate});
   }
   if(path==='/api/alerts/settings'){
    if(!user)return json({error:'Sign in to change alerts.'},401);

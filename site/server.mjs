@@ -32,9 +32,9 @@ const PORT=Number(process.env.PORT||5173);
 const HOST=process.env.HOST||'127.0.0.1';
 // Which build this is, shown in the page so the beta and a local test copy can't be confused.
 const BUILD=buildInfo(JSON.parse(readFileSync(path.join(root,'package.json'),'utf8')).version,process.env.FUTURESIGHT_CHANNEL);
-const env={DB,SENTRY_DSN:process.env.SENTRY_DSN,SENTRY_ENV:process.env.SENTRY_ENV,FUTURESIGHT_SCORE_MODEL:process.env.FUTURESIGHT_SCORE_MODEL,FUTURESIGHT_JA_RESEARCH:process.env.FUTURESIGHT_JA_RESEARCH,NETWORK_DISABLED:/127\.0\.0\.1:9\b/.test(process.env.HTTPS_PROXY||process.env.HTTP_PROXY||'')};
+const env={DB,EBAY_EPN_CAMPAIGN_ID:process.env.EBAY_EPN_CAMPAIGN_ID,EBAY_EPN_CUSTOM_ID:process.env.EBAY_EPN_CUSTOM_ID,SENTRY_DSN:process.env.SENTRY_DSN,SENTRY_ENV:process.env.SENTRY_ENV,FUTURESIGHT_SCORE_MODEL:process.env.FUTURESIGHT_SCORE_MODEL,FUTURESIGHT_JA_RESEARCH:process.env.FUTURESIGHT_JA_RESEARCH,NETWORK_DISABLED:/127\.0\.0\.1:9\b/.test(process.env.HTTPS_PROXY||process.env.HTTP_PROXY||'')};
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.json':'application/json'};
-const SHARED_MODULES=new Set(['analysis.mjs','portfolio.mjs','investment-costs.mjs']);
+const SHARED_MODULES=new Set(['analysis.mjs','portfolio.mjs','investment-costs.mjs','ebay-links.mjs']);
 const PAGE_HEADERS={'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'same-origin','Cache-Control':'no-store'};
 function sendJson(res,status,body,extra={}){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...extra});res.end(JSON.stringify(body));}
 // Through the tunnel every request arrives from this computer, so rate limits use the visitor

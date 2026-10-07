@@ -1,3 +1,4 @@
+import {manualSearchQuery,manualSearchUrl} from '../lib/ebay-links.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -30,7 +31,7 @@ function workspace(){
  const document={querySelector:s=>elements.get(s)||null,querySelectorAll:s=>s==='[data-category]'?categories:[]};
  const responses={'/api/catalog':{cards,sets,series,markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/movers':moverData,'/api/investments':investData,'/api/scores':{grades:scoreData.grades,scores:scoreData.scores},'/api/market':{market:null,score:null},'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
  const calls=[];
- const context=vm.createContext({document,normalizeCosts,costSummary,netReturn,maxBuyPrice,DEFAULT_COSTS,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,calls,fetch:async url=>{const path=url.split('?')[0];calls.push(url);let r=responses[path];if(typeof r==='function')r=r(url);if(r?.__response)return r.__response;const headers=new Headers({'Content-Type':'application/json'});if(r&&r.__status)return {ok:false,status:r.__status,headers,json:async()=>r.body};return {ok:true,status:200,headers,json:async()=>r||{}};}});
+ const context=vm.createContext({document,manualSearchQuery,manualSearchUrl,normalizeCosts,costSummary,netReturn,maxBuyPrice,DEFAULT_COSTS,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,calls,fetch:async url=>{const path=url.split('?')[0];calls.push(url);let r=responses[path];if(typeof r==='function')r=r(url);if(r?.__response)return r.__response;const headers=new Headers({'Content-Type':'application/json'});if(r&&r.__status)return {ok:false,status:r.__status,headers,json:async()=>r.body};return {ok:true,status:200,headers,json:async()=>r||{}};}});
  const source=readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/^import .*;\s*$/gm,'').replace(/init\(\);\s*$/,'');
  vm.runInContext(source,context);
  return {context,responses,calls,e:s=>elements.get(s),run:s=>vm.runInContext(s,context)};
@@ -98,6 +99,22 @@ test('Alerts enables live SerpApi scans without eBay keys and offers the provide
  assert.doesNotMatch(ui.e('#alerts-view').innerHTML,/id="alerts-scan"[^>]*disabled/);
  ui.responses['/api/alerts/scan']={...ui.responses['/api/alerts'],found:0,checked:1,skipped:[],error:null};
  await ui.e('#alerts-scan').onclick();assert.ok(ui.calls.includes('/api/alerts/scan'));
+});
+test('Manual search chooses unwatched cards, edits grade/query/price and preserves affiliate disclosure',async()=>{
+ const ui=workspace();await ui.run('init()');await ui.run('loadAlerts()');ui.run('renderAlerts()');
+ assert.match(ui.e('#manual-search-panel').innerHTML,/does not need to be watched/);
+ ui.run("chooseManualCard('xy5-151','psa9')");
+ assert.match(ui.e('#manual-search-panel').innerHTML,/Primal Groudon EX/);
+ ui.e('#manual-ebay-query').value='Pokemon Groudon 151 PSA9';ui.e('#manual-ebay-query').oninput();
+ assert.equal(new URL(ui.e('#manual-open').href).searchParams.get('_nkw'),'Pokemon Groudon 151 PSA9');
+ ui.e('#manual-price').value='1499.95';ui.e('#manual-price').oninput();assert.equal(new URL(ui.e('#manual-open').href).searchParams.get('_udhi'),'1499.95');
+ ui.e('#manual-grade').value='psa10';ui.e('#manual-grade').onchange();assert.match(ui.run('state.alerts.manual.query'),/PSA 10/);
+ ui.e('#manual-broaden').onclick();assert.doesNotMatch(ui.run('state.alerts.manual.query'),/Primal Clash/);assert.equal(ui.run('state.alerts.manual.price'),'');
+ ui.e('#manual-reset').onclick();assert.match(ui.run('state.alerts.manual.query'),/Primal Clash/);
+ ui.run("state.alerts.data.affiliate={enabled:true,campaignId:'5331234567',customId:'manual'};renderManualSearch()");
+ assert.match(ui.e('#manual-search-panel').innerHTML,/Affiliate link: we may earn a commission/);assert.match(ui.e('#manual-search-panel').innerHTML,/rel="noopener noreferrer sponsored"/);
+ const html=ui.e('#manual-search-panel').innerHTML;assert.match(html,/campid=5331234567/);
+ ui.run("applyAlerts({...state.alerts.data,affiliate:undefined})");assert.equal(ui.run('state.alerts.data.affiliate.campaignId'),'5331234567');
 });
 test('Dex date entry uses bounded month, day, and year controls',async()=>{
  const ui=workspace();await ui.run('init()');ui.run('openDexDialog({})');const form=ui.e('#dex-form').innerHTML;
