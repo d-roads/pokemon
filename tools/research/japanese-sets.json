@@ -1,5 +1,5 @@
 {
- "note": "Japanese sets covered by FutureSight. English names follow PriceCharting where its console list (fetched Oct 6, 2026, partial) shows them; pricechartingListed=false means the console slug is a best guess that Task 2 must confirm before capture. Card lists come from TCGdex (MIT).",
+ "note": "Japanese sets covered by FutureSight. English names follow PriceCharting. pricechartingListed=true means the console was confirmed to exist on PriceCharting on Oct 7, 2026 (category page, direct check or site search); false means unconfirmed (the set is not mapped until fixed). DP1a/DP1b share PriceCharting's 'Space-Time' console. Card lists come from TCGdex (MIT).",
  "sets": [
   {
    "tcgdex": "PMCG1",
@@ -95,7 +95,7 @@
    "era": "WOTC",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-web",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "E1",
@@ -142,7 +142,7 @@
    "name": "ADV Expansion Pack",
    "era": "EX",
    "kind": "expansion",
-   "pricecharting": "pokemon-japanese-adv-expansion-pack",
+   "pricecharting": null,
    "pricechartingListed": false
   },
   {
@@ -151,7 +151,7 @@
    "era": "EX",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-miracle-of-the-desert",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "ADV3",
@@ -159,7 +159,7 @@
    "era": "EX",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-rulers-of-the-heavens",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "ADV4",
@@ -167,7 +167,7 @@
    "era": "EX",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-magma-vs-aqua-two-ambitions",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "ADV5",
@@ -175,7 +175,7 @@
    "era": "EX",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-undone-seal",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "PCG1",
@@ -183,7 +183,7 @@
    "era": "EX",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-flight-of-legends",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "PCG2",
@@ -215,7 +215,7 @@
    "era": "EX",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-mirage-forest",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "PCG6",
@@ -239,7 +239,7 @@
    "era": "EX",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-miracle-crystal",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "PCG9",
@@ -255,23 +255,23 @@
    "era": "EX",
    "kind": "special",
    "pricecharting": "pokemon-japanese-world-champions-pack",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "DP1a",
    "name": "Space-Time Creation: Diamond Collection",
    "era": "DP",
    "kind": "expansion",
-   "pricecharting": "pokemon-japanese-space-time-creation-diamond-collection",
-   "pricechartingListed": false
+   "pricecharting": "pokemon-japanese-space-time",
+   "pricechartingListed": true
   },
   {
    "tcgdex": "DP1b",
    "name": "Space-Time Creation: Pearl Collection",
    "era": "DP",
    "kind": "expansion",
-   "pricecharting": "pokemon-japanese-space-time-creation-pearl-collection",
-   "pricechartingListed": false
+   "pricecharting": "pokemon-japanese-space-time",
+   "pricechartingListed": true
   },
   {
    "tcgdex": "DP2",
@@ -279,7 +279,7 @@
    "era": "DP",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-secret-of-the-lakes",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "DP3",
@@ -295,7 +295,7 @@
    "era": "DP",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-moonlit-pursuit",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "DP4b",
@@ -303,7 +303,7 @@
    "era": "DP",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-dawn-dash",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "DP5a",
@@ -311,7 +311,7 @@
    "era": "DP",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-cry-from-the-mysterious",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "DP5b",
@@ -319,7 +319,7 @@
    "era": "DP",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-temple-of-anger",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "DP6",
@@ -327,7 +327,7 @@
    "era": "DP",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-intense-fight-in-the-destroyed-sky",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "Pt1",
@@ -335,7 +335,7 @@
    "era": "DP",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-galactic%27s-conquest",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "Pt2",
@@ -343,7 +343,7 @@
    "era": "DP",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-bonds-to-the-end-of-time",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "Pt3",
@@ -367,7 +367,7 @@
    "era": "DP",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-heartgold-collection",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "L1b",
@@ -375,7 +375,7 @@
    "era": "DP",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-soulsilver-collection",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "L2",
@@ -383,7 +383,7 @@
    "era": "DP",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-reviving-legends",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "LL",
@@ -391,7 +391,7 @@
    "era": "DP",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-lost-link",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "L3",
@@ -399,7 +399,7 @@
    "era": "DP",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-clash-at-the-summit",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "BW1a",
@@ -407,7 +407,7 @@
    "era": "BW",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-black-collection",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "BW1b",
@@ -415,7 +415,7 @@
    "era": "BW",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-white-collection",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "BW2",
@@ -423,7 +423,7 @@
    "era": "BW",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-red-collection",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "BW3a",
@@ -431,7 +431,7 @@
    "era": "BW",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-psycho-drive",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "BW3b",
@@ -439,7 +439,7 @@
    "era": "BW",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-hail-blizzard",
-   "pricechartingListed": false,
+   "pricechartingListed": true,
    "release": "2011-09-16",
    "printedTotal": 52
   },
@@ -449,7 +449,7 @@
    "era": "BW",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-dark-rush",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "DS",
@@ -457,7 +457,7 @@
    "era": "BW",
    "kind": "special",
    "pricecharting": "pokemon-japanese-dragon-selection",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "BW5a",
@@ -465,7 +465,7 @@
    "era": "BW",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-dragon-blast",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "BW5b",
@@ -473,7 +473,7 @@
    "era": "BW",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-dragon-blade",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "BW6a",
@@ -481,7 +481,7 @@
    "era": "BW",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-freeze-bolt",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "BW6b",
@@ -489,7 +489,7 @@
    "era": "BW",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-cold-flare",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "BW7",
@@ -497,7 +497,7 @@
    "era": "BW",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-plasma-gale",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "BW8a",
@@ -505,7 +505,7 @@
    "era": "BW",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-spiral-force",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "BW8b",
@@ -513,7 +513,7 @@
    "era": "BW",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-thunder-knuckle",
-   "pricechartingListed": false,
+   "pricechartingListed": true,
    "release": "2012-12-14",
    "printedTotal": 51
   },
@@ -531,7 +531,7 @@
    "era": "BW",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-megalo-cannon",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "EBB",
@@ -539,7 +539,7 @@
    "era": "BW",
    "kind": "special",
    "pricecharting": "pokemon-japanese-ex-battle-boost",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "XY1a",
@@ -547,7 +547,7 @@
    "era": "XY",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-collection-x",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "XY1b",
@@ -555,7 +555,7 @@
    "era": "XY",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-collection-y",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "XY2",
@@ -563,7 +563,7 @@
    "era": "XY",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-wild-blaze",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "XY3",
@@ -571,7 +571,7 @@
    "era": "XY",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-rising-fist",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "XY4",
@@ -587,7 +587,7 @@
    "era": "XY",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-gaia-volcano",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "XY5b",
@@ -595,7 +595,7 @@
    "era": "XY",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-tidal-storm",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "CP1",
@@ -603,7 +603,7 @@
    "era": "XY",
    "kind": "special",
    "pricecharting": "pokemon-japanese-double-crisis",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "XY6",
@@ -611,7 +611,7 @@
    "era": "XY",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-emerald-break",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "XY7",
@@ -635,7 +635,7 @@
    "era": "XY",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-blue-shock",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "XY8b",
@@ -643,7 +643,7 @@
    "era": "XY",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-red-flash",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "XY9",
@@ -651,7 +651,7 @@
    "era": "XY",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-rage-of-the-broken-heavens",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "CP3",
@@ -667,7 +667,7 @@
    "era": "XY",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-awakening-psychic-king",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "CP4",
@@ -675,15 +675,15 @@
    "era": "XY",
    "kind": "special",
    "pricecharting": "pokemon-japanese-premium-champion-pack",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "XY11a",
    "name": "Explosive Fighter",
    "era": "XY",
    "kind": "expansion",
-   "pricecharting": "pokemon-japanese-explosive-fighter",
-   "pricechartingListed": false
+   "pricecharting": "pokemon-japanese-fever-burst-fighter",
+   "pricechartingListed": true
   },
   {
    "tcgdex": "XY11b",
@@ -691,7 +691,7 @@
    "era": "XY",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-cruel-traitor",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "CP5",
@@ -722,8 +722,8 @@
    "name": "Pikachu's New Friends",
    "era": "SM",
    "kind": "special",
-   "pricecharting": "pokemon-japanese-pikachu%27s-new-friends",
-   "pricechartingListed": false
+   "pricecharting": "pokemon-japanese-sun-&-moon-new-friends",
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM1M",
@@ -731,7 +731,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-collection-moon",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM1S",
@@ -739,15 +739,15 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-collection-sun",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM1p",
    "name": "Sun & Moon Strengthening Expansion",
    "era": "SM",
    "kind": "expansion",
-   "pricecharting": "pokemon-japanese-sun-&-moon-strengthening-expansion",
-   "pricechartingListed": false
+   "pricecharting": "pokemon-japanese-strength-expansion-pack-sun-&-moon",
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM2K",
@@ -755,7 +755,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-islands-await-you",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM2L",
@@ -770,16 +770,16 @@
    "name": "Beyond a New Challenge",
    "era": "SM",
    "kind": "expansion",
-   "pricecharting": "pokemon-japanese-beyond-a-new-challenge",
-   "pricechartingListed": false
+   "pricecharting": "pokemon-japanese-facing-a-new-trial",
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM3H",
    "name": "To Have Seen the Battle Rainbow",
    "era": "SM",
    "kind": "expansion",
-   "pricecharting": "pokemon-japanese-to-have-seen-the-battle-rainbow",
-   "pricechartingListed": false
+   "pricecharting": "pokemon-japanese-battle-rainbow",
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM3N",
@@ -787,7 +787,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-darkness-that-consumes-light",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM3p",
@@ -803,7 +803,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-ultradimensional-beasts",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM4S",
@@ -811,7 +811,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-awakened-heroes",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM4p",
@@ -827,7 +827,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-ultra-moon",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM5S",
@@ -835,7 +835,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-ultra-sun",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM5p",
@@ -843,7 +843,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-ultra-force",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM6",
@@ -851,7 +851,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-forbidden-light",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM6a",
@@ -859,7 +859,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-dragon-storm",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM6b",
@@ -867,15 +867,15 @@
    "era": "SM",
    "kind": "special",
    "pricecharting": "pokemon-japanese-champion-road",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM7",
    "name": "Charisma of the Wrecked Sky",
    "era": "SM",
    "kind": "expansion",
-   "pricecharting": "pokemon-japanese-charisma-of-the-wrecked-sky",
-   "pricechartingListed": false
+   "pricecharting": "pokemon-japanese-sky-splitting-charisma",
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM7a",
@@ -883,7 +883,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-thunderclap-spark",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM7b",
@@ -891,15 +891,15 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-fairy-rise",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM8",
    "name": "Explosive Impact",
    "era": "SM",
    "kind": "expansion",
-   "pricecharting": "pokemon-japanese-explosive-impact",
-   "pricechartingListed": false
+   "pricecharting": "pokemon-japanese-super-burst-impact",
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM8a",
@@ -907,7 +907,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-dark-order",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM8b",
@@ -931,7 +931,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-night-unison",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM9b",
@@ -939,7 +939,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-full-metal-wall",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM10",
@@ -955,7 +955,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-gg-end",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM10b",
@@ -963,7 +963,7 @@
    "era": "SM",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-sky-legend",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SMP2",
@@ -971,7 +971,7 @@
    "era": "SM",
    "kind": "special",
    "pricecharting": "pokemon-japanese-detective-pikachu",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "SM11",
@@ -1019,7 +1019,7 @@
    "era": "SWSH",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-shield",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "S1W",
@@ -1027,7 +1027,7 @@
    "era": "SWSH",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-sword",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "S1a",
@@ -1035,15 +1035,15 @@
    "era": "SWSH",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-vmax-rising",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "S2",
    "name": "Rebellion Crash",
    "era": "SWSH",
    "kind": "expansion",
-   "pricecharting": "pokemon-japanese-rebellion-crash",
-   "pricechartingListed": false
+   "pricecharting": "pokemon-japanese-rebel-clash",
+   "pricechartingListed": true
   },
   {
    "tcgdex": "S2a",
@@ -1051,7 +1051,7 @@
    "era": "SWSH",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-explosive-walker",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "S3",
@@ -1059,7 +1059,7 @@
    "era": "SWSH",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-infinity-zone",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "S3a",
@@ -1067,7 +1067,7 @@
    "era": "SWSH",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-legendary-heartbeat",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "S4",
@@ -1091,7 +1091,7 @@
    "era": "SWSH",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-single-strike-master",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "S5R",
@@ -1099,14 +1099,14 @@
    "era": "SWSH",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-rapid-strike-master",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "S5a",
    "name": "Matchless Fighters",
    "era": "SWSH",
    "kind": "expansion",
-   "pricecharting": "pokemon-japanese-matchless-fighters",
+   "pricecharting": null,
    "pricechartingListed": false
   },
   {
@@ -1115,7 +1115,7 @@
    "era": "SWSH",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-silver-lance",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "S6K",
@@ -1123,7 +1123,7 @@
    "era": "SWSH",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-jet-black-spirit",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "S6a",
@@ -1139,7 +1139,7 @@
    "era": "SWSH",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-skyscraping-perfection",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "S7R",
@@ -1195,7 +1195,7 @@
    "era": "SWSH",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-time-gazer",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "S10P",
@@ -1203,7 +1203,7 @@
    "era": "SWSH",
    "kind": "expansion",
    "pricecharting": "pokemon-japanese-space-juggler",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "tcgdex": "S10a",
@@ -1595,8 +1595,8 @@
    "name": "30th Celebration Premium Deck Set: Espeon & Umbreon",
    "era": "ME",
    "kind": "deck",
-   "pricecharting": null,
-   "pricechartingListed": false
+   "pricecharting": "pokemon-japanese-30th-celebration-premium-deck",
+   "pricechartingListed": true
   }
  ]
 }

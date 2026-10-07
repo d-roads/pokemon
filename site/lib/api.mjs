@@ -15,6 +15,7 @@ import {analyze} from './analysis.mjs';
 import {recordObservations} from './observations.mjs';
 import {investmentTable,investmentView,scoreMode,modelVersion,archiveScores} from './investment.mjs';
 import {DEFAULT_COSTS,maxBuyPrice,netReturn,COST_PROFILE_VERSION} from './investment-costs.mjs';
+import {parseJapaneseListing,matchJapaneseListing,listingGuide,JA_MAP_VERSION} from './japanese.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const cardById=new Map(cards.map(c=>[c.id,c]));
 const seriesIds=series.map(item=>item.id);
@@ -25,6 +26,35 @@ async function readWatch(db,user){const r=await db.prepare('SELECT card_id,grade
 async function readCollection(db,user){const r=await db.prepare('SELECT id,card_id,grade,quantity,purchase_price,purchase_date,notes,created_at,updated_at FROM collection WHERE user_id = ? ORDER BY COALESCE(purchase_date,substr(created_at,1,10)) DESC,id DESC').bind(user).all();return r.results||[];}
 // Every capture is also appended to the observation log (best effort: a logging failure never blocks a refresh).
 async function logCapture(db,env,ctx,card,captured){try{await recordObservations(db,card,captured);}catch(e){console.error('Observation log:',e.message);ctx?.waitUntil?.(reportError(env,e,{source:'observations'}));}}
+// Japanese cards get their price source when their set is mapped (source_map). The mapping is
+// loaded once per process and applied to the catalog's card objects, so every route sees it.
+let sourceMapLoaded=null;
+function applySource(card,row){card.source=row.url;card.sourceVerified=true;if(row.name)card.pcName=row.name;if(row.product_id)card.pcProductId=row.product_id;}
+// Tests reset the mapping between databases.
+export function forgetSourceMap(){sourceMapLoaded=null;for(const c of cards)if(c.japanese){c.source=null;c.sourceVerified=false;delete c.pcName;delete c.pcProductId;}}
+async function ensureSourceMap(db){
+ if(!sourceMapLoaded)sourceMapLoaded=(async()=>{const r=await db.prepare('SELECT card_id,url,product_id,name FROM source_map').all();for(const row of r.results||[]){const c=cardById.get(row.card_id);if(c&&c.japanese)applySource(c,row);}})().catch(e=>{sourceMapLoaded=null;throw e;});
+ return sourceMapLoaded;
+}
+// Read every page of a Japanese set's listing, match products to cards, save the matches and their guide prices.
+async function mapJapaneseSet(db,env,ctx,set){
+ if(!set.marketSource)return {mapped:0,unmatched:[],warning:'This Japanese set has no price-guide listing.'};
+ const rows=[];let cursor=null,pages=0;const seen=new Set();
+ do{const html=await sourceFetch(set.marketSource+'?view=table'+(cursor?'&cursor='+encodeURIComponent(cursor):''),env);const page=parseJapaneseListing(html);rows.push(...page.rows);cursor=page.cursor;pages++;if(cursor&&seen.has(cursor))break;if(cursor)seen.add(cursor);}while(cursor&&pages<20);
+ const setCards=cards.filter(c=>c.setId===set.id&&c.eligible),{matches,unmatched}=matchJapaneseListing(rows,setCards),now=new Date().toISOString(),cached=await cachedMarkets(db),markets={},sources={};
+ const statements=[];
+ for(const [id,row] of matches){
+  const card=cardById.get(id),url='https://www.pricecharting.com'+row.path;
+  statements.push(db.prepare('INSERT INTO source_map (card_id,url,product_id,name,rule,map_version,mapped_at) VALUES (?,?,?,?,?,?,?) ON CONFLICT(card_id) DO UPDATE SET url=excluded.url,product_id=excluded.product_id,name=excluded.name,rule=excluded.rule,map_version=excluded.map_version,mapped_at=excluded.mapped_at').bind(id,url,row.productId,row.name,row.rule,JA_MAP_VERSION,now));
+  applySource(card,{url,product_id:row.productId,name:row.name});sources[id]={source:url,name:row.name};
+  const g=listingGuide(row,card,now);if(!Object.keys(g.guide).length)continue;
+  const m=mergeMarket(mergeMarket(snapshots[id],cached[id]),g);markets[id]=m;
+  statements.push(db.prepare('INSERT INTO market_cache (card_id,payload,fetched_at) VALUES (?,?,?) ON CONFLICT(card_id) DO UPDATE SET payload=excluded.payload,fetched_at=excluded.fetched_at').bind(id,JSON.stringify(m),m.observedAt));
+  await logCapture(db,env,ctx,card,g);
+ }
+ if(statements.length)await db.batch(statements);
+ return {mapped:matches.size,total:setCards.length,unmatched,pages,sources,markets:Object.fromEntries(Object.entries(markets).map(([id,m])=>[id,lightMarket(m)]))};
+}
 async function saveMarket(db,card,market){await db.prepare('INSERT INTO market_cache (card_id,payload,fetched_at) VALUES (?,?,?) ON CONFLICT(card_id) DO UPDATE SET payload=excluded.payload,fetched_at=excluded.fetched_at').bind(card.id,JSON.stringify(market),market.observedAt).run();}
 async function input(request){if(!request.headers.get('Content-Type')?.includes('application/json'))throw new Error('Send JSON data.');const raw=await request.text();if(raw.length>8192)throw new Error('The request was too large.');const body=JSON.parse(raw);if(!isPlainObject(body))throw new Error('Send a JSON object.');return body;}
 export async function readSettings(db,user){const row=await db.prepare('SELECT payload FROM alert_settings WHERE user_id = ?').bind(user).first();return normalizeSettings(row?JSON.parse(row.payload):DEFAULT_SETTINGS);}
@@ -85,6 +115,7 @@ export async function scanForUser(env,user,options={}){
  return runScan({db,user,cards,marketFor:id=>mergeMarket(snapshots[id],markets[id]),settings,fetchImpl:env.fetch||fetch,...options});
 }
 export async function api(request,env,ctx){
+ if(env.DB)await ensureSourceMap(database(env)).catch(e=>console.error('Source map:',e.message));
  const url=new URL(request.url),path=url.pathname;
  try{
   const db=database(env),user=env.LOCAL_USER_ID||request.headers.get('oai-authenticated-user-id');
@@ -201,17 +232,20 @@ export async function api(request,env,ctx){
    let market=await fullMarket(db,card.id);const mode=scoreMode(env);
    const extras=async()=>({score:(await scoreTable(db)).full.get(card.id)||null,investment:mode==='legacy'?null:marketInvestment(await researchFor(db,mode),card,market)});
    if(url.searchParams.get('refresh')==='1'){
-    if(!card.source)return json({market,refreshed:false,warning:'Japanese prices are not loaded yet. They arrive once each Japanese card is matched to its exact price-guide product.',...await extras()});
-    try{const live=parseMarket(await sourceFetch(card.source,env),card);market=mergeMarket(market,live);await saveMarket(db,card,market);await logCapture(db,env,ctx,card,live);return json({market,refreshed:true,...await extras()});}
-    catch(e){return json({market,refreshed:false,warning:e.message,...await extras()});}
+    let mapping=null;
+    if(card.japanese&&!card.source){try{mapping=await mapJapaneseSet(db,env,ctx,sets.find(s=>s.id===card.setId));market=await fullMarket(db,card.id);}catch(e){return json({market,refreshed:false,warning:e.message,...await extras()});}}
+    if(card.japanese&&!card.source)return json({market,refreshed:false,mapping,warning:'No exact price-guide product was found for this Japanese card, so it stays unpriced.',...await extras()});
+    if(!card.source)return json({market,refreshed:false,warning:card.japanese?'No exact price-guide product was found for this Japanese card.':'This card has no price source.',...await extras()});
+    try{const live=parseMarket(await sourceFetch(card.source,env),card);market=mergeMarket(market,live);await saveMarket(db,card,market);await logCapture(db,env,ctx,card,live);return json({market,refreshed:true,mapping,...await extras()});}
+    catch(e){return json({market,refreshed:false,mapping,warning:e.message,...await extras()});}
    }
    return json({market,refreshed:false,...await extras()});
   }
   if(path==='/api/refresh' && request.method==='POST'){
    const set=sets.find(s=>s.id===(url.searchParams.get('set')||'xy5'));
    if(!set)return json({error:'Choose a set to refresh.'},400);
-   // Japanese sets have no verified price products yet (Japanese work, task 2).
-   if(set.lang==='ja')return json({refreshed:false,count:0,warning:'Japanese prices are not loaded yet. They arrive once each Japanese card is matched to its exact price-guide product.'});
+   // Japanese sets: match every card to its exact product, then save those products' guide prices.
+   if(set.lang==='ja'){try{const r=await mapJapaneseSet(db,env,ctx,set);return json({refreshed:r.mapped>0,count:r.mapped,...r});}catch(e){return json({refreshed:false,count:0,warning:e.message});}}
    try{
     const guides=parseSet(await sourceFetch(set.marketSource,env),cards.filter(c=>c.setId===set.id&&c.eligible)),cached=await cachedMarkets(db),markets={};
     for(const [id,g] of Object.entries(guides)){const previous=mergeMarket(snapshots[id],cached[id]);markets[id]=mergeMarket(previous,g);await logCapture(db,env,ctx,cardById.get(id),g);}
@@ -225,7 +259,8 @@ export async function api(request,env,ctx){
    if(scopeId!=='all'&&!era&&!sets.some(s=>s.id===scopeId))return json({error:'Choose a supported set.'},400);
    if(era&&!series.some(s=>s.id===era))return json({error:'Choose a supported era.'},400);
    // Only cards with a price source are fetched; Japanese cards join once their products are verified.
-   const scope=cards.filter(c=>c.eligible&&c.source&&(scopeId==='all'||(era?c.series===era:c.setId===scopeId)));
+   const lang=url.searchParams.get('lang');if(lang&&!LANGUAGES.includes(lang))return json({error:'Choose English or Japanese.'},400);
+   const scope=cards.filter(c=>c.eligible&&c.source&&(!lang||langOf(c)===lang)&&(scopeId==='all'||(era?c.series===era:c.setId===scopeId)));
    if(!Number.isInteger(offset)||offset<0||offset>scope.length)return json({error:'Invalid sales batch.'},400);
    if(env.NETWORK_DISABLED)return json({refreshed:false,attempted:0,total:scope.length,done:true,warning:'Live sales refresh is unavailable in this workspace. Showing the last researched sales.'});
    const batch=scope.slice(offset,offset+4),cached=await cachedMarkets(db),markets={},failures=[];

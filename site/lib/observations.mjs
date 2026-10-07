@@ -40,7 +40,7 @@ export function observationRows(card,market,{recordedAt=new Date().toISOString()
  const sales=(market.sales||[]).filter(s=>s.price>0&&/^\d{4}-\d{2}-\d{2}$/.test(s.date)&&s.date<=capturedAt.slice(0,10)&&['raw','psa9','psa10'].includes(s.grade)).map(s=>{
   const listing=String(s.id||[s.date,s.price,s.title].join('|'));
   const content={date:s.date,price:s.price,grade:s.grade,condition:s.condition||'',title:s.title||'',marketplace:s.marketplace||''};
-  return {card_id:card.id,printing:card.printing||null,language:'en',grade:s.grade,grader:s.grade==='raw'?null:'PSA',condition:s.grade==='raw'?(s.condition||'Unknown'):null,event_at:s.date,available_at:capturedAt,captured_at:capturedAt,listing_id:listing,marketplace:s.marketplace||null,currency:'USD',price:s.price,price_basis:SALE_BASIS,source_url:s.source||source,parser_version:parser,completeness,content_hash:contentHash(content),recorded_at:recordedAt};
+  return {card_id:card.id,printing:card.printing||null,language:card.lang||'en',grade:s.grade,grader:s.grade==='raw'?null:'PSA',condition:s.grade==='raw'?(s.condition||'Unknown'):null,event_at:s.date,available_at:capturedAt,captured_at:capturedAt,listing_id:listing,marketplace:s.marketplace||null,currency:'USD',price:s.price,price_basis:SALE_BASIS,source_url:s.source||source,parser_version:parser,completeness,content_hash:contentHash(content),recorded_at:recordedAt};
  });
  const guides=[];
  for(const [key,value] of Object.entries(market.guide||{}))if(value>0&&GUIDE_BASIS[key])guides.push({card_id:card.id,guide:key,period:'current',price:value,price_basis:GUIDE_BASIS[key],event_at:capturedAt,available_at:capturedAt,captured_at:capturedAt,source_url:source,parser_version:parser,content_hash:contentHash([value]),recorded_at:recordedAt});

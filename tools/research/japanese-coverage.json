@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-07T02:14:58.591Z",
+ "generatedAt": "2026-10-07T03:47:43.097Z",
  "source": "https://github.com/tcgdex/cards-database (MIT)",
  "englishSetPairs": 146,
  "englishSetPairProblems": [
@@ -145,7 +145,7 @@
    "eligible": 15,
    "linked": 6,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-web",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-e1",
@@ -205,7 +205,7 @@
    "eligible": 45,
    "linked": 26,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-flight-of-legends",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-pcg2",
@@ -245,7 +245,7 @@
    "eligible": 48,
    "linked": 29,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-mirage-forest",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-pcg6",
@@ -275,7 +275,7 @@
    "eligible": 39,
    "linked": 26,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-miracle-crystal",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-pcg9",
@@ -295,7 +295,7 @@
    "eligible": 8,
    "linked": 5,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-double-crisis",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-cp2",
@@ -315,7 +315,7 @@
    "eligible": 25,
    "linked": 13,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-collection-moon",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm1s",
@@ -325,7 +325,7 @@
    "eligible": 25,
    "linked": 13,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-collection-sun",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm1p",
@@ -334,8 +334,8 @@
    "era": "SM",
    "eligible": 24,
    "linked": 12,
-   "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-sun-&-moon-strengthening-expansion",
-   "pricechartingListed": false
+   "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-strength-expansion-pack-sun-&-moon",
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm2k",
@@ -345,7 +345,7 @@
    "eligible": 21,
    "linked": 11,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-islands-await-you",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm2l",
@@ -364,8 +364,8 @@
    "era": "SM",
    "eligible": 22,
    "linked": 12,
-   "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-beyond-a-new-challenge",
-   "pricechartingListed": false
+   "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-facing-a-new-trial",
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm3h",
@@ -374,8 +374,8 @@
    "era": "SM",
    "eligible": 23,
    "linked": 11,
-   "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-to-have-seen-the-battle-rainbow",
-   "pricechartingListed": false
+   "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-battle-rainbow",
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm3n",
@@ -385,7 +385,7 @@
    "eligible": 23,
    "linked": 12,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-darkness-that-consumes-light",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm3p",
@@ -405,7 +405,7 @@
    "eligible": 22,
    "linked": 13,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-ultradimensional-beasts",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm4s",
@@ -415,7 +415,7 @@
    "eligible": 23,
    "linked": 12,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-awakened-heroes",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm4p",
@@ -435,7 +435,7 @@
    "eligible": 26,
    "linked": 15,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-ultra-moon",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm5s",
@@ -445,7 +445,7 @@
    "eligible": 26,
    "linked": 16,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-ultra-sun",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm5p",
@@ -455,7 +455,7 @@
    "eligible": 19,
    "linked": 8,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-ultra-force",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm6",
@@ -465,7 +465,7 @@
    "eligible": 34,
    "linked": 15,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-forbidden-light",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm6a",
@@ -475,7 +475,7 @@
    "eligible": 26,
    "linked": 15,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-dragon-storm",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm6b",
@@ -485,7 +485,7 @@
    "eligible": 35,
    "linked": 19,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-champion-road",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm7",
@@ -494,8 +494,8 @@
    "era": "SM",
    "eligible": 34,
    "linked": 21,
-   "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-charisma-of-the-wrecked-sky",
-   "pricechartingListed": false
+   "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-sky-splitting-charisma",
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm7a",
@@ -505,7 +505,7 @@
    "eligible": 26,
    "linked": 13,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-thunderclap-spark",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm7b",
@@ -515,7 +515,7 @@
    "eligible": 25,
    "linked": 13,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-fairy-rise",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm8",
@@ -524,8 +524,8 @@
    "era": "SM",
    "eligible": 34,
    "linked": 19,
-   "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-explosive-impact",
-   "pricechartingListed": false
+   "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-super-burst-impact",
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm8a",
@@ -535,7 +535,7 @@
    "eligible": 26,
    "linked": 13,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-dark-order",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm8b",
@@ -565,7 +565,7 @@
    "eligible": 30,
    "linked": 19,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-night-unison",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm9b",
@@ -575,7 +575,7 @@
    "eligible": 30,
    "linked": 19,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-full-metal-wall",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm10",
@@ -595,7 +595,7 @@
    "eligible": 30,
    "linked": 20,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-gg-end",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm10b",
@@ -605,7 +605,7 @@
    "eligible": 30,
    "linked": 17,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-sky-legend",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-sm11",
@@ -665,7 +665,7 @@
    "eligible": 38,
    "linked": 35,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-single-strike-master",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-s6h",
@@ -675,7 +675,7 @@
    "eligible": 42,
    "linked": 34,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-silver-lance",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-s6k",
@@ -685,7 +685,7 @@
    "eligible": 42,
    "linked": 28,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-jet-black-spirit",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-s7d",
@@ -695,7 +695,7 @@
    "eligible": 40,
    "linked": 30,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-skyscraping-perfection",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-s8",
@@ -745,7 +745,7 @@
    "eligible": 38,
    "linked": 26,
    "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-space-juggler",
-   "pricechartingListed": false
+   "pricechartingListed": true
   },
   {
    "set": "ja-s10a",
@@ -1224,8 +1224,8 @@
    "era": "ME",
    "eligible": 6,
    "linked": 2,
-   "pricecharting": null,
-   "pricechartingListed": false
+   "pricecharting": "https://www.pricecharting.com/console/pokemon-japanese-30th-celebration-premium-deck",
+   "pricechartingListed": true
   }
  ],
  "missingCardLists": [

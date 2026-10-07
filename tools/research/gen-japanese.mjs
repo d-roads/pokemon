@@ -127,7 +127,7 @@ for(const row of table){
  const release=row.release||dateOf(ts?.releaseDate,'ja')||null;
  const printedTotal=row.printedTotal??(ts?.cardCount?.official||null);
  const id='ja-'+row.tcgdex.toLowerCase().replace(/[^a-z0-9]+/g,'');
- const set={id,lang:'ja',tcgdexId:row.tcgdex,name:row.name,nameJa:ts?.name?.ja||null,series:row.era,kind:row.kind,printedTotal:printedTotal||null,total:list.length,release,slug:row.pricecharting?row.pricecharting.replace(/^pokemon-/,''):null,marketSource:row.pricecharting?'https://www.pricecharting.com/console/'+row.pricecharting:null,marketSourceListed:row.pricechartingListed,checklistSource:'https://github.com/tcgdex/cards-database/tree/master/data-asia/'+(ts?.serie||'')+'/'+row.tcgdex,cards:[]};
+ const set={id,lang:'ja',tcgdexId:row.tcgdex,name:row.name,nameJa:ts?.name?.ja||null,series:row.era,kind:row.kind,printedTotal:printedTotal||null,total:list.length,release,slug:row.pricecharting?row.pricecharting.replace(/^pokemon-/,''):null,marketSource:row.pricecharting&&row.pricechartingListed?'https://www.pricecharting.com/console/'+row.pricecharting:null,marketSourceListed:row.pricechartingListed,checklistSource:'https://github.com/tcgdex/cards-database/tree/master/data-asia/'+(ts?.serie||'')+'/'+row.tcgdex,cards:[]};
  if(!release){report.missingCardLists.push({set:id,name:row.name,problem:'no release date'});continue;}
  if(!list.length){report.missingCardLists.push({set:id,tcgdex:row.tcgdex,name:row.name,era:row.era,release,printedTotal});continue;}
  for(const c of list){

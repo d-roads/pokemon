@@ -4,6 +4,7 @@
 // eBay developer keys. Every listing is re-checked against the card number, grade and listing
 // exclusions before it can become an alert, and each listing alerts only once.
 import {gradeOf,conditionOf,collector,EXCLUDED_LISTING} from './sales.mjs';
+import {japaneseTitleMatches} from './japanese.mjs';
 import {analyze} from './analysis.mjs';
 
 export const EBAY_CATEGORY='183454';
@@ -44,12 +45,21 @@ export function ntfyUrl(value){
 export function searchQuery(card,grade){
  const core=card.name.replace(/^M\s+/,'').replace(/\s*(?:EX|BREAK)$/,'').replace(/[^\p{L}\p{N}' .-]/gu,' ').replace(/\s+/g,' ').trim();
  const num=String(card.number).toUpperCase().startsWith('XY')?'XY'+Number(String(card.number).slice(2)):String(card.number);
+ // Japanese printings are searched as Japanese listings; WOTC-era ones by Pokédex number, as they are sold.
+ if(card.japanese)return ['pokemon','japanese',(card.pcName||core).replace(/[^\p{L}\p{N}' .-]/gu,' ').replace(/\s+/g,' ').trim(),card.series==='WOTC'&&card.dexId?.length===1?String(card.dexId[0]):num,GRADE_QUERY[grade]].filter(Boolean).join(' ');
  return ['pokemon',core,num,GRADE_QUERY[grade]].filter(Boolean).join(' ');
 }
 
 const words=s=>s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim().split(' ').filter(Boolean);
 export function listingMatches(title,card,grade){
  const t=String(title||'');
+ if(card.japanese){
+  if(!t||/\b(?:you pick|pick your|choose|complete set|binder|booster (?:pack|box)|sealed|(?:case|pack|box) break)\b/i.test(t))return false;
+  if(gradeOf(t)!==grade)return false;
+  if(grade==='raw'&&['Damaged','HP','MP'].includes(conditionOf(t)))return false;
+  // Must say Japanese, and pass the Japanese title rules (name, number, no other language).
+  return /japanese|\bjpn\b|\bjp\b|\bjapan\b/i.test(t)&&japaneseTitleMatches(t,card);
+ }
  if(!t||EXCLUDED_LISTING.test(t)||/\b(?:you pick|pick your|choose|complete set|binder|booster (?:pack|box)|sealed|(?:case|pack|box) break)\b/i.test(t))return false;
  if((t.match(/\s&\s/g)||[]).length>(card.name.match(/\s&\s/g)||[]).length)return false;
  if(gradeOf(t)!==grade)return false;
@@ -140,7 +150,7 @@ export async function runScan({db,user,cards,marketFor,settings,fetchImpl=fetch,
   for(const w of watch.slice(0,60)){
    const card=byId.get(w.card_id);if(!card){skipped.push({card_id:w.card_id,grade:w.grade,reason:'Not in catalog'});continue;}
    // Listing matching rejects Japanese titles for English cards; Japanese cards need their own rules (task 2).
-   if(card.japanese){skipped.push({card_id:w.card_id,grade:w.grade,reason:'Listing alerts for Japanese cards are not available yet.'});continue;}
+   if(card.japanese&&!card.source){skipped.push({card_id:w.card_id,grade:w.grade,reason:'This Japanese card has no matched price product yet. Refresh its set first.'});continue;}
    const market=marketFor(card.id),limit=alertLimit(w,market,s,now);
    if(!limit){skipped.push({card_id:w.card_id,grade:w.grade,reason:'No buy limit yet. Set one on the card to get alerts.'});continue;}
    const items=await searchListings(card,w.grade,limit.limit,s,{fetchImpl,token});checked++;

@@ -44,7 +44,7 @@ export function parseMarket(html,card,now=new Date().toISOString()){
  if(card.japanese&&!card.sourceVerified)throw new Error('Japanese prices are not loaded yet. They arrive once each Japanese card is matched to its exact price-guide product.');
  if((card.vintage||card.modern)&&!card.sourceVerified)throw new Error('An exact source match is required before this card can be priced.');
  const page=parsePage(html);
- if((card.vintage||card.modern)&&!matchesCard(page.name,card))throw new Error('The source page does not match this card and printing.');
+ if((card.vintage||card.modern||card.japanese)&&!matchesCard(page.name,card))throw new Error('The source page does not match this card and printing.');
  if(card.modern){const words=s=>String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f'’‘]/g,'').replace(/[^a-z0-9]+/g,' ').trim();if(![card.name,...(card.nameAliases||[])].some(name=>(' '+words(page.name)+' ').includes(' '+words(name)+' ')))throw new Error('The source page names a different card.');}
  if(!Object.keys(page.guide).length&&!page.rows.length)throw new Error('The price source format could not be read.');
  const market=expandCapture(classifyCapture({...page,url:card.source,fetchedAt:now},card),card);

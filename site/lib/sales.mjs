@@ -20,7 +20,10 @@ export function conditionOf(title){
  if(/near[ -]?mint|\bNM\b|\bmint(?: condition)?\b/i.test(t))return 'NM';
  return 'Unknown';
 }
+import {japaneseTitleMatches} from './japanese.mjs';
 export function matchesCard(title,card){
+ // Japanese cards have their own title rules (they must not be English or another language).
+ if(card.japanese)return japaneseTitleMatches(title,card);
  let checkedTitle=card.nativeReverse?title.replace(/reverse[ -]?(?:holo|foil)/gi,''):title;
  if(card.nativeStamp==='Snowflake'){
   if(!/snowflake/i.test(title))return false;
