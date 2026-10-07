@@ -1,3 +1,48 @@
+# FutureSight — session handoff, October 6, 2026 (late night)
+
+Repository `d-roads/pokemon`. Work this session is on branch **`dev`** only. `main` and the beta are unchanged.
+
+## Which version is the beta
+- **The beta runs branch `beta` = commit `4bdf0c8`** ("Start-Beta.ps1: don't stop on cloudflared's stderr log lines"), app version **1.0.0, "beta 1"**. `main` currently points at the same commit. A `beta-1` tag was made but GitHub's integration refused to push tags (HTTP 403); the `beta` branch is the marker.
+- Owner's rule: **changes go to a local test copy only; the beta is updated only when the owner asks.** When that happens: merge `dev` into `main`, move `beta` to the new commit, bump the version (e.g. 1.1.0), copy into the beta folder and run `Start-Beta.ps1`.
+- `dev` is version **1.1.0-dev**. Every page now shows its build beside the logo and on the sign-in page (`Beta · v…` / `Local test · v…` / `Local · v…`), from `GET /api/version` and `FUTURESIGHT_CHANNEL`. The current beta (1.0.0) predates this label, so it shows none; the next beta update will show "Beta".
+
+## Local test copy (new)
+- `site/Start-LocalTest.ps1`: run from a **separate folder** next to the beta folder, e.g. `...\g-p-6a72b895d6288191b4624c5f5479fcae\futuresight-local-test\site`. It refuses to run from the beta folder. Port **5180** (Start-Beta only stops 5173/5174), localhost only (`-Network` for the home network), no tunnel, channel `local-test`.
+- Database: `data\local-test.sqlite`, a one-time snapshot of the beta database via `copy-db.mjs` (SQLite `VACUUM INTO`, safe while the beta runs; `-FreshCopy` re-copies). `FUTURESIGHT_DB` env selects the file. The beta's `.env` is copied if the test copy has none (admin password, Sentry).
+- **Not deployed to the PC this session:** the request for access to the PC folder was declined, so the build was delivered as a zip in the conversation (`futuresight-local-test-1.1.0-dev.zip`). Owner: unzip it into a new `futuresight-local-test` folder beside `primal-watch` and run `site\Start-LocalTest.ps1`.
+
+## Default Browse view
+- First load now shows **every set, every era, both languages, All rares** (was Primal Clash chase cards). The Primal Clash "featured" ordering only applies when Primal Clash is the selected set. Test updated.
+
+## Japanese cards — split into two tasks
+
+### Task 1 (done this session, commit on `dev`)
+- **Catalog:** `site/data/japanese-catalogs.json` from `tools/research/gen-japanese.mjs` (TCGdex `cards-database`, MIT; clone it and pass the path). 120 Japanese sets with card lists, **5,726 rare/promo cards**, ids `ja-<set>-<number>` (e.g. `ja-sv2a-201`), eras mapped to ours (WOTC…ME), English name where known (1,038 keep only the Japanese name, mostly trainers), Japanese name, era-correct codes (SM/SWSH: HR rainbow, UR gold; SV+: UR gold), TCGdex image URLs.
+- **Set table:** `tools/research/japanese-sets.json`, 199 Japanese sets with English names, kind, era and PriceCharting console; **97 consoles confirmed** from PriceCharting's category page (Oct 6, partial listing), the rest are guesses (`pricechartingListed:false`).
+- **English links:** 3,345 linked to the English card with the same artwork: same illustrator + Pokémon + HP + attack costs/damage + rarity class (JP SR ↔ EN full art, AR ↔ IR, SAR ↔ SIR, UR/HR ↔ secret). Without illustrator data (most WOTC/PCG records) it matches on Pokémon + HP + attacks ("stats"). Ties resolve by the English set most of that Japanese set links to, then by the clearly-first English printing; otherwise unlinked (693 ambiguous, 1,688 with no English match, many Japan-only). A 40-link random sample was all correct. English cards carry `japaneseIds`.
+- **App:** Language filter in the screener (English/Japanese, default both), Japanese set groups in the set picker, JP tag on rows, search by Japanese name, card panel with "English version"/"Japanese versions" links and a "Japanese prices — coming soon" box. Japanese cards can be watched and added to the Dex.
+- **Guards (fail closed):** Japanese cards have `source:null`, `sourceVerified:false`. Single-card refresh, set refresh, Update sales, set-guide parsing and alert scans skip them with a clear message; movers/investments/scores contain no Japanese cards.
+- **Coverage report:** `tools/research/japanese-coverage.json`: per-set link counts and the **79 sets with no TCGdex card list** (ADV, all DP/Pt/L, all BW, XY except CP1/CP2, SM0/SMP2, S1–S3a, S4, S4a, S5R, S5a, S6a, S7R, S8a, S10D, S10b, PCG10, etc.).
+- Tests: **166/166** on Node 22 (`tests/japanese.test.mjs`, a new UI test; English catalog tests now filter `!c.japanese`). Worker build passes at 195.2 MB. HTTP check against a running server passed (version, catalog, JP market/refresh warnings, JP watchlist). No browser check: Chromium could not be downloaded here.
+
+### Task 2 (next session starts here)
+Network to PriceCharting is blocked in Claude's sandbox; earlier captures ran on the PC (Node 24). Task 2 needs either that, or the PC folder link.
+1. **Confirm consoles:** for every set in `japanese-sets.json` with `pricechartingListed:false`, find the real PriceCharting console (`https://www.pricecharting.com/category/pokemon-cards`, Japanese section) and fix `pricecharting`.
+2. **Map products:** write `tools/research/capture-japanese.mjs` (model on `capture-modern.mjs`): read each Japanese console listing, match product rows to cards by collector number **and** name (English name or the linked English name), reject stamped/promo/error/1st-edition/"no rarity" variants unless the card is that variant, and save exact product URLs to `source-urls.json` with `sourceVerified:true` on the card (add a `japanese` branch in `catalog.mjs` that sets `source` from `sourceUrls[id]`). Unmatched stay unpriced.
+3. **Sale matching for Japanese titles:** `lib/sales.mjs` `EXCLUDED_LISTING` rejects "japanese/jpn/jap" for every card. Add a Japanese path: for `card.japanese`, require a Japanese marker or the Japanese set name/number in the title and reject English-only titles. Same for `lib/alerts.mjs` listing matching (then remove the alert-scan skip).
+4. **Capture** full pages for all mapped Japanese cards (resumable, ≤3 concurrent), then `audit-japanese.mjs` like `audit-modern.mjs`, writing `japanese-audit.json`.
+5. **Remove the Task 1 guards** once prices exist: the `card.japanese&&!card.sourceVerified` checks stay (they become per-card), but drop the blanket `set.lang==='ja'` refusal in `/api/refresh` and the UI "coming soon" box for verified cards (render the normal panel).
+6. **Scores, movers, investments, research rank:** decide with the owner whether Japanese cards rank inside each era or as their own peer group (gem rates and prices differ a lot from English). Character demand should probably stay English-based. Add a Language filter to Top movers and Investments.
+7. **Fill the 79 sets without card lists** from the PriceCharting listings (they give English names and numbers) or a later TCGdex update; re-run `gen-japanese.mjs`.
+8. Optional: English names for the 1,038 Japanese-only names (PriceCharting product names give them in step 2); verify TCGdex Japanese image URLs load on the PC browser.
+
+## Next for the owner
+- Unzip the local test build and run `Start-LocalTest.ps1`; check the badge says **Local test** and the beta still runs untouched.
+- Ask for a beta update when happy with the local test.
+
+---
+
 # FutureSight beta access: invite codes over a Quick Tunnel (resolved)
 
 Updated October 6, 2026 (evening) Pacific, Claude session. Replaces Codex's "Private Quick Tunnel / Dashboard Loading" handoff.
