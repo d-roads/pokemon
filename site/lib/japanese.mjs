@@ -34,7 +34,7 @@ const jaNumber=n=>String(n??'').toUpperCase().replace(/\s/g,'').replace(/^([A-Z]
 // species without a regional or owner prefix only as a last resort.
 export function nameForms(card){
  const out=new Set(),base=String(card.name||'');
- if(!card.nameIsJapanese&&base)out.add(jaWords(base));
+ if((!card.nameIsJapanese||card.nameFromGuide)&&base)out.add(jaWords(base));
  if(card.pcName)out.add(jaWords(card.pcName));
  if(!out.size&&card.species)out.add(jaWords(card.species));
  for(const n of [...out]){if(n.startsWith('mega '))out.add('m '+n.slice(5));if(n.startsWith('m '))out.add('mega '+n.slice(2));}

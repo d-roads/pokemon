@@ -29,9 +29,10 @@ async function logCapture(db,env,ctx,card,captured){try{await recordObservations
 // Japanese cards get their price source when their set is mapped (source_map). The mapping is
 // loaded once per process and applied to the catalog's card objects, so every route sees it.
 let sourceMapLoaded=null;
-function applySource(card,row){card.source=row.url;card.sourceVerified=true;if(row.name)card.pcName=row.name;if(row.product_id)card.pcProductId=row.product_id;}
+// A card known only by its Japanese name takes the price guide's English product name.
+function applySource(card,row){card.source=row.url;card.sourceVerified=true;if(row.name)card.pcName=row.name;if(row.product_id)card.pcProductId=row.product_id;if(card.nameIsJapanese&&row.name){card.nameOriginal??=card.name;card.name=row.name;card.nameFromGuide=true;}}
 // Tests reset the mapping between databases.
-export function forgetSourceMap(){sourceMapLoaded=null;for(const c of cards)if(c.japanese){c.source=null;c.sourceVerified=false;delete c.pcName;delete c.pcProductId;}}
+export function forgetSourceMap(){sourceMapLoaded=null;for(const c of cards)if(c.japanese){c.source=null;c.sourceVerified=false;delete c.pcName;delete c.pcProductId;if(c.nameFromGuide){c.name=c.nameOriginal;delete c.nameOriginal;delete c.nameFromGuide;}}}
 async function ensureSourceMap(db){
  if(!sourceMapLoaded)sourceMapLoaded=(async()=>{const r=await db.prepare('SELECT card_id,url,product_id,name FROM source_map').all();for(const row of r.results||[]){const c=cardById.get(row.card_id);if(c&&c.japanese)applySource(c,row);}})().catch(e=>{sourceMapLoaded=null;throw e;});
  return sourceMapLoaded;

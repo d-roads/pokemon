@@ -276,16 +276,16 @@ function renderDetail(){
  const goto=(id,label)=>{const t=cardById(id);return t?`<button class="lang-link ${t.id===c.id?'current':''}" data-version="${t.id}"><img src="${t.image}"${t.imageAlt?` data-alt="${t.imageAlt}"`:''} alt="" loading="lazy"><span><strong>${esc(t.name)}${t.japanese?'<span class="lang-tag">JP</span>':''}</strong><small>${esc(t.setName)} · #${esc(t.numberLabel)}${label?' · '+esc(label):''}</small></span></button>`:'';};
  const langSec=c.japanese?`<div class="detail-section lang-versions"><h3>English version</h3>${c.englishId?goto(c.englishId,'')+`<p class="sales-note">Same artwork and card${/stats/.test(c.englishLink||'')?' (matched on attacks and HP; the Japanese record has no illustrator)':''}. Prices are kept separately: Japanese and English copies sell at different prices.</p>`:`<p class="sales-note">${c.englishCandidates?'Several English cards share this artwork, so none is linked rather than guessing.':'No English printing of this exact card was found. It may be Japan-only.'}</p>`}</div>`
   :c.japaneseIds?.length?`<div class="detail-section lang-versions"><h3>Japanese version${c.japaneseIds.length>1?'s':''}</h3>${c.japaneseIds.map(id=>goto(id,'')).join('')}<p class="sales-note">Same artwork, printed in Japan. Prices are tracked separately.</p></div>`:'';
+ const jaTop=c.japanese?top.replace(`<h2>${esc(c.name)}</h2>`,`<h2>${esc(c.name)}</h2>${c.nameIsJapanese&&!c.nameFromGuide?'':`<p class="name-ja" lang="ja">${esc(c.nameJa)}</p>`}`).replace(`<span class="type-pill">${esc(c.type)}</span>`,`<span class="type-pill lang-pill">Japanese</span><span class="type-pill">${esc(c.rarity)}</span>`):top;
  if(c.japanese&&!c.source){
-  const jaTop=top.replace(`<h2>${esc(c.name)}</h2>`,`<h2>${esc(c.name)}</h2>${c.nameIsJapanese?'':`<p class="name-ja" lang="ja">${esc(c.nameJa)}</p>`}`).replace(`<span class="type-pill">${esc(c.type)}</span>`,`<span class="type-pill lang-pill">Japanese</span><span class="type-pill">${esc(c.rarity)}</span>`);
   const pending=`<div class="buy-box insufficient jp-pending"><div class="eyebrow">JAPANESE ${esc(gradeNames[state.grade].toUpperCase())} PRICES</div><div class="buy-amount"><strong>Not matched yet</strong></div><p>This card hasn't been matched to its exact Japanese price-guide product yet. <b>Find prices</b> matches every card in its set and loads their prices; it never borrows the English card's value.</p></div>`;
   const jaActions=actions.replace(/<button class="button" id="refresh-card"[\s\S]*?<\/button>/,`<button class="button" id="refresh-card">${icon('refresh')} Find prices</button>`);
   const jaSource=`<div class="detail-section research"><h3>Card data</h3><p>Japanese checklist${c.illustrator?' · illustrated by '+esc(c.illustrator):''}.${c.nameIsJapanese?' No English name is recorded for this card yet.':''}</p><p class="sales-note">Japanese cards are priced, scored and ranked only against other Japanese cards.</p></div>`;
   const jaFooter=`<div class="source-line"><span>Japanese checklist</span><a href="${esc(sourceSet.checklistSource)}" target="_blank" rel="noopener noreferrer">TCGdex · View source</a></div>`;
   el.innerHTML=f?focusBar(c)+`<div class="focus-body">${versionBar(base,c,false)}<div class="focus-hero">${jaTop}<div class="focus-key">${pending}${jaActions}</div></div><div class="focus-grid"><div class="focus-col">${limitSec}${jaSource}</div><div class="focus-col wide">${langSec}</div></div>${jaFooter}</div>`
    :versionBar(base,c,true)+jaTop+pending+jaActions+langSec+limitSec+jaSource+jaFooter;
- }else el.innerHTML=f?focusBar(c)+`<div class="focus-body">${versionBar(base,c,false)}<div class="focus-hero">${top}<div class="focus-key">${buy}${metrics}${actions}</div></div><div class="focus-grid"><div class="focus-col">${scoreHtml}${langSec}${limitSec}${researchSec}${scenarioSec}</div><div class="focus-col wide">${chartSec}${historySec}${salesSec}</div></div>${footer}</div>`
-  :versionBar(base,c,true)+top+buy+metrics+scoreHtml+chartSec+actions+langSec+limitSec+salesSec+historySec+researchSec+scenarioSec+footer;
+ }else el.innerHTML=f?focusBar(c)+`<div class="focus-body">${versionBar(base,c,false)}<div class="focus-hero">${jaTop}<div class="focus-key">${buy}${metrics}${actions}</div></div><div class="focus-grid"><div class="focus-col">${scoreHtml}${langSec}${limitSec}${researchSec}${scenarioSec}</div><div class="focus-col wide">${chartSec}${historySec}${salesSec}</div></div>${footer}</div>`
+  :versionBar(base,c,true)+jaTop+buy+metrics+scoreHtml+chartSec+actions+langSec+limitSec+salesSec+historySec+researchSec+scenarioSec+footer;
  $('#detail-watch').onclick=()=>toggleWatch(c.id,$('#detail-watch'));
  $('#detail-dex').onclick=()=>openDexDialog({card_id:c.id,grade:state.grade});
  if($('#refresh-card'))$('#refresh-card').onclick=()=>refreshCard(c);
@@ -349,7 +349,7 @@ async function mapJapaneseSets(scopes,langs,signal,progress){
 }
 function applyMapping(r,setId){
  for(const c of state.cards)if(c.setId===setId)c.mapTried=true;
- for(const [id,s] of Object.entries(r.sources||{})){const c=cardById(id);if(c){c.source=s.source;c.sourceVerified=true;if(s.name)c.pcName=s.name;}}
+ for(const [id,s] of Object.entries(r.sources||{})){const c=cardById(id);if(c){c.source=s.source;c.sourceVerified=true;if(s.name){c.pcName=s.name;if(c.nameIsJapanese){c.name=s.name;c.nameFromGuide=true;}}}}
  for(const [id,m] of Object.entries(r.markets||{})){state.markets[id]=expandMarket(m);delete state.full[id];}
 }
 const updateLabel=()=>'Update sales · '+state.cards.filter(c=>c.eligible&&langOf(c)===state.marketLang&&state.marketSeries.includes(c.series)).length.toLocaleString()+(state.marketLang==='ja'?' Japanese':'')+' cards';
