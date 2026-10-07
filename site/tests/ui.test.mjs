@@ -264,22 +264,42 @@ test('Research rank panel: shadow label, evidence, price check and withheld fore
  // Legacy mode (rollback) hides the panel entirely.
  ui.run("state.research={mode:'legacy'};renderDetail()");assert.doesNotMatch(ui.e('#detail').innerHTML,/Research rank/);
 });
-test('Japanese cards: language filter, set picker groups, card panel and links to the English card',async()=>{
+test('Japanese cards: language switch, set picker groups, info-screen language and grade tabs',async()=>{
  const ui=workspace();await ui.run('init()');
  const all=ui.run('filteredCards().length'),jp=ui.run('filteredCards().filter(c=>c.japanese).length');
  assert.ok(jp>5000,'Japanese cards are in the default all-cards view');
- assert.match(ui.e('#set-select').innerHTML,/Japanese · Scarlet &amp; Violet|Japanese · Scarlet & Violet/);
- ui.run("toggleLang('ja')");assert.equal(ui.run('filteredCards().length'),all-jp);assert.match(ui.e('#active-filters').innerHTML,/English only/);
- ui.run("toggleLang('en')");assert.equal(ui.run('state.langs.length'),1,'the last language cannot be removed');
- ui.run("toggleLang('ja')");assert.equal(ui.run('filteredCards().length'),all);
+ assert.match(ui.e('#set-select').innerHTML,/Japanese · Scarlet/);
+ assert.match(ui.e('#lang-chips').innerHTML,/data-lang-mode="all" class="active"/);
+ ui.run("setLangMode('en')");assert.equal(ui.run('filteredCards().length'),all-jp);assert.match(ui.e('#active-filters').innerHTML,/English only/);
+ ui.run("setLangMode('ja')");assert.equal(ui.run('filteredCards().length'),jp);assert.ok(ui.run('filteredCards().every(c=>c.japanese)'));assert.match(ui.e('#active-filters').innerHTML,/Japanese only/);
+ ui.run("setLangMode('all')");assert.equal(ui.run('filteredCards().length'),all);
  // Search matches Japanese names too.
  ui.e('#search').oninput({target:{value:'リザードンex'}});assert.match(ui.e('#card-list').innerHTML,/JP<\/span>/);ui.e('#search').oninput({target:{value:''}});
- // Japanese card panel: no price, link to the English card, no refresh button.
+ // Japanese card: no price, English tab available, grade tabs, no refresh button.
  ui.run("state.selected='ja-sv2a-201';renderDetail()");let html=ui.e('#detail').innerHTML;
- assert.match(html,/JAPANESE PRICES/);assert.match(html,/English version/);assert.match(html,/data-goto="sv3pt5-199"/);assert.match(html,/リザードンex/);assert.match(html,/Special Art Rare \(SAR\)/);
+ assert.match(html,/JAPANESE PSA 9 PRICES/);assert.match(html,/English version/);assert.match(html,/data-version="sv3pt5-199"/);assert.match(html,/リザードンex/);assert.match(html,/Special Art Rare \(SAR\)/);
+ assert.match(html,/data-detail-lang="ja" class="active"/);assert.match(html,/data-detail-grade="psa10"/);
  assert.doesNotMatch(html,/id="refresh-card"/);assert.doesNotMatch(html,/SUGGESTED MAXIMUM PRICE/);
- ui.run("setFocus(true)");assert.match(ui.e('#detail').innerHTML,/JAPANESE PRICES/);ui.run("setFocus(false)");
- // English card panel lists its Japanese printing; following the link widens an English-only view.
- ui.run("state.selected='sv3pt5-199';renderDetail()");html=ui.e('#detail').innerHTML;assert.match(html,/Japanese version/);assert.match(html,/data-goto="ja-sv2a-201"/);
- ui.run("toggleLang('ja')");ui.run("goToCard('ja-sv2a-201')");assert.equal(ui.run('state.selected'),'ja-sv2a-201');assert.ok(ui.run("state.langs.includes('ja')"));
+ // Swap the info screen to English: the list selection stays, the English card is shown.
+ ui.run("showVersion('en')");html=ui.e('#detail').innerHTML;assert.equal(ui.run('state.selected'),'ja-sv2a-201');assert.equal(ui.run('shownCard().id'),'sv3pt5-199');
+ assert.match(html,/data-detail-lang="en" class="active"/);assert.match(html,/Japanese version/);assert.match(html,/data-version="ja-sv2a-201"/);
+ // Grade tabs work in either language; the language choice carries over.
+ ui.run("state.grade='psa10';updateView()");assert.equal(ui.run('shownCard().id'),'sv3pt5-199');assert.match(ui.e('#detail').innerHTML,/data-detail-grade="psa10" class="active"/);
+ ui.run("showVersion('ja')");assert.equal(ui.run('shownCard().id'),'ja-sv2a-201');assert.match(ui.e('#detail').innerHTML,/JAPANESE PSA 10 PRICES/);
+ // Reading view has the same language tabs beside the grade tabs.
+ ui.run("setFocus(true)");assert.match(ui.e('#detail').innerHTML,/class="grade-tab lang-tab active" data-detail-lang="ja"/);ui.run("setFocus(false)");
+ // An English card with no Japanese printing keeps its English page and says so.
+ const lone=ui.run("state.cards.find(c=>!c.japanese&&c.eligible&&!c.japaneseIds).id");ui.run(`select('${lone}')`);
+ assert.equal(ui.run('shownCard().id'),lone);assert.match(ui.e('#detail').innerHTML,/No Japanese printing of this card/);
+ // Choosing a Browse language resets the info screen to follow it.
+ ui.run("setLangMode('en')");assert.equal(ui.run('state.detailLang'),null);
+});
+
+test('Top movers and Investments switch language and rank each language separately',async()=>{
+ const ui=workspace();await ui.run('init()');
+ ui.e('#movers-nav').onclick();await ui.run('loadMovers("week")');
+ assert.match(ui.e('#movers-view').innerHTML,/data-market-lang="en" class="active"/);assert.ok(ui.calls.some(u=>u.startsWith('/api/movers?')&&u.includes('lang=en')));
+ ui.run("state.marketLang='ja'");await ui.run('loadMovers("week",true)');assert.ok(ui.calls.some(u=>u.startsWith('/api/movers?')&&u.includes('lang=ja')));
+ assert.match(ui.e('#movers-view').innerHTML,/ranked only against other Japanese cards/);
+ ui.e('#invest-nav').onclick();await ui.run('loadInvest(true)');assert.ok(ui.calls.some(u=>u.startsWith('/api/investments?')&&u.includes('lang=ja')));
 });

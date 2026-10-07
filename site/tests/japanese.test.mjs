@@ -88,3 +88,18 @@ test('Movers, investments and scores stay English-only while Japanese cards have
  const invest=await(await api(req('/api/investments'),env)).json(),picks=Object.values(invest.grades).flatMap(g=>g.picks);
  assert.ok(picks.length>0);assert.ok(picks.every(p=>!p.card_id.startsWith('ja-')));
 });
+
+test('Rankings never mix languages: lang=en|ja on movers and investments, scores per language',async()=>{
+ const env={DB,NETWORK_DISABLED:true};
+ const jm=await(await api(req('/api/movers?period=month&lang=ja'),env)).json();
+ assert.equal(jm.lang,'ja');assert.ok(Object.values(jm.grades).every(g=>g.movers.length===0),'no Japanese prices yet, so no Japanese movers');
+ const em=await(await api(req('/api/movers?period=month&lang=en'),env)).json(),dm=await(await api(req('/api/movers?period=month'),env)).json();
+ assert.equal(em.lang,'en');assert.deepEqual(em.grades,dm.grades,'English is the default');
+ const ji=await(await api(req('/api/investments?lang=ja'),env)).json();assert.equal(ji.lang,'ja');assert.ok(Object.values(ji.grades).every(g=>g.picks.length===0));
+ assert.equal((await api(req('/api/movers?lang=fr'),env)).status,400);assert.equal((await api(req('/api/investments?lang=fr'),env)).status,400);
+ // English scores are exactly what English cards alone produce.
+ const {investmentScores}=await import('../lib/score.mjs'),{snapshots}=await import('../data/market.mjs');
+ const alone=investmentScores(cards.filter(c=>!c.japanese).map(c=>[c,snapshots[c.id]]));
+ const served=(await(await api(req('/api/scores'),env)).json()).scores;
+ for(const id of Object.keys(alone.scores).slice(0,200))assert.deepEqual(served[id],alone.scores[id],id);
+});

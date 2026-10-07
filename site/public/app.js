@@ -19,7 +19,7 @@ const ago=iso=>{const m=Math.round((Date.now()-Date.parse(iso))/60000);return m<
 const signed=v=>v==null?'—':(v>0?'+':v<0?'−':'')+money(Math.abs(v));
 const pct=v=>v==null?'':(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(1)+'%';
 const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
-const state={sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],langs:['en','ja'],filters:{min:null,max:null,activity:0,invest:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
+const state={sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],langs:['en','ja'],detailLang:null,detailAlt:null,marketLang:'en',filters:{min:null,max:null,activity:0,invest:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
  dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
 // Crashes in the page are sent to the server, which forwards them to Sentry only when SENTRY_DSN is set. At most 5 per page load.
@@ -228,8 +228,27 @@ function scoreBox(c){
  const signals=detail?.signals?.length?`<p class="score-signals">Investments signals met: ${detail.signals.map(t=>`<span class="signal ${t==='uptrend'?'up':t==='recovering'?'rec':'cheap'}">${SIGNAL_NAMES[t]}</span>`).join(' ')}</p>`:'';
  return `<div class="score-box ${cls}">${head}<div class="score-main"><strong>${v}</strong><em>/ 100</em><div class="score-meter" role="img" aria-label="Investment score ${v} out of 100" style="--v:${v}%"><span style="left:35%"></span><span style="left:50%"></span><span style="left:65%"></span><span style="left:80%"></span></div></div>${detail?.belowFloor?'<p class="score-note warn-note">Under the $25 investment floor, so capped at 59.</p>':''}${parts}${signals}<p class="score-note">From this app's ${gradeNames[state.grade]} sales only. Describes past sales, not a forecast or investment advice. The Strong/Good/Fair bands are fixed thresholds that have not been validated against later prices. <button class="link-button" id="score-method">How it's scored</button></p></div>`;
 }
+// The info screen can show the English or the Japanese printing of the selected card. The choice
+// (state.detailLang) carries over as you move through the list; state.detailAlt picks one of several printings.
+const anchorOf=c=>c?(c.japanese?c.englishId:c.id):null;
+function counterpart(c,lang){if(!c)return null;if(langOf(c)===lang)return c;return cardById(lang==='ja'?c.japaneseIds?.[0]:c.englishId)||null;}
+function shownCard(){
+ const base=cardById(state.selected);if(!base)return null;
+ const alt=state.detailAlt&&cardById(state.detailAlt);
+ if(alt&&anchorOf(alt)&&anchorOf(alt)===anchorOf(base))return alt;
+ return state.detailLang?counterpart(base,state.detailLang)||base:base;
+}
+function showVersion(lang,id){
+ state.detailLang=lang;state.detailAlt=id||null;
+ const c=shownCard();renderDetail();if(c&&!state.full[c.id])loadCard(c.id);
+}
+function versionBar(base,c,withGrades){
+ const missing=state.detailLang&&langOf(c)!==state.detailLang;
+ const tab=l=>{const target=counterpart(base,l)||counterpart(c,l),on=langOf(c)===l;return `<button data-detail-lang="${l}" class="${on?'active':''}" aria-pressed="${on}" ${target?'':'disabled'} title="${target?(l==='ja'?'Japanese printing':'English printing'):l==='ja'?'No Japanese printing of this card':'No English printing of this card'}">${l==='ja'?'Japanese':'English'}</button>`;};
+ return `<div class="version-bar"><div class="segmented lang-tabs" role="group" aria-label="Card language">${tab('en')}${tab('ja')}</div>${withGrades?`<div class="segmented grade-tabs-inline" role="group" aria-label="Grade">${['raw','psa9','psa10'].map(g=>`<button data-detail-grade="${g}" class="${g===state.grade?'active':''}" aria-pressed="${g===state.grade}">${{raw:'Raw NM',psa9:'PSA 9',psa10:'PSA 10'}[g]}</button>`).join('')}</div>`:''}${missing?`<span class="version-note">No ${state.detailLang==='ja'?'Japanese':'English'} printing of this card.</span>`:''}</div>`;
+}
 function renderDetail(){
- const c=cardById(state.selected);if(!c){$('#detail').innerHTML='<div class="empty-state"><strong>Select a card</strong><p>Card insights will appear here.</p></div>';return;}
+ const base=cardById(state.selected),c=shownCard();if(!c){$('#detail').innerHTML='<div class="empty-state"><strong>Select a card</strong><p>Card insights will appear here.</p></div>';return;}
  const sourceSet=state.sets.find(s=>s.id===c.setId);$('#set-market-source').href=sourceSet.marketSource||sourceSet.checklistSource;$('#set-checklist-source').href=sourceSet.checklistSource;
  const m=state.markets[c.id],a=analyze(m,state.grade),w=matchingWatch(c.id),target=w?.target??a.target,mine=owned(c.id);
  const salesChecked=m?.research?.checkedAt||m?.observedAt;
@@ -254,24 +273,26 @@ function renderDetail(){
  const scenarioSec=`<div class="detail-section scenarios"><h3>Five-year scenarios <span class="muted">· 2031</span></h3><div class="scenario-grid">${['Bear','Steady','Strong'].map((label,i)=>`<div><span>${label}</span><strong>${forecasts[i]}</strong><small>${['−7%','+5%','+12%'][i]} / year</small></div>`).join('')}</div><p class="sales-note">Illustrative scenarios, using the ${comparison} comparable median. Not a backtested forecast.</p></div>`;
  const footer=`<button class="mobile-expand" id="expand-details">${state.expanded?'Show fewer details':'See sales & five-year scenarios'}</button><div class="source-line"><span>${(referenceSource?.observedAt||m?.observedAt)?'Checked '+new Date(referenceSource?.observedAt||m.observedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'Price data not yet loaded'}</span><a href="${esc(referenceSource?.url||m?.sourceUrl||c.source)}" target="_blank" rel="noopener noreferrer">${referenceSource?.name?esc(referenceSource.name)+' · ':m?.source?esc(m.source)+' · ':''}View source</a></div>`;
  // Language versions: an English card lists its Japanese printings; a Japanese card links to its English counterpart.
- const goto=(id,label)=>{const t=cardById(id);return t?`<button class="lang-link" data-goto="${t.id}"><img src="${t.image}"${t.imageAlt?` data-alt="${t.imageAlt}"`:''} alt="" loading="lazy"><span><strong>${esc(t.name)}${t.japanese?'<span class="lang-tag">JP</span>':''}</strong><small>${esc(t.setName)} · #${esc(t.numberLabel)}${label?' · '+esc(label):''}</small></span></button>`:'';};
+ const goto=(id,label)=>{const t=cardById(id);return t?`<button class="lang-link ${t.id===c.id?'current':''}" data-version="${t.id}"><img src="${t.image}"${t.imageAlt?` data-alt="${t.imageAlt}"`:''} alt="" loading="lazy"><span><strong>${esc(t.name)}${t.japanese?'<span class="lang-tag">JP</span>':''}</strong><small>${esc(t.setName)} · #${esc(t.numberLabel)}${label?' · '+esc(label):''}</small></span></button>`:'';};
  const langSec=c.japanese?`<div class="detail-section lang-versions"><h3>English version</h3>${c.englishId?goto(c.englishId,'')+`<p class="sales-note">Same artwork and card${/stats/.test(c.englishLink||'')?' (matched on attacks and HP; the Japanese record has no illustrator)':''}. Prices are kept separately: Japanese and English copies sell at different prices.</p>`:`<p class="sales-note">${c.englishCandidates?'Several English cards share this artwork, so none is linked rather than guessing.':'No English printing of this exact card was found. It may be Japan-only.'}</p>`}</div>`
   :c.japaneseIds?.length?`<div class="detail-section lang-versions"><h3>Japanese version${c.japaneseIds.length>1?'s':''}</h3>${c.japaneseIds.map(id=>goto(id,'')).join('')}<p class="sales-note">Same artwork, printed in Japan. Prices are tracked separately.</p></div>`:'';
  if(c.japanese){
   const jaTop=top.replace(`<h2>${esc(c.name)}</h2>`,`<h2>${esc(c.name)}</h2>${c.nameIsJapanese?'':`<p class="name-ja" lang="ja">${esc(c.nameJa)}</p>`}`).replace(`<span class="type-pill">${esc(c.type)}</span>`,`<span class="type-pill lang-pill">Japanese</span><span class="type-pill">${esc(c.rarity)}</span>`);
-  const pending=`<div class="buy-box insufficient jp-pending"><div class="eyebrow">JAPANESE PRICES</div><div class="buy-amount"><strong>Coming soon</strong></div><p>${esc('Japanese prices, sales history and investment scores are being added. Until this card’s exact price-guide product is verified, no price is shown rather than borrowing the English card’s value.')}</p></div>`;
+  const pending=`<div class="buy-box insufficient jp-pending"><div class="eyebrow">JAPANESE ${esc(gradeNames[state.grade].toUpperCase())} PRICES</div><div class="buy-amount"><strong>Coming soon</strong></div><p>${esc('Japanese prices, sales history and investment scores are being added. Until this card’s exact price-guide product is verified, no price is shown rather than borrowing the English card’s value.')}</p></div>`;
   const jaActions=actions.replace(/<button class="button" id="refresh-card"[\s\S]*?<\/button>/,'');
   const jaSource=`<div class="detail-section research"><h3>Card data</h3><p>Japanese checklist${c.illustrator?' · illustrated by '+esc(c.illustrator):''}.${c.nameIsJapanese?' No English name is recorded for this card yet.':''}</p><p class="sales-note">Listing alerts, movers, investments and scores include Japanese cards once their prices are loaded.</p></div>`;
   const jaFooter=`<div class="source-line"><span>Japanese checklist</span><a href="${esc(sourceSet.checklistSource)}" target="_blank" rel="noopener noreferrer">TCGdex · View source</a></div>`;
-  el.innerHTML=f?focusBar(c)+`<div class="focus-body"><div class="focus-hero">${jaTop}<div class="focus-key">${pending}${jaActions}</div></div><div class="focus-grid"><div class="focus-col">${limitSec}${jaSource}</div><div class="focus-col wide">${langSec}</div></div>${jaFooter}</div>`
-   :jaTop+pending+jaActions+langSec+limitSec+jaSource+jaFooter;
- }else el.innerHTML=f?focusBar(c)+`<div class="focus-body"><div class="focus-hero">${top}<div class="focus-key">${buy}${metrics}${actions}</div></div><div class="focus-grid"><div class="focus-col">${scoreHtml}${langSec}${limitSec}${researchSec}${scenarioSec}</div><div class="focus-col wide">${chartSec}${historySec}${salesSec}</div></div>${footer}</div>`
-  :top+buy+metrics+scoreHtml+chartSec+actions+langSec+limitSec+salesSec+historySec+researchSec+scenarioSec+footer;
+  el.innerHTML=f?focusBar(c)+`<div class="focus-body">${versionBar(base,c,false)}<div class="focus-hero">${jaTop}<div class="focus-key">${pending}${jaActions}</div></div><div class="focus-grid"><div class="focus-col">${limitSec}${jaSource}</div><div class="focus-col wide">${langSec}</div></div>${jaFooter}</div>`
+   :versionBar(base,c,true)+jaTop+pending+jaActions+langSec+limitSec+jaSource+jaFooter;
+ }else el.innerHTML=f?focusBar(c)+`<div class="focus-body">${versionBar(base,c,false)}<div class="focus-hero">${top}<div class="focus-key">${buy}${metrics}${actions}</div></div><div class="focus-grid"><div class="focus-col">${scoreHtml}${langSec}${limitSec}${researchSec}${scenarioSec}</div><div class="focus-col wide">${chartSec}${historySec}${salesSec}</div></div>${footer}</div>`
+  :versionBar(base,c,true)+top+buy+metrics+scoreHtml+chartSec+actions+langSec+limitSec+salesSec+historySec+researchSec+scenarioSec+footer;
  $('#detail-watch').onclick=()=>toggleWatch(c.id,$('#detail-watch'));
  $('#detail-dex').onclick=()=>openDexDialog({card_id:c.id,grade:state.grade});
  if($('#refresh-card'))$('#refresh-card').onclick=()=>refreshCard(c);
  if($('#expand-details'))$('#expand-details').onclick=()=>{state.expanded=!state.expanded;renderDetail();};
- $('#detail').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>goToCard(b.dataset.goto));
+ $('#detail').querySelectorAll('[data-version]').forEach(b=>b.onclick=()=>{const t=cardById(b.dataset.version);if(t)showVersion(langOf(t),t.id);});
+ $('#detail').querySelectorAll('[data-detail-lang]').forEach(b=>b.onclick=()=>showVersion(b.dataset.detailLang));
+ $('#detail').querySelectorAll('[data-detail-grade]').forEach(b=>b.onclick=()=>{state.grade=b.dataset.detailGrade;$('#grade').value=state.grade;updateView();});
  if($('#detail-focus'))$('#detail-focus').onclick=()=>setFocus(true);
  if(f)wireFocusBar();
  if($('#score-method'))$('#score-method').onclick=()=>$('#method-dialog').showModal();
@@ -285,7 +306,7 @@ function focusNeighbors(){const list=filteredCards(),i=list.findIndex(c=>c.id===
 function focusBar(c){
  const {list,i,prev,next}=focusNeighbors();
  return `<div class="focus-bar"><div class="focus-title"><span class="focus-label">CARD INSIGHT</span><strong>${esc(c.name)}</strong><small>${esc(c.setName)} · #${c.numberLabel}</small></div>
- <div class="grade-tabs" role="tablist" aria-label="Grade">${['raw','psa9','psa10'].map(g=>`<button role="tab" class="grade-tab ${g===state.grade?'active':''}" data-focus-grade="${g}" aria-selected="${g===state.grade}" title="${gradeNames[g]}">${{raw:'Raw NM',psa9:'PSA 9',psa10:'PSA 10'}[g]}</button>`).join('')}</div>
+ <div class="grade-tabs" role="tablist" aria-label="Grade">${['raw','psa9','psa10'].map(g=>`<button role="tab" class="grade-tab ${g===state.grade?'active':''}" data-focus-grade="${g}" aria-selected="${g===state.grade}" title="${gradeNames[g]}">${{raw:'Raw NM',psa9:'PSA 9',psa10:'PSA 10'}[g]}</button>`).join('')}${['en','ja'].map(l=>{const t=counterpart(cardById(state.selected),l)||counterpart(c,l),on=langOf(c)===l;return `<button role="tab" class="grade-tab lang-tab ${on?'active':''}" data-detail-lang="${l}" aria-selected="${on}" ${t?'':'disabled'} title="${l==='ja'?'Japanese printing':'English printing'}">${l==='ja'?'JP':'EN'}</button>`;}).join('')}</div>
  <div class="focus-nav">${i>=0?`<span class="focus-count">${i+1} of ${list.length}</span>`:''}<button class="icon-button" id="focus-prev" aria-label="Previous card${prev?': '+esc(prev.name):''}" ${prev?'':'disabled'}>${icon('chev-left')}</button><button class="icon-button" id="focus-next" aria-label="Next card${next?': '+esc(next.name):''}" ${next?'':'disabled'}>${icon('chev-right')}</button><button class="icon-button" id="focus-close" aria-label="Close expanded view" title="Close (Esc)">${icon('close')}</button></div></div>`;
 }
 function wireFocusBar(){
@@ -303,8 +324,8 @@ function setFocus(on){
  renderDetail();d.scrollTop=0;
  if(!on)$('#detail-focus')?.focus?.();
 }
-async function select(id){state.selected=id;state.expanded=false;renderList();renderDetail();$('#detail').scrollTop=0;if(!state.full[id])await loadCard(id);}
-async function loadCard(id){selectionController?.abort();selectionController=new AbortController();try{const r=await request(`/api/market?id=${encodeURIComponent(id)}`,{signal:selectionController.signal});if(r.market){state.markets[id]=r.market;state.full[id]=true;}if(r.score)state.scoreDetail[id]=r.score;if(r.investment)state.investDetail[id]=r.investment;if(state.selected===id)renderDetail();}catch(e){if(e.name!=='AbortError')toast('Could not load this card. Try Refresh.');}}
+async function select(id){state.selected=id;state.detailAlt=null;state.expanded=false;renderList();renderDetail();$('#detail').scrollTop=0;if(!state.full[id])await loadCard(id);}
+async function loadCard(id){selectionController?.abort();selectionController=new AbortController();try{const r=await request(`/api/market?id=${encodeURIComponent(id)}`,{signal:selectionController.signal});if(r.market){state.markets[id]=r.market;state.full[id]=true;}if(r.score)state.scoreDetail[id]=r.score;if(r.investment)state.investDetail[id]=r.investment;if(state.selected===id||shownCard()?.id===id)renderDetail();}catch(e){if(e.name!=='AbortError')toast('Could not load this card. Try Refresh.');}}
 async function toggleWatch(id,button){const w=matchingWatch(id),grade=state.grade;button.disabled=true;try{const r=await send('/api/watchlist',w?'DELETE':'POST',{card_id:id,grade,target:null});state.watch=r.watchlist;toast(w?'Removed from watchlist.':'Saved to your watchlist.');stats();renderList();renderDetail();}catch(e){error(e.message);button.disabled=false;}}
 async function saveTarget(id,target){const button=$('#target-form button');if(button)button.disabled=true;try{const r=await send('/api/watchlist','POST',{card_id:id,grade:state.grade,target});state.watch=r.watchlist;renderList();renderDetail();toast(target==null?'Using the suggested target.':'Your buy limit is saved.');}catch(e){error(e.message);if(button)button.disabled=false;}}
 async function refreshCard(c){const b=$('#refresh-card');b.disabled=true;b.textContent='…';try{const r=await request(`/api/market?id=${encodeURIComponent(c.id)}&refresh=1`);if(r.market){state.markets[c.id]=r.market;state.full[c.id]=true;}if(r.investment)state.investDetail[c.id]=r.investment;if(r.score){state.scoreDetail[c.id]=r.score;if(state.scores)state.scores[c.id]=['psa10','psa9','raw'].map(g=>r.score[g]?.score??null);}if(r.refreshed)dropMarketCaches();toast(r.refreshed?'Latest source data saved.':r.warning||'The source is unavailable. Showing saved observations.');renderList();renderDetail();stats();}catch(e){toast(e.message);b.disabled=false;b.innerHTML=icon('refresh');}}
@@ -483,20 +504,25 @@ function renderAlerts(){
 const MOVER_GRADES=['psa10','psa9','raw'],shortGrade=g=>gradeNames[g].replace(' · near mint',' NM');
 const wholeMoney=v=>v>=100?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v):money(v);
 const marketSeriesKey=()=>state.marketSeries.join(',');
-const moverKey=period=>period+'|'+marketSeriesKey();
+const marketScopeKey=()=>state.marketLang+'|'+marketSeriesKey();
+const moverKey=period=>period+'|'+marketScopeKey();
 const marketSeriesLabel=id=>id==='DP'?'DP–HGSS':id;
 function marketFilterView(){
  const all=state.marketSeries.length===state.series.length;
- return `<div class="market-era-filter" aria-label="Included eras"><span>Include eras</span><div role="group">${state.series.map(series=>`<button data-market-series="${series.id}" class="${state.marketSeries.includes(series.id)?'active':''}" aria-pressed="${state.marketSeries.includes(series.id)}" title="${esc(series.name)} · ${esc(series.years)}">${marketSeriesLabel(series.id)}</button>`).join('')}</div><button class="link-button" data-market-all ${all?'disabled':''}>All eras</button></div>`;
+ // Each language is ranked on its own: Japanese cards are compared only with other Japanese cards.
+ const langSwitch=`<div class="market-lang" role="group" aria-label="Card language"><span>Language</span><div class="segmented">${LANGS.map(l=>`<button data-market-lang="${l.id}" class="${state.marketLang===l.id?'active':''}" aria-pressed="${state.marketLang===l.id}">${l.label}</button>`).join('')}</div></div>`;
+ const note=state.marketLang==='ja'?`<div class="market-lang-note">Japanese cards are ranked only against other Japanese cards. Japanese prices aren't loaded yet, so these lists stay empty until they are.</div>`:'';
+ return langSwitch+note+`<div class="market-era-filter" aria-label="Included eras"><span>Include eras</span><div role="group">${state.series.map(series=>`<button data-market-series="${series.id}" class="${state.marketSeries.includes(series.id)?'active':''}" aria-pressed="${state.marketSeries.includes(series.id)}" title="${esc(series.name)} · ${esc(series.years)}">${marketSeriesLabel(series.id)}</button>`).join('')}</div><button class="link-button" data-market-all ${all?'disabled':''}>All eras</button></div>`;
 }
 function wireMarketFilters(view,load){
  view.querySelectorAll('[data-market-series]').forEach(button=>button.onclick=()=>{const id=button.dataset.marketSeries,active=state.marketSeries.includes(id);if(active&&state.marketSeries.length===1){toast('Keep at least one era included.');return;}state.marketSeries=active?state.marketSeries.filter(value=>value!==id):state.series.map(s=>s.id).filter(value=>state.marketSeries.includes(value)||value===id);renderMovers();renderInvest();load();});
+ view.querySelectorAll('[data-market-lang]').forEach(b=>b.onclick=()=>{if(state.marketLang===b.dataset.marketLang)return;state.marketLang=b.dataset.marketLang;renderMovers();renderInvest();load();});
  const all=view.querySelector('[data-market-all]');if(all)all.onclick=()=>{state.marketSeries=state.series.map(series=>series.id);renderMovers();renderInvest();load();};
 }
 // Market-wide lists are cached in the page, but only briefly: opening the tab again after FRESH_MS asks the
 // server again (it answers from memory unless saved sales changed) and swaps the new list in without a spinner.
 const FRESH_MS=30000;
-const checkedOf=()=>state.view==='movers'?state.movers.data[moverKey(state.movers.period)]?.checkedAt:state.invest.data[marketSeriesKey()]?.checkedAt;
+const checkedOf=()=>state.view==='movers'?state.movers.data[moverKey(state.movers.period)]?.checkedAt:state.invest.data[marketScopeKey()]?.checkedAt;
 function dropMarketCaches(){state.movers.data={};state.invest.data={};}
 function invalidateMarketViews(){
  dropMarketCaches();state.movers.error=null;state.invest.error=null;
@@ -522,7 +548,7 @@ function wireRefresh(view){
 async function loadMovers(period,force=false){
  const key=moverKey(period),have=state.movers.data[key];
  if(have&&!force&&Date.now()-have._at<FRESH_MS)return;
- try{const r=await request('/api/movers?period='+period+'&series='+encodeURIComponent(marketSeriesKey()));r._at=Date.now();state.movers.data[key]=r;state.movers.error=null;}catch(e){if(!have)state.movers.error=e.message;}
+ try{const r=await request('/api/movers?period='+period+'&lang='+state.marketLang+'&series='+encodeURIComponent(marketSeriesKey()));r._at=Date.now();state.movers.data[key]=r;state.movers.error=null;}catch(e){if(!have)state.movers.error=e.message;}
  if(state.view==='movers')renderMovers();
 }
 // Jump to another card (e.g. the Japanese printing), keeping the grade; widens the scope only when needed.
@@ -557,9 +583,9 @@ function renderMovers(){
 
 // ---------- Potential investments ----------
 async function loadInvest(force=false){
- const key=marketSeriesKey(),have=state.invest.data[key];
+ const key=marketScopeKey(),have=state.invest.data[key];
  if(have&&!force&&Date.now()-have._at<FRESH_MS)return;
- try{const r=await request('/api/investments?series='+encodeURIComponent(key));r._at=Date.now();state.invest.data[key]=r;state.invest.error=null;}catch(e){if(!have)state.invest.error=e.message;}
+ try{const r=await request('/api/investments?lang='+state.marketLang+'&series='+encodeURIComponent(marketSeriesKey()));r._at=Date.now();state.invest.data[key]=r;state.invest.error=null;}catch(e){if(!have)state.invest.error=e.message;}
  if(state.view==='invest')renderInvest();
 }
 const pctWhole=v=>Math.round(v*100)+'%';
@@ -569,7 +595,7 @@ function signalView(s){
  return {cls:'cheap',label:'Cheap vs. similar cards',value:pctWhole(1-s.ratio)+' below',detail:`${esc(s.category)} cards of less in-demand characters in ${esc(s.setName)} sell for ${wholeMoney(s.typical)} (median of ${s.peers}).`};
 }
 function renderInvest(){
- const view=$('#invest-view'),d=state.invest.data[marketSeriesKey()],g=state.invest.grade;
+ const view=$('#invest-view'),d=state.invest.data[marketScopeKey()],g=state.invest.grade;
  const checked=d?.checkedAt?new Date(d.checkedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):null;
  const head=`<section class="panel movers-head"><div><h2>Cards worth a closer look</h2><p>Each pick has a confident sold price of $25 or more, features a character in the top quarter for collector demand, and shows at least one signal in its own sales history. Built only from the sales in this app${checked?', checked '+checked:''}. Not investment advice.</p></div><div class="head-actions">${refreshControls()}<div class="segmented" role="group" aria-label="Grade">${MOVER_GRADES.map(x=>`<button data-invest-grade="${x}" aria-pressed="${g===x}" class="${g===x?'active':''}">${shortGrade(x)}</button>`).join('')}</div></div></section>
  <div class="signal-key"><span class="signal up">Steady uptrend</span><span>A clear, consistent rise over the past year.</span><span class="signal rec">Recovering from highs</span><span>Well below a held high, with sales turning up.</span><span class="signal cheap">Cheap vs. similar cards</span><span>Below same-set cards of less popular characters.</span></div>`;
@@ -618,19 +644,22 @@ function syncScreener(){
  $('#price-grade').textContent=gradeNames[state.grade].replace(' · near mint',' NM');
  $('#era-chips').innerHTML=state.series.map(x=>`<button data-era="${x.id}" class="${eras.includes(x.id)?'active':''}" aria-pressed="${eras.includes(x.id)}" title="${esc(x.name)} · ${esc(x.years)}">${marketSeriesLabel(x.id)}</button>`).join('');
  $('#era-chips').querySelectorAll('[data-era]').forEach(b=>b.onclick=()=>toggleEra(b.dataset.era));
- if($('#lang-chips')){$('#lang-chips').innerHTML=LANGS.map(l=>`<button data-lang="${l.id}" class="${state.langs.includes(l.id)?'active':''}" aria-pressed="${state.langs.includes(l.id)}">${l.label}</button>`).join('');$('#lang-chips').querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>toggleLang(b.dataset.lang));}
+ if($('#lang-chips')){const mode=langMode();$('#lang-chips').innerHTML=[['all','All'],...LANGS.map(l=>[l.id,l.label])].map(([id,label])=>`<button data-lang-mode="${id}" class="${mode===id?'active':''}" aria-pressed="${mode===id}">${label}</button>`).join('');$('#lang-chips').querySelectorAll('[data-lang-mode]').forEach(b=>b.onclick=()=>setLangMode(b.dataset.langMode));}
  const n=filterCount();$('#filter-count').textContent=n;$('#filter-count').hidden=!n;
  $('#reset-filters').disabled=!n&&state.setId==='all';
  $('#filters-toggle').setAttribute('aria-expanded',String(state.filtersOpen));$('#screener').classList.toggle('open',state.filtersOpen);
  document.querySelectorAll('[data-preset]').forEach(b=>{const p=PRESETS[b.dataset.preset],on=Object.entries(p).every(([k,v])=>f[k]===v);b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
 }
-function toggleLang(id){
- const on=state.langs.includes(id);
- if(on&&state.langs.length===1){toast('Keep at least one language included.');return;}
- state.langs=LANGS.map(l=>l.id).filter(x=>x===id?!on:state.langs.includes(x));
- if(!state.setId.startsWith('era:')&&state.setId!=='all'&&!state.langs.includes(langOf({lang:activeSet()?.lang})))state.setId='all';
- updateView();
+// Browse language switch: all cards, English only or Japanese only.
+const langMode=()=>state.langs.length===LANGS.length?'all':state.langs[0];
+function setLangMode(mode){
+ state.langs=mode==='all'?LANGS.map(l=>l.id):[mode];
+ // A set from the other language can't stay selected; the info screen follows the chosen language again.
+ if(!state.setId.startsWith('era:')&&state.setId!=='all'&&!state.langs.includes(activeSet()?.lang||'en'))state.setId='all';
+ state.detailLang=null;state.detailAlt=null;updateView();
 }
+// Kept for older callers: turn one language on or off (at least one stays on).
+function toggleLang(id){const on=state.langs.includes(id);if(on&&state.langs.length===1){toast('Keep at least one language included.');return;}setLangMode(on?LANGS.map(l=>l.id).find(x=>x!==id):'all');}
 function toggleEra(id){
  const current=activeEras(),on=current.includes(id);
  if(on&&current.length===1){toast('Keep at least one era included.');return;}

@@ -15,6 +15,12 @@ Repository `d-roads/pokemon`. Work this session is on branch **`dev`** only. `ma
 ## Default Browse view
 - First load now shows **every set, every era, both languages, All rares** (was Primal Clash chase cards). The Primal Clash "featured" ordering only applies when Primal Clash is the selected set. Test updated.
 
+## Follow-up the same night (owner's decision: Japanese cards are compared only with other Japanese cards)
+- Browse: the Language filter is now a switch: **All / English / Japanese** (`setLangMode`).
+- Card info screen: **English / Japanese tabs** beside **Raw NM / PSA 9 / PSA 10** (normal panel and reading view). The tabs swap the panel to the linked printing (`shownCard()`, `state.detailLang`, `state.detailAlt` for cards with several Japanese printings) while the list selection stays; the choice carries over between cards and resets when the Browse language changes. Disabled with a note when there is no printing in the other language.
+- Rankings per language: `/api/movers` and `/api/investments` take `lang=en|ja` (default `en`, 400 otherwise); Top movers and Investments have a Language switch, with a note that Japanese lists stay empty until prices load. `/api/scores` is computed separately per language and merged. The research rank is English-only.
+- Tests 168/168 (new per-language API test and UI tests).
+
 ## Japanese cards — split into two tasks
 
 ### Task 1 (done this session, commit on `dev`)
@@ -33,7 +39,7 @@ Network to PriceCharting is blocked in Claude's sandbox; earlier captures ran on
 3. **Sale matching for Japanese titles:** `lib/sales.mjs` `EXCLUDED_LISTING` rejects "japanese/jpn/jap" for every card. Add a Japanese path: for `card.japanese`, require a Japanese marker or the Japanese set name/number in the title and reject English-only titles. Same for `lib/alerts.mjs` listing matching (then remove the alert-scan skip).
 4. **Capture** full pages for all mapped Japanese cards (resumable, ≤3 concurrent), then `audit-japanese.mjs` like `audit-modern.mjs`, writing `japanese-audit.json`.
 5. **Remove the Task 1 guards** once prices exist: the `card.japanese&&!card.sourceVerified` checks stay (they become per-card), but drop the blanket `set.lang==='ja'` refusal in `/api/refresh` and the UI "coming soon" box for verified cards (render the normal panel).
-6. **Scores, movers, investments, research rank:** decide with the owner whether Japanese cards rank inside each era or as their own peer group (gem rates and prices differ a lot from English). Character demand should probably stay English-based. Add a Language filter to Top movers and Investments.
+6. **Scores, movers, investments:** decided: **Japanese cards are compared only with other Japanese cards.** The plumbing is done (per-language score table, `lang=ja` movers/investments, Language switches); once Japanese prices exist, check that the rules hold with Japanese data (e.g. the $25 floor, demand computed from Japanese sales only, PSA scarcity within Japanese cards of the era). The research rank needs its own evidence before it can cover Japanese cards; keep it English-only until then.
 7. **Fill the 79 sets without card lists** from the PriceCharting listings (they give English names and numbers) or a later TCGdex update; re-run `gen-japanese.mjs`.
 8. Optional: English names for the 1,038 Japanese-only names (PriceCharting product names give them in step 2); verify TCGdex Japanese image URLs load on the PC browser.
 

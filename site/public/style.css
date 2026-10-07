@@ -1005,3 +1005,16 @@ html.intro-pending .brand-mark,html.intro-playing .brand-mark{visibility:hidden}
 .lang-versions .lang-link img{width:34px;height:47px;object-fit:cover;border-radius:3px;flex:none}
 .lang-versions .lang-link small{display:block;color:var(--muted);font-size:12px}
 .jp-pending .buy-amount strong{font-size:22px}
+/* Info screen: English / Japanese and grade tabs */
+.version-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
+.version-bar .segmented button{padding:5px 10px;font-size:12px}
+.version-bar .segmented button[disabled],.focus-bar .lang-tab[disabled]{opacity:.4;cursor:not-allowed}
+.version-note{font-size:12px;color:var(--muted)}
+.focus-body>.version-bar{margin:4px 0 14px}
+.focus-bar .lang-tab{margin-left:6px}
+.focus-bar .lang-tab+.lang-tab{margin-left:0}
+.lang-versions .lang-link.current{border-color:var(--accent-line);background:var(--accent-soft)}
+/* Movers / Investments language switch */
+.market-lang{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:13px;color:var(--muted)}
+.market-lang .segmented button{padding:5px 12px}
+.market-lang-note{margin:0 0 12px;padding:10px 12px;border:1px dashed var(--line);border-radius:8px;font-size:13px;color:var(--muted)}

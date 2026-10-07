@@ -41,12 +41,21 @@ async function insight(db,key,compute){
  }
  return insightMemo.get(stamp);
 }
-const scoreTable=db=>insight(db,'scores',entries=>investmentScores(entries));
+// Languages are never mixed: a Japanese card is scored, ranked and compared only against other
+// Japanese cards (prices, demand and PSA gem rates differ a lot from English printings).
+const LANGUAGES=['en','ja'],langOf=c=>c.lang||'en';
+const inLanguage=(entries,lang)=>entries.filter(([card])=>langOf(card)===lang);
+function insightLanguage(url){const raw=url.searchParams.get('lang');return raw==null?'en':LANGUAGES.includes(raw)?raw:null;}
+const scoreTable=db=>insight(db,'scores',entries=>{
+ const parts=LANGUAGES.map(lang=>investmentScores(inLanguage(entries,lang)));
+ return {checkedAt:parts.map(p=>p.checkedAt).filter(Boolean).sort().at(-1)||null,grades:parts[0].grades,scores:Object.assign({},...parts.map(p=>p.scores)),full:new Map(parts.flatMap(p=>[...p.full]))};
+});
 // Research cache keys carry the model version, cost profile, horizon and bundled dataset revision;
 // the market-cache count, newest capture and day are added by insight().
 const RELEASE=Object.fromEntries(sets.map(s=>[s.id,s.release]));
 const DATASET_REVISION=observedAt+'|'+cards.length;
-const researchFor=(db,mode)=>insight(db,['research',modelVersion(),mode,COST_PROFILE_VERSION,'h12',DATASET_REVISION].join(':'),entries=>investmentTable(entries,{release:RELEASE,mode}));
+const researchFor=(db,mode)=>insight(db,['research',modelVersion(),mode,COST_PROFILE_VERSION,'h12',DATASET_REVISION].join(':'),entries=>investmentTable(inLanguage(entries,'en'),{release:RELEASE,mode}));
+// The research rank is a frozen model fit on English data, so it covers English cards only.
 // Shadow evaluation: archive both systems' outputs once per model and day, before outcomes exist.
 const archived=new Set();
 async function archiveOnce(db,env,ctx,table){
@@ -158,12 +167,14 @@ export async function api(request,env,ctx){
   if(path==='/api/movers' && request.method==='GET'){
    const period=url.searchParams.get('period')||'week';if(!PERIODS[period])return json({error:'Choose week or month.'},400);
    const included=insightSeries(url);if(!included)return json({error:'Choose one or more supported eras.'},400);const selected=new Set(included),key=included.join(',');
-   const result=await insight(db,'movers:'+period+':'+key,entries=>topMovers(entries.filter(([card])=>selected.has(card.series)),period));return json({...result,series:included});
+   const lang=insightLanguage(url);if(!lang)return json({error:'Choose English or Japanese.'},400);
+   const result=await insight(db,'movers:'+lang+':'+period+':'+key,entries=>topMovers(inLanguage(entries,lang).filter(([card])=>selected.has(card.series)),period));return json({...result,series:included,lang});
   }
   if(path==='/api/investments' && request.method==='GET'){
    const included=insightSeries(url);if(!included)return json({error:'Choose one or more supported eras.'},400);const selected=new Set(included),key=included.join(',');
-   const result=await insight(db,'investments:'+key,entries=>potentialInvestments(entries.filter(([card])=>selected.has(card.series)))),mode=scoreMode(env);
-   if(mode==='legacy')return json({...result,series:included});
+   const lang=insightLanguage(url);if(!lang)return json({error:'Choose English or Japanese.'},400);
+   const result=await insight(db,'investments:'+lang+':'+key,entries=>potentialInvestments(inLanguage(entries,lang).filter(([card])=>selected.has(card.series)))),mode=scoreMode(env);
+   if(mode==='legacy')return json({...result,series:included,lang});
    // The shortlist and the card panel read the same research table, so they cannot disagree.
    const t=await researchFor(db,mode),grades={};
    for(const [g,col] of Object.entries(result.grades)){
@@ -177,7 +188,7 @@ export async function api(request,env,ctx){
     }
     grades[g]={...col,picks,removedByNetReturn:removed};
    }
-   return json({...result,grades,series:included,research:{modelVersion:t.modelVersion,mode:t.mode,gate:t.gate}});
+   return json({...result,grades,series:included,lang,research:{modelVersion:t.modelVersion,mode:t.mode,gate:t.gate}});
   }
   if(path==='/api/scores' && request.method==='GET'){
    const {checkedAt,grades,scores}=await scoreTable(db),mode=scoreMode(env);
