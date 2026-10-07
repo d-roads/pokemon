@@ -32,19 +32,29 @@ Repository `d-roads/pokemon`. Work this session is on branch **`dev`** only. `ma
 - **Coverage report:** `tools/research/japanese-coverage.json`: per-set link counts and the **79 sets with no TCGdex card list** (ADV, all DP/Pt/L, all BW, XY except CP1/CP2, SM0/SMP2, S1–S3a, S4, S4a, S5R, S5a, S6a, S7R, S8a, S10D, S10b, PCG10, etc.).
 - Tests: **166/166** on Node 22 (`tests/japanese.test.mjs`, a new UI test; English catalog tests now filter `!c.japanese`). Worker build passes at 195.2 MB. HTTP check against a running server passed (version, catalog, JP market/refresh warnings, JP watchlist). No browser check: Chromium could not be downloaded here.
 
-### Task 2 (next session starts here)
-Network to PriceCharting is blocked in Claude's sandbox; earlier captures ran on the PC (Node 24). Task 2 needs either that, or the PC folder link.
-1. **Confirm consoles:** for every set in `japanese-sets.json` with `pricechartingListed:false`, find the real PriceCharting console (`https://www.pricecharting.com/category/pokemon-cards`, Japanese section) and fix `pricecharting`.
-2. **Map products:** write `tools/research/capture-japanese.mjs` (model on `capture-modern.mjs`): read each Japanese console listing, match product rows to cards by collector number **and** name (English name or the linked English name), reject stamped/promo/error/1st-edition/"no rarity" variants unless the card is that variant, and save exact product URLs to `source-urls.json` with `sourceVerified:true` on the card (add a `japanese` branch in `catalog.mjs` that sets `source` from `sourceUrls[id]`). Unmatched stay unpriced.
-3. **Sale matching for Japanese titles:** `lib/sales.mjs` `EXCLUDED_LISTING` rejects "japanese/jpn/jap" for every card. Add a Japanese path: for `card.japanese`, require a Japanese marker or the Japanese set name/number in the title and reject English-only titles. Same for `lib/alerts.mjs` listing matching (then remove the alert-scan skip).
-4. **Capture** full pages for all mapped Japanese cards (resumable, ≤3 concurrent), then `audit-japanese.mjs` like `audit-modern.mjs`, writing `japanese-audit.json`.
-5. **Remove the Task 1 guards** once prices exist: the `card.japanese&&!card.sourceVerified` checks stay (they become per-card), but drop the blanket `set.lang==='ja'` refusal in `/api/refresh` and the UI "coming soon" box for verified cards (render the normal panel).
-6. **Scores, movers, investments:** decided: **Japanese cards are compared only with other Japanese cards.** The plumbing is done (per-language score table, `lang=ja` movers/investments, Language switches); once Japanese prices exist, check that the rules hold with Japanese data (e.g. the $25 floor, demand computed from Japanese sales only, PSA scarcity within Japanese cards of the era). The research rank needs its own evidence before it can cover Japanese cards; keep it English-only until then.
-7. **Fill the 79 sets without card lists** from the PriceCharting listings (they give English names and numbers) or a later TCGdex update; re-run `gen-japanese.mjs`.
-8. Optional: English names for the 1,038 Japanese-only names (PriceCharting product names give them in step 2); verify TCGdex Japanese image URLs load on the PC browser.
+### Task 2 (done: October 7, 2026, early morning)
+Network to PriceCharting is blocked in Claude's sandbox, so the rules were checked against the live site through the owner's desktop-app browser pane (fetches in-page, at most one request at a time after an early burst hit HTTP 429), while the **actual fetching and saving is done by the local server**, like English cards.
+- **Consoles:** 193 of 199 Japanese PriceCharting consoles confirmed in `tools/research/japanese-sets.json` (several SM/SWSH/XY sets use other English names; DP1a/DP1b share "Space-Time"). ADV1, S5a, WCS23, SVK, SVLN, SVLS: none, so unpriced.
+- **Mapping (`site/lib/japanese.mjs`, `mapJapaneseSet` in `lib/api.mjs`):** reads a set's listing (all pages, 0.8 s apart, 429 retried, promo listing shared for 15 min), matches by number + name, number + species (e.g. "Dark Arbok"), or number alone only for trainers/energies without an English name. Pokédex numbers for PMCG/Neo, `#227/S-P` for promos. Variant rows never used; ambiguous → unmatched. Matches go to a new `source_map` table (loaded at start, applied to the in-memory catalog) plus the listing's raw/Grade 9/PSA 10 guide prices in `market_cache`. Cards known only by a Japanese name take the product's English name.
+- **Dry run on every live listing: 5,019 / 5,726 matched**, 30-card random sample all correct (`tools/research/japanese-mapping-check.json`). Weakest: promos (PriceCharting's promo console lacks many numbers), Neo Destiny, Leaders' Stadium.
+- **Sales:** `matchesCard` sends Japanese cards to `japaneseTitleMatches` (name + number + set total, no other language, no lots/variants; VS/web 1st Edition is native). A 24-card sample of real product pages gave 20–80 accepted sales per card. Parser versions bumped (`sales-2026.10.07`, `capture-2026.10.07`); observations record `language='ja'`.
+- **Bug fixed for all cards:** `gradeOf` treated "TAG" (TAG TEAM, Tag All Stars) and "ACE" (ACE SPEC) as grading companies, dropping those sales. English TAG TEAM / ACE SPEC cards recover the missed sales on their next refresh.
+- **Alerts:** Japanese cards search eBay with "japanese" and need Japanese/JPN/JP in the title; unmatched Japanese cards are skipped.
+- **App:** Update sales and Refresh sales first match any unmatched Japanese sets in scope (progress "Matching Japanese sets n / N"), then fetch sale histories; `/api/research` takes `lang`. Unmatched Japanese cards show "Not matched yet" with a **Find prices** button; matched ones get the full price panel with a Japanese note. Rankings stay per language.
+- Tests: **171/171** in one shared process (Node 22, `--experimental-test-isolation=none`). Worker build passes.
+
+### What the owner does to load Japanese prices (local test copy)
+1. Start the local test copy (`site\Start-LocalTest.ps1`).
+2. Top movers (or Investments) → Language **Japanese** → **Update sales**. It first matches all ~116 Japanese sets (about 5–10 minutes; guide prices appear right away), then fetches full sale histories for about 5,000 cards (roughly an hour or more; it can be cancelled and resumed, progress is saved).
+3. Japanese movers, investments and scores then fill in, ranked only against Japanese cards.
+
+### Left for later
+- The 79 Japanese sets with no TCGdex card list (most DP/Pt/HGSS/BW/XY, S1–S4a…) could be built from PriceCharting listings (English names and numbers, but no rarity), then mapped the same way.
+- About 700 cards stay unmatched (mostly promos missing from PriceCharting's promo console, and older WOTC numbering gaps).
+- The research rank is English-only; a Japanese version needs its own backtest once enough Japanese history exists.
 
 ## Next for the owner
-- Unzip the local test build and run `Start-LocalTest.ps1`; check the badge says **Local test** and the beta still runs untouched.
+- Unzip the local test build and run `Start-LocalTest.ps1`; check the badge says **Local test** and the beta still runs untouched. Then load Japanese prices as above.
 - Ask for a beta update when happy with the local test.
 
 ---

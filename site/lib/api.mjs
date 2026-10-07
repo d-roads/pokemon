@@ -37,11 +37,32 @@ async function ensureSourceMap(db){
  if(!sourceMapLoaded)sourceMapLoaded=(async()=>{const r=await db.prepare('SELECT card_id,url,product_id,name FROM source_map').all();for(const row of r.results||[]){const c=cardById.get(row.card_id);if(c&&c.japanese)applySource(c,row);}})().catch(e=>{sourceMapLoaded=null;throw e;});
  return sourceMapLoaded;
 }
+// A whole listing (every page), kept for 15 minutes: the three promo sets share one listing.
+// Pages are read one at a time with a short pause; a "too many requests" answer waits and retries.
+const listingMemo=new Map();
+const pause=ms=>new Promise(r=>setTimeout(r,ms));
+async function listingPage(url,env){
+ for(let attempt=0;;attempt++){
+  try{return await sourceFetch(url,env);}
+  catch(e){if(attempt<3&&/\(429\)/.test(e.message)){await pause(env.LISTING_RETRY_MS??15000*(attempt+1));continue;}throw e;}
+ }
+}
+async function japaneseListing(source,env){
+ const hit=listingMemo.get(source);if(hit&&Date.now()-hit.at<900000)return hit.value;
+ const rows=[];let cursor=null,pages=0;const seen=new Set();
+ do{
+  if(pages)await pause(env.LISTING_PAUSE_MS??800);
+  const page=parseJapaneseListing(await listingPage(source+'?view=table'+(cursor?'&cursor='+encodeURIComponent(cursor):''),env));
+  rows.push(...page.rows);cursor=page.cursor;pages++;
+  if(cursor&&seen.has(cursor))break;if(cursor)seen.add(cursor);
+ }while(cursor&&pages<40);
+ const value={rows,pages};listingMemo.set(source,{at:Date.now(),value});return value;
+}
+export function forgetListings(){listingMemo.clear();}
 // Read every page of a Japanese set's listing, match products to cards, save the matches and their guide prices.
 async function mapJapaneseSet(db,env,ctx,set){
  if(!set.marketSource)return {mapped:0,unmatched:[],warning:'This Japanese set has no price-guide listing.'};
- const rows=[];let cursor=null,pages=0;const seen=new Set();
- do{const html=await sourceFetch(set.marketSource+'?view=table'+(cursor?'&cursor='+encodeURIComponent(cursor):''),env);const page=parseJapaneseListing(html);rows.push(...page.rows);cursor=page.cursor;pages++;if(cursor&&seen.has(cursor))break;if(cursor)seen.add(cursor);}while(cursor&&pages<20);
+ const {rows,pages}=await japaneseListing(set.marketSource,env);
  const setCards=cards.filter(c=>c.setId===set.id&&c.eligible),{matches,unmatched}=matchJapaneseListing(rows,setCards),now=new Date().toISOString(),cached=await cachedMarkets(db),markets={},sources={};
  const statements=[];
  for(const [id,row] of matches){

@@ -1,0 +1,18 @@
+{
+ "note": "Dry run of site/lib/japanese.mjs matchJapaneseListing against every live PriceCharting Japanese listing, run in the owner's desktop-app browser on Oct 7, 2026 (UTC). No data was saved by this check; the app saves its own matches when a Japanese set is refreshed. Per set: matched / eligible cards. A 24-card sample of full product pages was also parsed with the app's parser: 20-80 accepted sales per card; rejected rows were other graders, 1st Edition copies, wrong set totals and multi-card listings (and Tag All Stars titles before the TAG grader fix).",
+ "checkedAt": "2026-10-07T04:07:57Z",
+ "totals": {"cards": 5726, "matched": 5019, "rules": {"number+name": 4304, "number-only": 591, "number+species": 124}},
+ "notMapped": {"ja-wcs23": "no console", "ja-svk": "no console", "ja-svln": "no console", "ja-svls": "no console"},
+ "promoNote": "PriceCharting's single Japanese promo console lists 1,517 products; many S-P / SV-P / M-P numbers are absent there, so those promos stay unpriced (S-P 121/296, SV-P 89/288, M-P 15/132).",
+ "sets": {
+  "ja-pmcg1": "27/32", "ja-pmcg2": "16/16", "ja-pmcg3": "16/16", "ja-pmcg4": "14/17", "ja-pmcg5": "22/32", "ja-pmcg6": "30/34",
+  "ja-neo1": "22/32", "ja-neo2": "19/20", "ja-neo3": "19/19", "ja-neo4": "21/43", "ja-vs1": "8/11", "ja-web1": "15/15",
+  "ja-e1": "63/64", "ja-e2": "32/32", "ja-e3": "35/35", "ja-e4": "35/35", "ja-e5": "35/35",
+  "ja-pcg1": "45/45", "ja-pcg2": "45/46", "ja-pcg3": "46/49", "ja-pcg4": "45/48", "ja-pcg5": "45/48", "ja-pcg6": "41/45", "ja-pcg7": "16/18", "ja-pcg8": "37/39", "ja-pcg9": "31/34",
+  "ja-cp1": "8/8", "ja-cp2": "12/12",
+  "ja-sm1m": "25/25", "ja-sm1s": "25/25", "ja-sm1p": "24/24", "ja-sm2k": "21/21", "ja-sm2l": "22/22", "ja-sm2p": "22/22", "ja-sm3h": "23/23", "ja-sm3n": "23/23", "ja-sm3p": "34/34", "ja-sm4a": "22/22", "ja-sm4s": "23/23", "ja-sm4p": "29/29", "ja-sm5m": "26/26", "ja-sm5s": "25/26", "ja-sm5p": "19/19", "ja-sm6": "32/34", "ja-sm6a": "25/26", "ja-sm6b": "35/35", "ja-sm7": "34/34", "ja-sm7a": "26/26", "ja-sm7b": "25/25", "ja-sm8": "33/34", "ja-sm8a": "26/26", "ja-sm8b": "121/125", "ja-sm9": "41/43", "ja-sm9a": "29/30", "ja-sm9b": "27/30", "ja-sm10": "38/41", "ja-sm10a": "27/30", "ja-sm10b": "29/30", "ja-sm11": "37/41", "ja-sm11a": "29/31", "ja-sm11b": "37/37", "ja-sm12": "40/42", "ja-sm12a": "84/92",
+  "ja-s5i": "38/38", "ja-s6h": "42/42", "ja-s6k": "40/42", "ja-s7d": "40/40", "ja-s8": "51/51", "ja-s8b": "136/145", "ja-s9": "49/49", "ja-s9a": "45/45", "ja-s10p": "38/38", "ja-s10a": "48/50", "ja-s11": "46/49", "ja-s11a": "45/48", "ja-s12": "49/49", "ja-s12a": "132/139", "ja-sp": "121/296",
+  "ja-svp": "89/288", "ja-sv1s": "42/44", "ja-sv1v": "44/44", "ja-sv1a": "40/44", "ja-sv2d": "42/42", "ja-sv2p": "42/42", "ja-sv2a": "82/82", "ja-sv3": "51/51", "ja-sv3a": "44/44", "ja-sv4k": "42/43", "ja-sv4m": "42/43", "ja-sv4a": "189/189", "ja-sv5k": "42/45", "ja-sv5m": "41/45", "ja-sv5a": "42/43", "ja-sv6": "50/52", "ja-sv6a": "42/46", "ja-sv7": "48/50", "ja-sv7a": "41/43", "ja-sv8": "48/51", "ja-sv8a": "83/85", "ja-sv9": "48/50", "ja-sv9a": "43/43", "ja-sv10": "51/52", "ja-sv11b": "102/104", "ja-sv11w": "103/104",
+  "ja-mp": "15/132", "ja-m1l": "38/40", "ja-m1s": "40/40", "ja-m2": "49/52", "ja-m2a": "83/84", "ja-mc": "120/132", "ja-m3": "53/53", "ja-m4": "53/53", "ja-m5": "49/53", "ja-m6": "53/53", "ja-m6a": "69/75", "ja-mf": "6/6"
+ }
+}

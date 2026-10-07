@@ -84,15 +84,19 @@ export function listingGuide(row,card,now){
 // Sold-listing titles for Japanese cards. The same lot, proxy, grading and stamp rules as
 // English cards apply, but the title must not say it is another language, and it must name
 // the card and carry its number (fraction numerator and set total must both agree).
+const SERIES_AND=/\b(?:sun\s*&\s*moon|sword\s*&\s*shield|scarlet\s*&\s*violet|black\s*&\s*white|diamond\s*&\s*pearl|ruby\s*&\s*sapphire|heart\s*gold\s*&\s*soul\s*silver|x\s*&\s*y)\b/gi;
+const NATIVE_FIRST=/^ja-(?:vs1|web1)$/;
 const JA_EXCLUDED=/\blot\b|bundle|\bfake\b|proxy|replica|custom|jumbo|oversized|reverse[ -]?holo|\brev[\/-]holo\b|pre-?release|\bleague\b|championship|\bwinner\b|\bstaff\b|signed|autograph|\benglish\b|\beng\b|\bger\b|german|french|\bfr\b|korean|\bkor\b|chinese|\bchn\b|simplified|traditional chinese|italian|spanish|portuguese|thai|indonesian|\bmaster ?ball\b|\bpoke ?ball (?:pattern|mirror)\b/i;
 export function japaneseTitleMatches(title,card){
  const t=String(title||'');
  if(JA_EXCLUDED.test(t))return false;
  if(card.category!=='Promo'&&/\bstamp(?:ed)?\b/i.test(t))return false;
- if(card.series==='WOTC'&&/\b1st\b|first edition/i.test(t))return false;
+ // VS and web were printed only as 1st Edition; elsewhere a 1st Edition copy is a different product.
+ if(card.series==='WOTC'&&!NATIVE_FIRST.test(card.setId||'')&&/\b1st\b|first edition/i.test(t))return false;
  const tw=' '+jaWords(t)+' ';
  if(!nameForms(card).some(f=>tw.includes(' '+f+' ')||tw.includes(' '+f.replace(/ (ex|gx|v|vmax|vstar)$/,'')+' ')))return false;
- const titleAnd=(t.match(/\s&\s/g)||[]).length,nameAnd=(String(card.pcName||card.name).match(/\s&\s/g)||[]).length,setAnd=(String(card.setName).match(/\s&\s/g)||[]).length;
+ // Series names with "&" (Sun & Moon, Sword & Shield...) describe the set, not a second card.
+ const titleAnd=(t.replace(SERIES_AND,' ').match(/\s&\s/g)||[]).length,nameAnd=(String(card.pcName||card.name).match(/\s&\s/g)||[]).length,setAnd=(String(card.setName).match(/\s&\s/g)||[]).length;
  if(titleAnd>nameAnd+setAnd)return false;
  const code=PROMO_CODE[card.setId];
  if(code&&!new RegExp('promo|'+code.replace('-','-?'),'i').test(t))return false;

@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
-import {api,forgetSourceMap} from '../lib/api.mjs';
+import {api,forgetSourceMap,forgetListings} from '../lib/api.mjs';
 import {parseJapaneseListing,matchJapaneseListing,japaneseTitleMatches} from '../lib/japanese.mjs';
 import {matchesCard} from '../lib/sales.mjs';
 import {listingMatches,searchQuery} from '../lib/alerts.mjs';
@@ -95,16 +95,23 @@ test('Japanese sale titles: Japanese printing, right card and number, no other l
  // The shared matcher sends Japanese cards to these rules and still rejects Japanese titles for English cards.
  assert.equal(matchesCard('Charizard ex 201/165 Japanese',card),true);
  assert.equal(matchesCard('Charizard ex 199/165 Japanese 151',byId.get('sv3pt5-199')),false);
+ // Real titles from PriceCharting: series names with "&" are not a second card; VS and web were only
+ // printed as 1st Edition; elsewhere 1st Edition is another product.
+ assert.equal(japaneseTitleMatches('2022 POKEMON JAPANESE SWORD & SHIELD VSTAR UNIVERSE FULL ART/LEAFEON VSTAR PSA 9 #210',byId.get('ja-s12a-210')),true);
+ assert.equal(japaneseTitleMatches("Falkner's Skarmory 007/141 VS Series 1st Edition Japanese Pokémon Card",{...byId.get('ja-vs1-007'),name:"Falkner's Skarmory",nameFromGuide:true}),true);
+ assert.equal(japaneseTitleMatches('Vileplume 1st Ed Holo Wind from the Sea 004/087 Holo Japanese',byId.get('ja-e3-004')),false);
+ assert.equal(japaneseTitleMatches('Pikachu & Zekrom GX 001/095 Japanese',byId.get('ja-sm9-001')),false,'a tag team must name its own partners');
  const wotc={...byId.get('ja-pmcg1-011'),name:'Venusaur'};
  assert.equal(japaneseTitleMatches('1996 POKEMON BASE SET JAPANESE #3 VENUSAUR-HOLO PSA 9',wotc),true);
  assert.equal(japaneseTitleMatches('Pokemon PSA 6/5/7 Venusaur Charizard Blastoise #3-6-9 Holo Base Set Japanese',wotc),false);
 });
 
 test('Mapping a Japanese set saves verified products and guide prices; refresh then reads Japanese sales',async()=>{
- const s=new DatabaseSync(':memory:');s.exec(sql);const db=dbAdapter(s),env={DB:db,NETWORK_DISABLED:false};
- const realFetch=globalThis.fetch,asked=[];
+ const s=new DatabaseSync(':memory:');s.exec(sql);const db=dbAdapter(s),env={DB:db,NETWORK_DISABLED:false,LISTING_PAUSE_MS:0,LISTING_RETRY_MS:0};
+ const realFetch=globalThis.fetch,asked=[];let limited=1;forgetListings();
  globalThis.fetch=async url=>{url=String(url);asked.push(url);
   if(url.includes('/console/pokemon-japanese-scarlet-&-violet-151?view=table&cursor=150'))return new Response(listing([listingRow(5326214,'pikachu-173','Pikachu #173','28.41','52.64','106.44')]));
+  if(url.includes('/console/pokemon-japanese-scarlet-&-violet-151?view=table')&&limited-->0)return new Response('slow down',{status:429});
   if(url.includes('/console/pokemon-japanese-scarlet-&-violet-151?view=table'))return new Response(listing([listingRow(5326231,'charizard-ex-201','Charizard EX #201','327.00','381.97','546.14')],'150'));
   if(url.includes('/game/pokemon-japanese-scarlet-&-violet-151/charizard-ex-201'))return new Response(productPage(
    section('used',[saleRow('2023 Pokemon Japanese 151 Charizard EX SAR 201 NM Japanese 201/165',323.99,1001),saleRow('Charizard ex 199/165 English 151 SIR',150,1002),saleRow('Charizard ex 201/165 Korean',90,1003)]),
@@ -114,7 +121,7 @@ test('Mapping a Japanese set saves verified products and guide prices; refresh t
  try{
   forgetSourceMap();
   const r=await(await api(req('/api/refresh?set=ja-sv2a','POST'),env)).json();
-  assert.equal(r.refreshed,true);assert.equal(r.mapped,2);assert.equal(r.pages,2);
+  assert.equal(r.refreshed,true);assert.equal(r.mapped,2);assert.equal(r.pages,2,'a 429 is retried, then both pages are read');
   assert.equal(r.sources['ja-sv2a-201'].source,'https://www.pricecharting.com/game/pokemon-japanese-scarlet-&-violet-151/charizard-ex-201');
   assert.deepEqual(r.markets['ja-sv2a-201'].guide,{raw:327,grade9:381.97,psa10:546.14});
   assert.equal(s.prepare('SELECT count(*) n FROM source_map').get().n,2);
@@ -131,7 +138,7 @@ test('Mapping a Japanese set saves verified products and guide prices; refresh t
   await api(req('/api/catalog'),env);assert.equal(card.source,r.sources['ja-sv2a-201'].source);
   // Observations record the language.
   assert.ok(s.prepare("SELECT count(*) n FROM sales_observations WHERE card_id='ja-sv2a-201' AND language='ja'").get().n>=3);
- }finally{globalThis.fetch=realFetch;forgetSourceMap();}
+ }finally{globalThis.fetch=realFetch;forgetSourceMap();forgetListings();}
 });
 
 test('An unmatched Japanese card stays unpriced; matched Japanese cards get Japanese listing alerts',async()=>{
@@ -182,4 +189,13 @@ test('Rankings never mix languages: lang=en|ja on movers and investments, scores
  const alone=investmentScores(cards.filter(c=>!c.japanese).map(c=>[c,snapshots[c.id]]));
  const served=(await(await api(req('/api/scores'),env)).json()).scores;
  for(const id of Object.keys(alone.scores).slice(0,200))assert.deepEqual(served[id],alone.scores[id],id);
+});
+
+test('TAG and ACE are graders only with a grade: Tag All Stars, TAG TEAM and ACE SPEC titles count',async()=>{
+ const {gradeOf}=await import('../lib/sales.mjs');
+ assert.equal(gradeOf('Bounsweet 012/173 Tag All Stars Japanese LP'),'raw');
+ assert.equal(gradeOf('Pikachu & Zekrom GX TAG TEAM 33/181 NM'),'raw');
+ assert.equal(gradeOf('ACE SPEC Prime Catcher 157/162'),'raw');
+ assert.equal(gradeOf('Charizard Tag Team PSA 10'),'psa10');
+ for(const t of ['TAG 10 PRISTINE Charizard ex 201/165','Charizard ex TAG 9 MINT','Charizard ACE 10 Japanese','Charizard CGC 9'])assert.equal(gradeOf(t),null,t);
 });

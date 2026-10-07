@@ -12,7 +12,7 @@ const SECTION_GRADE={used:'raw',graded:'psa9','manual-only':'psa10'};
 const GRADE_SECTION={raw:'used',psa9:'graded',psa10:'manual-only'};
 const MARKET={e:'eBay',t:'TCGPlayer',o:'Other'};
 // Bump when classification rules change, so stored observations say which rules produced them.
-export const CAPTURE_PARSER_VERSION='capture-2026.10.06';
+export const CAPTURE_PARSER_VERSION='capture-2026.10.07';
 
 export function classifyCapture(page,card){
  const guide={};

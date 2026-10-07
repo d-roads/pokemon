@@ -2,7 +2,9 @@
 export const EXCLUDED_LISTING=/\blot\b|bundle|\bfake\b|proxy|replica|custom|jumbo|oversized|reverse[ -]?holo|\brev[\/-]holo\b|cosmos|pre-?release|\bleague\b|stamped|\bstamp\b|championship|\bwinner\b|crosshatch|\bstaff\b|signed|autograph|japanese|\bjpn\b|\bjap\b|\bger\b|german|french|\bfr\b|korean|chinese|italian|spanish|portuguese/i;
 export const collector=n=>String(n).toUpperCase().replace(/\s/g,'').replace(/^([A-Z]*)0+(?=\d)/,'$1');
 export function gradeOf(title){
- if(/\b(?:CGC|BGS|BVG|Beckett|HGA|DSG|GRA|KSA|ACE|TAG|SGC|GMA|PCA|AGS|CGS)\b|\bPSA\s*(?:9|10)\s*\/\s*(?:9|10)\b/i.test(title))return null;
+ // TAG and ACE are also ordinary card words ("TAG TEAM", "Tag All Stars", "ACE SPEC"), so they count
+ // as graders only when a grade or the word grading follows.
+ if(/\b(?:CGC|BGS|BVG|Beckett|HGA|DSG|GRA|KSA|SGC|GMA|PCA|AGS|CGS)\b|\b(?:TAG|ACE)\s*(?:\d|pristine|gem|mint|grad)|\bPSA\s*(?:9|10)\s*\/\s*(?:9|10)\b/i.test(title))return null;
  // Qualifiers are annotations on the grade. The word "of" in a set name is not OF.
  if(/\(\s*(?:OC|MC|ST|MK|PD|OF)\s*\)|\bPSA\s*(?:9|10)\s+(?:OC|MC|ST|MK|PD|OF)\b/i.test(title))return null;
  const grades=[...title.matchAll(/\bPSA\s*([\d.]+)/gi)].map(m=>m[1]);
@@ -101,7 +103,7 @@ export function mergeMarket(previous,next){
  return {...previous,...next,source:latest?.source,sourceUrl:latest?.sourceUrl,observedAt:latest?.observedAt,status:latest?.status,pop:next.pop||previous?.pop||null,guide,guideSources,sales:dedupeSales([...(next.sales||[]),...(previous?.sales||[])])};
 }
 // Bump when listing-title rules change.
-export const SALES_PARSER_VERSION='sales-2026.10.06';
+export const SALES_PARSER_VERSION='sales-2026.10.07';
 export function parsePublicText(text,card){
  const plain=text.replace(/^L\d+:\s*/gm,''),guide={},sales=[];
  const lines=plain.split('\n');
