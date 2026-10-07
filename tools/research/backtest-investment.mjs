@@ -125,10 +125,16 @@ export function dateBootstrap(testBaskets,config){
  return {dates:lifts.length,lower:bs[Math.floor(n*.025)],upper:bs[Math.ceil(n*.975)-1],note:'Exploratory date-cluster bootstrap; adjacent 12-month holdings overlap, so not a formal confidence interval.'};
 }
 
-export async function loadData(){
+// The study's inputs: only the captures it was run on (investment-backtest-universe.json), so captures
+// bundled later for the app cannot change its published results. frozen:false loads everything.
+export function loadUniverse(file=path.join(here,'investment-backtest-universe.json')){const u=JSON.parse(readFileSync(file,'utf8'));assert.equal(sha256(u.captureIds.join('\n')),u.sha256,'Universe file was edited');return u;}
+export async function loadData({frozen=true}={}){
  const {cards,sets}=await import(pathToFileURL(path.join(root,'site/data/catalog.mjs')).href);
- const {snapshots}=await import(pathToFileURL(path.join(root,'site/data/market.mjs')).href);
- return {cards,sets,snapshots};
+ const {snapshots:all,snapshotsWithoutCaptures:base}=await import(pathToFileURL(path.join(root,'site/data/market.mjs')).href);
+ if(!frozen)return {cards,sets,snapshots:all};
+ const universe=loadUniverse(),used=new Set(universe.captureIds),snapshots={};
+ for(const id of new Set([...Object.keys(base),...used]))if(used.has(id)?all[id]:base[id])snapshots[id]=used.has(id)?all[id]:base[id];
+ return {cards,sets,snapshots,universe:{captures:used.size,sha256:universe.sha256}};
 }
 export function captureManifest(dir=path.join(root,'site/data/pricecharting')){
  const files=readdirSync(dir).filter(f=>f.endsWith('.json')).sort().map(f=>[f,sha256(readFileSync(path.join(dir,f)))]);
@@ -208,7 +214,7 @@ async function main(){
  const cfg=loadConfig(),data=await loadData();
  const results=await runBacktest(cfg,data);
  const manifest=captureManifest();
- results.provenance={scriptSha256:sha256(readFileSync(fileURLToPath(import.meta.url))),captures:{files:manifest.files,digest:manifest.digest},node:process.version};
+ results.provenance={scriptSha256:sha256(readFileSync(fileURLToPath(import.meta.url))),captures:{files:manifest.files,digest:manifest.digest},universe:data.universe,node:process.version};
  for(const r of [results.testBaskets])for(const b of r)delete b.h;
  const file=path.join(here,'investment-backtest-results.json');
  writeFileSync(file,JSON.stringify(results,(k,v)=>typeof v==='number'&&!Number.isInteger(v)?Math.round(v*1e8)/1e8:v,1)+'\n');

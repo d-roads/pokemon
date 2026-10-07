@@ -1,0 +1,383 @@
+{
+ "input": "research-collect-records.jsonl",
+ "records": 5700,
+ "cards": 5700,
+ "skippedJapanese": 3425,
+ "added": 1,
+ "replaced": 0,
+ "kept": 2274,
+ "rejected": {},
+ "bySet": {
+  "bw1": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 1
+  },
+  "bw5": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 1
+  },
+  "bw9": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 1
+  },
+  "col1": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 35
+  },
+  "dp1": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 33
+  },
+  "dp2": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 33
+  },
+  "dp3": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 34
+  },
+  "dp4": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 25
+  },
+  "dp5": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 28
+  },
+  "dp6": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 38
+  },
+  "dp7": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 31
+  },
+  "ex1": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 23
+  },
+  "ex10": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 70
+  },
+  "ex11": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 35
+  },
+  "ex12": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 25
+  },
+  "ex13": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 38
+  },
+  "ex14": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 29
+  },
+  "ex15": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 27
+  },
+  "ex16": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 34
+  },
+  "ex2": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 24
+  },
+  "ex3": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 24
+  },
+  "ex4": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 23
+  },
+  "ex5": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 24
+  },
+  "ex6": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 32
+  },
+  "ex7": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 34
+  },
+  "ex8": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 32
+  },
+  "ex9": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 27
+  },
+  "hgss1": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 35
+  },
+  "hgss2": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 29
+  },
+  "hgss3": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 25
+  },
+  "hgss4": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 33
+  },
+  "pl1": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 41
+  },
+  "pl2": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 43
+  },
+  "pl3": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 49
+  },
+  "pl4": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 38
+  },
+  "sm1": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 54
+  },
+  "sm10": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 102
+  },
+  "sm11": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 93
+  },
+  "sm115": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 104
+  },
+  "sm12": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 119
+  },
+  "sm2": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 78
+  },
+  "sm3": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 76
+  },
+  "sm35": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 21
+  },
+  "sm4": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 47
+  },
+  "sm5": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 68
+  },
+  "sm6": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 59
+  },
+  "sm7": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 67
+  },
+  "sm75": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 21
+  },
+  "sm8": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 104
+  },
+  "sm9": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 88
+  },
+  "sv4": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 5
+  },
+  "sve": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 8
+  },
+  "svp": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 47
+  },
+  "swsh11": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 2
+  },
+  "swsh5": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 1
+  },
+  "swshp": {
+   "added": 1,
+   "replaced": 0,
+   "kept": 45
+  },
+  "xy1": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 2
+  },
+  "xy10": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 1
+  },
+  "xy2": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 1
+  },
+  "xy3": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 2
+  },
+  "xy4": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 3
+  },
+  "xyp": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 1
+  },
+  "zsv10pt5": {
+   "added": 0,
+   "replaced": 0,
+   "kept": 1
+  }
+ },
+ "filesChanged": [
+  "swshp"
+ ],
+ "coverage": {
+  "asOf": "2026-10-07T10:00:00.000Z",
+  "rankVersion": "research-rank-v1",
+  "eligible": 9758,
+  "ranked": 7569,
+  "bySeries": {
+   "WOTC": {
+    "eligible": 741,
+    "ranked": 700
+   },
+   "EX": {
+    "eligible": 687,
+    "ranked": 633
+   },
+   "DP": {
+    "eligible": 738,
+    "ranked": 631
+   },
+   "XY": {
+    "eligible": 902,
+    "ranked": 733
+   },
+   "BW": {
+    "eligible": 553,
+    "ranked": 411
+   },
+   "SM": {
+    "eligible": 1380,
+    "ranked": 1072
+   },
+   "SWSH": {
+    "eligible": 2290,
+    "ranked": 1860
+   },
+   "SV": {
+    "eligible": 1795,
+    "ranked": 1529
+   },
+   "ME": {
+    "eligible": 672,
+    "ranked": 0
+   }
+  },
+  "unrankedBy": {
+   "below-floor": 1320,
+   "no-market": 59,
+   "no-history": 102,
+   "flat-history": 5,
+   "history-gap": 26,
+   "unverified-source": 8,
+   "cohort-not-validated": 669
+  }
+ }
+}

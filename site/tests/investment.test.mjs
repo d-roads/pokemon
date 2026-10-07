@@ -150,3 +150,13 @@ test('Card view: forecast withheld, costs follow the asking price, archive rows 
  const rows=archiveRows(t,null);assert.ok(rows.length>100);assert.ok(rows.every(r=>r.model_version===t.modelVersion&&r.as_of==='2026-10-06'));
  assert.ok(rows.some(r=>JSON.parse(r.payload).shadowForecast));
 });
+
+test('Bundled full-page captures give every qualifying English card a research rank',()=>{
+ const english=cards.filter(c=>c.eligible&&(c.lang||'en')==='en'),t=researchTable(english.map(c=>[c,snapshots[c.id]]),{now:NOW,release});
+ const ranked=english.filter(c=>['raw','psa9','psa10'].some(g=>t.table.get(c.id)[g].rank!=null));
+ assert.ok(ranked.length>=7500,'ranked '+ranked.length);
+ // Every era with a validated history has most of its rares ranked; ME stays excluded by design.
+ for(const s of new Set(english.map(c=>c.series))){const all=english.filter(c=>c.series===s),n=ranked.filter(c=>c.series===s).length;if(s==='ME')assert.equal(n,0);else assert.ok(n/all.length>=.7,s+' '+n+'/'+all.length);}
+ // The legacy sets whose rares had guide prices only now carry monthly history.
+ for(const set of ['ex2','dp1','pl1','hgss1','col1','sm1','sm12'])assert.ok(english.filter(c=>c.setId===set).filter(c=>snapshots[c.id]?.history).length>=english.filter(c=>c.setId===set).length*.8,set);
+});

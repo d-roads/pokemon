@@ -38,3 +38,6 @@ const cardById=new Map(cards.map(c=>[c.id,c]));
 export const snapshots={...legacy};
 for(const [id,record] of Object.entries(captures)){const card=cardById.get(id);if(card)snapshots[id]=mergeCapture(legacy[id],expandCapture(record,card));}
 export const captureCount=Object.keys(captures).length;
+// Market records before any full-page capture is applied; the frozen investment study rebuilds its
+// original inputs from these plus only the captures it used (tools/research/investment-backtest-universe.json).
+export const snapshotsWithoutCaptures=legacy;
