@@ -1,29 +1,31 @@
-# FutureSight — October 7, 2026: exact language counterparts (dev)
+# FutureSight — October 7, 2026: exact language counterparts completed on dev
 
-Owner requested diagnosis, a catalog-wide fix, a commit to `dev`, handoff update, and a running local test server. They confirmed that **official English/Japanese set names and collector numbers may differ for an exact counterpart**.
+Owner authorized diagnosis, implementation, committing to `dev`, updating this handoff and starting a local test server. Official EN/JA names and numbers may differ for the exact printing.
 
-## Cause and implemented policy
-- `gen-japanese.mjs` called illustrator + coarse HP/attack/rarity fingerprints “artwork” matches. Trainer fingerprints lacked translated identity/artwork checks. Set-majority votes and an earliest-English-release fallback promoted guesses to active links. Illustrator and gameplay similarity cannot distinguish alternate artwork or reprints.
-- The UI selected `japaneseIds[0]` and accepted any Japanese alternate sharing an English anchor. This could choose another expansion/printing; one English Giovanni’s Exile (`sm115-67`) linked to three Japanese full-art numbers (`ja-sm12a-193`, `196`, `201`). There were 89 English cards with multiple Japanese links.
-- All catalog/API/build consumers now use `site/data/language-pairs.json` through `language-links.mjs`. A pair must have evidence, existing endpoints, and a unique endpoint in both languages. The UI also requires the verified marker and a reciprocal single pair, rejects unrelated/stale version ids, and preserves exact round trips in normal and reading views. Unknown counterparts have disabled tabs and accurate “No verified … counterpart” text.
-- The generator now emits fingerprint **candidates only**; it cannot re-enable set-vote or first-print guesses. The existing 3,345 inferred links were migrated to candidate fields, preserving every other field on all 5,726 Japanese cards. Cross-language links live in the catalog, **not SQLite**: no user-data or price-cache migration is needed; restart any dev server to load the corrected catalog.
+## Cause and fix
+- The old generator promoted illustrator/gameplay/rarity fingerprints, set votes and earliest-English reprints into active relationships. These are not artwork identity. The UI then chose the first Japanese ID or any version sharing an English anchor, allowing unrelated full arts and reprints.
+- All catalog/API/build consumers use a reciprocal, one-to-one registry. The UI checks the verified marker and both endpoints, rejects stale/unrelated version IDs, preserves exact round trips in both layouts, and disables unresolved counterparts with “No verified … counterpart” text.
+- The earlier safety commit (`eb3cfb5`) enabled just three fixtures. This follow-up replaces that limitation with **5,767 explicit printing pairs**, adds **2,506 missing Japanese cards across 65 sets**, and retains every original field and stable ID on all **5,726 existing Japanese cards**. The full catalog has **28,197 cards**, including **8,232 Japanese cards**. No owner database or price cache was written.
+- Giovanni’s Exile `sm115-67` now maps exclusively to `ja-sm10-105`, rather than the three unrelated Tag All Stars full arts. Evolving Skies Umbreon VMAX #215 maps to Eevee Heroes #095. English 151 Charizard #199 maps to Japanese #201.
+- Verified Japanese display names come from their actual counterpart, replacing names borrowed from incorrect historical guesses. Early Japanese cards display their physical Pokédex number or “Unnumbered”; e.g. Venusaur keeps stable ID `ja-pmcg1-011` but displays “Unnumbered · Pokédex 003”.
 
-## Material coverage limitation / unfinished data verification
-- **Only three pre-existing known-pair regression fixtures remain enabled**: `sv3pt5-199` ↔ `ja-sv2a-201`, `sv3pt5-6` ↔ `ja-sv2a-006`, `base1-15` ↔ `ja-pmcg1-011`.
-- **3,342 previously active heuristic links are quarantined, not declared nonexistent.** They have not been individually verified against both artwork scans and expansion/rarity/finish/reprint identity. The safety fix covers the entire catalog, but restoring verified language-switch coverage is still outstanding. Do not present this as a completed artwork audit or as proof of Japan-only/English-only cards.
-- Full source download was unavailable: shell `git clone https://github.com/tcgdex/cards-database.git …` failed DNS resolution. Web lookup could read some source records, but was insufficient for a complete artwork audit.
-- Research checklist: compare both card images and checklist entries, verify alternate-art/holo/stamp/promo/reprint origin, record concrete evidence in the registry, then run the audit and tests. Never activate a link from a matching illustrator/name/stats or release order alone.
-- Deterministic full-catalog report: `tools/research/language-links-audit.json` (25,691 cards, 5,726 Japanese, 3 reviewed pairs, 3,345 preserved candidate cards). Regenerate with `node tools/research/audit-language-links.mjs` from repo root.
+## Data provenance and regeneration
+- `tools/research/language-printing-facts.json` retains explicit EN/JA expansion and collector-number relationships from public numbered species tables and individual card infoboxes, with source URL and line. It contains factual identifiers, not copied article prose.
+- Independent TCGdex set/card metadata is pinned to commit `4199850a6af49665db0080fa2bb9ef751750a406`. Known reference errors (Rayquaza, Gengar GL, Wondrous Patch) have documented corrections with independent references.
+- No blank-cell inheritance, Japanese-only reprint inheritance, earliest-print matching or inferred set voting. General rarity summary tables and foreign-language catalogs are excluded. Printed totals/species/available primary identities are checked, and any ambiguous endpoint stays disabled. The rebuild has **zero endpoint conflicts**.
+- Rebuild: `node tools/research/build-language-reference.mjs --facts --write`, then `node tools/research/audit-language-links.mjs`. The catalog/registry rebuild is idempotent. The Japanese generator preserves reference-backed records absent from upstream card lists; run the reference rebuild after upstream regeneration.
+- Existing heuristic candidates remain research-only; **1,306 candidate-bearing records** still lack a validated counterpart. Unknown does not mean no other-language edition. Unsupported older promo/deck sets, unnumbered ambiguous printings, reference errors and unavailable source records are documented in `language-reference-report.json`. This is a sourced printing-relationship audit, not a claim that every artwork was manually compared. New records without native names, scans or prices retain those gaps and show existing placeholders.
+- Links live in the bundled catalog, not SQLite: restarting any server loads the correction for every database without migrating collections or sales.
 
-## Validation and local server
-- Focused Japanese/catalog/UI regressions: **41/41 pass**, including disabled tabs in both layouts, wrong-art refusal, exact round trips, malformed/nonreciprocal links, missing evidence/endpoints and duplicate-pair refusal.
-- Full test suite: **188/189 pass**. The sole failure is the pre-existing running-server import-safety test (`site/tests/import.test.mjs:74`) because `listen` is denied with `EPERM`; it needs rerunning outside this sandbox. `npm run build` and the Worker syntax check pass (245.6 MB Worker). Data preservation check passed for all 5,726 Japanese records; `git diff --check` passes.
-- Local test server **could not be left running**. Startup was attempted with a separate database at `/home/binj/projects/future-sight/work/language-local-test.sqlite`, dev channel, `127.0.0.1:5180`. It reached `listen` and failed with `EPERM`; the session sandbox disallows listening sockets. No live-browser QA was possible. User authorization does not remove this platform restriction.
-- Outside this restricted session, run from `repo/site`:
+## Validation and server
+- Full suite: **193/193 passing** (`npm test`, Node 24.21). Parser and regression checks cover missing cells, Japanese-only reprints, alternate-art/trainer relationships, unique reciprocal provenance, preserved vintage IDs and physical numbering. The import-safety test now mocks its HTTP probe instead of opening a forbidden listening socket; production import safety is unchanged.
+- Build and bundled server syntax check pass (249.2 MB Worker). All 5,726 original raw card records are byte-equivalent after JSON parsing, and repeated reference rebuilds leave catalog/registry hashes unchanged.
+- Local server startup was attempted with the separate dev test database and failed at `listen` with **EPERM on 127.0.0.1:5180**. This session’s sandbox forbids listening sockets; no server is running and live-browser QA was unavailable. No approval request can remove this platform restriction.
+- Start outside this sandbox from `repo/site`:
   `FUTURESIGHT_DB=/home/binj/projects/future-sight/work/language-local-test.sqlite FUTURESIGHT_CHANNEL=dev PORT=5180 HOST=127.0.0.1 npm run dev`
-  Then open `http://127.0.0.1:5180`. The separate test DB was initialized during the failed startup; never substitute the beta/owner DB for testing.
+  Open `http://127.0.0.1:5180`. Never use the beta/owner DB for this test.
 
-Commit: this entry is included in the `dev` fix commit. Previous handoff follows; its “uncommitted” statements describe prior sessions.
+This handoff is included in the follow-up `dev` commit. Earlier session history follows.
 
 ---
 

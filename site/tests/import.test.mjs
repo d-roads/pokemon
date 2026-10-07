@@ -4,7 +4,6 @@ import {DatabaseSync} from 'node:sqlite';
 import {readFileSync,mkdtempSync,existsSync,readdirSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {createServer} from 'node:http';
 import {importCollected,targetProblem,serverRunning} from '../../tools/research/import-collected.mjs';
 
 const sql=readFileSync(new URL('../db/schema.sql',import.meta.url),'utf8');
@@ -71,14 +70,17 @@ test('Import dry run writes nothing',async()=>{
  const db=new DatabaseSync(target,{readOnly:true});assert.equal(db.prepare("SELECT COUNT(*) AS n FROM market_cache WHERE card_id='ex2-5'").get().n,0);db.close();
 });
 
-test('Import refuses the beta, a main database, the same file and a running server',async()=>{
+test('Import refuses the beta, a main database, the same file and a running server',async t=>{
  assert.match(targetProblem('C:/Users/x/primal-watch/site/data/local-test.sqlite'),/beta folder/);
  assert.match(targetProblem('C:\\Users\\x\\primal-watch\\site\\data\\primal-watch.sqlite'),/beta folder/);
  assert.match(targetProblem('/home/x/repo/site/data/primal-watch.sqlite'),/--allow-main-db/);
  assert.match(targetProblem('/nowhere/local-test.sqlite'),/does not exist/);
  const {source,target}=fixture();
  await assert.rejects(importCollected({from:source,to:source,port:0,log:quiet.log}),/same file/);
- const server=createServer((q,s)=>{s.writeHead(200);s.end('{}');});await new Promise(r=>server.listen(0,'127.0.0.1',r));
- try{const port=server.address().port;assert.equal(await serverRunning(port),true);await assert.rejects(importCollected({from:source,to:target,port,log:quiet.log}),/running on port/);}
- finally{server.close();}
+ // Test the HTTP probe and refusal without requiring a listening socket.
+ const port=5180,requests=[];
+ t.mock.method(globalThis,'fetch',async url=>{requests.push(url);return new Response('{}',{status:200});});
+ assert.equal(await serverRunning(port),true);
+ await assert.rejects(importCollected({from:source,to:target,port,log:quiet.log}),/running on port/);
+ assert.deepEqual(requests,[`http://127.0.0.1:${port}/api/version`,`http://127.0.0.1:${port}/api/version`]);
 });

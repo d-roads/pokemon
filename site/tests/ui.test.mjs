@@ -66,7 +66,7 @@ test('Set picker, all-set search, and Radiant Collection render correct cards',a
  // English only: the original 687 EX-era rares.
  ui.run("toggleLang('ja')");assert.match(ui.e('#set-count').innerHTML,/^687 /);ui.run("toggleLang('ja')");
  ui.e('#set-select').onchange({target:{value:'col1'}});ui.e('#search').oninput({target:{value:'SL10'}});assert.match(ui.e('#card-list').innerHTML,/Rayquaza/);assert.match(ui.e('#card-list').innerHTML,/#SL10 · Shiny rare/);
- ui.e('#search').oninput({target:{value:''}});ui.e('#set-select').onchange({target:{value:'era:BW'}});assert.match(ui.e('#set-count').innerHTML,/553/);assert.equal(ui.e('#page-title').textContent,'Explore the Black & White era');
+ ui.e('#search').oninput({target:{value:''}});ui.e('#set-select').onchange({target:{value:'era:BW'}});assert.match(ui.e('#set-count').innerHTML,new RegExp('^'+cards.filter(c=>c.eligible&&c.series==='BW').length+' '));assert.equal(ui.e('#page-title').textContent,'Explore the Black & White era');
  ui.e('#set-select').onchange({target:{value:'bw11'}});ui.e('#search').oninput({target:{value:'RC24'}});assert.match(ui.e('#card-list').innerHTML,/Mew EX/);assert.match(ui.e('#card-list').innerHTML,/RC24\/RC25/);
  ui.e('#set-select').onchange({target:{value:'era:SM'}});assert.match(ui.e('#set-count').innerHTML,new RegExp('^'+cards.filter(c=>c.eligible&&c.series==='SM').length+' '));assert.equal(ui.run("filteredCards().filter(c=>!c.japanese).length")+0>0,true);ui.run("toggleLang('ja')");assert.match(ui.e('#set-count').innerHTML,/^1380 /);ui.run("toggleLang('ja')");assert.equal(ui.e('#page-title').textContent,'Explore the Sun & Moon era');
  ui.e('#set-select').onchange({target:{value:'sm115'}});ui.e('#search').oninput({target:{value:'SV49'}});assert.match(ui.e('#card-list').innerHTML,/Charizard GX/);assert.match(ui.e('#card-list').innerHTML,/SV49\/SV94/);
@@ -386,7 +386,8 @@ test('Top movers and Investments switch language and rank each language separate
 test('Language switching refuses unreviewed, ambiguous and unrelated printings in both layouts',async()=>{
  const ui=workspace();await ui.run('init()');
  ui.run("select('sm115-67')");
- assert.equal(ui.run("counterpart(cardById('sm115-67'),'ja')"),null);
+ assert.equal(ui.run("counterpart(cardById('sm115-67'),'ja').id"),'ja-sm10-105');
+ ui.run("state.cards=state.cards.map(c=>c.id==='sm115-67'?{...c,japaneseIds:[]}:c);renderDetail()");
  assert.match(ui.e('#detail').innerHTML,/data-detail-lang="ja"[^>]*disabled/);
  ui.run("showVersion('ja','ja-sm12a-193')");assert.equal(ui.run('shownCard().id'),'sm115-67');
  ui.run("setFocus(true)");assert.match(ui.e('#detail').innerHTML,/data-detail-lang="ja"[^>]*disabled/);

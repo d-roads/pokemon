@@ -1,0 +1,5992 @@
+{
+ "sources": 1520,
+ "sourceRows": 14366,
+ "possiblePairs": 5767,
+ "uniquePairs": 5767,
+ "addedCards": 0,
+ "addedSets": 0,
+ "referenceBackedCards": 2506,
+ "referenceBackedSets": 135,
+ "conflicts": [],
+ "rejected": [
+  {
+   "row": {
+    "enSet": "Primal Clash",
+    "enNumber": "163/160",
+    "jaSet": "Gaia Volcano",
+    "jaNumber": "079/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Switch_(Base_Set_95)",
+    "line": 424,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "154/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "043/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Prism_Star_(TCG)",
+    "line": 189,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "191/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "058/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Prism_Star_(TCG)",
+    "line": 196,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Paldea Evolved",
+    "enNumber": "230/197",
+    "jaSet": "Ruler of the Black Flame",
+    "jaNumber": "141/108",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Fire_Energy",
+    "line": 358,
+    "kind": "numbered-infobox"
+   },
+   "reason": "English printed total disagrees with catalog"
+  },
+  {
+   "row": {
+    "enSet": "Paldea Evolved",
+    "enNumber": "230/197",
+    "jaSet": "Ruler of the Black Flame",
+    "jaNumber": "141/108",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Fire_Energy_(M_Master_Deck_Build_Box_Speed_Style)",
+    "line": 358,
+    "kind": "numbered-infobox"
+   },
+   "reason": "English printed total disagrees with catalog"
+  },
+  {
+   "row": {
+    "enSet": "Lost Origin",
+    "enNumber": "199/196",
+    "jaSet": "Lost Abyss",
+    "jaNumber": "117/100",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Aerodactyl_(TCG)",
+    "line": 239,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese species disagrees with English numbered printing"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "1/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "055/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Aggron_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "92/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "076/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Altaria_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Hidden Fates",
+    "enNumber": "27/68",
+    "jaSet": "Sky Legend",
+    "jaNumber": "026/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Arbok_(TCG)",
+    "line": 170,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "32/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "024/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Articuno_(TCG)",
+    "line": 180,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "15/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "057/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Bronzong_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "24/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "010/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Camerupt_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "3/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "037/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Celebi_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "92/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "007/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Celebi_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "50/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "027/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Chandelure_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Origin",
+    "enNumber": "026/196",
+    "jaSet": "Battle Region",
+    "jaNumber": "013/067",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Chandelure_(TCG)",
+    "line": 171,
+    "kind": "numbered-table"
+   },
+   "reason": "Primary Japanese card identity disagrees"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "77/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "061/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Chandelure_(TCG)",
+    "line": 185,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "19/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "011/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Charizard_(TCG)",
+    "line": 188,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "17/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "009/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Charmander_(TCG)",
+    "line": 184,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "18/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "010/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Charmeleon_(TCG)",
+    "line": 178,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "88/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "072/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Darkrai_(TCG)",
+    "line": 214,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "127/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "038/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Dialga_(TCG)",
+    "line": 171,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "101/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "072/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Dialga_(TCG)",
+    "line": 216,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "102/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "073/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Dialga_(TCG)",
+    "line": 217,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "17/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "064/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Ditto_(TCG)",
+    "line": 178,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "154/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "043/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Ditto_(TCG)",
+    "line": 206,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "123/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "036/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Dugtrio_(TCG)",
+    "line": 210,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "47/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "058/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Eevee_(TCG)",
+    "line": 184,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "33/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "029/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Electabuzz_(TCG)",
+    "line": 174,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "71/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "026/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Electabuzz_(TCG)",
+    "line": 186,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "20/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "030/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Electivire_(TCG)",
+    "line": 160,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "72/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "027/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Electivire_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "34/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "026/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Electrode_(TCG)",
+    "line": 176,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "93/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "027/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Electrode_(TCG)",
+    "line": 177,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "35/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "027/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Empoleon_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "90/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "063/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Entei_(TCG)",
+    "line": 230,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "91/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "064/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Entei_(TCG)",
+    "line": 231,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "2/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "024/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Espeon_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "26/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "009/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Flareon_(TCG)",
+    "line": 173,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "3/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "046/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Forretress_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "81/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "065/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Gallade_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "96/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "080/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Garchomp_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "130/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "041/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Genesect_(TCG)",
+    "line": 195,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "204/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "064/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Genesect_(TCG)",
+    "line": 196,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "224/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "070/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Genesect_(TCG)",
+    "line": 197,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "22/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "016/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Golduck_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "87/90",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "070/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Groudon_(TCG)",
+    "line": 219,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "88/90",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "071/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Groudon_(TCG)",
+    "line": 220,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "31/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "023/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Gyarados_(TCG)",
+    "line": 181,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "48/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "013/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Heatran_(TCG)",
+    "line": 176,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "16/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "039/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Honchkrow_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Brilliant Stars",
+    "enNumber": "088/172",
+    "jaSet": "Star Birth",
+    "jaNumber": "088/100",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Honchkrow_(TCG)",
+    "line": 204,
+    "kind": "numbered-table"
+   },
+   "reason": "Primary Japanese card identity disagrees"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "5/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "043/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Houndoom_(TCG)",
+    "line": 170,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "54/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "042/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Houndour_(TCG)",
+    "line": 174,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "99/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "083/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Hydreigon_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "28/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "017/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Jolteon_(TCG)",
+    "line": 173,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "36/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "063/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kangaskhan_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "45/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "037/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Keldeo_(TCG)",
+    "line": 184,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "47/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "019/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Keldeo_(TCG)",
+    "line": 191,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "219/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "057/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Keldeo_(TCG)",
+    "line": 192,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "240/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "064/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Keldeo_(TCG)",
+    "line": 193,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "17/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "014/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kingdra_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "85/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "015/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kingdra_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "60/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "049/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kirlia_(TCG)",
+    "line": 172,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "87/90",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "070/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kyogre_(TCG)",
+    "line": 215,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "88/90",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "071/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kyogre_(TCG)",
+    "line": 216,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "44/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "036/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kyurem_(TCG)",
+    "line": 181,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "100/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "084/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kyurem_(TCG)",
+    "line": 205,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "63/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "021/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kyurem_(TCG)",
+    "line": 219,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "18/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "019/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Lanturn_(TCG)",
+    "line": 170,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "86/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "020/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Lanturn_(TCG)",
+    "line": 171,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "56/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "017/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Lapras_(TCG)",
+    "line": 179,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "80/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "064/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Lucario_(TCG)",
+    "line": 172,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "102/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "086/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Lugia_(TCG)",
+    "line": 219,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "26/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "044/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Machamp_(TCG)",
+    "line": 176,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "95/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "045/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Machamp_(TCG)",
+    "line": 177,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "40/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "043/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Machoke_(TCG)",
+    "line": 174,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "6/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "011/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Magcargo_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "44/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "012/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Magcargo_(TCG)",
+    "line": 207,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "198/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "062/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Magcargo_(TCG)",
+    "line": 208,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "218/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "068/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Magcargo_(TCG)",
+    "line": 209,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "30/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "022/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Magikarp_(TCG)",
+    "line": 184,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "42/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "013/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Magmar_(TCG)",
+    "line": 177,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "58/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "021/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Magnemite_(TCG)",
+    "line": 202,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "59/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "022/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Magneton_(TCG)",
+    "line": 195,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "60/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "023/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Magnezone_(TCG)",
+    "line": 174,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "44/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "047/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Marowak_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "56/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "050/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Mawile_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "18/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "053/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Metagross_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "22/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "014/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Moltres_(TCG)",
+    "line": 178,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "38/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "010/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Moltres_(TCG)",
+    "line": 181,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "31/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "023/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Muk_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "59/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "038/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Murkrow_(TCG)",
+    "line": 171,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "21/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "013/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Ninetales_(TCG)",
+    "line": 182,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "101/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "072/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Palkia_(TCG)",
+    "line": 212,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "102/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "073/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Palkia_(TCG)",
+    "line": 213,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "29/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "060/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Pidgeot_(TCG)",
+    "line": 172,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "4/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "001/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Pinsir_(TCG)",
+    "line": 180,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "72/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "010/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Ponyta_(TCG)",
+    "line": 176,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "16/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "006/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Ponyta_(TCG)",
+    "line": 179,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "74/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "015/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Psyduck_(TCG)",
+    "line": 172,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "90/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "063/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Raikou_(TCG)",
+    "line": 213,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "91/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "064/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Raikou_(TCG)",
+    "line": 214,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "92/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "067/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Raikou_(TCG)",
+    "line": 222,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "93/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "068/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Raikou_(TCG)",
+    "line": 223,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "8/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "011/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Rapidash_(TCG)",
+    "line": 176,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "17/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "007/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Rapidash_(TCG)",
+    "line": 179,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "34/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "055/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Raticate_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "93/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "077/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Rayquaza_(TCG)",
+    "line": 171,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Crown Zenith",
+    "enNumber": "113/159",
+    "jaSet": "VSTAR Universe",
+    "jaNumber": "124/414",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Regigigas_(TCG)",
+    "line": 203,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "28/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "020/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Reshiram_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "114/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "094/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Reshiram_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "29/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "021/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Reshiram_(TCG)",
+    "line": 192,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "79/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "063/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Riolu_(TCG)",
+    "line": 171,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "20/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "021/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Rotom_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "35/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "045/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Sableye_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "7/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "048/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Scizor_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "36/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "005/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Scyther_(TCG)",
+    "line": 174,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "30/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "051/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Sharpedo_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "21/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "049/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Skarmory_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "68/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "040/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Sneasel_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "EX Team Rocket Returns",
+    "enNumber": "101/109",
+    "jaSet": "Rocket Gang Strikes Back",
+    "jaNumber": "067/084",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Sneasel_(TCG)",
+    "line": 218,
+    "kind": "numbered-table"
+   },
+   "reason": "English numbered card disagrees with the reference species"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "87/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "047/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Steelix_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "125/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "037/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Steelix_(TCG)",
+    "line": 171,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "67/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "032/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Steelix_(TCG)",
+    "line": 233,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "83/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "067/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Stunfisk_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "83/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "031/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Stunfisk_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "59/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "018/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Suicune_(TCG)",
+    "line": 175,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "92/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "067/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Suicune_(TCG)",
+    "line": 221,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "93/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "068/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Suicune_(TCG)",
+    "line": 222,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "94/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "065/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Suicune_(TCG)",
+    "line": 230,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "95/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "066/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Suicune_(TCG)",
+    "line": 231,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "85/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "032/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Tapu_Koko_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "108/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "092/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Tornadus_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "88/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "044/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Tyranitar_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "10/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "037/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Umbreon_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "41/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "016/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Vaporeon_(TCG)",
+    "line": 172,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "49/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "014/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Victini_(TCG)",
+    "line": 175,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "26/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "011/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Victini_(TCG)",
+    "line": 176,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "24/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "016/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Victini_(TCG)",
+    "line": 206,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "24/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "003/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Vileplume_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "26/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "012/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Volcanion_(TCG)",
+    "line": 178,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "107/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "055/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Volcanion_(TCG)",
+    "line": 179,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "115/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "059/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Volcanion_(TCG)",
+    "line": 180,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "83/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "025/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Voltorb_(TCG)",
+    "line": 180,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "20/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "012/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Vulpix_(TCG)",
+    "line": 182,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "25/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "041/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Weavile_(TCG)",
+    "line": 160,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Hidden Fates",
+    "enNumber": "29/68",
+    "jaSet": "Sky Legend",
+    "jaNumber": "028/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Weezing_(TCG)",
+    "line": 174,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "82/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "042/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Xerneas_(TCG)",
+    "line": 198,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "46/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "038/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Zapdos_(TCG)",
+    "line": 182,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "115/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "095/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Zekrom_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "52/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "044/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Zekrom_(TCG)",
+    "line": 189,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "86/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "033/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Zeraora_(TCG)",
+    "line": 184,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "201/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "063/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Zeraora_(TCG)",
+    "line": 185,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "221/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "069/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Zeraora_(TCG)",
+    "line": 186,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "90/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "074/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Zoroark_(TCG)",
+    "line": 171,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "89/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "073/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Zorua_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "80/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "080/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Metal_Energy_(Neo_Genesis_19)",
+    "line": 221,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "79/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "079/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Darkness_Energy_(Neo_Genesis_104)",
+    "line": 221,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Silver Tempest",
+    "enNumber": "173/195",
+    "jaSet": "Paradigm Trigger",
+    "jaNumber": "179/098",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Arcanine_(TCG)",
+    "line": 251,
+    "kind": "numbered-table"
+   },
+   "reason": "English numbered card disagrees with the reference species"
+  },
+  {
+   "row": {
+    "enSet": "Hidden Fates",
+    "enNumber": "44/68",
+    "jaSet": "Sky Legend",
+    "jaNumber": "035/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Articuno_(TCG)",
+    "line": 252,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Hidden Fates",
+    "enNumber": "66/68",
+    "jaSet": "Sky Legend",
+    "jaNumber": "059/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Articuno_(TCG)",
+    "line": 253,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Hidden Fates",
+    "enNumber": "69/68",
+    "jaSet": "Sky Legend",
+    "jaNumber": "066/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Articuno_(TCG)",
+    "line": 254,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "89/90",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "074/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Deoxys_(TCG)",
+    "line": 223,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "90/90",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "075/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Deoxys_(TCG)",
+    "line": 224,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "94/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "065/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Entei_(TCG)",
+    "line": 239,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "95/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "066/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Entei_(TCG)",
+    "line": 240,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "1/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "001/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Exeggutor_(TCG)",
+    "line": 241,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "214/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "055/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Exeggutor_(TCG)",
+    "line": 242,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "215/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "056/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Exeggutor_(TCG)",
+    "line": 243,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "237/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "063/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Exeggutor_(TCG)",
+    "line": 244,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Astral Radiance",
+    "enNumber": "170/185",
+    "jaSet": "Time Gazer",
+    "jaNumber": "071/067",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Jirachi_(TCG)",
+    "line": 256,
+    "kind": "numbered-table"
+   },
+   "reason": "English printed total disagrees with catalog"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "101/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "085/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kyurem_(TCG)",
+    "line": 230,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "54/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "045/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Mewtwo_(TCG)",
+    "line": 273,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Hidden Fates",
+    "enNumber": "44/68",
+    "jaSet": "Sky Legend",
+    "jaNumber": "035/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Moltres_(TCG)",
+    "line": 245,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Hidden Fates",
+    "enNumber": "66/68",
+    "jaSet": "Sky Legend",
+    "jaNumber": "059/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Moltres_(TCG)",
+    "line": 246,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Hidden Fates",
+    "enNumber": "69/68",
+    "jaSet": "Sky Legend",
+    "jaNumber": "066/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Moltres_(TCG)",
+    "line": 247,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "89/90",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "074/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Rayquaza_(TCG)",
+    "line": 237,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "90/90",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "075/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Rayquaza_(TCG)",
+    "line": 238,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Hidden Fates",
+    "enNumber": "44/68",
+    "jaSet": "Sky Legend",
+    "jaNumber": "035/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Zapdos_(TCG)",
+    "line": 254,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Hidden Fates",
+    "enNumber": "66/68",
+    "jaSet": "Sky Legend",
+    "jaNumber": "059/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Zapdos_(TCG)",
+    "line": 255,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Hidden Fates",
+    "enNumber": "69/68",
+    "jaSet": "Sky Legend",
+    "jaNumber": "066/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Zapdos_(TCG)",
+    "line": 256,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "42/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "017/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Abomasnow_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "55/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "068/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Aipom_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "90/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "044/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Aipom_(TCG)",
+    "line": 170,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "13/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "069/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Ambipom_(TCG)",
+    "line": 160,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "91/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "045/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Ambipom_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "13/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "005/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Amoonguss_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "177/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "040/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Audino_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "70/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "035/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Bastiodon_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "62/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "020/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Beartic_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "1/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "004/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Bellossom_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "81/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "029/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Blitzle_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "107/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "091/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Bouffalant_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "17/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "006/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Bounsweet_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "58/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "056/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Bronzor_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "70/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "025/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Bruxish_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "59/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "050/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Carvanha_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "105/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "089/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Cinccino_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "33/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "018/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Clauncher_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "34/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "019/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Clawitzer_(TCG)",
+    "line": 159,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "35/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "020/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Clawitzer_(TCG)",
+    "line": 173,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "91/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "075/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Cobalion_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "74/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "039/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Cobalion_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "129/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "040/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Cobalion_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "62/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "050/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Croagunk_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "58/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "030/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Croagunk_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "EX Delta Species",
+    "enNumber": "2/113",
+    "jaSet": "Holon Research Tower",
+    "jaNumber": "007/086",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Crobat_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese species disagrees with English numbered printing"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "11/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "003/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Crustle_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "46/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "018/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Cryogonal_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "61/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "019/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Cubchoo_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "38/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "030/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Dewott_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "31/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "016/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Dewott_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "11/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "057/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Dodrio_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "45/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "056/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Doduo_(TCG)",
+    "line": 171,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "4/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "052/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Drapion_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Platinum",
+    "enNumber": "123/127",
+    "jaSet": "Galactic's Conquest",
+    "jaNumber": "060/092",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Drapion_(TCG)",
+    "line": 177,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "12/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "029/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Drifblim_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "47/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "024/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Drifblim_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "46/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "028/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Drifloon_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "106/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "090/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Druddigon_(TCG)",
+    "line": 160,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "83/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "043/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Druddigon_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "157/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "033/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Druddigon_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "75/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "059/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Duosion_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "128/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "039/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Durant_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "EX Crystal Guardians",
+    "enNumber": "17/110",
+    "jaSet": "Miracle Crystal",
+    "jaNumber": "040/075",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Dusclops_(TCG)",
+    "line": 160,
+    "kind": "numbered-table"
+   },
+   "reason": "English printed total disagrees with catalog"
+  },
+  {
+   "row": {
+    "enSet": "EX Crystal Guardians",
+    "enNumber": "51/110",
+    "jaSet": "Miracle Crystal",
+    "jaNumber": "039/075",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Duskull_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "English printed total disagrees with catalog"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "28/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "005/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Dustox_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "10/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "002/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Dwebble_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "21/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "028/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Elekid_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "27/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "019/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Emboar_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "49/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "041/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Emolga_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "95/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "047/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Fletchinder_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "31/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "012/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Fletchinder_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "15/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "004/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Fomantis_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "12/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "004/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Foongus_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "38/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "015/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Froslass_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "95/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "079/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Gabite_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "42/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "022/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Galvantula_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "68/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "054/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Garbodor_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "29/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "014/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Gastrodon_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "94/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "078/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Gible_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "27/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "002/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Gloom_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "36/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "008/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Gogoat_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Temporal Forces",
+    "enNumber": "087/162",
+    "jaSet": "Wild Force",
+    "jaNumber": "036/071",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Golurk_(TCG)",
+    "line": 172,
+    "kind": "numbered-table"
+   },
+   "reason": "English numbered card disagrees with the reference species"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "69/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "055/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Gothita_(TCG)",
+    "line": 159,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "72/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "057/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Gothitelle_(TCG)",
+    "line": 159,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "71/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "056/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Gothorita_(TCG)",
+    "line": 159,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "23/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "039/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Grumpig_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "14/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "036/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Hariyama_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "165/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "038/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Hoothoot_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "49/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "012/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Horsea_(TCG)",
+    "line": 171,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "41/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "021/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Joltik_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "161/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "044/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kecleon_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "72/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "037/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Klang_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "80/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "040/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Klefki_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "71/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "036/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Klink_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Scarlet & Violet",
+    "enNumber": "125/198",
+    "jaSet": "Violet ex",
+    "jaNumber": "050/078",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Koraidon_(TCG)",
+    "line": 175,
+    "kind": "numbered-table"
+   },
+   "reason": "Primary Japanese card identity disagrees"
+  },
+  {
+   "row": {
+    "enSet": "Scarlet & Violet",
+    "enNumber": "231/198",
+    "jaSet": "Violet ex",
+    "jaNumber": "094/078",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Koraidon_(TCG)",
+    "line": 176,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese species disagrees with English numbered printing"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "65/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "008/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kricketot_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "43/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "035/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kyurem_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "37/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "054/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Lairon_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "49/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "026/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Lampent_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "85/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "069/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Landorus_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "12/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "007/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Leavanny_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "66/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "061/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Lickitung_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "22/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "008/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Litleo_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "50/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "015/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Litleo_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "48/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "025/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Litwick_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "25/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "048/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Lunatone_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "16/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "005/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Lurantis_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "39/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "024/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Luvdisc_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "41/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "012/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Magby_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "131/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "042/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Magearna_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "27/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "014/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Magmortar_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "55/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "035/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Makuhita_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "5/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "021/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Mamoswine_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Sun & Moon",
+    "enNumber": "8/149",
+    "jaSet": "Collection Moon",
+    "jaNumber": "003/149",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Masquerain_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "78/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "062/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Meloetta_(TCG)",
+    "line": 159,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "86/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "070/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Meloetta_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "84/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "030/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Mesprit_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "30/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "052/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Metang_(TCG)",
+    "line": 171,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "104/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "088/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Minccino_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "48/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "040/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Minun_(TCG)",
+    "line": 173,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "57/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "025/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Misdreavus_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "19/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "026/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Mismagius_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "160/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "034/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Naganadel_(TCG)",
+    "line": 171,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "230/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "058/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Naganadel_(TCG)",
+    "line": 172,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "249/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "065/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Naganadel_(TCG)",
+    "line": 173,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "55/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "046/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Natu_(TCG)",
+    "line": 170,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "6/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "041/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Nidoking_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "28/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "033/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Nidoqueen_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "45/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "032/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Nidorina_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "46/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "035/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Nidorino_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "166/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "039/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Noctowl_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "54/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "028/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Nosepass_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "10/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "002/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Nuzleaf_(TCG)",
+    "line": 170,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "60/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "001/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Oddish_(TCG)",
+    "line": 171,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "37/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "029/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Oshawott_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "30/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "015/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Oshawott_(TCG)",
+    "line": 173,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "80/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "028/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Pachirisu_(TCG)",
+    "line": 173,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "41/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "033/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Palpitoad_(TCG)",
+    "line": 159,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "36/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "028/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Phione_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "47/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "059/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Pidgeotto_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "71/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "058/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Pidgey_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "26/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "018/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Pignite_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "48/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "020/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Piloswine_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "63/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "006/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Pineco_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "33/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "025/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Piplup_(TCG)",
+    "line": 175,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "47/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "039/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Plusle_(TCG)",
+    "line": 173,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "102/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "032/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Poipole_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "65/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "022/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Popplio_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "7/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "067/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Porygon-Z_(TCG)",
+    "line": 160,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "67/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "024/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Primarina_(TCG)",
+    "line": 159,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "55/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "029/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Probopass_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "38/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "034/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Pupitar_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "23/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "009/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Pyroar_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "51/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "016/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Pyroar_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "76/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "060/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Reuniclus_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "39/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "031/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Samurott_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "32/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "017/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Samurott_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "EX Ruby & Sapphire",
+    "enNumber": "11/109",
+    "jaSet": "ADV Expansion Pack",
+    "jaNumber": "003/050",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Sceptile_(TCG)",
+    "line": 158,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unleashed",
+    "enNumber": "40/95",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "013/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Seadra_(TCG)",
+    "line": 171,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "42/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "034/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Seismitoad_(TCG)",
+    "line": 159,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "8/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "004/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Serperior_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "7/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "003/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Servine_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "9/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "005/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Sewaddle_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "3/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "001/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Shuckle_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "16/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "002/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Shuckle_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "66/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "052/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Sigilyph_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "184/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "043/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Silvally_(TCG)",
+    "line": 160,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "8/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "062/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Smeargle_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "6/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "002/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Snivy_(TCG)",
+    "line": 170,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "37/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "014/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Snorunt_(TCG)",
+    "line": 168,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "41/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "016/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Snover_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "73/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "058/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Solosis_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "9/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "049/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Solrock_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "87/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "071/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Spiritomb_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "103/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "087/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Swablu_(TCG)",
+    "line": 170,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "11/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "006/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Swadloon_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "79/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "019/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Swinub_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "96/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "048/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Talonflame_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "32/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "013/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Talonflame_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "37/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "009/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Tapu_Bulu_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "53/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "020/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Tapu_Fini_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "50/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "018/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Tentacruel_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "25/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "017/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Tepig_(TCG)",
+    "line": 172,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "84/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "068/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Terrakion_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "50/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "042/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Thundurus_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "9/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "061/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Togekiss_(TCG)",
+    "line": 159,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Roaring Skies",
+    "enNumber": "46/108",
+    "jaSet": "Emerald Break",
+    "jaNumber": "039/0782",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Togekiss_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "39/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "060/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Togetic_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "67/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "053/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Trubbish_(TCG)",
+    "line": 160,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "19/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "008/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Tsareena_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "40/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "032/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Tympole_(TCG)",
+    "line": 159,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "183/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "042/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Type:_Null_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Undaunted",
+    "enNumber": "40/90",
+    "jaSet": "Reviving Legends",
+    "jaNumber": "027/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Unown_(TCG)",
+    "line": 161,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "51/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "036/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Unown_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "83/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "029/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Uxie_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "23/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "015/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Victini_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "12/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "003/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Victreebel_(TCG)",
+    "line": 166,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "15/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "008/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Virizion_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "25/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "011/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Volcanion_(TCG)",
+    "line": 157,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "31/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "023/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Wailord_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "53/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "002/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Weepinbell_(TCG)",
+    "line": 165,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "56/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "047/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Xatu_(TCG)",
+    "line": 169,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Steam Siege",
+    "enNumber": "81/114",
+    "jaSet": "Fever-Burst Fighter",
+    "jaNumber": "041/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Xerneas_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "70/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "024/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Xurkitree_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "84/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "004/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Yanma_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "54/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "005/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Yanmega_(TCG)",
+    "line": 162,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Triumphant",
+    "enNumber": "98/102",
+    "jaSet": "Clash at the Summit",
+    "jaNumber": "006/080",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Yanmega_(TCG)",
+    "line": 163,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "82/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "030/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Zebstrika_(TCG)",
+    "line": 167,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "51/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "043/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Zekrom_(TCG)",
+    "line": 164,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Legendary Treasures",
+    "enNumber": "98/113",
+    "jaSet": "EX Battle Boost",
+    "jaNumber": "082/093",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Zweilous_(TCG)",
+    "line": 160,
+    "kind": "numbered-table"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Aquapolis",
+    "enNumber": "144/147",
+    "jaSet": "The Town on No Map",
+    "jaNumber": "092/092",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Rainbow_Energy_(Team_Rocket_17)",
+    "line": 161,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Primary Japanese card identity disagrees"
+  },
+  {
+   "row": {
+    "enSet": "Aquapolis",
+    "enNumber": "143/147",
+    "jaSet": "The Town on No Map",
+    "jaNumber": "091/092",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Metal_Energy_(Neo_Genesis_19)",
+    "line": 163,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Primary Japanese card identity disagrees"
+  },
+  {
+   "row": {
+    "enSet": "Aquapolis",
+    "enNumber": "142/147",
+    "jaSet": "The Town on No Map",
+    "jaNumber": "090/092",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Darkness_Energy_(Neo_Genesis_104)",
+    "line": 163,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Primary Japanese card identity disagrees"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "212/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "050/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Recycle_Energy_(Neo_Genesis_105)",
+    "line": 158,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "257/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "069/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Recycle_Energy_(Neo_Genesis_105)",
+    "line": 164,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "EX Ruby & Sapphire",
+    "enNumber": "88/109",
+    "jaSet": "Expansion Pack",
+    "jaNumber": "052/055",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Pok%C3%A9Nav_(EX_Ruby_&_Sapphire_88)",
+    "line": 149,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "EX Crystal Guardians",
+    "enNumber": "88/100",
+    "jaSet": "Miracle Crystal",
+    "jaNumber": "075/075",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Double_Rainbow_Energy_(EX_Team_Magma_vs_Team_Aqua_88)",
+    "line": 160,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Primary Japanese card identity disagrees"
+  },
+  {
+   "row": {
+    "enSet": "EX Delta Species",
+    "enNumber": "104/113",
+    "jaSet": "Holon Research Tower",
+    "jaNumber": "085/086",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Holon_Energy_FF_(EX_Delta_Species_104)",
+    "line": 147,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Primary Japanese card identity disagrees"
+  },
+  {
+   "row": {
+    "enSet": "EX Delta Species",
+    "enNumber": "105/113",
+    "jaSet": "Holon Research Tower",
+    "jaNumber": "084/086",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Holon_Energy_GL_(EX_Delta_Species_105)",
+    "line": 148,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Primary Japanese card identity disagrees"
+  },
+  {
+   "row": {
+    "enSet": "EX Delta Species",
+    "enNumber": "106/113",
+    "jaSet": "Holon Research Tower",
+    "jaNumber": "086/086",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Holon_Energy_WP_(EX_Delta_Species_106)",
+    "line": 148,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Primary Japanese card identity disagrees"
+  },
+  {
+   "row": {
+    "enSet": "Hidden Fates",
+    "enNumber": "SV89/SV94",
+    "jaSet": "Full Metal Wall",
+    "jaNumber": "069/066",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Mt._Coronet_(Ultra_Prism_130)",
+    "line": 157,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "170/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "053/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Counter_Gain_(Lost_Thunder_170)",
+    "line": 148,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "230/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "073/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Counter_Gain_(Lost_Thunder_170)",
+    "line": 154,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "171/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "047/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Custom_Catcher_(Lost_Thunder_171)",
+    "line": 147,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "231/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "072/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Custom_Catcher_(Lost_Thunder_171)",
+    "line": 153,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "172/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "046/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Electropower_(Lost_Thunder_172)",
+    "line": 147,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "232/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "071/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Electropower_(Lost_Thunder_172)",
+    "line": 153,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "179/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "055/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kahili_(Lost_Thunder_179)",
+    "line": 148,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "210/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "065/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Kahili_(Lost_Thunder_179)",
+    "line": 154,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "256/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "068/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Viridian_Forest_(Team_Up_156)",
+    "line": 154,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "211/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "046/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/U-Turn_Board_(Unified_Minds_211)",
+    "line": 147,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Unified Minds",
+    "enNumber": "255/236",
+    "jaSet": "Sky Legend",
+    "jaNumber": "067/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/U-Turn_Board_(Unified_Minds_211)",
+    "line": 153,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Hidden Fates",
+    "enNumber": "58/68",
+    "jaSet": "Sky Legend",
+    "jaNumber": "048/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Jessie_&_James_(Hidden_Fates_58)",
+    "line": 148,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Hidden Fates",
+    "enNumber": "68/68",
+    "jaSet": "Sky Legend",
+    "jaNumber": "062/054",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Jessie_&_James_(Hidden_Fates_58)",
+    "line": 154,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Paldean Fates",
+    "enNumber": "239/198",
+    "jaSet": "Shiny Treasure ex",
+    "jaNumber": "182/190",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Penny_(Scarlet_&_Violet_183)",
+    "line": 167,
+    "kind": "numbered-infobox"
+   },
+   "reason": "English printed total disagrees with catalog"
+  },
+  {
+   "row": {
+    "enSet": "Paldea Evolved",
+    "enNumber": "230/197",
+    "jaSet": "Ruler of the Black Flame",
+    "jaNumber": "141/108",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Fire_Energy_(Base_Set_98)",
+    "line": 358,
+    "kind": "numbered-infobox"
+   },
+   "reason": "English printed total disagrees with catalog"
+  },
+  {
+   "row": {
+    "enSet": "EX Team Rocket Returns",
+    "enNumber": "83/109",
+    "jaSet": "Rocket Gang Strikes Back",
+    "jaNumber": "078/085",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Copycat_(TCG)",
+    "line": 156,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  },
+  {
+   "row": {
+    "enSet": "Lost Thunder",
+    "enNumber": "209/214",
+    "jaSet": "Thunderclap Spark",
+    "jaNumber": "066/060",
+    "source": "https://bulbapedia.bulbagarden.net/wiki/Judge_(TCG)",
+    "line": 177,
+    "kind": "numbered-infobox"
+   },
+   "reason": "Japanese printed total disagrees with set metadata"
+  }
+ ],
+ "unavailableSources": [
+  "https://bulbapedia.bulbagarden.net/wiki/Arcanine_V_(Silver_Tempest_90)",
+  "https://bulbapedia.bulbagarden.net/wiki/Basic_Darkness_Energy_(Scarlet_%26_Violet_Energies_7)",
+  "https://bulbapedia.bulbagarden.net/wiki/Basic_Fighting_Energy_%28Radiant_Energy_6%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Basic_Fighting_Energy_(Scarlet_%26_Violet_Energies_6)",
+  "https://bulbapedia.bulbagarden.net/wiki/Basic_Fire_Energy_%28SV-P_Promo_281%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Basic_Fire_Energy_(Scarlet_%26_Violet_Energies_2)",
+  "https://bulbapedia.bulbagarden.net/wiki/Basic_Grass_Energy_(Scarlet_%26_Violet_Energies_1)",
+  "https://bulbapedia.bulbagarden.net/wiki/Basic_Lightning_Energy_%28Scarlet_%26_Violet_257%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Basic_Lightning_Energy_(Scarlet_%26_Violet_Energies_4)",
+  "https://bulbapedia.bulbagarden.net/wiki/Basic_Metal_Energy_%28SVE_Energy_24%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Basic_Metal_Energy_(Scarlet_%26_Violet_Energies_8)",
+  "https://bulbapedia.bulbagarden.net/wiki/Basic_Psychic_Energy_(Scarlet_%26_Violet_Energies_5)",
+  "https://bulbapedia.bulbagarden.net/wiki/Basic_Water_Energy_%28Paldea_Evolved_279%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Basic_Water_Energy_(Scarlet_%26_Violet_Energies_3)",
+  "https://bulbapedia.bulbagarden.net/wiki/Beast_Energy_%E2%97%87_(Forbidden_Light_117)",
+  "https://bulbapedia.bulbagarden.net/wiki/Big_Charm_%28TCG%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Big_Charm_(Sword_%26_Shield_158)",
+  "https://bulbapedia.bulbagarden.net/wiki/Bill's_Maintenance_(Expedition_Base_Set_137)",
+  "https://bulbapedia.bulbagarden.net/wiki/Black_Belt%27s_Training_%28SVP_Promo_220%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Black_Belt's_Training_(Scarlet_%26_Violet_Black_Star_Promos_219)",
+  "https://bulbapedia.bulbagarden.net/wiki/Black_Market_%E2%97%87_(Team_Up_134)",
+  "https://bulbapedia.bulbagarden.net/wiki/Blaine's_Quiz_%231_(Gym_Heroes_97)",
+  "https://bulbapedia.bulbagarden.net/wiki/Blanche_(SWSH_Black_Star_Promos_SWSH227)",
+  "https://bulbapedia.bulbagarden.net/wiki/Boss's_Orders_(Ghetsis)_(Paldea_Evolved_172)",
+  "https://bulbapedia.bulbagarden.net/wiki/Boss's_Orders_(SWSH_Black_Star_Promos_SWSH251)",
+  "https://bulbapedia.bulbagarden.net/wiki/Bubbly_Water_Energy_(Chaos_Rising_84)",
+  "https://bulbapedia.bulbagarden.net/wiki/Candela_(SWSH_Black_Star_Promos_SWSH228)",
+  "https://bulbapedia.bulbagarden.net/wiki/Champions_Festival_(XY_Black_Star_Promos_XY27)",
+  "https://bulbapedia.bulbagarden.net/wiki/Channeler_(Unified_Minds_190)",
+  "https://bulbapedia.bulbagarden.net/wiki/Choice_Helmet_(Lost_Thunder_169)",
+  "https://bulbapedia.bulbagarden.net/wiki/Computer_Error_(Wizards_Black_Star_Promos_16)",
+  "https://bulbapedia.bulbagarden.net/wiki/Copycat_(Expedition_Base_Set_138)",
+  "https://bulbapedia.bulbagarden.net/wiki/Cynthia_%26_Caitlin_(Cosmic_Eclipse_189)",
+  "https://bulbapedia.bulbagarden.net/wiki/Cyrus_%E2%97%87_(Ultra_Prism_120)",
+  "https://bulbapedia.bulbagarden.net/wiki/Fairy_Energy_(XY_Base_Set_140)",
+  "https://bulbapedia.bulbagarden.net/wiki/Fighting_Energy_%28Guardians_Rising_169%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Glossary_%28TCG%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Growing_Grass_Energy_(Perfect_Order_86)",
+  "https://bulbapedia.bulbagarden.net/wiki/Heat_Factory_%E2%97%87_(Lost_Thunder_178)",
+  "https://bulbapedia.bulbagarden.net/wiki/Iono_(Scarlet_%26_Violet_Black_Star_Promos_124)",
+  "https://bulbapedia.bulbagarden.net/wiki/Judge_%28Hidden_Shadow_170%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Judge_(HS%E2%80%94Unleashed_78)",
+  "https://bulbapedia.bulbagarden.net/wiki/Klara_%28SWSH_Promo_302%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Klara_(SWSH_Black_Star_Promos_SWSH302)",
+  "https://bulbapedia.bulbagarden.net/wiki/Kricketune_%28TCG%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Kricketune_(TCG)",
+  "https://bulbapedia.bulbagarden.net/wiki/Lance_%E2%97%87_(Dragon_Majesty_61)",
+  "https://bulbapedia.bulbagarden.net/wiki/Life_Forest_%E2%97%87_(Lost_Thunder_180)",
+  "https://bulbapedia.bulbagarden.net/wiki/Lucky_Stadium_(Wizards_Black_Star_Promos_41)",
+  "https://bulbapedia.bulbagarden.net/wiki/Lusamine_%E2%97%87_(Lost_Thunder_182)",
+  "https://bulbapedia.bulbagarden.net/wiki/Lusamine_Prism_Star",
+  "https://bulbapedia.bulbagarden.net/wiki/Lysandre_%E2%97%87_(Forbidden_Light_110)",
+  "https://bulbapedia.bulbagarden.net/wiki/Magnetic_Metal_Energy_(Chaos_Rising_85)",
+  "https://bulbapedia.bulbagarden.net/wiki/Marnie's_Pride_(Brilliant_Stars_145)",
+  "https://bulbapedia.bulbagarden.net/wiki/Marnie_(SWSH_Black_Star_Promos_SWSH120)",
+  "https://bulbapedia.bulbagarden.net/wiki/Nitro_Fire_Energy_(Chaos_Rising_86)",
+  "https://bulbapedia.bulbagarden.net/wiki/Paradise_Resort_(Scarlet_%26_Violet_Black_Star_Promos_45)",
+  "https://bulbapedia.bulbagarden.net/wiki/Picnicker_(Scarlet_%26_Violet_Black_Star_Promos_114)",
+  "https://bulbapedia.bulbagarden.net/wiki/Pok%C3%A9mon_Tower_(Wizards_Black_Star_Promos_42)",
+  "https://bulbapedia.bulbagarden.net/wiki/Professor's_Research_(Professor_Magnolia)_(Sword_%26_Shield_178)",
+  "https://bulbapedia.bulbagarden.net/wiki/Professor's_Research_(Professor_Oak)_(Celebrations_23)",
+  "https://bulbapedia.bulbagarden.net/wiki/Professor's_Research_(Professor_Sada)_(Scarlet_%26_Violet_189)",
+  "https://bulbapedia.bulbagarden.net/wiki/Professor's_Research_(Professor_Turo)_(Scarlet_%26_Violet_190)",
+  "https://bulbapedia.bulbagarden.net/wiki/Professor's_Research_(SWSH_Black_Star_Promos_SWSH152)",
+  "https://bulbapedia.bulbagarden.net/wiki/Professor_Burnet_(SWSH_Black_Star_Promos_SWSH167)",
+  "https://bulbapedia.bulbagarden.net/wiki/Rainbow_Brush_%28Celestial_Storm_141%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Rainbow_Brush_(Celestial_Storm_141)",
+  "https://bulbapedia.bulbagarden.net/wiki/Rocky_Fighting_Energy_(Perfect_Order_87)",
+  "https://bulbapedia.bulbagarden.net/wiki/Shadowy_Darkness_Energy_(Pitch_Black_83)",
+  "https://bulbapedia.bulbagarden.net/wiki/Shauna_%28Polychromatic_Gathering_Friend_177%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Shauna_(XY_Base_Set_127)",
+  "https://bulbapedia.bulbagarden.net/wiki/Spark_(SWSH_Black_Star_Promos_SWSH226)",
+  "https://bulbapedia.bulbagarden.net/wiki/Super_Boost_Energy_%E2%97%87_(Ultra_Prism_136)",
+  "https://bulbapedia.bulbagarden.net/wiki/Telepathic_Psychic_Energy_(Perfect_Order_88)",
+  "https://bulbapedia.bulbagarden.net/wiki/Thunder_Mountain_%E2%97%87_(Lost_Thunder_191)",
+  "https://bulbapedia.bulbagarden.net/wiki/Unit_Energy_FightingDarknessFairy_(Forbidden_Light_118)",
+  "https://bulbapedia.bulbagarden.net/wiki/Unit_Energy_GrassFireWater_(Ultra_Prism_137)",
+  "https://bulbapedia.bulbagarden.net/wiki/Unit_Energy_LightningPsychicMetal_(Ultra_Prism_138)",
+  "https://bulbapedia.bulbagarden.net/wiki/Voltaic_Lightning_Energy_(Pitch_Black_84)",
+  "https://bulbapedia.bulbagarden.net/wiki/Wait_and_See_Hammer_(Lost_Thunder_192)",
+  "https://bulbapedia.bulbagarden.net/wiki/Welcoming_Lantern_%28Chilling_Reign_156%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Welcoming_Lantern_(Chilling_Reign_156)",
+  "https://bulbapedia.bulbagarden.net/wiki/Wondrous_Labyrinth_%E2%97%87_(Team_Up_158)",
+  "https://bulbapedia.bulbagarden.net/wiki/Zinnia_%28TCG%29",
+  "https://bulbapedia.bulbagarden.net/wiki/Zinnia_(Dragon_Majesty_64)"
+ ],
+ "missingEnglishSets": [
+  [
+   "SM Black Star Promos",
+   203
+  ],
+  [
+   "BW Black Star Promos",
+   74
+  ],
+  [
+   "Yellow A Alternate cards",
+   58
+  ],
+  [
+   "DP Black Star Promos",
+   33
+  ],
+  [
+   "Nintendo Black Star Promos",
+   30
+  ],
+  [
+   "Delta Reign",
+   23
+  ],
+  [
+   "Kalos Starter Set",
+   21
+  ],
+  [
+   "Charizard & Ho-Oh ex Deck",
+   16
+  ],
+  [
+   "POP Series 1",
+   16
+  ],
+  [
+   "POP Series 3",
+   15
+  ],
+  [
+   "POP Series 4",
+   15
+  ],
+  [
+   "POP Series 9",
+   15
+  ],
+  [
+   "POP Series 6",
+   15
+  ],
+  [
+   "Blastoise & Suicune ex Deck",
+   14
+  ],
+  [
+   "Venusaur & Lugia ex Deck",
+   14
+  ],
+  [
+   "HGSS Black Star Promos",
+   13
+  ],
+  [
+   "POP Series 7",
+   12
+  ],
+  [
+   "POP Series 2",
+   12
+  ],
+  [
+   "POP Series 5",
+   12
+  ],
+  [
+   "Pokémon Rumble",
+   12
+  ],
+  [
+   "POP Series 8",
+   11
+  ],
+  [
+   "McDonald's Collection",
+   9
+  ],
+  [
+   "Laboratory",
+   4
+  ],
+  [
+   "Promotional Card",
+   3
+  ],
+  [
+   "Mystery",
+   3
+  ],
+  [
+   "Alolan Raichu Half Deck",
+   2
+  ],
+  [
+   "Latias Half Deck",
+   2
+  ],
+  [
+   "Latios Half Deck",
+   2
+  ],
+  [
+   "Evolution",
+   2
+  ],
+  [
+   "Noivern Half Deck",
+   2
+  ],
+  [
+   "Lycanroc Half Deck",
+   2
+  ],
+  [
+   "Pikachu Libre Half Deck",
+   1
+  ],
+  [
+   "FLO",
+   1
+  ],
+  [
+   "Suicune Half Deck",
+   1
+  ],
+  [
+   "Minun Half Deck",
+   1
+  ],
+  [
+   "Plusle Half Deck",
+   1
+  ],
+  [
+   "Sylveon Half Deck",
+   1
+  ]
+ ],
+ "missingJapaneseSets": [
+  [
+   "XY-P Promotional cards",
+   137
+  ],
+  [
+   "Space-Time Creation",
+   81
+  ],
+  [
+   "Unnumbered Promotional cards",
+   52
+  ],
+  [
+   "BW-P Promotional cards",
+   50
+  ],
+  [
+   "BREAK Starter Pack",
+   45
+  ],
+  [
+   "SM-P Promotional cards",
+   42
+  ],
+  [
+   "Pokémon Card Game Battle Academy",
+   40
+  ],
+  [
+   "Sword & Shield Family Pokémon Card Game",
+   31
+  ],
+  [
+   "Sun & Moon Family Pokémon Card Game",
+   30
+  ],
+  [
+   "PCG-P Promotional cards",
+   29
+  ],
+  [
+   "Beginning Set",
+   29
+  ],
+  [
+   "National Beginning Set",
+   27
+  ],
+  [
+   "Start Deck 100",
+   26
+  ],
+  [
+   "Promo Card Pack 25th Anniversary Edition",
+   24
+  ],
+  [
+   "Pokémon-e Starter Deck",
+   21
+  ],
+  [
+   "L-P Promotional cards",
+   20
+  ],
+  [
+   "ADV-P Promotional cards",
+   16
+  ],
+  [
+   "Dialga Half Deck",
+   15
+  ],
+  [
+   "Southern Islands",
+   15
+  ],
+  [
+   "Giratina Half Deck",
+   13
+  ],
+  [
+   "Torchic Constructed Starter Deck",
+   12
+  ],
+  [
+   "Metagross Constructed Starter Deck",
+   12
+  ],
+  [
+   "M Audino-EX Mega Battle Deck",
+   11
+  ],
+  [
+   "V Starter Set Lightning",
+   10
+  ],
+  [
+   "Reshiram-EX Battle Strength Deck",
+   10
+  ],
+  [
+   "Arceus LV.X Deck: Lightning & Psychic",
+   10
+  ],
+  [
+   "Arceus LV.X Deck: Grass & Fire",
+   10
+  ],
+  [
+   "Salamence Constructed Starter Deck",
+   10
+  ],
+  [
+   "Rayquaza Half Deck",
+   10
+  ],
+  [
+   "Deoxys Half Deck",
+   10
+  ],
+  [
+   "Silver Deck Kit",
+   10
+  ],
+  [
+   "Flygon Constructed Starter Deck",
+   10
+  ],
+  [
+   "Imprison! Gardevoir ex Constructed Standard Deck",
+   10
+  ],
+  [
+   "Aqua Deck Kit",
+   10
+  ],
+  [
+   "Mudkip Constructed Starter Deck",
+   10
+  ],
+  [
+   "Treecko Constructed Starter Deck",
+   10
+  ],
+  [
+   "Magma Deck Kit",
+   9
+  ],
+  [
+   "Latias ex Half Deck",
+   9
+  ],
+  [
+   "ex Starter Set Fuecoco & Ampharos ex",
+   9
+  ],
+  [
+   "Infernape Half Deck",
+   9
+  ],
+  [
+   "Zekrom-EX Battle Strength Deck",
+   9
+  ],
+  [
+   "Chimchar Half Deck",
+   9
+  ],
+  [
+   "Generations Start Deck Reshiram ex & Amoonguss ex",
+   9
+  ],
+  [
+   "Piplup Half Deck",
+   8
+  ],
+  [
+   "Earth's Groudon ex Constructed Starter Deck",
+   8
+  ],
+  [
+   "Venusaur VMAX Starter Set",
+   8
+  ],
+  [
+   "Charizard Starter Deck",
+   8
+  ],
+  [
+   "Virizion Battle Strength Deck",
+   8
+  ],
+  [
+   "DP-P Promotional cards",
+   8
+  ],
+  [
+   "Latios ex Half Deck",
+   8
+  ],
+  [
+   "Shockwave! Tyranitar ex Constructed Standard Deck",
+   8
+  ],
+  [
+   "Lightning Quick Construction Pack",
+   8
+  ],
+  [
+   "Steelix Constructed Standard Deck",
+   8
+  ],
+  [
+   "Garchomp Half Deck",
+   8
+  ],
+  [
+   "Keldeo Battle Strength Deck",
+   8
+  ],
+  [
+   "Tyranitar Constructed Standard Deck",
+   8
+  ],
+  [
+   "Hydreigon Half Deck",
+   8
+  ],
+  [
+   "Black Deck Kit",
+   8
+  ],
+  [
+   "Black Kyurem-EX Battle Strength Deck",
+   8
+  ],
+  [
+   "Regigigas Half Deck",
+   8
+  ],
+  [
+   "Mewtwo Half Deck",
+   8
+  ],
+  [
+   "White Kyurem-EX Battle Strength Deck",
+   8
+  ],
+  [
+   "V Starter Set Grass",
+   8
+  ],
+  [
+   "Generations Start Deck Zacian ex & Alcremie ex",
+   8
+  ],
+  [
+   "Sun & Moon",
+   8
+  ],
+  [
+   "Terrakion Battle Strength Deck",
+   8
+  ],
+  [
+   "Team Plasma's Powered Half Deck",
+   8
+  ],
+  [
+   "Terastal Starter Set Mewtwo ex",
+   7
+  ],
+  [
+   "MEGA Starter Set Mega Gengar ex",
+   7
+  ],
+  [
+   "Turtwig Half Deck",
+   7
+  ],
+  [
+   "Charizard G Half Deck",
+   7
+  ],
+  [
+   "Ocean's Kyogre ex Constructed Starter Deck",
+   7
+  ],
+  [
+   "Blastoise Starter Deck",
+   7
+  ],
+  [
+   "Generations Start Deck Dialga ex & Lucario ex",
+   7
+  ],
+  [
+   "Gallade Half Deck",
+   7
+  ],
+  [
+   "Venusaur Starter Deck",
+   7
+  ],
+  [
+   "Fire Quick Construction Pack",
+   7
+  ],
+  [
+   "PPP Promotional cards",
+   7
+  ],
+  [
+   "Electivire Half Deck",
+   7
+  ],
+  [
+   "ex Starter Set Pikachu ex & Pawmot",
+   7
+  ],
+  [
+   "Palkia Half Deck",
+   7
+  ],
+  [
+   "Zygarde-EX Perfect Battle Deck",
+   7
+  ],
+  [
+   "Gengar VMAX High-Class Deck",
+   7
+  ],
+  [
+   "Generations Start Deck Lugia ex & Tyranitar ex",
+   7
+  ],
+  [
+   "Lucario VSTAR Starter Set",
+   7
+  ],
+  [
+   "ex Starter Set Quaxly & Mimikyu ex",
+   7
+  ],
+  [
+   "V Starter Set Fire",
+   7
+  ],
+  [
+   "Raichu Half Deck",
+   7
+  ],
+  [
+   "ex Starter Set Sprigatito & Lucario ex",
+   7
+  ],
+  [
+   "Yveltal Half Deck",
+   7
+  ],
+  [
+   "Victini Coin Flip Deck",
+   7
+  ],
+  [
+   "Cobalion Battle Strength Deck",
+   7
+  ],
+  [
+   "M Charizard-EX Mega Battle Deck",
+   7
+  ],
+  [
+   "Victini Formation Deck",
+   7
+  ],
+  [
+   "Tera Greedent ex Start Deck",
+   7
+  ],
+  [
+   "Kuchiba City Gym",
+   6
+  ],
+  [
+   "Raichu BREAK Evolution Pack",
+   6
+  ],
+  [
+   "Magma Gang VS Aqua Gang: Double Crisis",
+   6
+  ],
+  [
+   "Emboar-EX Half Deck",
+   6
+  ],
+  [
+   "Hyper Metal Chain Deck",
+   6
+  ],
+  [
+   "Mightyena Quarter Deck",
+   6
+  ],
+  [
+   "Typhlosion Constructed Starter Deck",
+   6
+  ],
+  [
+   "Deoxys Constructed Starter Deck",
+   6
+  ],
+  [
+   "Holon Research Tower Fire Quarter Deck",
+   6
+  ],
+  [
+   "Holon Research Tower Water Quarter Deck",
+   6
+  ],
+  [
+   "V Starter Set Fighting",
+   6
+  ],
+  [
+   "Leafeon Deck",
+   6
+  ],
+  [
+   "Garchomp C Half Deck",
+   6
+  ],
+  [
+   "Inteleon VMAX High-Class Deck",
+   6
+  ],
+  [
+   "Generations Start Deck Xerneas ex & Noivern ex",
+   6
+  ],
+  [
+   "P Promotional cards",
+   6
+  ],
+  [
+   "Stellar Tera Type Starter Set Ceruledge ex",
+   6
+  ],
+  [
+   "Darkrai VSTAR Starter Set",
+   6
+  ],
+  [
+   "Xerneas Half Deck",
+   6
+  ],
+  [
+   "Metagross Deck",
+   6
+  ],
+  [
+   "V Starter Set Water",
+   6
+  ],
+  [
+   "Raichu Battle Starter Deck",
+   6
+  ],
+  [
+   "Rayquaza Constructed Starter Deck",
+   6
+  ],
+  [
+   "Terastal Starter Set Skeledirge ex",
+   6
+  ],
+  [
+   "Blastoise VMAX Starter Set",
+   6
+  ],
+  [
+   "Mew Quarter Deck",
+   6
+  ],
+  [
+   "Fighting Quick Construction Pack",
+   6
+  ],
+  [
+   "Metal Melmetal ex Start Deck",
+   6
+  ],
+  [
+   "Water Quick Construction Pack",
+   6
+  ],
+  [
+   "Noivern BREAK Evolution Pack",
+   6
+  ],
+  [
+   "Pikachu Half Deck",
+   6
+  ],
+  [
+   "Rockruff Full Power Deck",
+   6
+  ],
+  [
+   "Torchic Quarter Deck",
+   6
+  ],
+  [
+   "Sun & Moon Starter Set",
+   6
+  ],
+  [
+   "Generations Start Deck Koraidon ex & Paldean Clodsire ex",
+   6
+  ],
+  [
+   "Thundurus Half Deck",
+   6
+  ],
+  [
+   "Genesect Half Deck",
+   6
+  ],
+  [
+   "Torterra Half Deck",
+   6
+  ],
+  [
+   "Charizard VMAX Starter Set",
+   5
+  ],
+  [
+   "Charizard VSTAR vs Rayquaza VMAX Special Deck Set",
+   5
+  ],
+  [
+   "Blastoise + Kyurem-EX Combo Deck",
+   5
+  ],
+  [
+   "Holon Research Tower Lightning Quarter Deck",
+   5
+  ],
+  [
+   "Mirage's Mew Constructed Starter Deck",
+   5
+  ],
+  [
+   "Empoleon Half Deck",
+   5
+  ],
+  [
+   "Golduck BREAK + Palkia-EX Combo Deck",
+   5
+  ],
+  [
+   "Generations Start Deck Tapu Koko ex & Mimikyu ex",
+   5
+  ],
+  [
+   "Heatran Half Deck",
+   5
+  ],
+  [
+   "PokéPark Blue",
+   5
+  ],
+  [
+   "TAG TEAM GX Starter Sets",
+   5
+  ],
+  [
+   "Water Greninja ex Start Deck",
+   5
+  ],
+  [
+   "Future Miraidon ex Starter Deck & Build Set",
+   5
+  ],
+  [
+   "Magmortar Battle Starter Deck",
+   5
+  ],
+  [
+   "M Rayquaza-EX Mega Battle Deck",
+   5
+  ],
+  [
+   "MEGA Starter Set Mega Diancie ex",
+   5
+  ],
+  [
+   "Tornadus Half Deck",
+   5
+  ],
+  [
+   "Stellar Tera Type Starter Set Sylveon ex",
+   5
+  ],
+  [
+   "Greninja V-UNION Special Card Set",
+   5
+  ],
+  [
+   "Torterra Battle Starter Deck",
+   5
+  ],
+  [
+   "Meganium Constructed Starter Deck",
+   5
+  ],
+  [
+   "Mewtwo V-UNION Special Card Set",
+   4
+  ],
+  [
+   "Grimmsnarl VMAX Starter Set",
+   4
+  ],
+  [
+   "PLAY Promotional cards",
+   4
+  ],
+  [
+   "Togekiss-EX Half Deck",
+   4
+  ],
+  [
+   "Yamabuki City Gym",
+   4
+  ],
+  [
+   "Psychic Quick Construction Pack",
+   4
+  ],
+  [
+   "Lightning Miraidon ex Start Deck",
+   4
+  ],
+  [
+   "Bulbasaur Quarter Deck",
+   4
+  ],
+  [
+   "Team Plasma Battle Gift Set",
+   4
+  ],
+  [
+   "VSTAR Special Set",
+   4
+  ],
+  [
+   "Zacian V-UNION Special Card Set",
+   4
+  ],
+  [
+   "Zeraora VSTAR & VMAX High-Class Deck",
+   4
+  ],
+  [
+   "Deoxys VSTAR & VMAX High-Class Deck",
+   4
+  ],
+  [
+   "Grass Decidueye ex Start Deck",
+   4
+  ],
+  [
+   "Lucario Quarter Deck",
+   4
+  ],
+  [
+   "Grass Quick Construction Pack",
+   4
+  ],
+  [
+   "Crawdaunt Quarter Deck",
+   4
+  ],
+  [
+   "Start Deck 100 CoroCoro Comic Version",
+   3
+  ],
+  [
+   "Lightning Pikachu V Deck",
+   3
+  ],
+  [
+   "Venusaur & Charizard & Blastoise Special Deck Set ex",
+   3
+  ],
+  [
+   "Fire Victini ex Start Deck",
+   3
+  ],
+  [
+   "Psychic Clefable ex Start Deck",
+   3
+  ],
+  [
+   "Generations Start Deck Pikachu ex & Snorlax ex",
+   3
+  ],
+  [
+   "Feraligatr Constructed Starter Deck",
+   3
+  ],
+  [
+   "Ancient Koraidon ex Starter Deck & Build Set",
+   3
+  ],
+  [
+   "Side Deck",
+   3
+  ],
+  [
+   "Water Wailord V Deck",
+   3
+  ],
+  [
+   "Generations Start Deck Kyogre ex & Blaziken ex",
+   3
+  ],
+  [
+   "Espeon & Deoxys-GX TAG TEAM GX Starter Set",
+   3
+  ],
+  [
+   "Eevee Heroes VMAX Special Set",
+   3
+  ],
+  [
+   "Beginning Set for Girls",
+   3
+  ],
+  [
+   "V Starter Decks",
+   3
+  ],
+  [
+   "ex Special Set",
+   3
+  ],
+  [
+   "Zacian + Zamazenta Box",
+   3
+  ],
+  [
+   "Colorless Eevee V Deck",
+   2
+  ],
+  [
+   "Expansion Sheet 2",
+   2
+  ],
+  [
+   "Grass Venusaur V Deck",
+   2
+  ],
+  [
+   "Blastoise Battle Starter Deck",
+   2
+  ],
+  [
+   "Silver Lance & Jet-Black Spirit Jumbo Pack Set",
+   2
+  ],
+  [
+   "The Best of XY",
+   2
+  ],
+  [
+   "DPt-P Promotional cards",
+   2
+  ],
+  [
+   "Tera Dragonite ex Start Deck",
+   2
+  ],
+  [
+   "Brock of Pewter City Gym Trainer Battle Deck",
+   2
+  ],
+  [
+   "Zacian & Zamazenta vs Eternatus Special Deck Set",
+   2
+  ],
+  [
+   "Darkness Houndoom ex Start Deck",
+   2
+  ],
+  [
+   "Fighting Lucario V Deck",
+   2
+  ],
+  [
+   "Magmortar Half Deck",
+   2
+  ],
+  [
+   "Guren Town Gym",
+   2
+  ],
+  [
+   "Hanada City Gym",
+   2
+  ],
+  [
+   "Expansion Sheet 3",
+   2
+  ],
+  [
+   "Umbreon & Darkrai-GX TAG TEAM GX Starter Set",
+   2
+  ],
+  [
+   "Super Legend Set: Xerneas-EX & Yveltal-EX",
+   2
+  ],
+  [
+   "Incineroar-GX Starter Set Fire",
+   2
+  ],
+  [
+   "Metal Duraludon V Deck",
+   2
+  ],
+  [
+   "Fighting Koraidon ex Start Deck",
+   2
+  ],
+  [
+   "Pokémon ☆",
+   1
+  ],
+  [
+   "25th Anniversary Golden Box",
+   1
+  ],
+  [
+   "Darkness Galarian Slowbro V Deck",
+   1
+  ],
+  [
+   "Magma Gang vs Aqua Gang: Double Crisis",
+   1
+  ],
+  [
+   "Dialga LV.X Constructed Standard Deck",
+   1
+  ],
+  [
+   "Tamamushi City Gym",
+   1
+  ],
+  [
+   "VMAX Special Set",
+   1
+  ],
+  [
+   "Umbreon & Darkrai-GX Starter Set",
+   1
+  ],
+  [
+   "Expansion Sheet 1",
+   1
+  ],
+  [
+   "Nivi City Gym",
+   1
+  ],
+  [
+   "Misty of Cerulean City Gym Trainer Battle Deck",
+   1
+  ],
+  [
+   "Generations Start Decks",
+   1
+  ],
+  [
+   "Pokémon Web",
+   1
+  ],
+  [
+   "Fire Incineroar V Starter Deck",
+   1
+  ],
+  [
+   "Pokémon Star",
+   1
+  ],
+  [
+   "Master Kit Side Deck",
+   1
+  ],
+  [
+   "Fire Incineroar V Deck",
+   1
+  ],
+  [
+   "Bulbasaur Quatter Deck",
+   1
+  ],
+  [
+   "Palkia LV.X Constructed Standard Deck",
+   1
+  ],
+  [
+   "Psychic Mew V Deck",
+   1
+  ]
+ ]
+}

@@ -1,0 +1,5 @@
+[
+ {"source":"https://bulbapedia.bulbagarden.net/wiki/Rayquaza_(TCG)","enSet":"Ascended Heroes","enNumber":"153/217","oldJaNumber":"153/193","jaNumber":"127/193","evidence":"Individual Rayquaza printing article gives Japanese 127; species table incorrectly repeated the English number.","reference":"https://bulbapedia.bulbagarden.net/wiki/Rayquaza_(Ascended_Heroes_153)"},
+ {"source":"https://bulbapedia.bulbagarden.net/wiki/Gengar_(TCG)","enSet":"Rising Rivals","enNumber":"40/111","oldJaNumber":"065/090","jaNumber":"043/090","evidence":"Individual Gengar GL article gives Japanese 043; 065 belongs to Aggron.","reference":"https://bulbapedia.bulbagarden.net/wiki/Gengar_GL_(Rising_Rivals_40)"},
+ {"source":"https://bulbapedia.bulbagarden.net/wiki/Wondrous_Patch_(Phantasmal_Flames_94)","enSet":"Perfect Order","enNumber":"117/088","oldJaNumber":"103/080","jaNumber":"104/080","evidence":"Primary Japanese M3/104 record is ワンダーパッチ (Wondrous Patch); M3/103 is ポケパッド (Poké Pad).","reference":"https://github.com/tcgdex/cards-database/blob/4199850a6af49665db0080fa2bb9ef751750a406/data-asia/M/M3/104.ts"}
+]

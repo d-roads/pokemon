@@ -10,5 +10,5 @@ export function linkLanguages(english,japanese,registry){
  }
  const clean=c=>{const {englishId,englishLink,japaneseIds,languagePairVerified,...rest}=c;return rest;};
  return [...english.map(c=>({...clean(c),...(enLinks.has(c.id)?{japaneseIds:[enLinks.get(c.id)],languagePairVerified:true}:{})})),
-  ...japanese.map(c=>({...clean(c),...(jaLinks.has(c.id)?{englishId:jaLinks.get(c.id),englishLink:'reviewed-exact-printing',languagePairVerified:true}:{})}))];
+  ...japanese.map(c=>({...clean(c),...(jaLinks.has(c.id)?{name:enById.get(jaLinks.get(c.id)).name,nameDisplayOnly:false,nameIsJapanese:false,englishId:jaLinks.get(c.id),englishLink:'reviewed-exact-printing',languagePairVerified:true}:{})}))];
 }

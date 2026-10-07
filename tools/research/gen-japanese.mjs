@@ -178,6 +178,13 @@ for(const p of pending){
   englishCandidates:cands.length,englishCandidateIds:cands.map(e=>e.id)};
  set.cards.push(card);
 }
+// Preserve reference-backed printings absent from upstream card lists.
+if(existsSync(outCatalog))for(const previous of JSON.parse(readFileSync(outCatalog,'utf8'))){
+ const retained=previous.cards.filter(c=>c.counterpartReference);if(!retained.length)continue;
+ let target=out.find(s=>s.id===previous.id);
+ if(!target){target={...previous,cards:[]};out.push(target);}
+ for(const card of retained)if(!target.cards.some(c=>String(c.number)===String(card.number)))target.cards.push(card);
+}
 for(const s of out){const linked=s.cards.filter(c=>reviewedByJa.has(s.id+'-'+c.number)).length;report.sets.push({set:s.id,tcgdex:s.tcgdexId,name:s.name,era:s.series,eligible:s.cards.length,linked,pricecharting:s.marketSource,pricechartingListed:s.marketSourceListed});s.total=s.cards.length;}
 report.totals={setsWithCards:out.length,setsWithoutCardLists:report.missingCardLists.length,eligibleCards:stats.eligible,linkedToEnglish:stats.linked,unreviewedWithCandidates:stats.unreviewed,ambiguous:stats.ambiguous,noEnglishMatch:stats.none,byMethod:stats.byMethod,japaneseNamesOnly:out.reduce((n,s)=>n+s.cards.filter(c=>c.nameIsJapanese).length,0)};
 writeFileSync(outCatalog,JSON.stringify(out)+'\n');
