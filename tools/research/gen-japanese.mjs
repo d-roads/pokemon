@@ -91,6 +91,8 @@ function englishName(card,link){
  const raw=card.name.ja.replace(/-\d+\/\d+$/,'');
  if(/^[A-Za-z0-9 .'’-]+$/.test(raw))return raw.replace(/\b[a-z]/g,m=>m.toUpperCase());
  const ja=raw.replace(/\s+/g,'').replace(/[（(]デルタ種[)）]$/,'δ'),tail=tailOf(ja),d=card.dexId||[];
+ // Tag teams: "セレビィ&フシギバナGX" -> "Celebi & Venusaur GX" when every partner's species is known.
+ if(card.category==='Pokemon'&&d.length>1&&ja.includes('&')){const parts=ja.replace(TAIL,'').split('&'),names=d.map(speciesName);if(parts.length===d.length&&names.every(Boolean)&&parts.every(p=>/^[ァ-ヴー・]+$/.test(p)))return names.join(' & ')+(tail?' '+tail:'');}
  if(card.category==='Pokemon'&&d.length===1){const base=speciesName(d[0]);if(base){
   let rest=ja,prefix='';for(let again=true;again;){again=false;for(const [k,v] of PREFIX)if(rest.startsWith(k)){prefix+=v;rest=rest.slice(k.length);again=true;}}
   // What is left must be just the species (in katakana) and a known suffix; anything else stays Japanese.

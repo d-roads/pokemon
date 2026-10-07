@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-07T03:59:01.233Z",
+ "generatedAt": "2026-10-07T04:00:53.640Z",
  "source": "https://github.com/tcgdex/cards-database (MIT)",
  "englishSetPairs": 146,
  "englishSetPairProblems": [
@@ -1877,6 +1877,6 @@
    "stats+set": 24,
    "stats+first-print": 2
   },
-  "japaneseNamesOnly": 1022
+  "japaneseNamesOnly": 951
  }
 }
