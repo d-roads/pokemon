@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "note": "Exact counterparts retained from the catalog's existing known-pair regression fixtures. Inferred illustrator/stats links are candidates only. Add pairs only after checking artwork, expansion, rarity/finish and printing; never use release order to choose a reprint.",
+  "pairs": [
+    {"en": "sv3pt5-199", "ja": "ja-sv2a-201", "evidence": "Known 151 Charizard ex special illustration pair; existing japanese.test.mjs regression fixture"},
+    {"en": "sv3pt5-6", "ja": "ja-sv2a-006", "evidence": "Known 151 regular Charizard ex pair; existing japanese.test.mjs regression fixture"},
+    {"en": "base1-15", "ja": "ja-pmcg1-011", "evidence": "Known Base Set / Expansion Pack Venusaur holo pair; existing japanese.test.mjs regression fixture"}
+  ]
+}

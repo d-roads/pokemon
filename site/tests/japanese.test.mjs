@@ -40,7 +40,8 @@ test('Japanese sets and cards are in the catalog with unique ids, eras and no pr
 
 test('Links between Japanese and English cards point both ways and to real English cards',()=>{
  const linked=ja.filter(c=>c.englishId);
- assert.ok(linked.length>2500,'most Japanese cards with an English printing are linked');
+ assert.equal(linked.length,3,'only reviewed known pairs enable switching');
+ assert.ok(ja.filter(c=>c.englishCandidateIds?.length&&!c.englishId).length>3000,'unverified candidates stay disabled');
  for(const c of linked){const e=byId.get(c.englishId);assert.ok(e&&!e.japanese,c.id);assert.ok(e.japaneseIds?.includes(c.id),c.id);}
  for(const e of cards.filter(c=>c.japaneseIds))for(const id of e.japaneseIds)assert.equal(byId.get(id)?.englishId,e.id);
  // Known pairs: same artwork, matching rarity class.

@@ -1,3 +1,32 @@
+# FutureSight — October 7, 2026: exact language counterparts (dev)
+
+Owner requested diagnosis, a catalog-wide fix, a commit to `dev`, handoff update, and a running local test server. They confirmed that **official English/Japanese set names and collector numbers may differ for an exact counterpart**.
+
+## Cause and implemented policy
+- `gen-japanese.mjs` called illustrator + coarse HP/attack/rarity fingerprints “artwork” matches. Trainer fingerprints lacked translated identity/artwork checks. Set-majority votes and an earliest-English-release fallback promoted guesses to active links. Illustrator and gameplay similarity cannot distinguish alternate artwork or reprints.
+- The UI selected `japaneseIds[0]` and accepted any Japanese alternate sharing an English anchor. This could choose another expansion/printing; one English Giovanni’s Exile (`sm115-67`) linked to three Japanese full-art numbers (`ja-sm12a-193`, `196`, `201`). There were 89 English cards with multiple Japanese links.
+- All catalog/API/build consumers now use `site/data/language-pairs.json` through `language-links.mjs`. A pair must have evidence, existing endpoints, and a unique endpoint in both languages. The UI also requires the verified marker and a reciprocal single pair, rejects unrelated/stale version ids, and preserves exact round trips in normal and reading views. Unknown counterparts have disabled tabs and accurate “No verified … counterpart” text.
+- The generator now emits fingerprint **candidates only**; it cannot re-enable set-vote or first-print guesses. The existing 3,345 inferred links were migrated to candidate fields, preserving every other field on all 5,726 Japanese cards. Cross-language links live in the catalog, **not SQLite**: no user-data or price-cache migration is needed; restart any dev server to load the corrected catalog.
+
+## Material coverage limitation / unfinished data verification
+- **Only three pre-existing known-pair regression fixtures remain enabled**: `sv3pt5-199` ↔ `ja-sv2a-201`, `sv3pt5-6` ↔ `ja-sv2a-006`, `base1-15` ↔ `ja-pmcg1-011`.
+- **3,342 previously active heuristic links are quarantined, not declared nonexistent.** They have not been individually verified against both artwork scans and expansion/rarity/finish/reprint identity. The safety fix covers the entire catalog, but restoring verified language-switch coverage is still outstanding. Do not present this as a completed artwork audit or as proof of Japan-only/English-only cards.
+- Full source download was unavailable: shell `git clone https://github.com/tcgdex/cards-database.git …` failed DNS resolution. Web lookup could read some source records, but was insufficient for a complete artwork audit.
+- Research checklist: compare both card images and checklist entries, verify alternate-art/holo/stamp/promo/reprint origin, record concrete evidence in the registry, then run the audit and tests. Never activate a link from a matching illustrator/name/stats or release order alone.
+- Deterministic full-catalog report: `tools/research/language-links-audit.json` (25,691 cards, 5,726 Japanese, 3 reviewed pairs, 3,345 preserved candidate cards). Regenerate with `node tools/research/audit-language-links.mjs` from repo root.
+
+## Validation and local server
+- Focused Japanese/catalog/UI regressions: **41/41 pass**, including disabled tabs in both layouts, wrong-art refusal, exact round trips, malformed/nonreciprocal links, missing evidence/endpoints and duplicate-pair refusal.
+- Full test suite: **188/189 pass**. The sole failure is the pre-existing running-server import-safety test (`site/tests/import.test.mjs:74`) because `listen` is denied with `EPERM`; it needs rerunning outside this sandbox. `npm run build` and the Worker syntax check pass (245.6 MB Worker). Data preservation check passed for all 5,726 Japanese records; `git diff --check` passes.
+- Local test server **could not be left running**. Startup was attempted with a separate database at `/home/binj/projects/future-sight/work/language-local-test.sqlite`, dev channel, `127.0.0.1:5180`. It reached `listen` and failed with `EPERM`; the session sandbox disallows listening sockets. No live-browser QA was possible. User authorization does not remove this platform restriction.
+- Outside this restricted session, run from `repo/site`:
+  `FUTURESIGHT_DB=/home/binj/projects/future-sight/work/language-local-test.sqlite FUTURESIGHT_CHANNEL=dev PORT=5180 HOST=127.0.0.1 npm run dev`
+  Then open `http://127.0.0.1:5180`. The separate test DB was initialized during the failed startup; never substitute the beta/owner DB for testing.
+
+Commit: this entry is included in the `dev` fix commit. Previous handoff follows; its “uncommitted” statements describe prior sessions.
+
+---
+
 # FutureSight — session handoff, October 7, 2026 (morning, Pacific): research-rank coverage, research filter, Japanese check
 
 Branch **`dev`**, uncommitted (the owner has not asked for a commit yet). `main`, `beta`, the beta folder and the owner's databases were not written. Plan: `/home/binj/projects/future-sight/research-plan.md`.

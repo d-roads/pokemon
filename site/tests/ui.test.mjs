@@ -364,7 +364,7 @@ test('Japanese cards: language switch, set picker groups, info-screen language a
  ui.run("setFocus(true)");assert.match(ui.e('#detail').innerHTML,/class="grade-tab lang-tab active" data-detail-lang="ja"/);ui.run("setFocus(false)");
  // An English card with no Japanese printing keeps its English page and says so.
  const lone=ui.run("state.cards.find(c=>!c.japanese&&c.eligible&&!c.japaneseIds).id");ui.run(`select('${lone}')`);
- assert.equal(ui.run('shownCard().id'),lone);assert.match(ui.e('#detail').innerHTML,/No Japanese printing of this card/);
+ assert.equal(ui.run('shownCard().id'),lone);assert.match(ui.e('#detail').innerHTML,/No verified Japanese counterpart of this printing/);
  // Choosing a Browse language resets the info screen to follow it.
  ui.run("setLangMode('en')");assert.equal(ui.run('state.detailLang'),null);
  // Once matched to its product (Find prices / Update sales), a Japanese card gets the full price panel.
@@ -380,4 +380,22 @@ test('Top movers and Investments switch language and rank each language separate
  ui.run("state.marketLang='ja'");await ui.run('loadMovers("week",true)');assert.ok(ui.calls.some(u=>u.startsWith('/api/movers?')&&u.includes('lang=ja')));
  assert.match(ui.e('#movers-view').innerHTML,/ranked only against other Japanese cards/);
  ui.e('#invest-nav').onclick();await ui.run('loadInvest(true)');assert.ok(ui.calls.some(u=>u.startsWith('/api/investments?')&&u.includes('lang=ja')));
+});
+
+
+test('Language switching refuses unreviewed, ambiguous and unrelated printings in both layouts',async()=>{
+ const ui=workspace();await ui.run('init()');
+ ui.run("select('sm115-67')");
+ assert.equal(ui.run("counterpart(cardById('sm115-67'),'ja')"),null);
+ assert.match(ui.e('#detail').innerHTML,/data-detail-lang="ja"[^>]*disabled/);
+ ui.run("showVersion('ja','ja-sm12a-193')");assert.equal(ui.run('shownCard().id'),'sm115-67');
+ ui.run("setFocus(true)");assert.match(ui.e('#detail').innerHTML,/data-detail-lang="ja"[^>]*disabled/);
+ ui.run("setFocus(false);select('sv3pt5-199');showVersion('ja','ja-sv2a-006')");
+ assert.equal(ui.run('shownCard().id'),'sv3pt5-199');
+ ui.run("showVersion('ja')");assert.equal(ui.run('shownCard().id'),'ja-sv2a-201');
+ ui.run("showVersion('en');showVersion('ja')");assert.equal(ui.run('shownCard().id'),'ja-sv2a-201');
+ ui.run("state.cards=state.cards.map(c=>c.id==='sv3pt5-199'?{...c,japaneseIds:['ja-sv2a-201','ja-sv2a-006']}:c)");
+ assert.equal(ui.run("counterpart(cardById('sv3pt5-199'),'ja')"),null);
+ ui.run("state.cards=state.cards.map(c=>c.id==='sv3pt5-199'?{...c,japaneseIds:['ja-sv2a-201']}:c.id==='ja-sv2a-201'?{...c,englishId:'sv3pt5-6'}:c)");
+ assert.equal(ui.run("counterpart(cardById('sv3pt5-199'),'ja')"),null);
 });

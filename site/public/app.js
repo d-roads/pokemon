@@ -248,22 +248,27 @@ function scoreBox(c){
 const viewGrade=()=>state.detailGrade||state.grade;
 function resetDetailVersion(){state.detailLang=null;state.detailAlt=null;state.detailGrade=null;}
 function showGrade(g){state.detailGrade=g===state.grade?null:g;renderDetail();}
-const anchorOf=c=>c?(c.japanese?c.englishId:c.id):null;
-function counterpart(c,lang){if(!c)return null;if(langOf(c)===lang)return c;return cardById(lang==='ja'?c.japaneseIds?.[0]:c.englishId)||null;}
+function counterpart(c,lang){if(!c)return null;if(langOf(c)===lang)return c;if(!c.languagePairVerified)return null;
+ const ids=lang==='ja'?c.japaneseIds:(c.englishId?[c.englishId]:[]);
+ if(ids?.length!==1)return null;
+ const target=cardById(ids[0]);
+ return target?.languagePairVerified&&langOf(target)===lang&&(lang==='ja'?target.englishId===c.id:target.japaneseIds?.length===1&&target.japaneseIds[0]===c.id)?target:null;}
 function shownCard(){
  const base=cardById(state.selected);if(!base)return null;
  const alt=state.detailAlt&&cardById(state.detailAlt);
- if(alt&&anchorOf(alt)&&anchorOf(alt)===anchorOf(base))return alt;
+ if(alt&&(alt.id===base.id||counterpart(base,langOf(alt))?.id===alt.id))return alt;
  return state.detailLang?counterpart(base,state.detailLang)||base:base;
 }
 function showVersion(lang,id){
+ const base=cardById(state.selected),target=counterpart(base,lang);
+ if(!target||(id&&id!==target.id))return;
  state.detailLang=lang;state.detailAlt=id||null;
  const c=shownCard();renderDetail();if(c&&!state.full[c.id])loadCard(c.id);
 }
 function versionBar(base,c,withGrades){
  const missing=state.detailLang&&langOf(c)!==state.detailLang;
- const tab=l=>{const target=counterpart(base,l)||counterpart(c,l),on=langOf(c)===l;return `<button data-detail-lang="${l}" class="${on?'active':''}" aria-pressed="${on}" ${target?'':'disabled'} title="${target?(l==='ja'?'Japanese printing':'English printing'):l==='ja'?'No Japanese printing of this card':'No English printing of this card'}">${l==='ja'?'Japanese':'English'}</button>`;};
- return `<div class="version-bar"><div class="segmented lang-tabs" role="group" aria-label="Card language">${tab('en')}${tab('ja')}</div>${withGrades?`<div class="segmented grade-tabs-inline" role="group" aria-label="Grade">${['raw','psa9','psa10'].map(g=>`<button data-detail-grade="${g}" class="${g===viewGrade()?'active':''}" aria-pressed="${g===viewGrade()}">${{raw:'Raw NM',psa9:'PSA 9',psa10:'PSA 10'}[g]}</button>`).join('')}</div>`:''}${missing?`<span class="version-note">No ${state.detailLang==='ja'?'Japanese':'English'} printing of this card.</span>`:''}</div>`;
+ const tab=l=>{const target=counterpart(base,l),on=langOf(c)===l;return `<button data-detail-lang="${l}" class="${on?'active':''}" aria-pressed="${on}" ${target?'':'disabled'} title="${target?(l==='ja'?'Japanese printing':'English printing'):l==='ja'?'No verified Japanese counterpart of this printing':'No verified English counterpart of this printing'}">${l==='ja'?'Japanese':'English'}</button>`;};
+ return `<div class="version-bar"><div class="segmented lang-tabs" role="group" aria-label="Card language">${tab('en')}${tab('ja')}</div>${withGrades?`<div class="segmented grade-tabs-inline" role="group" aria-label="Grade">${['raw','psa9','psa10'].map(g=>`<button data-detail-grade="${g}" class="${g===viewGrade()?'active':''}" aria-pressed="${g===viewGrade()}">${{raw:'Raw NM',psa9:'PSA 9',psa10:'PSA 10'}[g]}</button>`).join('')}</div>`:''}${missing?`<span class="version-note">No verified ${state.detailLang==='ja'?'Japanese':'English'} counterpart of this printing.</span>`:''}</div>`;
 }
 function renderDetail(){
  const base=cardById(state.selected),c=shownCard();if(!c){$('#detail').innerHTML='<div class="empty-state"><strong>Select a card</strong><p>Card insights will appear here.</p></div>';return;}
@@ -292,8 +297,8 @@ function renderDetail(){
  const footer=`<button class="mobile-expand" id="expand-details">${state.expanded?'Show fewer details':'See sales & five-year scenarios'}</button><div class="source-line"><span>${(referenceSource?.observedAt||m?.observedAt)?'Checked '+new Date(referenceSource?.observedAt||m.observedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'Price data not yet loaded'}</span><a href="${esc(referenceSource?.url||m?.sourceUrl||c.source)}" target="_blank" rel="noopener noreferrer">${referenceSource?.name?esc(referenceSource.name)+' · ':m?.source?esc(m.source)+' · ':''}View source</a></div>`;
  // Language versions: an English card lists its Japanese printings; a Japanese card links to its English counterpart.
  const goto=(id,label)=>{const t=cardById(id);return t?`<button class="lang-link ${t.id===c.id?'current':''}" data-version="${t.id}"><img src="${t.image}"${t.imageAlt?` data-alt="${t.imageAlt}"`:''} alt="" loading="lazy"><span><strong>${esc(t.name)}${t.japanese?'<span class="lang-tag">JP</span>':''}</strong><small>${esc(t.setName)} · #${esc(t.numberLabel)}${label?' · '+esc(label):''}</small></span></button>`:'';};
- const langSec=c.japanese?`<div class="detail-section lang-versions"><h3>English version</h3>${c.englishId?goto(c.englishId,'')+`<p class="sales-note">Same artwork and card${/stats/.test(c.englishLink||'')?' (matched on attacks and HP; the Japanese record has no illustrator)':''}. Prices are kept separately: Japanese and English copies sell at different prices.</p>`:`<p class="sales-note">${c.englishCandidates?'Several English cards share this artwork, so none is linked rather than guessing.':'No English printing of this exact card was found. It may be Japan-only.'}</p>`}</div>`
-  :c.japaneseIds?.length?`<div class="detail-section lang-versions"><h3>Japanese version${c.japaneseIds.length>1?'s':''}</h3>${c.japaneseIds.map(id=>goto(id,'')).join('')}<p class="sales-note">Same artwork, printed in Japan. Prices are tracked separately.</p></div>`:'';
+ const langSec=c.japanese?`<div class="detail-section lang-versions"><h3>English version</h3>${c.englishId?goto(c.englishId,'')+`<p class="sales-note">Reviewed counterpart with the same artwork and printing. Official set names and collector numbers can differ. Prices are kept separately: Japanese and English copies sell at different prices.</p>`:`<p class="sales-note">No verified English counterpart of this exact printing is available. A matching name, illustrator or card stats alone cannot confirm a counterpart.</p>`}</div>`
+  :c.japaneseIds?.length?`<div class="detail-section lang-versions"><h3>Japanese version${c.japaneseIds.length>1?'s':''}</h3>${c.japaneseIds.map(id=>goto(id,'')).join('')}<p class="sales-note">Reviewed counterpart with the same artwork and printing. Official set names and collector numbers can differ. Prices are tracked separately.</p></div>`:'';
  const jaSet=state.sets.find(x=>x.id===c.setId),jaLine=state.showJapanese?[c.nameJa&&c.nameJa!==c.name?c.nameJa:'',jaSet?.nameJa||''].filter(Boolean).join(' · '):'';
  const jaTop=c.japanese?top.replace(`<h2>${esc(c.name)}</h2>`,`<h2>${esc(c.name)}</h2>${jaLine?`<p class="name-ja" lang="ja">${esc(jaLine)}</p>`:''}`).replace(`<span class="type-pill">${esc(c.type)}</span>`,`<span class="type-pill lang-pill">Japanese</span><span class="type-pill">${esc(c.rarity)}</span>`):top;
  if(c.japanese&&!c.source){
@@ -325,7 +330,7 @@ function focusNeighbors(){const list=filteredCards(),i=list.findIndex(c=>c.id===
 function focusBar(c){
  const {list,i,prev,next}=focusNeighbors();
  return `<div class="focus-bar"><div class="focus-title"><span class="focus-label">CARD INSIGHT</span><strong>${esc(c.name)}</strong><small>${esc(c.setName)} · #${c.numberLabel}</small></div>
- <div class="grade-tabs" role="tablist" aria-label="Grade">${['raw','psa9','psa10'].map(g=>`<button role="tab" class="grade-tab ${g===viewGrade()?'active':''}" data-focus-grade="${g}" aria-selected="${g===viewGrade()}" title="${gradeNames[g]}">${{raw:'Raw NM',psa9:'PSA 9',psa10:'PSA 10'}[g]}</button>`).join('')}${['en','ja'].map(l=>{const t=counterpart(cardById(state.selected),l)||counterpart(c,l),on=langOf(c)===l;return `<button role="tab" class="grade-tab lang-tab ${on?'active':''}" data-detail-lang="${l}" aria-selected="${on}" ${t?'':'disabled'} title="${l==='ja'?'Japanese printing':'English printing'}">${l==='ja'?'JP':'EN'}</button>`;}).join('')}</div>
+ <div class="grade-tabs" role="tablist" aria-label="Grade">${['raw','psa9','psa10'].map(g=>`<button role="tab" class="grade-tab ${g===viewGrade()?'active':''}" data-focus-grade="${g}" aria-selected="${g===viewGrade()}" title="${gradeNames[g]}">${{raw:'Raw NM',psa9:'PSA 9',psa10:'PSA 10'}[g]}</button>`).join('')}${['en','ja'].map(l=>{const t=counterpart(cardById(state.selected),l),on=langOf(c)===l;return `<button role="tab" class="grade-tab lang-tab ${on?'active':''}" data-detail-lang="${l}" aria-selected="${on}" ${t?'':'disabled'} title="${l==='ja'?'Japanese printing':'English printing'}">${l==='ja'?'JP':'EN'}</button>`;}).join('')}</div>
  <div class="focus-nav">${i>=0?`<span class="focus-count">${i+1} of ${list.length}</span>`:''}<button class="icon-button" id="focus-prev" aria-label="Previous card${prev?': '+esc(prev.name):''}" ${prev?'':'disabled'}>${icon('chev-left')}</button><button class="icon-button" id="focus-next" aria-label="Next card${next?': '+esc(next.name):''}" ${next?'':'disabled'}>${icon('chev-right')}</button><button class="icon-button" id="focus-close" aria-label="Close expanded view" title="Close (Esc)">${icon('close')}</button></div></div>`;
 }
 function wireFocusBar(){

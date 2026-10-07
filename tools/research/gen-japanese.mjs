@@ -1,6 +1,6 @@
 // Japanese catalog (Task 1 of the Japanese work): every rare/promo card of the Japanese sets in
 // tools/research/japanese-sets.json, with its English counterpart in our catalog where one can be
-// identified without guessing.
+// reviewed in site/data/language-pairs.json. Fingerprints produce candidates only.
 //
 //   git clone --depth 1 https://github.com/tcgdex/cards-database /tmp/tcgdex
 //   node tools/research/gen-japanese.mjs /tmp/tcgdex
@@ -16,6 +16,8 @@ const src=process.argv[2];
 if(!src)throw new Error('Usage: node tools/research/gen-japanese.mjs <path to tcgdex cards-database clone | cached JSON>');
 const tcg=src.endsWith('.json')?JSON.parse(readFileSync(src,'utf8')):loadTcgdex(src);
 const table=JSON.parse(readFileSync(new URL('./japanese-sets.json',import.meta.url),'utf8')).sets;
+const reviewed=JSON.parse(readFileSync(new URL('../../site/data/language-pairs.json',import.meta.url),'utf8'));
+const reviewedByJa=new Map(reviewed.pairs.map(p=>[p.ja,p.en]));
 const outCatalog=new URL('../../site/data/japanese-catalogs.json',import.meta.url);
 const outReport=new URL('./japanese-coverage.json',import.meta.url);
 
@@ -161,40 +163,23 @@ function candidates(p){
   return e.release==null||p.release==null||e.release>=p.release-45; // the English print comes after (or with) the Japanese one
  });
 }
-const firstPass=new Map();
 for(const p of pending)p.cands=candidates(p);
-// Japanese set -> English sets that its unambiguous Pokémon links point to (majority vote).
-const vote=new Map();
-for(const p of pending){if(p.c.category!=='Pokemon'||p.cands.length!==1)continue;const k=p.set.id,v=vote.get(k)||{};v[p.cands[0].setId]=(v[p.cands[0].setId]||0)+1;vote.set(k,v);}
-const preferred=k=>{const v=vote.get(k)||{},tot=Object.values(v).reduce((a,b)=>a+b,0);return new Set(Object.entries(v).filter(([,n])=>n>=Math.max(2,tot*0.1)).map(([s])=>s));};
-const stats={eligible:0,linked:0,ambiguous:0,none:0,byMethod:{}};
+const stats={eligible:0,linked:0,unreviewed:0,ambiguous:0,none:0,byMethod:{}};
 for(const p of pending){
  const {c,set,row}=p;stats.eligible++;
- let cands=p.cands,method=null,link=null;
- const kind=c.illustrator?'artwork':'stats';
- if(cands.length===1){link=cands[0];method=kind;}
- else if(cands.length>1){
-  const pref=preferred(set.id);
-  let narrowed=cands.filter(e=>pref.has(e.setId));
-  if(narrowed.length===1){link=narrowed[0];method=kind+'+set';}
-  else{
-   // Same artwork reprinted in several English products: take the first English printing,
-   // but only when it is clearly first (no other candidate within 30 days) and not a promo reprint of a set card.
-   const pool=(narrowed.length?narrowed:cands).filter(e=>!e.promo||set.kind==='promo');
-   const sorted=pool.slice().sort((a,b)=>(a.release??9e9)-(b.release??9e9));
-   if(sorted.length===1||sorted.length>1&&(sorted[1].release??9e9)-(sorted[0].release??9e9)>30){link=sorted[0];method=kind+'+first-print';}
-  }
- }
- if(link){stats.linked++;stats.byMethod[method]=(stats.byMethod[method]||0)+1;}else if(cands.length)stats.ambiguous++;else stats.none++;
+ const cands=p.cands,verifiedId=reviewedByJa.get(set.id+'-'+c.localId);
+ const link=verifiedId?enById.get(verifiedId):null,method=link?'reviewed-exact-printing':null;
+ if(verifiedId&&!link)throw new Error('Missing reviewed English card '+verifiedId);
+ if(link){stats.linked++;stats.byMethod[method]=(stats.byMethod[method]||0)+1;}else if(cands.length){stats.unreviewed++;if(cands.length>1)stats.ambiguous++;}else stats.none++;
  const number=String(c.localId),name=englishName(c,link);
  const card={number,name:name||c.name.ja,nameJa:c.name.ja,...(name?{}:{nameIsJapanese:true}),rarity:rarityLabel(c.rarity,row.era,link&&enById.get(link.id)),category:categoryOf(c,row,row.era,p.secret),...(c.dexId?.length?{dexId:c.dexId}:{}),...(c.illustrator?{illustrator:c.illustrator}:{}),
   image:`https://assets.tcgdex.net/ja/${tSets.get(row.tcgdex)?.serie||c.serie}/${row.tcgdex}/${c.localId}/high.webp`,
   ...(c.category==='Pokemon'&&c.dexId?.length===1&&speciesName(c.dexId[0])?{species:speciesName(c.dexId[0])}:{}),
-  ...(link?{englishId:link.id,englishLink:method}:{englishCandidates:cands.length})};
+  englishCandidates:cands.length,englishCandidateIds:cands.map(e=>e.id)};
  set.cards.push(card);
 }
-for(const s of out){const linked=s.cards.filter(c=>c.englishId).length;report.sets.push({set:s.id,tcgdex:s.tcgdexId,name:s.name,era:s.series,eligible:s.cards.length,linked,pricecharting:s.marketSource,pricechartingListed:s.marketSourceListed});s.total=s.cards.length;}
-report.totals={setsWithCards:out.length,setsWithoutCardLists:report.missingCardLists.length,eligibleCards:stats.eligible,linkedToEnglish:stats.linked,ambiguous:stats.ambiguous,noEnglishMatch:stats.none,byMethod:stats.byMethod,japaneseNamesOnly:out.reduce((n,s)=>n+s.cards.filter(c=>c.nameIsJapanese).length,0)};
+for(const s of out){const linked=s.cards.filter(c=>reviewedByJa.has(s.id+'-'+c.number)).length;report.sets.push({set:s.id,tcgdex:s.tcgdexId,name:s.name,era:s.series,eligible:s.cards.length,linked,pricecharting:s.marketSource,pricechartingListed:s.marketSourceListed});s.total=s.cards.length;}
+report.totals={setsWithCards:out.length,setsWithoutCardLists:report.missingCardLists.length,eligibleCards:stats.eligible,linkedToEnglish:stats.linked,unreviewedWithCandidates:stats.unreviewed,ambiguous:stats.ambiguous,noEnglishMatch:stats.none,byMethod:stats.byMethod,japaneseNamesOnly:out.reduce((n,s)=>n+s.cards.filter(c=>c.nameIsJapanese).length,0)};
 writeFileSync(outCatalog,JSON.stringify(out)+'\n');
 writeFileSync(outReport,JSON.stringify(report,null,1)+'\n');
 console.log(JSON.stringify(report.totals),'\nEnglish set pairs',setPairs.length,'problems',setPairProblems.length);
