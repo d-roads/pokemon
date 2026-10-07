@@ -283,6 +283,21 @@ test('Research rank panel: shadow label, evidence, price check and withheld fore
  // Legacy mode (rollback) hides the panel entirely.
  ui.run("state.research={mode:'legacy'};renderDetail()");assert.doesNotMatch(ui.e('#detail').innerHTML,/Research rank/);
 });
+test('Info-screen grade and language tabs change only the shown card, not the list',async()=>{
+ const ui=workspace();await ui.run('init()');await ui.run("select('ja-sv2a-201')");ui.run("state.grade='psa9';updateView()");
+ const list=ui.e('#card-list').innerHTML;
+ ui.run("showGrade('psa10')");
+ assert.equal(ui.run('state.selected'),'ja-sv2a-201','same card stays open');assert.equal(ui.run('state.grade'),'psa9','list grade is untouched');
+ assert.notEqual(ui.e('#grade').value,'psa10');assert.equal(ui.e('#card-list').innerHTML,list,'list is not re-filtered');
+ assert.match(ui.e('#detail').innerHTML,/JAPANESE PSA 10 PRICES/);assert.match(ui.e('#detail').innerHTML,/data-detail-grade="psa10" class="active"/);
+ ui.run("showVersion('en')");
+ assert.equal(ui.run('state.selected'),'ja-sv2a-201');assert.equal(ui.run('shownCard().id'),'sv3pt5-199');assert.match(ui.e('#detail').innerHTML,/data-detail-grade="psa10" class="active"/);
+ // Picking another card starts it in the list's grade and its own printing.
+ const other=ui.run("filteredCards().find(c=>c.id!=='ja-sv2a-201'&&c.japanese).id");await ui.run(`select('${other}')`);
+ assert.equal(ui.run('shownCard().id'),other);assert.equal(ui.run('viewGrade()'),'psa9');
+ // The list grade picker takes over the info screen again.
+ ui.run("showGrade('raw')");ui.e('#grade').onchange({target:{value:'psa10'}});assert.equal(ui.run('viewGrade()'),'psa10');
+});
 test('Japanese cards: language switch, set picker groups, info-screen language and grade tabs',async()=>{
  const ui=workspace();await ui.run('init()');
  const all=ui.run('filteredCards().length'),jp=ui.run('filteredCards().filter(c=>c.japanese).length');
