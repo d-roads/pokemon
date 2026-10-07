@@ -152,11 +152,30 @@ test('Top movers and Investments reload after prices change instead of showing a
 });
 test('Update sales fetches in batches from the Movers and Investments tabs and then rebuilds the list',async()=>{
  const ui=workspace();await ui.run('init()');
- const posted=[];ui.responses['/api/research']=url=>{posted.push(url);return {count:4,total:8,done:posted.length>1,nextOffset:4,markets:{}};};
+ const posted=[];ui.responses['/api/research']=url=>{const ids=new URL('http://x'+url).searchParams.get('ids').split(',');posted.push(ids);return {count:ids.length,total:ids.length,done:true,markets:{},failures:[]};};
  ui.e('#movers-nav').onclick();await ui.run('loadMovers("week")');await new Promise(r=>setImmediate(r));const m=ui.calls.filter(u=>u.startsWith('/api/movers')).length;
  await ui.run('updateMarketSales()');
- assert.equal(posted.length,2);assert.match(posted[0],/set=all&offset=0/);assert.match(posted[1],/offset=4/);
+ const n=ui.run("state.cards.filter(c=>c.source&&c.eligible&&langOf(c)==='en').length");
+ assert.equal(posted.length,Math.ceil(n/4));assert.ok(posted.every(b=>b.length>=1&&b.length<=4));assert.equal(new Set(posted.flat()).size,n,'each card once');
  assert.ok(ui.calls.filter(u=>u.startsWith('/api/movers')).length>m,'the list is rebuilt once the sales are in');
+});
+test('Update sales resumes: recently read cards are skipped, unread cards go first, failures are retried once',async()=>{
+ const ui=workspace();await ui.run('init()');ui.context.setTimeout=f=>{f();return 0;};
+ const scope=ui.run("state.cards.filter(c=>c.source&&c.eligible&&c.setId==='xy5').map(c=>c.id)");assert.ok(scope.length>8);
+ ui.run(`state.markets['${scope[0]}']={...(state.markets['${scope[0]}']||{}),research:{status:'full',checkedAt:new Date().toISOString()}}`);
+ ui.run(`state.markets['${scope[1]}']={...(state.markets['${scope[1]}']||{}),research:{status:'full',checkedAt:'2020-01-01T00:00:00.000Z'}}`);
+ const posted=[];let failed=false;
+ ui.responses['/api/research']=url=>{const ids=new URL('http://x'+url).searchParams.get('ids').split(',');posted.push(ids);const failures=failed?[]:[{card_id:ids[0],message:'The price source is unavailable (503).'}];failed=true;return {count:ids.length-failures.length,markets:{},failures,done:true};};
+ await ui.run("refreshSales(['xy5'],['en'])");
+ const all=posted.flat();
+ assert.ok(!all.includes(scope[0]),'a card read in the last few hours is skipped');
+ assert.equal(all.length,scope.length,'every other card once, plus one retry');
+ assert.deepEqual(posted.at(-1),[posted[0][0]],'the failed card is tried again at the end');
+ // First pass order: never-read cards, then the oldest reads first.
+ const order=posted.slice(0,-1).flat(),readAt=id=>ui.run(`Date.parse(state.markets['${id}']?.research?.checkedAt||'')||0`),at=order.indexOf(scope[1]);
+ assert.ok(order.slice(0,at).every(id=>readAt(id)===0),'unread cards come before cards read earlier');
+ assert.ok(order.slice(at+1).every(id=>readAt(id)===0||readAt(id)>=readAt(scope[1]))&&order.slice(at+1).some(id=>readAt(id)>0)===order.some(id=>id!==scope[1]&&readAt(id)>0),'then the oldest reads first');
+ assert.match(ui.e('#toast').textContent,/1 already checked/);assert.doesNotMatch(ui.e('#toast').textContent,/could not be read/);
 });
 test('Settings offers persistent light, dark, and soft-contrast appearances',async()=>{
  const ui=workspace();await ui.run('init()');ui.e('#settings-nav').onclick();assert.equal(ui.e('#settings-view').hidden,false);assert.equal(ui.e('#page-title').textContent,'Settings');
@@ -277,7 +296,8 @@ test('Japanese cards: language switch, set picker groups, info-screen language a
  ui.e('#search').oninput({target:{value:'リザードンex'}});assert.match(ui.e('#card-list').innerHTML,/JP<\/span>/);ui.e('#search').oninput({target:{value:''}});
  // Japanese card: no price, English tab available, grade tabs, no refresh button.
  ui.run("state.selected='ja-sv2a-201';renderDetail()");let html=ui.e('#detail').innerHTML;
- assert.match(html,/JAPANESE PSA 9 PRICES/);assert.match(html,/English version/);assert.match(html,/data-version="sv3pt5-199"/);assert.match(html,/リザードンex/);assert.match(html,/Special Art Rare \(SAR\)/);
+ assert.match(html,/JAPANESE PSA 9 PRICES/);assert.match(html,/English version/);assert.match(html,/data-version="sv3pt5-199"/);assert.doesNotMatch(html,/リザードン|ポケモンカード151/,'English only by default');
+ ui.run("state.showJapanese=true;renderDetail()");assert.match(ui.e('#detail').innerHTML,/<p class="name-ja" lang="ja">リザードンex · /);ui.run("state.showJapanese=false;renderDetail()");html=ui.e('#detail').innerHTML;assert.match(html,/Special Art Rare \(SAR\)/);
  assert.match(html,/data-detail-lang="ja" class="active"/);assert.match(html,/data-detail-grade="psa10"/);
  assert.match(html,/Not matched yet/);assert.match(html,/id="refresh-card"[^>]*>[\s\S]*?Find prices/);assert.doesNotMatch(html,/SUGGESTED MAXIMUM PRICE/);
  // Swap the info screen to English: the list selection stays, the English card is shown.

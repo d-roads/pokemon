@@ -27,7 +27,11 @@ test('Japanese sets and cards are in the catalog with unique ids, eras and no pr
  for(const c of ja){
   assert.ok(c.id.startsWith('ja-'));assert.equal(c.lang,'ja');assert.ok(eras.has(c.series),c.id);
   assert.equal(c.eligible,true);assert.equal(c.source,null);assert.equal(c.sourceVerified,false);
-  assert.ok(c.name&&c.nameJa&&c.numberLabel&&c.image.startsWith('https://assets.tcgdex.net/ja/'),c.id);
+  assert.ok(c.name&&c.nameJa&&c.numberLabel,c.id);
+  // TCGdex scans use the case-sensitive path TCGdex reports (ja/SV/SV2a/...); otherwise the product photo, else a placeholder.
+  assert.match(c.image,/^(?:https:\/\/assets\.tcgdex\.net\/ja\/[A-Z][^/]*\/[A-Z][^/]*\/[^/]+\/high\.webp|https:\/\/storage\.googleapis\.com\/images\.pricecharting\.com\/[a-z0-9]+\/240\.jpg|data:image\/svg\+xml,)/,c.id);
+  assert.equal(!!c.imagePlaceholder,c.image.startsWith('data:'),c.id);
+  if(c.nameIsJapanese&&c.nameEn)assert.equal(c.name,c.nameEn,'an English guide name is shown by default: '+c.id);
  }
  for(const s of jaSets){assert.ok(s.id.startsWith('ja-'));assert.ok(/^\d{4}-\d{2}-\d{2}$/.test(s.release),s.id);assert.ok(s.checklistSource.includes('tcgdex'));}
  // English cards keep their own data; only the cross-reference is added.
@@ -57,7 +61,7 @@ test('Japanese rarity codes follow each era and names are English where known',(
 });
 
 // PriceCharting markup, as captured from the live Japanese listing and product pages (Oct 7, 2026).
-const listingRow=(id,slug,title,used,cib,nw)=>`<tr id="product-${id}" data-product="${id}"><td class="image"><a href="https://www.pricecharting.com/game/pokemon-japanese-scarlet-&amp;-violet-151/${slug}"></a></td><td class="title" title="${id}"><a href="/game/pokemon-japanese-scarlet-&amp;-violet-151/${slug}">${title}</a></td><td class="price numeric used_price"><span class="js-price">$${used}</span></td><td class="price numeric cib_price"><span class="js-price">$${cib}</span></td><td class="price numeric new_price"><span class="js-price">$${nw}</span></td></tr>`;
+const listingRow=(id,slug,title,used,cib,nw,photo)=>`<tr id="product-${id}" data-product="${id}"><td class="image"><a href="https://www.pricecharting.com/game/pokemon-japanese-scarlet-&amp;-violet-151/${slug}">${photo?`<img class="photo" loading="lazy" src="https://storage.googleapis.com/images.pricecharting.com/${photo}/60.jpg" />`:''}</a></td><td class="title" title="${id}"><a href="/game/pokemon-japanese-scarlet-&amp;-violet-151/${slug}">${title}</a></td><td class="price numeric used_price"><span class="js-price">$${used}</span></td><td class="price numeric cib_price"><span class="js-price">$${cib}</span></td><td class="price numeric new_price"><span class="js-price">$${nw}</span></td></tr>`;
 const listing=(rows,cursor)=>`<html><table>${rows.join('')}</table>${cursor?`<form><input type="hidden" name="cursor" value="${cursor}"></form>`:''}</html>`;
 const saleRow=(title,price,id,date='2026-09-29')=>`<tr id="ebay-${id}"><td class="date">${date}</td><td class="image"></td><td class="title"><a target="_blank" class="js-ebay-completed-sale" href="https://www.ebay.com/itm/${id}?nordt=true">${title}</a></td><td class="numeric"><span class="js-price">$${price}</span></td><td class="numeric listed-price"></td></tr>`;
 const section=(name,rows)=>`<div class="completed-auctions-${name}"><table><tbody>${rows.join('')}</tbody></table></div>`;
@@ -66,13 +70,14 @@ VGPC.pop_data = {"psa":[0,0,0,0,0,0,1,4,90,410]};</script></html>`;
 
 test('Listing pages are read and Japanese cards are matched to exact products only',()=>{
  const page=parseJapaneseListing(listing([
-  listingRow(5326231,'charizard-ex-201','Charizard EX #201','327.00','381.97','546.14'),
+  listingRow(5326231,'charizard-ex-201','Charizard EX #201','327.00','381.97','546.14','nw6zzppucvgyxgqd'),
   listingRow(5326232,'charizard-ex-201-master-ball','Charizard EX [Master Ball] #201','900.00','',''),
   listingRow(5326214,'pikachu-173','Pikachu #173','28.41','52.64','106.44'),
   listingRow(5326300,'bulbasaur-166','Bulbasaur #166','12.00','',''),
   listingRow(5326301,'bulbasaur-166-2','Bulbasaur #166','10.00','','')],'150'));
  assert.equal(page.cursor,'150');assert.equal(page.rows.length,5);
- assert.deepEqual(page.rows[0],{productId:'5326231',path:'/game/pokemon-japanese-scarlet-&-violet-151/charizard-ex-201',title:'Charizard EX #201',name:'Charizard EX',number:'201',variant:false,prices:[327,381.97,546.14]});
+ assert.deepEqual(page.rows[0],{productId:'5326231',path:'/game/pokemon-japanese-scarlet-&-violet-151/charizard-ex-201',title:'Charizard EX #201',name:'Charizard EX',number:'201',variant:false,prices:[327,381.97,546.14],image:'https://storage.googleapis.com/images.pricecharting.com/nw6zzppucvgyxgqd/240.jpg'});
+ assert.equal(page.rows[2].image,null,'no photo, no image');
  assert.equal(page.rows[1].variant,true);
  const set=cards.filter(c=>c.setId==='ja-sv2a');
  const {matches,unmatched}=matchJapaneseListing(page.rows,set);
@@ -88,10 +93,36 @@ test('Listing pages are read and Japanese cards are matched to exact products on
  assert.equal(w.matches.get('ja-pmcg1-011')?.productId,'1');
 });
 
+test('Pokédex-numbered sets never match a trainer by number alone, and older such matches are forgotten',async()=>{
+ // Devolution Spray is #086 in the Japanese Expansion Pack; PriceCharting's #86 there is Seel (Pokédex number).
+ const spray=cards.find(c=>c.id==='ja-pmcg1-086');assert.ok(spray&&!spray.dexId?.length);
+ const page=parseJapaneseListing(listing([listingRow(1,'seel-86','Seel #86','5.00','','')]));
+ const {matches}=matchJapaneseListing(page.rows,[spray]);assert.equal(matches.size,0);
+ const s=new DatabaseSync(':memory:');s.exec(sql);const db=dbAdapter(s);
+ s.prepare('INSERT INTO source_map (card_id,url,product_id,name,rule,map_version,mapped_at) VALUES (?,?,?,?,?,?,?)').run('ja-pmcg1-086','https://www.pricecharting.com/game/pokemon-japanese-expansion-pack/seel-86','1','Seel','number-only','ja-map-2026.10.07','2026-10-07T00:00:00Z');
+ s.prepare('INSERT INTO source_map (card_id,url,product_id,name,rule,map_version,mapped_at) VALUES (?,?,?,?,?,?,?)').run('ja-sv2a-201','https://www.pricecharting.com/game/pokemon-japanese-scarlet-&-violet-151/charizard-ex-201','2','Charizard EX','number+name','ja-map-2026.10.07','2026-10-07T00:00:00Z');
+ s.prepare('INSERT INTO market_cache (card_id,payload,fetched_at) VALUES (?,?,?)').run('ja-pmcg1-086',JSON.stringify({guide:{raw:5},sales:[],observedAt:'2026-10-07T00:00:00Z'}),'2026-10-07T00:00:00Z');
+ forgetSourceMap();
+ try{
+  await api(req('/api/catalog'),{DB:db,NETWORK_DISABLED:true});
+  assert.equal(byId.get('ja-pmcg1-086').source,null);assert.notEqual(byId.get('ja-pmcg1-086').name,'Seel');
+  assert.ok(byId.get('ja-sv2a-201').source,'name matches are kept');
+  assert.equal(s.prepare("SELECT count(*) n FROM source_map WHERE card_id='ja-pmcg1-086'").get().n,0);
+  assert.equal(s.prepare("SELECT count(*) n FROM market_cache WHERE card_id='ja-pmcg1-086'").get().n,0);
+ }finally{forgetSourceMap();}
+});
 test('Japanese sale titles: Japanese printing, right card and number, no other language',()=>{
  const card=byId.get('ja-sv2a-201');
  for(const t of ['2023 Pokemon Japanese 151 Charizard EX SAR 201 NM Japanese 201/165','2023 POKEMON JAPANESE SV2A-POKEMON 151 SPECIAL ART RARE #201 CHARIZARD EX PSA 9 #201','Pokemon Card Game Charizard ex SAR 201/165 sv2a 151 Scarlet & Violet TCG Holo Japanese'])assert.equal(japaneseTitleMatches(t,card),true,t);
  for(const t of ['Charizard ex 199/165 English 151','Charizard ex 201/165 korean','Charizard ex lot 201/165','Charizard ex 006/165 Japanese','Charizard ex 201/165 Master Ball Japanese'])assert.equal(japaneseTitleMatches(t,card),false,t);
+ // Words in the set's or card's own name are not listing exclusions: Dream League, Reset Stamp, Iron Bundle.
+ const piplup=cards.find(c=>c.id==='ja-sm11b-052');
+ assert.equal(japaneseTitleMatches('Piplup #52 Pokemon Japanese Dream League',piplup),true);
+ assert.equal(japaneseTitleMatches('Piplup CHR 052/049 SM11b Cosmic Eclipse Dream League Japanese',piplup),true);
+ assert.equal(japaneseTitleMatches('Piplup 052/049 Dream League lot of 3',piplup),false);
+ assert.equal(japaneseTitleMatches('Piplup 052/049 Dream League English',piplup),false);
+ const stamp={...cards.find(c=>c.id==='ja-sm10a-068'),pcName:'Reset Stamp',nameFromGuide:true};assert.equal(cards.find(c=>c.id==='ja-sm10a-068').name,'Reset Stamp','English guide name by default');
+ assert.equal(japaneseTitleMatches('Reset Stamp 068/054 UR Japanese',stamp),true);
  // The shared matcher sends Japanese cards to these rules and still rejects Japanese titles for English cards.
  assert.equal(matchesCard('Charizard ex 201/165 Japanese',card),true);
  assert.equal(matchesCard('Charizard ex 199/165 Japanese 151',byId.get('sv3pt5-199')),false);

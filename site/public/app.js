@@ -19,7 +19,10 @@ const ago=iso=>{const m=Math.round((Date.now()-Date.parse(iso))/60000);return m<
 const signed=v=>v==null?'—':(v>0?'+':v<0?'−':'')+money(Math.abs(v));
 const pct=v=>v==null?'':(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(1)+'%';
 const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
-const state={sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],langs:['en','ja'],detailLang:null,detailAlt:null,marketLang:'en',filters:{min:null,max:null,activity:0,invest:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
+// Japanese cards and sets show their English names. Settings can add the original Japanese text.
+const JA_TEXT_KEY='futuresight-japanese-text';
+function savedJapaneseText(){try{return localStorage.getItem(JA_TEXT_KEY)==='on';}catch{return false;}}
+const state={showJapanese:savedJapaneseText(),sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],langs:['en','ja'],detailLang:null,detailAlt:null,marketLang:'en',filters:{min:null,max:null,activity:0,invest:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
  dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
 // Crashes in the page are sent to the server, which forwards them to Sentry only when SENTRY_DSN is set. At most 5 per page load.
@@ -276,11 +279,12 @@ function renderDetail(){
  const goto=(id,label)=>{const t=cardById(id);return t?`<button class="lang-link ${t.id===c.id?'current':''}" data-version="${t.id}"><img src="${t.image}"${t.imageAlt?` data-alt="${t.imageAlt}"`:''} alt="" loading="lazy"><span><strong>${esc(t.name)}${t.japanese?'<span class="lang-tag">JP</span>':''}</strong><small>${esc(t.setName)} · #${esc(t.numberLabel)}${label?' · '+esc(label):''}</small></span></button>`:'';};
  const langSec=c.japanese?`<div class="detail-section lang-versions"><h3>English version</h3>${c.englishId?goto(c.englishId,'')+`<p class="sales-note">Same artwork and card${/stats/.test(c.englishLink||'')?' (matched on attacks and HP; the Japanese record has no illustrator)':''}. Prices are kept separately: Japanese and English copies sell at different prices.</p>`:`<p class="sales-note">${c.englishCandidates?'Several English cards share this artwork, so none is linked rather than guessing.':'No English printing of this exact card was found. It may be Japan-only.'}</p>`}</div>`
   :c.japaneseIds?.length?`<div class="detail-section lang-versions"><h3>Japanese version${c.japaneseIds.length>1?'s':''}</h3>${c.japaneseIds.map(id=>goto(id,'')).join('')}<p class="sales-note">Same artwork, printed in Japan. Prices are tracked separately.</p></div>`:'';
- const jaTop=c.japanese?top.replace(`<h2>${esc(c.name)}</h2>`,`<h2>${esc(c.name)}</h2>${c.nameIsJapanese&&!c.nameFromGuide?'':`<p class="name-ja" lang="ja">${esc(c.nameJa)}</p>`}`).replace(`<span class="type-pill">${esc(c.type)}</span>`,`<span class="type-pill lang-pill">Japanese</span><span class="type-pill">${esc(c.rarity)}</span>`):top;
+ const jaSet=state.sets.find(x=>x.id===c.setId),jaLine=state.showJapanese?[c.nameJa&&c.nameJa!==c.name?c.nameJa:'',jaSet?.nameJa||''].filter(Boolean).join(' · '):'';
+ const jaTop=c.japanese?top.replace(`<h2>${esc(c.name)}</h2>`,`<h2>${esc(c.name)}</h2>${jaLine?`<p class="name-ja" lang="ja">${esc(jaLine)}</p>`:''}`).replace(`<span class="type-pill">${esc(c.type)}</span>`,`<span class="type-pill lang-pill">Japanese</span><span class="type-pill">${esc(c.rarity)}</span>`):top;
  if(c.japanese&&!c.source){
   const pending=`<div class="buy-box insufficient jp-pending"><div class="eyebrow">JAPANESE ${esc(gradeNames[state.grade].toUpperCase())} PRICES</div><div class="buy-amount"><strong>Not matched yet</strong></div><p>This card hasn't been matched to its exact Japanese price-guide product yet. <b>Find prices</b> matches every card in its set and loads their prices; it never borrows the English card's value.</p></div>`;
   const jaActions=actions.replace(/<button class="button" id="refresh-card"[\s\S]*?<\/button>/,`<button class="button" id="refresh-card">${icon('refresh')} Find prices</button>`);
-  const jaSource=`<div class="detail-section research"><h3>Card data</h3><p>Japanese checklist${c.illustrator?' · illustrated by '+esc(c.illustrator):''}.${c.nameIsJapanese?' No English name is recorded for this card yet.':''}</p><p class="sales-note">Japanese cards are priced, scored and ranked only against other Japanese cards.</p></div>`;
+  const jaSource=`<div class="detail-section research"><h3>Card data</h3><p>Japanese checklist${c.illustrator?' · illustrated by '+esc(c.illustrator):''}.${c.nameIsJapanese&&!c.nameFromGuide&&!c.nameDisplayOnly?' No English name is recorded for this card yet, so its Japanese name is shown.':''}</p><p class="sales-note">Japanese cards are priced, scored and ranked only against other Japanese cards.</p></div>`;
   const jaFooter=`<div class="source-line"><span>Japanese checklist</span><a href="${esc(sourceSet.checklistSource)}" target="_blank" rel="noopener noreferrer">TCGdex · View source</a></div>`;
   el.innerHTML=f?focusBar(c)+`<div class="focus-body">${versionBar(base,c,false)}<div class="focus-hero">${jaTop}<div class="focus-key">${pending}${jaActions}</div></div><div class="focus-grid"><div class="focus-col">${limitSec}${jaSource}</div><div class="focus-col wide">${langSec}</div></div>${jaFooter}</div>`
    :versionBar(base,c,true)+jaTop+pending+jaActions+langSec+limitSec+jaSource+jaFooter;
@@ -349,7 +353,7 @@ async function mapJapaneseSets(scopes,langs,signal,progress){
 }
 function applyMapping(r,setId){
  for(const c of state.cards)if(c.setId===setId)c.mapTried=true;
- for(const [id,s] of Object.entries(r.sources||{})){const c=cardById(id);if(c){c.source=s.source;c.sourceVerified=true;if(s.name){c.pcName=s.name;if(c.nameIsJapanese){c.name=s.name;c.nameFromGuide=true;}}}}
+ for(const [id,s] of Object.entries(r.sources||{})){const c=cardById(id);if(c){c.source=s.source;c.sourceVerified=true;if(s.image&&c.imagePlaceholder){c.image=s.image;c.imagePlaceholder=false;}if(s.name){c.pcName=s.name;if(c.nameIsJapanese){c.name=s.name;c.nameFromGuide=true;}}}}
  for(const [id,m] of Object.entries(r.markets||{})){state.markets[id]=expandMarket(m);delete state.full[id];}
 }
 const updateLabel=()=>'Update sales · '+state.cards.filter(c=>c.eligible&&langOf(c)===state.marketLang&&state.marketSeries.includes(c.series)).length.toLocaleString()+(state.marketLang==='ja'?' Japanese':'')+' cards';
@@ -358,29 +362,52 @@ function setRefreshLabels(text){
  if(b){if(busy)b.textContent=text;else b.innerHTML=icon('refresh')+' Refresh sales';b.disabled=false;}
  document.querySelectorAll('[data-update-sales]').forEach(x=>{x.textContent=busy?text:updateLabel();});
 }
+// Cards whose full sales page was read this recently are skipped, so an interrupted update resumes
+// where it stopped. Cards never read come first (most valuable first), then the oldest reads.
+const FRESH_HOURS=6;
+const checkedAt=c=>Date.parse(state.markets[c.id]?.research?.checkedAt||'')||0;
+const guideValue=c=>{const g=state.markets[c.id]?.guide||{};return Math.max(g.psa10||0,g.grade9||0,g.raw||0);};
+const pause=ms=>new Promise(r=>setTimeout(r,ms));
+// One batch of up to four cards. A dropped connection or busy server is retried twice before giving up.
+async function researchBatch(batch,signal){
+ for(let attempt=0;;attempt++){
+  try{return await request('/api/research?ids='+batch.map(c=>encodeURIComponent(c.id)).join(','),{method:'POST',signal});}
+  catch(e){if(e.name==='AbortError'||attempt>=2||(e.status&&e.status<500&&e.status!==429))throw e;await pause(3000*(attempt+1));}
+ }
+}
 async function refreshSales(scopes,langs=LANGS.map(l=>l.id)){
  if(refreshRun){refreshRun.abort();return;}
  const controller=new AbortController();refreshRun=controller;
- let grand=scopes.reduce((n,sc)=>n+scopeSize(sc,langs),0),updated=0,done=0;
+ let updated=0,grand=0,skipped=0;const failed=new Map();
  setRefreshLabels('Cancel update');
  try{
   await mapJapaneseSets(scopes,langs,controller.signal,setRefreshLabels);
-  const lang=langs.length===1?'&lang='+langs[0]:'';
-  grand=scopes.reduce((n,sc)=>n+scopeSize(sc,langs),0);
-  for(const part of scopes){
-   let offset=0;
-   for(;;){
-    const r=await request('/api/research?set='+encodeURIComponent(part)+'&offset='+offset+lang,{method:'POST',signal:controller.signal});
-    if(r.markets)for(const [id,m] of Object.entries(r.markets)){state.markets[id]=expandMarket(m);delete state.full[id];delete state.scoreDetail[id];delete state.investDetail[id];}
-    updated+=r.count||0;
+  const now=Date.now(),inScope=state.cards.filter(c=>c.source&&scopes.some(sc=>inRefreshScope(c,sc,langs)));
+  const queue=inScope.filter(c=>now-checkedAt(c)>=FRESH_HOURS*3600000).sort((a,b)=>(checkedAt(a)?1:0)-(checkedAt(b)?1:0)||checkedAt(a)-checkedAt(b)||guideValue(b)-guideValue(a));
+  grand=inScope.length;skipped=grand-queue.length;
+  let n=0;
+  const run=async list=>{
+   for(let i=0;i<list.length;i+=4){
+    const batch=list.slice(i,i+4),r=await researchBatch(batch,controller.signal);
+    if(r.markets)for(const [id,m] of Object.entries(r.markets)){state.markets[id]=expandMarket(m);delete state.full[id];delete state.scoreDetail[id];delete state.investDetail[id];failed.delete(id);}
+    for(const f of r.failures||[])failed.set(f.card_id,f.message);
+    updated+=r.count||0;n+=batch.length;
     if(state.view==='browse'||state.view==='watch'){stats();renderList();renderDetail();}
-    if(r.warning){toast(r.warning);return;}
-    if(r.done){done+=r.total||0;break;}
-    offset=r.nextOffset;setRefreshLabels('Cancel · '+(done+offset).toLocaleString()+' / '+grand.toLocaleString());
+    if(r.warning){toast(r.warning);return false;}
+    setRefreshLabels('Cancel · '+n.toLocaleString()+' / '+queue.length.toLocaleString());
    }
+   return true;
+  };
+  if(!queue.length){toast(grand?'Every card here was checked in the last '+FRESH_HOURS+' hours. Nothing to update.':'No cards here have a price source yet.');return;}
+  if(!await run(queue))return;
+  if(failed.size){
+   // One more pass for cards whose page could not be read, after a short rest.
+   setRefreshLabels('Retrying '+failed.size+' cards');await pause(5000);
+   const retry=[...failed.keys()].map(cardById).filter(Boolean);failed.clear();
+   n=0;if(!await run(retry))return;
   }
-  toast('Refreshed sales for '+updated+' of '+grand+' rare cards.');
- }catch(e){toast(e.name==='AbortError'?'Update stopped. Retrieved sales are saved.':e.message);}
+  toast('Refreshed sales for '+updated.toLocaleString()+' of '+grand.toLocaleString()+' rare cards'+(skipped?' · '+skipped.toLocaleString()+' already checked in the last '+FRESH_HOURS+' h':'')+(failed.size?' · '+failed.size+' could not be read (try again later)':'')+'.');
+ }catch(e){toast(e.name==='AbortError'?'Update stopped. Retrieved sales are saved; the next update continues from here.':e.message+' Retrieved sales are saved; run the update again to continue.');}
  finally{
   refreshRun=null;setRefreshLabels('');
   if(updated){$('#snapshot-label').textContent='Sales checked just now';$('#status-data').textContent='Sales checked just now · '+state.cards.filter(c=>c.eligible).length.toLocaleString()+' rare cards';invalidateMarketViews();}
@@ -620,7 +647,7 @@ function renderInvest(){
  const view=$('#invest-view'),d=state.invest.data[marketScopeKey()],g=state.invest.grade;
  const checked=d?.checkedAt?new Date(d.checkedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):null;
  const head=`<section class="panel movers-head"><div><h2>Cards worth a closer look</h2><p>Each pick has a confident sold price of $25 or more, features a character in the top quarter for collector demand, and shows at least one signal in its own sales history. Built only from the sales in this app${checked?', checked '+checked:''}. Not investment advice.</p></div><div class="head-actions">${refreshControls()}<div class="segmented" role="group" aria-label="Grade">${MOVER_GRADES.map(x=>`<button data-invest-grade="${x}" aria-pressed="${g===x}" class="${g===x?'active':''}">${shortGrade(x)}</button>`).join('')}</div></div></section>
- <div class="signal-key"><span class="signal up">Steady uptrend</span><span>A clear, consistent rise over the past year.</span><span class="signal rec">Recovering from highs</span><span>Well below a held high, with sales turning up.</span><span class="signal cheap">Cheap vs. similar cards</span><span>Below same-set cards of less popular characters.</span></div>`;
+ <div class="signal-key"><p><span class="signal up">Steady uptrend</span><span>A clear, consistent rise over the past year.</span></p><p><span class="signal rec">Recovering from highs</span><span>Well below a held high, with sales turning up.</span></p><p><span class="signal cheap">Cheap vs. similar cards</span><span>Below same-set cards of less popular characters.</span></p></div>`;
  if(!d){view.innerHTML=head+marketFilterView()+(state.invest.error?`<div class="panel empty-state"><strong>Investments couldn't be loaded.</strong><p>${esc(state.invest.error)}</p><button class="button" id="invest-retry">Try again</button></div>`:'<div class="loading"><span class="spinner"></span>Screening every included card…</div>');}
  else{
   const col=d.grades[g],picks=col.picks;
@@ -646,6 +673,9 @@ function renderSettings(){
  view.querySelectorAll('[data-appearance]').forEach(button=>button.onclick=()=>{state.appearance=applyAppearance(button.dataset.appearance);renderSettings();toast(APPEARANCES[state.appearance].label+' appearance enabled.');});
  const intro=globalThis.futureSightIntro;
  view.insertAdjacentHTML?.('beforeend',`<section class="panel settings-panel intro-settings"><div class="panel-head"><div><h2>Opening animation</h2><p>Glint, the FutureSight mascot, flies in, does a little twirl and settles into the logo. It plays once each time you open the site in a new tab, and any click or key skips it. It never plays when your system asks for reduced motion.</p></div></div><div class="settings-note intro-row"><svg class="intro-preview" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><use href="#fs-glint"/></svg><label class="toggle"><input type="checkbox" id="intro-enabled" ${intro?.enabled()!==false?'checked':''}><span>Play the opening animation when I open FutureSight</span></label><button class="button" id="intro-replay">Replay now</button></div></section>`);
+ view.insertAdjacentHTML?.('beforeend',`<section class="panel settings-panel ja-settings"><div class="panel-head"><div><h2>Japanese cards</h2><p>Japanese cards and sets are shown with their English names. Turn this on to also see the original Japanese card and set names on each card's details.</p></div></div><div class="settings-note intro-row"><label class="toggle"><input type="checkbox" id="ja-text" ${state.showJapanese?'checked':''}><span>Show Japanese names alongside English</span></label></div></section>`);
+ const jaText=$('#ja-text');
+ if(jaText)jaText.onchange=e=>{state.showJapanese=e.target.checked;try{localStorage.setItem(JA_TEXT_KEY,state.showJapanese?'on':'off');}catch{}toast(state.showJapanese?'Japanese names shown alongside English.':'English names only.');};
  const introToggle=$('#intro-enabled'),replay=$('#intro-replay');
  if(introToggle)introToggle.onchange=e=>{intro?.setEnabled(e.target.checked);toast(e.target.checked?'Opening animation on.':'Opening animation off.');};
  if(replay)replay.onclick=()=>{if(intro)intro.play({force:true});else toast('The animation could not be loaded. Reload the page and try again.');};

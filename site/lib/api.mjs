@@ -15,7 +15,7 @@ import {analyze} from './analysis.mjs';
 import {recordObservations} from './observations.mjs';
 import {investmentTable,investmentView,scoreMode,modelVersion,archiveScores} from './investment.mjs';
 import {DEFAULT_COSTS,maxBuyPrice,netReturn,COST_PROFILE_VERSION} from './investment-costs.mjs';
-import {parseJapaneseListing,matchJapaneseListing,listingGuide,JA_MAP_VERSION} from './japanese.mjs';
+import {parseJapaneseListing,matchJapaneseListing,listingGuide,numberOnlyAllowed,JA_MAP_VERSION} from './japanese.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const cardById=new Map(cards.map(c=>[c.id,c]));
 const seriesIds=series.map(item=>item.id);
@@ -30,11 +30,17 @@ async function logCapture(db,env,ctx,card,captured){try{await recordObservations
 // loaded once per process and applied to the catalog's card objects, so every route sees it.
 let sourceMapLoaded=null;
 // A card known only by its Japanese name takes the price guide's English product name.
-function applySource(card,row){card.source=row.url;card.sourceVerified=true;if(row.name)card.pcName=row.name;if(row.product_id)card.pcProductId=row.product_id;if(card.nameIsJapanese&&row.name){card.nameOriginal??=card.name;card.name=row.name;card.nameFromGuide=true;}}
+// A card with no catalog image takes the matched product's photo.
+function applySource(card,row){card.source=row.url;card.sourceVerified=true;if(row.name)card.pcName=row.name;if(row.product_id)card.pcProductId=row.product_id;if(card.nameIsJapanese&&row.name){card.nameOriginal??=card.name;card.name=row.name;card.nameFromGuide=true;}if(row.image&&card.imagePlaceholder){card.placeholderImage??=card.image;card.image=row.image;card.imagePlaceholder=false;card.imageFromGuide=true;}}
 // Tests reset the mapping between databases.
-export function forgetSourceMap(){sourceMapLoaded=null;for(const c of cards)if(c.japanese){c.source=null;c.sourceVerified=false;delete c.pcName;delete c.pcProductId;if(c.nameFromGuide){c.name=c.nameOriginal;delete c.nameOriginal;delete c.nameFromGuide;}}}
+export function forgetSourceMap(){sourceMapLoaded=null;for(const c of cards)if(c.japanese){c.source=null;c.sourceVerified=false;delete c.pcName;delete c.pcProductId;if('nameOriginal' in c){c.name=c.nameOriginal;delete c.nameOriginal;delete c.nameFromGuide;}if(c.imageFromGuide){c.image=c.placeholderImage;c.imagePlaceholder=true;delete c.imageFromGuide;}}}
 async function ensureSourceMap(db){
- if(!sourceMapLoaded)sourceMapLoaded=(async()=>{const r=await db.prepare('SELECT card_id,url,product_id,name FROM source_map').all();for(const row of r.results||[]){const c=cardById.get(row.card_id);if(c&&c.japanese)applySource(c,row);}})().catch(e=>{sourceMapLoaded=null;throw e;});
+ if(!sourceMapLoaded)sourceMapLoaded=(async()=>{
+  const r=await db.prepare('SELECT card_id,url,product_id,name,rule FROM source_map').all(),wrong=[];
+  for(const row of r.results||[]){const c=cardById.get(row.card_id);if(!c||!c.japanese)continue;if(row.rule==='number-only'&&!numberOnlyAllowed(c)){wrong.push(row.card_id);continue;}applySource(c,row);}
+  // Matches made by number alone in Pokédex-numbered sets (before ja-map-2026.10.08) named another card: forget them and their prices.
+  if(wrong.length)await db.batch(wrong.flatMap(id=>[db.prepare('DELETE FROM source_map WHERE card_id = ?').bind(id),db.prepare('DELETE FROM market_cache WHERE card_id = ?').bind(id)]));
+ })().catch(e=>{sourceMapLoaded=null;throw e;});
  return sourceMapLoaded;
 }
 // A whole listing (every page), kept for 15 minutes: the three promo sets share one listing.
@@ -45,6 +51,14 @@ async function listingPage(url,env){
  for(let attempt=0;;attempt++){
   try{return await sourceFetch(url,env);}
   catch(e){if(attempt<3&&/\(429\)/.test(e.message)){await pause(env.LISTING_RETRY_MS??15000*(attempt+1));continue;}throw e;}
+ }
+}
+// Card pages during Update sales: a busy answer (429, 5xx) or a timeout is retried twice before the
+// card is reported as failed, so one slow response does not leave a card without its sales.
+async function cardPage(url,env){
+ for(let attempt=0;;attempt++){
+  try{return await sourceFetch(url,env);}
+  catch(e){if(attempt<2&&/\((?:429|5\d\d)\)|timeout|aborted|fetch failed/i.test(e.message)){await pause(env.CAPTURE_RETRY_MS??4000*(attempt+1));continue;}throw e;}
  }
 }
 async function japaneseListing(source,env){
@@ -68,7 +82,7 @@ async function mapJapaneseSet(db,env,ctx,set){
  for(const [id,row] of matches){
   const card=cardById.get(id),url='https://www.pricecharting.com'+row.path;
   statements.push(db.prepare('INSERT INTO source_map (card_id,url,product_id,name,rule,map_version,mapped_at) VALUES (?,?,?,?,?,?,?) ON CONFLICT(card_id) DO UPDATE SET url=excluded.url,product_id=excluded.product_id,name=excluded.name,rule=excluded.rule,map_version=excluded.map_version,mapped_at=excluded.mapped_at').bind(id,url,row.productId,row.name,row.rule,JA_MAP_VERSION,now));
-  applySource(card,{url,product_id:row.productId,name:row.name});sources[id]={source:url,name:row.name};
+  applySource(card,{url,product_id:row.productId,name:row.name,image:row.image});sources[id]={source:url,name:row.name,image:card.imageFromGuide?card.image:null};
   const g=listingGuide(row,card,now);if(!Object.keys(g.guide).length)continue;
   const m=mergeMarket(mergeMarket(snapshots[id],cached[id]),g);markets[id]=m;
   statements.push(db.prepare('INSERT INTO market_cache (card_id,payload,fetched_at) VALUES (?,?,?) ON CONFLICT(card_id) DO UPDATE SET payload=excluded.payload,fetched_at=excluded.fetched_at').bind(id,JSON.stringify(m),m.observedAt));
@@ -276,6 +290,19 @@ export async function api(request,env,ctx){
    }catch(e){return json({refreshed:false,warning:e.message});}
   }
   if(path==='/api/research'&&request.method==='POST'){
+   // Cards named by id (at most 4 per call): the page orders the queue, skips cards checked recently and retries failures.
+   const captureBatch=async batch=>{
+    const cached=await cachedMarkets(db),markets={},failures=[];
+    await Promise.all(batch.map(async card=>{try{const live=parseMarket(await cardPage(card.source,env),card),market=mergeMarket(mergeMarket(snapshots[card.id],cached[card.id]),live);await saveMarket(db,card,market);await logCapture(db,env,ctx,card,live);markets[card.id]=lightMarket(market);}catch(e){failures.push({card_id:card.id,message:e.message});}}));
+    return {markets,failures};
+   };
+   if(url.searchParams.has('ids')){
+    const ids=[...new Set(url.searchParams.get('ids').split(',').filter(Boolean))],batch=ids.map(id=>cardById.get(id));
+    if(!ids.length||ids.length>4||batch.some(c=>!c||!c.eligible||!c.source))return json({error:'Choose up to 4 rare cards with a price source.'},400);
+    if(env.NETWORK_DISABLED)return json({refreshed:false,attempted:0,total:ids.length,done:true,warning:'Live sales refresh is unavailable in this workspace. Showing the last researched sales.'});
+    const {markets,failures}=await captureBatch(batch);
+    return json({refreshed:Object.keys(markets).length>0,markets,count:Object.keys(markets).length,attempted:batch.length,total:batch.length,done:true,failures});
+   }
    const scopeId=url.searchParams.get('set')||'xy5',offset=Number(url.searchParams.get('offset')||0);
    const era=scopeId.startsWith('era:')?scopeId.slice(4).toUpperCase():null;
    if(scopeId!=='all'&&!era&&!sets.some(s=>s.id===scopeId))return json({error:'Choose a supported set.'},400);
@@ -285,8 +312,7 @@ export async function api(request,env,ctx){
    const scope=cards.filter(c=>c.eligible&&c.source&&(!lang||langOf(c)===lang)&&(scopeId==='all'||(era?c.series===era:c.setId===scopeId)));
    if(!Number.isInteger(offset)||offset<0||offset>scope.length)return json({error:'Invalid sales batch.'},400);
    if(env.NETWORK_DISABLED)return json({refreshed:false,attempted:0,total:scope.length,done:true,warning:'Live sales refresh is unavailable in this workspace. Showing the last researched sales.'});
-   const batch=scope.slice(offset,offset+4),cached=await cachedMarkets(db),markets={},failures=[];
-   await Promise.all(batch.map(async card=>{try{const live=parseMarket(await sourceFetch(card.source,env),card),market=mergeMarket(mergeMarket(snapshots[card.id],cached[card.id]),live);await saveMarket(db,card,market);await logCapture(db,env,ctx,card,live);markets[card.id]=lightMarket(market);}catch(e){failures.push({card_id:card.id,message:e.message});}}));
+   const batch=scope.slice(offset,offset+4),{markets,failures}=await captureBatch(batch);
    const nextOffset=offset+batch.length;
    return json({refreshed:Object.keys(markets).length>0,markets,count:Object.keys(markets).length,attempted:batch.length,nextOffset,total:scope.length,done:nextOffset>=scope.length,failures});
   }

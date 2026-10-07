@@ -48,6 +48,12 @@ test('Market cache preserves full set IDs and never merges matching numbers',asy
  assert.equal((await api(req('/api/refresh?set=invalid','POST'),env)).status,400);
  const r=await(await api(req('/api/refresh?set=g1','POST'),env)).json();assert.equal(r.refreshed,false);assert.equal(sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count,0);
 });
+test('Sales refresh by card id takes at most four rare cards with a price source',async()=>{
+ const ids=cards.filter(c=>c.eligible&&c.source).slice(0,5).map(c=>c.id),post=q=>api(req('/api/research?ids='+q,'POST'),env);
+ const ok=await(await post(ids.slice(0,4).join(','))).json();assert.equal(ok.total,4);assert.equal(ok.done,true);assert.equal(ok.attempted,0,'network is off in tests');
+ assert.equal((await post(ids.join(','))).status,400,'five cards');assert.equal((await post('')).status,400);assert.equal((await post('not-a-card')).status,400);
+ const unpriced=cards.find(c=>c.eligible&&!c.source);if(unpriced)assert.equal((await post(unpriced.id)).status,400);
+});
 test('Sales refresh is scoped to rares and reports blocked access without writes',async()=>{const before=sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count;const r=await api(req('/api/research?set=all','POST'),env),body=await r.json();assert.equal(body.total,cards.filter(c=>c.eligible&&c.source).length);assert.ok(cards.some(c=>c.japanese&&c.eligible));assert.equal((await(await api(req('/api/research?set=era:EX','POST'),env)).json()).total,687);assert.equal((await(await api(req('/api/research?set=era:DP','POST'),env)).json()).total,738);assert.equal((await(await api(req('/api/research?set=era:XY','POST'),env)).json()).total,902);assert.equal((await(await api(req('/api/research?set=era:BW','POST'),env)).json()).total,553);assert.equal((await(await api(req('/api/research?set=era:SM','POST'),env)).json()).total,1380);assert.equal(body.refreshed,false);assert.equal(body.attempted,0);assert.equal(sqlite.prepare('SELECT count(*) AS count FROM market_cache').get().count,before);assert.equal((await api(req('/api/research?set=invalid','POST'),env)).status,400);});
 
 test('Market detail returns the full record with history and titled sales',async()=>{const data=await(await api(req('/api/market?id=xy5-151'),env)).json();assert.equal(data.refreshed,false);assert.ok(data.market.sales.some(s=>s.title&&s.grade==='psa9'));assert.ok(data.market.history?.psa10?.length>12);assert.equal(data.market.research.status,'full');});

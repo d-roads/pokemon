@@ -10,7 +10,7 @@
 const decodeJa=s=>String(s).replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'").replace(/&nbsp;/g,' ').replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(+n));
 const textJa=s=>decodeJa(String(s).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim());
 const dollarsJa=s=>{const m=String(s).replace(/<s\b[^>]*>[\s\S]*?<\/s>/gi,'').match(/\$\s*([\d,]+(?:\.\d{1,2})?)/);return m?Number(m[1].replace(/,/g,'')):null;};
-export const JA_MAP_VERSION='ja-map-2026.10.07';
+export const JA_MAP_VERSION='ja-map-2026.10.08';
 
 // One listing page (view=table): product rows plus the cursor for the next page, if any.
 export function parseJapaneseListing(html){
@@ -22,7 +22,9 @@ export function parseJapaneseListing(html){
   const prices=[...row.matchAll(/<td\b[^>]*class=["'][^"']*\bprice\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/gi)].map(x=>dollarsJa(x[1]));
   // Promos carry their series code: "Pikachu #227/S-P".
   const number=title.match(/#\s*([A-Z]*-?\d+[a-z]?(?:\s*\/\s*[A-Z]+-?P\b)?)(?![a-z0-9])/i)?.[1]?.toUpperCase().replace(/\s+/g,'')||null;
-  rows.push({productId:id,path,title,name:title.replace(/\s*#.*$/,'').trim(),number,variant:/\[[^\]]+\]/.test(title),prices});
+  // The product photo (PriceCharting serves 60, 240 and 1600 px copies of the same image).
+  const photo=row.match(/<img\b[^>]*src=["'](https:\/\/storage\.googleapis\.com\/images\.pricecharting\.com\/[a-z0-9]{8,}\/)\d+\.jpg["']/i)?.[1];
+  rows.push({productId:id,path,title,name:title.replace(/\s*#.*$/,'').trim(),number,variant:/\[[^\]]+\]/.test(title),prices,image:photo?photo+'240.jpg':null});
  }
  const cursor=String(html).match(/name=["']cursor["']\s+value=["']([^"']+)["']/)?.[1]||null;
  return {rows,cursor};
@@ -33,7 +35,8 @@ const jaNumber=n=>String(n??'').toUpperCase().replace(/\s/g,'').replace(/^([A-Z]
 // Names a card may be listed under: its own English name, a "Mega"/"M" spelling, and the
 // species without a regional or owner prefix only as a last resort.
 export function nameForms(card){
- const out=new Set(),base=String(card.name||'');
+ // A display-only English name (baked from an earlier product match) is never evidence for a new match.
+ const out=new Set(),base=card.nameDisplayOnly&&!card.nameFromGuide?'':String(card.name||'');
  if((!card.nameIsJapanese||card.nameFromGuide)&&base)out.add(jaWords(base));
  if(card.pcName)out.add(jaWords(card.pcName));
  if(!out.size&&card.species)out.add(jaWords(card.species));
@@ -47,6 +50,9 @@ const sameName=(a,b)=>a===b||a.replace(/ (ex|gx|v|vmax|vstar|break|lv x)$/,'')==
 // Pokédex number; e-Card, VS and web have printed numbers. Promos are listed as 227/S-P.
 const DEX_LISTED=/^ja-(?:pmcg|neo)\d/,PROMO_CODE={'ja-sp':'S-P','ja-svp':'SV-P','ja-mp':'M-P'};
 export const dexListed=card=>DEX_LISTED.test(card.setId||'')&&card.dexId?.length===1;
+// In those sets a product's number is a Pokédex number, so a trainer's collector number would
+// point at an unrelated Pokémon (Devolution Spray #86 is not Seel #86): number alone never matches there.
+export const numberOnlyAllowed=card=>!DEX_LISTED.test(card.setId||'');
 export const listedNumber=card=>dexListed(card)?String(card.dexId[0]):PROMO_CODE[card.setId]?jaNumber(card.number)+'/'+PROMO_CODE[card.setId]:String(card.number);
 
 // Map every card of one Japanese set to at most one listing row, and each row to at most one card.
@@ -66,7 +72,7 @@ export function matchJapaneseListing(rows,cards){
   else if(bySpecies.length===1){pick=bySpecies[0];rule='number+species';}
   // Number alone only for cards with no Pokémon to check (trainers, energies) and no English name:
   // a Pokémon must never be matched to a product that names another Pokémon.
-  else if(!named.length&&pool.length===1&&(card.nameIsJapanese||!forms.length)&&!card.dexId?.length&&!dexListed(card)){pick=pool[0];rule='number-only';}
+  else if(!named.length&&pool.length===1&&(card.nameIsJapanese||!forms.length)&&!card.dexId?.length&&numberOnlyAllowed(card)){pick=pool[0];rule='number-only';}
   if(!pick||used.has(pick.productId)){unmatched.push({id:card.id,number:card.number,reason:!pool.length?'no product with this number':named.length>1?'several products with this name and number':pick?'product already used':'name differs: '+pool.map(r=>r.name).slice(0,3).join(' / ')});continue;}
   used.add(pick.productId);matches.set(card.id,{...pick,rule});
  }
@@ -87,10 +93,14 @@ export function listingGuide(row,card,now){
 const SERIES_AND=/\b(?:sun\s*&\s*moon|sword\s*&\s*shield|scarlet\s*&\s*violet|black\s*&\s*white|diamond\s*&\s*pearl|ruby\s*&\s*sapphire|heart\s*gold\s*&\s*soul\s*silver|x\s*&\s*y)\b/gi;
 const NATIVE_FIRST=/^ja-(?:vs1|web1)$/;
 const JA_EXCLUDED=/\blot\b|bundle|\bfake\b|proxy|replica|custom|jumbo|oversized|reverse[ -]?holo|\brev[\/-]holo\b|pre-?release|\bleague\b|championship|\bwinner\b|\bstaff\b|signed|autograph|\benglish\b|\beng\b|\bger\b|german|french|\bfr\b|korean|\bkor\b|chinese|\bchn\b|simplified|traditional chinese|italian|spanish|portuguese|thai|indonesian|\bmaster ?ball\b|\bpoke ?ball (?:pattern|mirror)\b/i;
+// A word that is part of the card's or set's own name ("Dream League", "Iron Bundle", "Reset Stamp")
+// describes the card, not the listing, so it does not exclude a title.
+const ownWords=card=>' '+jaWords([card.name,card.pcName,card.setName].filter(Boolean).join(' '))+' ';
+const foreignTerm=(t,rule,card)=>{const own=ownWords(card);return [...t.matchAll(new RegExp(rule.source,'gi'))].some(m=>!own.includes(' '+jaWords(m[0])+' '));};
 export function japaneseTitleMatches(title,card){
  const t=String(title||'');
- if(JA_EXCLUDED.test(t))return false;
- if(card.category!=='Promo'&&/\bstamp(?:ed)?\b/i.test(t))return false;
+ if(foreignTerm(t,JA_EXCLUDED,card))return false;
+ if(card.category!=='Promo'&&foreignTerm(t,/\bstamp(?:ed)?\b/i,card))return false;
  // VS and web were printed only as 1st Edition; elsewhere a 1st Edition copy is a different product.
  if(card.series==='WOTC'&&!NATIVE_FIRST.test(card.setId||'')&&/\b1st\b|first edition/i.test(t))return false;
  const tw=' '+jaWords(t)+' ';

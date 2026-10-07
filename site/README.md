@@ -93,6 +93,8 @@ Alerts run while `node server.mjs` is running. Keys stay in your local database 
 - **Sales and alerts.** Japanese sold listings must name the card and its number (fraction numerator and set total must both agree), and must not say English, Korean, Chinese or another language; lots, proxies, other graders, Master Ball and other variants are excluded. VS and web were printed only as 1st Edition; elsewhere 1st Edition copies are excluded. Listing alerts for Japanese cards search Japanese listings and require the word Japanese/JPN/JP in the title.
 - **Japanese cards are only compared with other Japanese cards.** Top movers, Investments and investment scores are computed per language (`lang=en|ja`); the research rank stays English-only (its model was fit on English data).
 - 79 Japanese sets (most of DP, Platinum, HGSS, BW, XY and early Sword & Shield) have no card list in TCGdex yet; they are listed in `tools/research/japanese-coverage.json`.
+- **Names and images.** Japanese cards and sets are shown with English names by default. Cards whose checklist has only a Japanese name take the English name of their matched PriceCharting product (`nameEn`, baked by `tools/research/japanese-images.mjs`; 270 cards, mostly promos, still have only a Japanese name). Settings → **Japanese cards** adds the original Japanese card and set names to each card's details (saved in the browser). Images are TCGdex scans where TCGdex has them (1,631 cards; the path is case-sensitive, e.g. `ja/SV/SV2a/201`), otherwise the matched product's PriceCharting photo; cards with neither show a plain placeholder until their product is matched.
+- **Matching in Pokédex-numbered sets.** The Wizards sets and Neo are listed on PriceCharting by Pokédex number, so a trainer is never matched there by its collector number alone (Devolution Spray #86 is not Seel #86). Matches made that way before `ja-map-2026.10.08` are removed, with their cached prices, when the server starts.
 
 ## Market data
 
@@ -180,7 +182,7 @@ Both lists and the investment scores are built from the sales saved in the local
 Each of the two tabs has two buttons:
 
 - **Recalculate** re-reads the sales you have already saved and rebuilds the list, the scores and the status-bar ticker. It is instant and fetches nothing new.
-- **Update sales** fetches the newest sold prices for every rare card in the included eras (four cards per request, with progress, and Cancel at any time; what was fetched is kept), then rebuilds everything. Refreshing a single card, or a set from Browse, also clears the cached lists.
+- **Update sales** fetches the newest sold prices for every rare card in the included eras (four cards per request, with progress, and Cancel at any time; what was fetched is kept), then rebuilds everything. Cards whose full sales page was read in the last 6 hours are skipped, so running it again after a cancel or a dropped connection continues where it stopped; never-read cards go first (highest guide price first), then the oldest reads. A busy or timed-out page is retried twice on the server, a failed request three times in the page, and cards that still failed get one more pass at the end; the summary says how many were skipped or could not be read. Refreshing a single card, or a set from Browse, also clears the cached lists.
 
 ## Tests and build
 
