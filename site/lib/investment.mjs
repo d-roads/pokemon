@@ -16,6 +16,10 @@ import investmentArtifact from '../data/investment-model.json' with {type:'json'
 
 export const SCORE_MODES=['legacy','shadow','candidate'];
 export const MODEL_ARTIFACT=investmentArtifact;
+// Languages the research rank is shown for. Japanese cards are ranked only against Japanese cards and
+// stay off unless FUTURESIGHT_JA_RESEARCH=shadow: the frozen English rank did not pass its
+// Japanese out-of-sample check (tools/research/investment-backtest-ja-results.json).
+export function researchLanguages(env){return String(env?.FUTURESIGHT_JA_RESEARCH||'off').trim().toLowerCase()==='shadow'?['en','ja']:['en'];}
 export function scoreMode(env,artifact=investmentArtifact){
  const asked=String(env?.FUTURESIGHT_SCORE_MODEL||'shadow').trim().toLowerCase();
  const mode=SCORE_MODES.includes(asked)?asked:'shadow';
@@ -30,14 +34,23 @@ export function gateSummary(artifact=investmentArtifact){
 const STATUS_CODE={supported:'S',limited:'L',insufficient:'I',unsupported:'U'};
 
 // Research for every card at `now`. Compact output is for the list: {card_id:[psa10,psa9,raw]}.
-export function investmentTable(entries,{now=Date.now(),release={},mode='shadow',artifact=investmentArtifact}={}){
+export function investmentTable(entries,{now=Date.now(),release={},mode='shadow',artifact=investmentArtifact,lang='en'}={}){
  const research=researchTable(entries,{now,release}),ranks={},status={};
  for(const [id,byGrade] of research.table){
   const r=['psa10','psa9','raw'].map(g=>byGrade[g]?.rank??null);
   if(r.some(v=>v!=null))ranks[id]=r;
   status[id]=['psa10','psa9','raw'].map(g=>STATUS_CODE[byGrade[g]?.evidenceStatus]||'U').join('');
  }
- return {modelVersion:modelVersion(artifact),mode,asOf:research.asOf,horizonMonths:artifact?.horizonMonths??12,research,ranks,status,gate:gateSummary(artifact),artifact};
+ // Each language is its own reference universe, archived under its own model version.
+ return {modelVersion:modelVersion(artifact)+(lang==='en'?'':'+'+lang),mode,asOf:research.asOf,horizonMonths:artifact?.horizonMonths??12,research,ranks,status,gate:gateSummary(artifact),artifact,languages:[lang]};
+}
+// One lookup table over several per-language tables (card ids never overlap). `parts` keeps each
+// language's own table for archiving.
+export function mergeInvestmentTables(tables){
+ if(tables.length===1)return {...tables[0],parts:tables};
+ const [first]=tables;
+ return {...first,languages:tables.flatMap(t=>t.languages),ranks:Object.assign({},...tables.map(t=>t.ranks)),status:Object.assign({},...tables.map(t=>t.status)),
+  research:{...first.research,table:new Map(tables.flatMap(t=>[...t.research.table])),reference:Object.assign({},...tables.map(t=>Object.fromEntries(Object.entries(t.research.reference).map(([k,v])=>[t.languages[0]+'|'+k,v]))))},parts:tables};
 }
 
 // The full research view for one card and grade. `reference` is the confident sold median
@@ -59,8 +72,9 @@ export function investmentView(table,cardId,grade,{reference=null,referenceLabel
    netReturnQuantiles:{p10:netReturn(ask>0?ask:reference,E10,costs)},maxBuyPrice:maxBuyPrice(E10,costs),
    note:'Conservative exit is the 10th percentile of held-out outcomes, not a confidence bound.'};
  }
+ const part=table.parts?.find(p=>p.research.table.has(cardId))||table;
  return {
-  modelVersion:table.modelVersion,mode:table.mode,asOf:table.asOf,horizonMonths:table.horizonMonths,
+  modelVersion:part.modelVersion,mode:table.mode,asOf:table.asOf,horizonMonths:table.horizonMonths,
   evidenceStatus:e.evidenceStatus,reasons:[...new Set(e.reasons)].map(code=>({code,text:REASONS[code]||code})),
   rank:e.rank,rankLabel:'Historical ranking percentile (uncalibrated). Not a probability of profit.',
   rankMonth:e.t,reference:e.reference||null,percentiles:e.percentiles||null,

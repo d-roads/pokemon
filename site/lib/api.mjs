@@ -13,7 +13,7 @@ import {isPlainObject,oneOf,optionalPrice,boundedText,optionalText,shapeError} f
 import {reportError} from './report.mjs';
 import {analyze} from './analysis.mjs';
 import {recordObservations} from './observations.mjs';
-import {investmentTable,investmentView,scoreMode,modelVersion,archiveScores} from './investment.mjs';
+import {investmentTable,investmentView,scoreMode,modelVersion,archiveScores,researchLanguages,mergeInvestmentTables} from './investment.mjs';
 import {DEFAULT_COSTS,maxBuyPrice,netReturn,COST_PROFILE_VERSION} from './investment-costs.mjs';
 import {parseJapaneseListing,matchJapaneseListing,listingGuide,numberOnlyAllowed,JA_MAP_VERSION} from './japanese.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
@@ -120,11 +120,15 @@ const scoreTable=db=>insight(db,'scores',entries=>{
 // the market-cache count, newest capture and day are added by insight().
 const RELEASE=Object.fromEntries(sets.map(s=>[s.id,s.release]));
 const DATASET_REVISION=observedAt+'|'+cards.length;
-const researchFor=(db,mode)=>insight(db,['research',modelVersion(),mode,COST_PROFILE_VERSION,'h12',DATASET_REVISION].join(':'),entries=>investmentTable(inLanguage(entries,'en'),{release:RELEASE,mode}));
-// The research rank is a frozen model fit on English data, so it covers English cards only.
+// The research rank is a frozen model fit on English data. Japanese cards get their own table (ranked
+// only against Japanese cards) when FUTURESIGHT_JA_RESEARCH=shadow; by default English only.
+const researchFor=(db,mode,langs=['en'])=>insight(db,['research',modelVersion(),mode,COST_PROFILE_VERSION,'h12',DATASET_REVISION,langs.join('+')].join(':'),entries=>mergeInvestmentTables(langs.map(lang=>investmentTable(inLanguage(entries,lang),{release:RELEASE,mode,lang}))));
 // Shadow evaluation: archive both systems' outputs once per model and day, before outcomes exist.
 const archived=new Set();
-async function archiveOnce(db,env,ctx,table){
+async function archiveOnce(db,env,ctx,merged){
+ for(const table of merged.parts||[merged])await archivePart(db,env,ctx,table);
+}
+async function archivePart(db,env,ctx,table){
  const key=table.modelVersion+'|'+table.asOf.slice(0,10);if(archived.has(key))return;archived.add(key);
  const task=(async()=>{
   const seen=await db.prepare('SELECT 1 AS x FROM score_observations WHERE model_version = ? AND as_of = ? LIMIT 1').bind(table.modelVersion,table.asOf.slice(0,10)).first();
@@ -243,7 +247,7 @@ export async function api(request,env,ctx){
    const result=await insight(db,'investments:'+lang+':'+key,entries=>potentialInvestments(inLanguage(entries,lang).filter(([card])=>selected.has(card.series)))),mode=scoreMode(env);
    if(mode==='legacy')return json({...result,series:included,lang});
    // The shortlist and the card panel read the same research table, so they cannot disagree.
-   const t=await researchFor(db,mode),grades={};
+   const t=await researchFor(db,mode,researchLanguages(env)),grades={};
    for(const [g,col] of Object.entries(result.grades)){
     let removed=0;const picks=[];
     for(const p of col.picks){
@@ -260,13 +264,13 @@ export async function api(request,env,ctx){
   if(path==='/api/scores' && request.method==='GET'){
    const {checkedAt,grades,scores}=await scoreTable(db),mode=scoreMode(env);
    if(mode==='legacy')return json({checkedAt,grades,scores,research:null});
-   const t=await researchFor(db,mode);await archiveOnce(db,env,ctx,t);
-   return json({checkedAt,grades,scores,research:{modelVersion:t.modelVersion,mode:t.mode,asOf:t.asOf,horizonMonths:t.horizonMonths,ranks:t.ranks,status:t.status,gate:t.gate}});
+   const t=await researchFor(db,mode,researchLanguages(env));await archiveOnce(db,env,ctx,t);
+   return json({checkedAt,grades,scores,research:{modelVersion:t.modelVersion,mode:t.mode,asOf:t.asOf,horizonMonths:t.horizonMonths,languages:t.languages,ranks:t.ranks,status:t.status,gate:t.gate}});
   }
   if(path==='/api/market' && request.method==='GET'){
    const card=cardById.get(url.searchParams.get('id'));if(!card)return json({error:'That card is not in the catalog.'},404);
    let market=await fullMarket(db,card.id);const mode=scoreMode(env);
-   const extras=async()=>({score:(await scoreTable(db)).full.get(card.id)||null,investment:mode==='legacy'?null:marketInvestment(await researchFor(db,mode),card,market)});
+   const extras=async()=>({score:(await scoreTable(db)).full.get(card.id)||null,investment:mode==='legacy'?null:marketInvestment(await researchFor(db,mode,researchLanguages(env)),card,market)});
    if(url.searchParams.get('refresh')==='1'){
     let mapping=null;
     if(card.japanese&&!card.source){try{mapping=await mapJapaneseSet(db,env,ctx,sets.find(s=>s.id===card.setId));market=await fullMarket(db,card.id);}catch(e){return json({market,refreshed:false,warning:e.message,...await extras()});}}

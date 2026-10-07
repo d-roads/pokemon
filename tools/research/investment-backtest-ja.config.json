@@ -1,0 +1,30 @@
+{
+  "version": "investment-backtest-ja-v1",
+  "description": "Out-of-sample check of the frozen English research rank (research-rank-v1, weights momentum 0.25 / value 0.75 / low-vol 0) on Japanese cards, ranked only against Japanese cards. Written before the first run on October 7, 2026. Nothing is selected or tuned: the weights come from the English study. Changing any value is a new experiment: bump the version and keep the old results.",
+  "weights": [0.25, 0.75, 0],
+  "grades": ["raw", "grade9", "psa10"],
+  "entry": { "first": "2023-06", "last": "2025-06", "stepMonths": 3 },
+  "excludeFromMonth": "2026-10",
+  "lastExitMonth": "2026-08",
+  "features": { "windowMonths": 13, "minDistinct": 6, "minPrice": 25, "minAgeMonths": 12 },
+  "horizons": [6, 12],
+  "primaryHorizon": 12,
+  "basket": { "topShare": 0.2, "minCards": 20 },
+  "costs": { "saleHaircut": 0.15, "entryFixed": 5, "exitFixed": 5 },
+  "missingExitReturn": -1,
+  "holdout": { "modulus": 5, "hashMultiplier": 31 },
+  "unsupportedSeries": ["ME"],
+  "bootstrap": { "seed": 123456789, "draws": 5000 },
+  "stress": { "buySlippage": 0.05, "acquisitionTax": 0.08, "exitSlippage": 0.05, "saleHaircut": 0.2, "fixed": 5 },
+  "gate": {
+    "note": "All checks must pass for the app to show Japanese research ranks (FUTURESIGHT_JA_RESEARCH=shadow). These mirror what the English rank showed before it was put in shadow mode: positive lift overall, after a one-month entry delay and on held-out sets.",
+    "minEntryDates": 4,
+    "checks": [
+      { "id": "lift", "label": "Top-quintile 12-month net return beats the all-card basket on average" },
+      { "id": "delayed", "label": "Still beats it when buying one month later" },
+      { "id": "heldSets", "label": "Beats it on held-out sets (never used anywhere)" },
+      { "id": "dates", "label": "Positive mean lift on a majority of entry dates" },
+      { "id": "coverage", "label": "At least 4 entry dates and 100 distinct cards across 5 sets" }
+    ]
+  }
+}

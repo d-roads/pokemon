@@ -32,7 +32,7 @@ const PORT=Number(process.env.PORT||5173);
 const HOST=process.env.HOST||'127.0.0.1';
 // Which build this is, shown in the page so the beta and a local test copy can't be confused.
 const BUILD=buildInfo(JSON.parse(readFileSync(path.join(root,'package.json'),'utf8')).version,process.env.FUTURESIGHT_CHANNEL);
-const env={DB,SENTRY_DSN:process.env.SENTRY_DSN,SENTRY_ENV:process.env.SENTRY_ENV,FUTURESIGHT_SCORE_MODEL:process.env.FUTURESIGHT_SCORE_MODEL,NETWORK_DISABLED:/127\.0\.0\.1:9\b/.test(process.env.HTTPS_PROXY||process.env.HTTP_PROXY||'')};
+const env={DB,SENTRY_DSN:process.env.SENTRY_DSN,SENTRY_ENV:process.env.SENTRY_ENV,FUTURESIGHT_SCORE_MODEL:process.env.FUTURESIGHT_SCORE_MODEL,FUTURESIGHT_JA_RESEARCH:process.env.FUTURESIGHT_JA_RESEARCH,NETWORK_DISABLED:/127\.0\.0\.1:9\b/.test(process.env.HTTPS_PROXY||process.env.HTTP_PROXY||'')};
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.json':'application/json'};
 const SHARED_MODULES=new Set(['analysis.mjs','portfolio.mjs','investment-costs.mjs']);
 const PAGE_HEADERS={'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'same-origin','Cache-Control':'no-store'};
