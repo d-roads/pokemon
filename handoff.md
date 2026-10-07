@@ -1,6 +1,14 @@
-# FutureSight — session handoff, October 6, 2026 (late night)
+# FutureSight — session handoff, October 6–7, 2026 (late night; last updated Oct 6, 9:35 PM Pacific)
 
 Repository `d-roads/pokemon`. Work this session is on branch **`dev`** only. `main` and the beta are unchanged.
+
+## Start here (next session)
+- **Branches:** `beta` = what outside testers run (`4bdf0c8`, v1.0.0). `dev` = everything from this session (v1.1.0-dev, latest `Start-LocalTest` fix). `main` still equals `beta`. Do not touch the beta folder or `beta`/`main` unless the owner asks for a beta update.
+- **Owner's PC (not linked this session):** beta in `...\g-p-6a72b895d6288191b4624c5f5479fcae\primal-watch\site`; local test copy unzipped at `...\g-p-6a72b895d6288191b4624c5f5479fcae\futuresight-local-test-1.1.0-dev\futuresight-local-test\site` (one folder deeper than planned). Folder access was declined this session, so builds went out as zips/files in chat.
+- **Open item:** the owner's first local-test start could not find the beta folder (because of the extra folder level) and created a blank database, so `admin` sign-in failed. Fixed in `Start-LocalTest.ps1` + `copy-db.mjs` (search upward for `primal-watch\site`; `--replace-empty` swaps a blank test DB for a copy of the beta's). The two files were sent to the owner to drop in; **confirm sign-in works** before anything else.
+- **Then:** owner loads Japanese prices on the local test copy (Top movers → Language Japanese → Update sales; ~5–10 min matching, then ~1 h+ of sale histories). Check results with the owner: Japanese movers/investments/scores, any wrong matches.
+- **Network:** PriceCharting is unreachable from Claude's shell. The desktop-app browser pane worked for checks (keep to one request at a time, ~1–1.5 s apart; a burst got HTTP 429). Background jobs in the page (`window.runJob`) avoid the 45 s tool timeout. The repo is public, so the page can load `site/lib/*.mjs` and data from raw.githubusercontent.com by commit hash.
+- **Tests:** 171/171 on Node 22 with `node --test --experimental-test-isolation=none tests/*.test.mjs` (the PC's Node 24 uses `npm test`).
 
 ## Which version is the beta
 - **The beta runs branch `beta` = commit `4bdf0c8`** ("Start-Beta.ps1: don't stop on cloudflared's stderr log lines"), app version **1.0.0, "beta 1"**. `main` currently points at the same commit. A `beta-1` tag was made but GitHub's integration refused to push tags (HTTP 403); the `beta` branch is the marker.
@@ -8,9 +16,9 @@ Repository `d-roads/pokemon`. Work this session is on branch **`dev`** only. `ma
 - `dev` is version **1.1.0-dev**. Every page now shows its build beside the logo and on the sign-in page (`Beta · v…` / `Local test · v…` / `Local · v…`), from `GET /api/version` and `FUTURESIGHT_CHANNEL`. The current beta (1.0.0) predates this label, so it shows none; the next beta update will show "Beta".
 
 ## Local test copy (new)
-- `site/Start-LocalTest.ps1`: run from a **separate folder** next to the beta folder, e.g. `...\g-p-6a72b895d6288191b4624c5f5479fcae\futuresight-local-test\site`. It refuses to run from the beta folder. Port **5180** (Start-Beta only stops 5173/5174), localhost only (`-Network` for the home network), no tunnel, channel `local-test`.
-- Database: `data\local-test.sqlite`, a one-time snapshot of the beta database via `copy-db.mjs` (SQLite `VACUUM INTO`, safe while the beta runs; `-FreshCopy` re-copies). `FUTURESIGHT_DB` env selects the file. The beta's `.env` is copied if the test copy has none (admin password, Sentry).
-- **Not deployed to the PC this session:** the request for access to the PC folder was declined, so the build was delivered as a zip in the conversation (`futuresight-local-test-1.1.0-dev.zip`). Owner: unzip it into a new `futuresight-local-test` folder beside `primal-watch` and run `site\Start-LocalTest.ps1`.
+- `site/Start-LocalTest.ps1`: run from a **separate folder** next to (or anywhere below a folder next to) the beta folder. It searches upward up to 6 levels for `primal-watch\site\data\primal-watch.sqlite`, or takes `-BetaSite <path>`; if it can't find the beta it stops with a message (it no longer starts blank). It refuses to run from the beta folder. Port **5180** (Start-Beta only stops 5173/5174), localhost only (`-Network` for the home network), no tunnel, channel `local-test`.
+- Database: `data\local-test.sqlite`, a snapshot of the beta database via `copy-db.mjs` (SQLite `VACUUM INTO`, safe while the beta runs). Every start runs `copy-db.mjs --replace-empty`: a test DB with accounts is kept, a blank one is replaced; `-FreshCopy` forces a new copy. `FUTURESIGHT_DB` selects the file. The beta's `.env` is copied if the test copy has none (Sentry etc.; the admin account itself comes from the copied database).
+- Delivered as `futuresight-local-test-1.1.0-dev.zip` in chat (latest zip includes Japanese Task 2; the launcher fix after it was sent as two separate files).
 
 ## Default Browse view
 - First load now shows **every set, every era, both languages, All rares** (was Primal Clash chase cards). The Primal Clash "featured" ordering only applies when Primal Clash is the selected set. Test updated.
@@ -23,7 +31,7 @@ Repository `d-roads/pokemon`. Work this session is on branch **`dev`** only. `ma
 
 ## Japanese cards — split into two tasks
 
-### Task 1 (done this session, commit on `dev`)
+### Task 1 (done this session, commit on `dev`; the guards and the 97-console count below were superseded by Task 2)
 - **Catalog:** `site/data/japanese-catalogs.json` from `tools/research/gen-japanese.mjs` (TCGdex `cards-database`, MIT; clone it and pass the path). 120 Japanese sets with card lists, **5,726 rare/promo cards**, ids `ja-<set>-<number>` (e.g. `ja-sv2a-201`), eras mapped to ours (WOTC…ME), English name where known (1,038 keep only the Japanese name, mostly trainers), Japanese name, era-correct codes (SM/SWSH: HR rainbow, UR gold; SV+: UR gold), TCGdex image URLs.
 - **Set table:** `tools/research/japanese-sets.json`, 199 Japanese sets with English names, kind, era and PriceCharting console; **97 consoles confirmed** from PriceCharting's category page (Oct 6, partial listing), the rest are guesses (`pricechartingListed:false`).
 - **English links:** 3,345 linked to the English card with the same artwork: same illustrator + Pokémon + HP + attack costs/damage + rarity class (JP SR ↔ EN full art, AR ↔ IR, SAR ↔ SIR, UR/HR ↔ secret). Without illustrator data (most WOTC/PCG records) it matches on Pokémon + HP + attacks ("stats"). Ties resolve by the English set most of that Japanese set links to, then by the clearly-first English printing; otherwise unlinked (693 ambiguous, 1,688 with no English match, many Japan-only). A 40-link random sample was all correct. English cards carry `japaneseIds`.
@@ -54,8 +62,8 @@ Network to PriceCharting is blocked in Claude's sandbox, so the rules were check
 - The research rank is English-only; a Japanese version needs its own backtest once enough Japanese history exists.
 
 ## Next for the owner
-- Unzip the local test build and run `Start-LocalTest.ps1`; check the badge says **Local test** and the beta still runs untouched. Then load Japanese prices as above.
-- Ask for a beta update when happy with the local test.
+- Replace `Start-LocalTest.ps1` and `copy-db.mjs` in the test `site` folder with the files sent in chat, close the test server window, run `.\Start-LocalTest.ps1` again, sign in as `admin`. The badge must say **Local test**; the beta keeps running untouched.
+- Then load Japanese prices as above, and ask for a beta update when happy with the local test (merge `dev` → `main`, move `beta`, bump to 1.1.0, copy into the beta folder, `Start-Beta.ps1`).
 
 ---
 
