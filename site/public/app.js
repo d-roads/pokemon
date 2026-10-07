@@ -22,7 +22,7 @@ const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
 // Japanese cards and sets show their English names. Settings can add the original Japanese text.
 const JA_TEXT_KEY='futuresight-japanese-text';
 function savedJapaneseText(){try{return localStorage.getItem(JA_TEXT_KEY)==='on';}catch{return false;}}
-const state={showJapanese:savedJapaneseText(),sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],langs:['en','ja'],detailLang:null,detailAlt:null,detailGrade:null,marketLang:'en',filters:{min:null,max:null,activity:0,invest:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
+const state={showJapanese:savedJapaneseText(),sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],langs:['en','ja'],detailLang:null,detailAlt:null,detailGrade:null,marketLang:'en',filters:{min:null,max:null,activity:0,invest:0,research:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
  dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
 // Crashes in the page are sent to the server, which forwards them to Sentry only when SENTRY_DSN is set. At most 5 per page load.
@@ -54,7 +54,7 @@ const scoreOf=(id,grade=state.grade)=>state.scores?.[id]?.[SCORE_INDEX[grade]]??
 const ratingOf=v=>v==null?null:v>=80?'Strong':v>=65?'Good':v>=50?'Fair':v>=35?'Weak':'Poor';
 const ratingClass=v=>v==null?'none':v>=80?'strong':v>=65?'good':v>=50?'fair':'weak';
 const activeEras=()=>state.setId.startsWith('era:')?[state.setId.slice(4)]:state.setId==='all'?state.eras:[activeSet()?.series].filter(Boolean);
-const filterCount=()=>{const f=state.filters;return (f.min!=null)+(f.max!=null)+(f.activity>0)+(f.invest>0)+(state.setId==='all'&&state.eras.length<state.series.length)+(state.langs.length<LANGS.length);};
+const filterCount=()=>{const f=state.filters;return (f.min!=null)+(f.max!=null)+(f.activity>0)+(f.invest>0)+(f.research>0)+(state.setId==='all'&&state.eras.length<state.series.length)+(state.langs.length<LANGS.length);};
 const activeSeries=()=>state.setId.startsWith('era:')?state.series.find(s=>s.id===state.setId.slice(4)):state.series.find(s=>s.id===activeSet()?.series);
 const LANGS=[{id:'en',label:'English'},{id:'ja',label:'Japanese'}];
 const langOf=c=>c.lang||'en';
@@ -80,17 +80,18 @@ function filteredCards(){
  if(f.min!=null||f.max!=null)list=list.filter(c=>{const p=get(c).current;return p!=null&&(f.min==null||p>=f.min)&&(f.max==null||p<=f.max);});
  if(f.activity>0)list=list.filter(c=>(get(c).score??-1)>=f.activity);
  if(f.invest>0)list=list.filter(c=>(scoreOf(c.id)??-1)>=f.invest);
+ if(f.research>0)list=list.filter(c=>(researchRankOf(c.id)??-1)>=f.research);
  const featured=c=>state.setId==='xy5'&&priority.includes(c.id)?priority.indexOf(c.id):get(c).current!=null?10:100;
  const setOrder=c=>state.sets.findIndex(s=>s.id===c.setId);
- return list.sort((a,b)=>state.sort==='number'?(setOrder(a)-setOrder(b))||cardNumber(a)-cardNumber(b):state.sort==='price'?(get(b).current??-1)-(get(a).current??-1):state.sort==='activity'?(get(b).score??-1)-(get(a).score??-1):state.sort==='invest'?(scoreOf(b.id)??-1)-(scoreOf(a.id)??-1)||(get(b).current??-1)-(get(a).current??-1):featured(a)-featured(b)||(state.setId!=='xy5'?(get(b).current??-1)-(get(a).current??-1):0)||cardNumber(a)-cardNumber(b));
+ return list.sort((a,b)=>state.sort==='number'?(setOrder(a)-setOrder(b))||cardNumber(a)-cardNumber(b):state.sort==='price'?(get(b).current??-1)-(get(a).current??-1):state.sort==='activity'?(get(b).score??-1)-(get(a).score??-1):state.sort==='invest'?(scoreOf(b.id)??-1)-(scoreOf(a.id)??-1)||(get(b).current??-1)-(get(a).current??-1):state.sort==='research'?(researchRankOf(b.id)??-1)-(researchRankOf(a.id)??-1)||(get(b).current??-1)-(get(a).current??-1):featured(a)-featured(b)||(state.setId!=='xy5'?(get(b).current??-1)-(get(a).current??-1):0)||cardNumber(a)-cardNumber(b));
 }
 function renderList(){
- const list=filteredCards();$('#result-count').textContent=`${list.length} ${state.view==='watch'?'watched entries':'cards'} · ${gradeNames[state.grade]}`;renderFilterChips();
+ const list=filteredCards(),res=researchColumn();if($('#score-head')){$('#score-head').textContent=res?'RES':'INV';$('#score-head').title=res?'Research rank out of 100 (shadow, unvalidated)':'Investment score out of 100';}$('#result-count').textContent=`${list.length} ${state.view==='watch'?'watched entries':'cards'} · ${gradeNames[state.grade]}`;renderFilterChips();
  $('#show-more').hidden=list.length<=state.limit;
- if(!list.length){$('#card-list').innerHTML=`<div class="empty-state"><strong>${state.view==='watch'&&!state.watch.length?'Your next pickup starts here.':'No cards match.'}</strong><p>${state.view==='watch'&&!state.watch.length?'Tap the star beside a card to save it with its grade and buy target.':(state.filters.invest>0&&!state.scores?(state.scoreError?scoreProblem()+' Clear the score filter to see cards without it.':'Investment scores are still loading.'):'Try another grade, search, category, or loosen the filters.')}</p><button class="button primary" id="clear-filters">${state.view==='watch'?'Browse cards':'Clear filters'}</button></div>`;$('#clear-filters').onclick=()=>{state.view=state.view==='watch'&&!state.watch.length?'browse':state.view;state.category='all';state.query='';$('#search').value='';resetFilters(false);updateView();};return;}
+ if(!list.length){$('#card-list').innerHTML=`<div class="empty-state"><strong>${state.view==='watch'&&!state.watch.length?'Your next pickup starts here.':'No cards match.'}</strong><p>${state.view==='watch'&&!state.watch.length?'Tap the star beside a card to save it with its grade and buy target.':(state.filters.invest>0&&!state.scores?(state.scoreError?scoreProblem()+' Clear the score filter to see cards without it.':'Investment scores are still loading.'):state.filters.research>0&&!state.research?(state.scoreError?scoreProblem()+' Clear the research filter to see cards without it.':'Research ranks are still loading.'):state.filters.research>0&&researchMissingFor().length?'Research ranks cover '+researchMissingNote()+'. Clear the research filter to see them.':'Try another grade, search, category, or loosen the filters.')}</p><button class="button primary" id="clear-filters">${state.view==='watch'?'Browse cards':'Clear filters'}</button></div>`;$('#clear-filters').onclick=()=>{state.view=state.view==='watch'&&!state.watch.length?'browse':state.view;state.category='all';state.query='';$('#search').value='';resetFilters(false);updateView();};return;}
  $('#card-list').innerHTML=list.slice(0,state.limit).map(c=>{
   const a=analyze(state.markets[c.id],state.grade),w=matchingWatch(c.id),target=w?.target??a.target,own=owned(c.id).length;
-  return `<div class="card-row ${c.id===state.selected?'selected':''}" data-id="${c.id}"><button class="card-open" data-open="${c.id}" aria-label="View ${esc(c.name)} number ${c.number}" ${c.id===state.selected?'aria-current="true"':''}><img class="card-thumb" src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><span class="card-name">${esc(c.name)}${c.japanese?'<span class="lang-tag" title="Japanese card">JP</span>':''}${own?'<span class="owned-dot" title="In your Dex">●</span>':''}</span><span class="card-sub">#${c.numberLabel} · ${esc(c.category)}<span class="row-set">${esc(c.setName)}</span></span></span></button><div class="price-cell">${money(a.current)}<small>${a.priceSource==='sales'?'Sold median':a.current?'Source guide':c.japanese?'JP prices soon':'Awaiting source'}</small></div><div class="target-cell ${target==null?'missing':''}">${target==null?'Needs sales':money(target)}${w?.target!=null?'<small class="card-sub">Your target</small>':''}</div><div class="score-cell"><span class="score-pill ${ratingClass(scoreOf(c.id))}" title="${scoreOf(c.id)==null?'No investment score: not enough recent matching sales':'Investment score '+scoreOf(c.id)+' / 100 · '+ratingOf(scoreOf(c.id))}">${scoreOf(c.id)??'—'}</span></div><button class="star-button ${w?'saved':''}" data-watch="${c.id}" aria-label="${w?'Remove':'Add'} ${esc(c.name)} ${gradeNames[state.grade]} ${w?'from':'to'} watchlist" aria-pressed="${!!w}">${w?icon('star-fill'):icon('star')}</button></div>`;
+  return `<div class="card-row ${c.id===state.selected?'selected':''}" data-id="${c.id}"><button class="card-open" data-open="${c.id}" aria-label="View ${esc(c.name)} number ${c.number}" ${c.id===state.selected?'aria-current="true"':''}><img class="card-thumb" src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><span class="card-name">${esc(c.name)}${c.japanese?'<span class="lang-tag" title="Japanese card">JP</span>':''}${own?'<span class="owned-dot" title="In your Dex">●</span>':''}</span><span class="card-sub">#${c.numberLabel} · ${esc(c.category)}<span class="row-set">${esc(c.setName)}</span></span></span></button><div class="price-cell">${money(a.current)}<small>${a.priceSource==='sales'?'Sold median':a.current?'Source guide':c.japanese?'JP prices soon':'Awaiting source'}</small></div><div class="target-cell ${target==null?'missing':''}">${target==null?'Needs sales':money(target)}${w?.target!=null?'<small class="card-sub">Your target</small>':''}</div><div class="score-cell">${researchColumn()?researchPill(c.id):`<span class="score-pill ${ratingClass(scoreOf(c.id))}" title="${scoreOf(c.id)==null?'No investment score: not enough recent matching sales':'Investment score '+scoreOf(c.id)+' / 100 · '+ratingOf(scoreOf(c.id))}">${scoreOf(c.id)??'—'}</span>`}</div><button class="star-button ${w?'saved':''}" data-watch="${c.id}" aria-label="${w?'Remove':'Add'} ${esc(c.name)} ${gradeNames[state.grade]} ${w?'from':'to'} watchlist" aria-pressed="${!!w}">${w?icon('star-fill'):icon('star')}</button></div>`;
  }).join('');
  $('#card-list').querySelectorAll('[data-open]').forEach(el=>el.onclick=()=>select(el.dataset.open));
  $('#card-list').querySelectorAll('.card-row').forEach(el=>el.onclick=e=>{if(!e.target.closest('button'))select(el.dataset.id);});
@@ -182,6 +183,13 @@ const EVIDENCE_FROM={S:'supported',L:'limited',I:'insufficient',U:'unsupported'}
 const RANK_INDEX={psa10:0,psa9:1,raw:2};
 const researchRankOf=(id,grade=state.grade)=>state.research?.ranks?.[id]?.[RANK_INDEX[grade]]??null;
 const researchStatusOf=(id,grade=state.grade)=>EVIDENCE_FROM[state.research?.status?.[id]?.[RANK_INDEX[grade]]]||null;
+// The research rank can be screened and sorted like the other scores, unless the server rolled it back.
+const researchOff=()=>state.research?.mode==='legacy';
+const researchColumn=()=>!researchOff()&&(state.sort==='research'||state.filters.research>0);
+function researchPill(id){const v=researchRankOf(id);return `<span class="score-pill research ${ratingClass(v)}" title="${v==null?'No research rank for this grade':'Research rank '+v+' / 100 · historical percentile (shadow, unvalidated)'}">${v??'—'}</span>`;}
+// Languages in view that the server sends no research ranks for (Japanese until it is validated).
+const researchMissingFor=()=>!state.research?.ranks?[]:state.langs.filter(l=>l!=='en'&&!(state.research.languages||['en']).includes(l));
+const researchMissingNote=()=>(state.research?.languages||['en']).map(l=>LANGS.find(x=>x.id===l)?.label||l).join(' and ')+' cards only for now';
 const monthText=ym=>ym?new Date(ym+'-15T00:00:00Z').toLocaleDateString('en-US',{month:'short',year:'numeric',timeZone:'UTC'}):'';
 const COST_FIELDS=[['saleFeeRate','Selling fees','%',100],['saleFixedFee','Fixed fee per sale','$',1],['shippingIn','Shipping to you','$',1],['shippingOut','Shipping to buyer','$',1],['taxRate','Sales tax','%',100],['hurdle','Return you want','%',100]];
 function costOutput(inv,c){
@@ -201,11 +209,14 @@ function researchBox(c){
  if(state.research?.mode==='legacy')return '';
  const inv=state.investDetail[c.id]?.[viewGrade()],rank=inv?inv.rank:researchRankOf(c.id,viewGrade()),status=inv?.evidenceStatus||researchStatusOf(c.id,viewGrade());
  if(!inv&&!state.research)return '';
+ // Languages the server does not rank (Japanese until it passes its own check) say so instead of loading forever.
+ const lang=langOf(c),covered=state.research?.languages||['en'];
+ if(!inv&&state.research?.ranks&&!covered.includes(lang))return `<div class="research-box"><div class="score-head-row"><span class="metric-label">Research rank</span></div><p class="score-note">Not shown for ${esc(LANGS.find(l=>l.id===lang)?.label||lang)} cards: the research rank was tested on Japanese price history and did not beat a simple all-card basket on held-out sets or when buying a month later, so it is switched off for them.</p></div>`;
  const tag=`<span class="rating-tag research-tag" title="Shown for comparison while the new system is evaluated">Shadow · unvalidated</span>`;
  const head=`<div class="score-head-row"><span class="metric-label">Research rank</span>${tag}</div>`;
  const main=`<div class="score-main"><strong>${rank??'—'}</strong><em>/ 100</em>${status?`<span class="evidence-chip ${status}">${EVIDENCE[status]}</span>`:''}</div>`;
  if(!inv)return `<div class="research-box">${head}${main}<p class="score-note">Loading evidence…</p></div>`;
- const what=rank!=null?`<p class="score-note">Percentile among ${inv.reference?.size?.toLocaleString('en-US')||'the'} ${gradeNames[viewGrade()]} cards ranked on ${monthText(inv.rankMonth)} prices: 75% how far below its 13-month median it sits, 25% momentum. A ranking of past prices, not a chance of profit.</p>${inv.basis?`<p class="score-note">Basis: ${esc(inv.basis.label)}.</p>`:''}`:'';
+ const what=rank!=null?`<p class="score-note">Percentile among ${inv.reference?.size?.toLocaleString('en-US')||'the'} ${lang==='ja'?'Japanese ':''}${gradeNames[viewGrade()]} cards ranked on ${monthText(inv.rankMonth)} prices: 75% how far below its 13-month median it sits, 25% momentum. A ranking of past prices, not a chance of profit.</p>${inv.basis?`<p class="score-note">Basis: ${esc(inv.basis.label)}.</p>`:''}`:'';
  const reasons=inv.reasons.length?`<ul class="evidence-reasons">${inv.reasons.map(r=>`<li>${esc(r.text)}</li>`).join('')}</ul>`:'';
  const costs=userCosts(),fields=COST_FIELDS.map(([k,label,unit,scale])=>`<label>${label}<span class="unit-input">${unit==='$'?'<i>$</i>':''}<input type="number" step="any" min="0" data-cost="${k}" value="${+(costs[k]*scale).toFixed(4)}">${unit==='%'?'<i>%</i>':''}</span></label>`).join('');
  const calc=`<div class="cost-calc"><h4>Price check</h4><label class="ask-label">Asking price (USD)<input id="ask-price" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="e.g. ${inv.priceReference?.price?Math.round(inv.priceReference.price):'100'}" value="${state.asks[c.id+'|'+viewGrade()]??''}"></label><div class="cost-out" id="cost-out">${costOutput(inv,c)}</div>
@@ -607,7 +618,7 @@ async function loadMovers(period,force=false){
 // Jump to another card (e.g. the Japanese printing), keeping the grade; widens the scope only when needed.
 function goToCard(id){
  const c=cardById(id);if(!c)return;
- if(!filteredCards().some(x=>x.id===id)){const lang=langOf(c);if(!state.langs.includes(lang))state.langs=[...state.langs,lang];if(state.setId!=='all'){state.setId='all';state.eras=state.series.map(x=>x.id);}state.category='all';state.query='';$('#search').value='';state.filters={min:null,max:null,activity:0,invest:0};updateView();}
+ if(!filteredCards().some(x=>x.id===id)){const lang=langOf(c);if(!state.langs.includes(lang))state.langs=[...state.langs,lang];if(state.setId!=='all'){state.setId='all';state.eras=state.series.map(x=>x.id);}state.category='all';state.query='';$('#search').value='';state.filters={min:null,max:null,activity:0,invest:0,research:0};updateView();}
  select(id);
 }
 function openCard(id,grade){
@@ -686,17 +697,20 @@ function renderSettings(){
 }
 
 // ---------- Screener (advanced filters) ----------
-const PRESETS={strong:{invest:80},good:{invest:65},liquid:{activity:60},under100:{max:100,min:null},mid:{min:100,max:500},high:{min:500,max:null}};
+const PRESETS={strong:{invest:80},good:{invest:65},research:{research:70},liquid:{activity:60},under100:{max:100,min:null},mid:{min:100,max:500},high:{min:500,max:null}};
 function resetFilters(scope=true){
- state.filters={min:null,max:null,activity:0,invest:0};
+ state.filters={min:null,max:null,activity:0,invest:0,research:0};
  if(scope){state.eras=state.series.map(x=>x.id);state.langs=LANGS.map(l=>l.id);if(state.setId==='all'||state.setId.startsWith('era:'))state.setId='all';}
  syncScreener();
 }
 function syncScreener(){
  const f=state.filters,eras=activeEras();
  if($('#price-min'))$('#price-min').value=f.min??'';if($('#price-max'))$('#price-max').value=f.max??'';
- $('#activity-min').value=f.activity;$('#invest-min').value=f.invest;for(const id of ['#activity-min','#invest-min'])$(id).style?.setProperty('--fill',$(id).value+'%');
- $('#activity-out').textContent=f.activity?f.activity+'+':'Any';$('#invest-out').textContent=f.invest?f.invest+'+':'Any';
+ // Legacy mode has no research rank: hide its slider, sort and preset and drop an active value.
+ const off=researchOff();if(off){f.research=0;if(state.sort==='research'){state.sort='featured';if($('#sort'))$('#sort').value='featured';}}
+ if($('#research-block'))$('#research-block').hidden=off;if($('#sort-research'))$('#sort-research').hidden=off;if($('#preset-research'))$('#preset-research').hidden=off;
+ $('#activity-min').value=f.activity;$('#invest-min').value=f.invest;if($('#research-min'))$('#research-min').value=f.research;for(const id of ['#activity-min','#invest-min','#research-min'])$(id)?.style?.setProperty('--fill',$(id).value+'%');
+ $('#activity-out').textContent=f.activity?f.activity+'+':'Any';$('#invest-out').textContent=f.invest?f.invest+'+':'Any';if($('#research-out'))$('#research-out').textContent=f.research?f.research+'+':'Any';
  $('#price-grade').textContent=gradeNames[state.grade].replace(' · near mint',' NM');
  $('#era-chips').innerHTML=state.series.map(x=>`<button data-era="${x.id}" class="${eras.includes(x.id)?'active':''}" aria-pressed="${eras.includes(x.id)}" title="${esc(x.name)} · ${esc(x.years)}">${marketSeriesLabel(x.id)}</button>`).join('');
  $('#era-chips').querySelectorAll('[data-era]').forEach(b=>b.onclick=()=>toggleEra(b.dataset.era));
@@ -732,6 +746,7 @@ function renderFilterChips(){
  if(f.min!=null||f.max!=null)chips.push(['price',(f.min!=null&&f.max!=null?wholeMoney(f.min)+'–'+wholeMoney(f.max):f.min!=null?wholeMoney(f.min)+'+':'Up to '+wholeMoney(f.max))+' · '+gradeNames[state.grade].replace(' · near mint',' NM')]);
  if(f.activity>0)chips.push(['activity','Activity '+f.activity+'+']);
  if(f.invest>0)chips.push(['invest','Inv. score '+f.invest+'+']);
+ if(f.research>0)chips.push(['research','Research '+f.research+'+']);
  const box=$('#active-filters');box.innerHTML=chips.map(([k,l])=>`<button class="chip" data-unfilter="${k}" aria-label="Remove filter: ${esc(l)}">${esc(l)}<span aria-hidden="true">×</span></button>`).join('');
  box.querySelectorAll('[data-unfilter]').forEach(b=>b.onclick=()=>{const k=b.dataset.unfilter;if(k==='eras'){state.eras=state.series.map(x=>x.id);updateView();return;}if(k==='langs'){state.langs=LANGS.map(l=>l.id);updateView();return;}if(k==='price'){f.min=null;f.max=null;}else f[k]=0;applyFilters();});
 }
@@ -742,6 +757,7 @@ function wireScreener(){
  $('#price-min').oninput=price;$('#price-max').oninput=price;
  $('#activity-min').oninput=e=>{state.filters.activity=Number(e.target.value);applyFilters();};
  $('#invest-min').oninput=e=>{state.filters.invest=Number(e.target.value);applyFilters();};
+ if($('#research-min'))$('#research-min').oninput=e=>{state.filters.research=Number(e.target.value);applyFilters();};
  document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{const p=PRESETS[b.dataset.preset],on=Object.entries(p).every(([k,v])=>state.filters[k]===v);for(const [k,v] of Object.entries(p))state.filters[k]=on?(k==='min'||k==='max'?null:0):v;applyFilters();});
  $('#reset-filters').onclick=()=>{resetFilters(true);state.category='all';updateView();toast('Filters cleared.');};
  $('#filters-toggle').onclick=()=>{state.filtersOpen=!state.filtersOpen;syncScreener();};

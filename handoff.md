@@ -1,3 +1,45 @@
+# FutureSight — session handoff, October 7, 2026 (morning, Pacific): research-rank coverage, research filter, Japanese check
+
+Branch **`dev`**, uncommitted (the owner has not asked for a commit yet). `main`, `beta`, the beta folder and the owner's databases were not written. Plan: `/home/binj/projects/future-sight/research-plan.md`.
+
+## Start here
+- **Tests:** 185/185 (`npm test`, Node 24.9). `npm run build` passes; the Worker bundle is now 245.6 MB (was 196 MB; hosted deployment already needed a storage redesign).
+- **Uncommitted work from the previous session is still here and preserved:** the info-screen grade/language fix in `site/public/app.js` and its test in `site/tests/ui.test.mjs`. A copy of that diff from before this session is in `work/research/pre-existing-uncommitted.diff`.
+- **Owner, to get Japanese prices/histories into the local test copy without another 2-hour Update sales:**
+  1. Copy the changed repo files (below) into the test `site` folder and close the test server window.
+  2. Import: `node tools/research/import-collected.mjs --from <collected.sqlite> --to site/data/local-test.sqlite`. The collected file is `/home/binj/projects/future-sight/work/research-collect.sqlite` in WSL. From WSL the test DB is `/mnt/c/Users/b345t/.codex/.chatgpt-projects/g-p-6a72b895d6288191b4624c5f5479fcae/futuresight-local-test-1.1.0-dev/futuresight-local-test/site/data/local-test.sqlite`. The tool backs it up first. Its running-server check uses 127.0.0.1:5180, which WSL may not see, so make sure the server window is closed.
+  3. Run `Start-LocalTest.ps1` again.
+
+## What changed
+### Research coverage (data)
+- Full pages were captured for every eligible card that lacked a research rank because its history was missing: 2,275 English and 3,425 Japanese. They went into a working copy of the owner's local-test DB (`work/research-collect.sqlite`); the owner's own file was only read. Raw records are in `work/research-collect-records.jsonl`.
+- `tools/research/bundle-captures.mjs` (new, add-only) merged 2,153 English records into 48 files in `site/data/pricecharting/` (+24 MB, 129.5 → 153 MB; `swshp.json` keeps its pretty-printed format, so its diff is additions only). **Bundled data alone now ranks 7,569 of 9,758 English cards** (5,721 before; 6,353 in the owner's DB before). The rest fail frozen rules: 1,320 below $25, 669 ME, plus short or flat histories. The report is `tools/research/research-coverage.json`.
+- **Frozen study pinned:** `backtest-investment.mjs`/`train-investment-model.mjs` now load only the captures in `tools/research/investment-backtest-universe.json` (7,436 ids from `e9084a2`, SHA-checked; `market.mjs` exports `snapshotsWithoutCaptures`). The backtest reproduces +5.13 pp exactly. Retraining reproduces the model coefficients; only the capture-folder digest differs, so the artifact was left unchanged.
+- **Product links:** 11 English cards had guessed URLs that redirect to search. They were fixed in `data/source-urls.json` after an exact set/number/name check and captured: ex13-110, ex16-108, dp3-41, dp3-42, pl2-35, pl2-37, sm2-77, sm2-97, sm9-88, sm9-91, sm10-103. **sm6-102a (Beast Ring 102a)** stays unmatched: PriceCharting lists only one #102 for two printings. The 15 Japanese failures are correct product pages with **no prices or sales on PriceCharting**; nothing to fix.
+
+### Research filter (UI)
+- Browse screener has **Min research rank** (slider), a **Research rank** sort and a **Research 70+** quick screen. They work exactly like activity/investment: per selected grade, with a chip, the filter badge and Clear filters. While sorting or filtering by it, the list's score column shows **RES** with dashed pills. Legacy mode hides all three. With only Japanese in scope, the list says ranks cover English cards only.
+- The screener's side-by-side layout moved from ≥1600 px to ≥2200 px, because four range controls did not fit at 1920. Checked in headless Chromium at 360/390/430/1100/1440/1700/1920/2200/2517 px: no overflow, no page errors.
+- Japanese card panels now say why there is no research rank (they used to show "Loading evidence…" forever).
+
+### Japanese research rank
+- `tools/research/backtest-japanese.mjs` and its config (written before the run) test the frozen English weights on Japanese history. Result: +1.50 pp overall, −0.12 pp delayed entry, −0.15 pp on held-out sets, latest entry dates and the SV era strongly negative. **Not passed**, so it is not shown.
+- `FUTURESIGHT_JA_RESEARCH=off|shadow` (default off): with `shadow`, Japanese cards are ranked in their own table, merged into `/api/scores` (`research.languages`), card panels and Japanese Investments, and archived as `…+ja`. English ranks are unaffected.
+
+### Import tool
+- `tools/research/import-collected.mjs`: merge-only import (market_cache via `mergeMarket`, observation logs, missing Japanese product matches). It never touches user tables, refuses the beta folder, `primal-watch.sqlite` and a running server, and backs up first. A trial on a copy of the owner snapshot ended with the same ranks as the collected DB (7,563 EN before the URL fixes / 3,049 JA pool), and a rerun is a no-op.
+
+### New and changed files
+New: `tools/research/{bundle-captures,import-collected,backtest-japanese}.mjs`, `tools/research/{investment-backtest-universe,investment-backtest-ja.config,investment-backtest-ja-results,research-coverage}.json`, `site/tests/{bundle,import,research-languages}.test.mjs`.
+Changed: `site/data/pricecharting/*.json` (48 sets), `site/data/source-urls.json`, `site/data/market.mjs`, `site/lib/{api,investment}.mjs`, `site/server.mjs`, `site/public/{app.js,index.html,style.css}`, `site/README.md`, `site/.env.example`, `tools/research/backtest-investment.mjs`, `site/tests/{analysis,investment,ui}.test.mjs` (pinned counts moved with the new data; the Update-sales test now skips recently read cards, as the app does).
+
+## Left for later
+- 575 Japanese cards with no product match (mostly `svp`/`sp` promos) and the 15 Japanese products with no prices.
+- 26 English and 77 Japanese cards short of 13 consecutive months; they qualify over time.
+- ME stays excluded by the frozen rules. Admitting it, lowering the $25 floor, or retrying Japanese would each be a new, versioned experiment.
+
+---
+
 # FutureSight — session handoff, October 7, 2026 (early morning; last updated Oct 6, ~11:55 PM Pacific)
 
 Repository `d-roads/pokemon`. Work this session is on branch **`dev`** only. `main`, `beta` and the beta folder are unchanged.

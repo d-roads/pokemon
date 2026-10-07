@@ -155,7 +155,8 @@ test('Update sales fetches in batches from the Movers and Investments tabs and t
  const posted=[];ui.responses['/api/research']=url=>{const ids=new URL('http://x'+url).searchParams.get('ids').split(',');posted.push(ids);return {count:ids.length,total:ids.length,done:true,markets:{},failures:[]};};
  ui.e('#movers-nav').onclick();await ui.run('loadMovers("week")');await new Promise(r=>setImmediate(r));const m=ui.calls.filter(u=>u.startsWith('/api/movers')).length;
  await ui.run('updateMarketSales()');
- const n=ui.run("state.cards.filter(c=>c.source&&c.eligible&&langOf(c)==='en').length");
+ // Cards read within the last FRESH_HOURS are skipped (bundled captures can be that recent).
+ const n=ui.run("state.cards.filter(c=>c.source&&c.eligible&&langOf(c)==='en'&&Date.now()-checkedAt(c)>=FRESH_HOURS*3600000).length");
  assert.equal(posted.length,Math.ceil(n/4));assert.ok(posted.every(b=>b.length>=1&&b.length<=4));assert.equal(new Set(posted.flat()).size,n,'each card once');
  assert.ok(ui.calls.filter(u=>u.startsWith('/api/movers')).length>m,'the list is rebuilt once the sales are in');
 });
@@ -207,6 +208,44 @@ test('Advanced filters screen by era, price, activity and investment score, and 
  assert.ok(ui.run("filteredCards().every(c=>['XY','SM'].includes(c.series))"));assert.equal(ui.e('#page-title').textContent,'Explore 2 eras');
  // Clearing restores everything
  ui.e('#reset-filters').onclick();assert.equal(ui.run('filterCount()'),0);assert.equal(ui.run('state.eras.length'),ui.run('state.series.length'));
+});
+test('Research rank screens and sorts like the other scores, per grade, and hides when rolled back',async()=>{
+ const NOW=Date.parse('2026-10-06T20:00:00Z'),release=Object.fromEntries(sets.map(s=>[s.id,s.release]));
+ const t=investmentTable(cards.filter(c=>(c.lang||'en')==='en').map(c=>[c,snapshots[c.id]]),{now:NOW,release});
+ const ui=workspace();ui.responses['/api/scores']={grades:scoreData.grades,scores:scoreData.scores,research:{modelVersion:t.modelVersion,mode:'shadow',languages:['en'],ranks:t.ranks,status:t.status,gate:t.gate}};
+ await ui.run('init()');await ui.run('loadScores()');
+ ui.e('#set-select').onchange({target:{value:'all'}});ui.run("state.category='all';updateView();");
+ const html=readFileSync(new URL('../public/index.html',import.meta.url),'utf8');
+ assert.match(html,/id="research-min"/);assert.match(html,/<option value="research"/);assert.match(html,/data-preset="research"/);
+ // The slider keeps cards whose rank for the selected grade meets the threshold.
+ ui.e('#research-min').oninput({target:{value:'70'}});
+ assert.equal(ui.run('state.filters.research'),70);assert.equal(ui.run('filterCount()'),1);
+ const psa9=ui.run('filteredCards().map(c=>c.id)');assert.ok(psa9.length>50);
+ assert.ok(psa9.every(id=>t.ranks[id][1]>=70));assert.equal(ui.e('#research-out').textContent,'70+');
+ assert.match(ui.e('#active-filters').innerHTML,/Research 70\+/);
+ // The score column shows the research rank while the filter is on.
+ assert.equal(ui.e('#score-head').textContent,'RES');assert.match(ui.e('#card-list').innerHTML,/score-pill research/);
+ // Another grade gives that grade's ranks.
+ ui.run("state.grade='psa10';applyFilters();");const psa10=ui.run('filteredCards().map(c=>c.id)');
+ assert.ok(psa10.every(id=>t.ranks[id][0]>=70));assert.notDeepEqual(psa10,psa9);
+ // Sorting: highest rank first, unranked cards last.
+ ui.run("state.filters.research=0;applyFilters();");assert.equal(ui.e('#score-head').textContent,'INV');
+ ui.e('#sort').onchange({target:{value:'research'}});assert.equal(ui.e('#score-head').textContent,'RES');
+ const ranks=ui.run("filteredCards().map(c=>researchRankOf(c.id)??-1)");assert.deepEqual(ranks,[...ranks].sort((a,b)=>b-a));assert.ok(ranks[0]>90&&ranks.at(-1)===-1);
+ // The quick screen sets the same filter.
+ assert.equal(ui.run('JSON.stringify(PRESETS.research)'),'{"research":70}');
+ // Japanese-only scope: no Japanese ranks yet, so the empty list says why.
+ ui.run("state.filters.research=60;setLangMode('ja');");assert.equal(ui.run('filteredCards().length'),0);assert.match(ui.e('#card-list').innerHTML,/Research ranks cover English cards only for now/);
+ ui.run("setLangMode('all');");
+ // A Japanese card's panel says why it has no research rank instead of loading forever.
+ assert.match(ui.run("researchBox(state.cards.find(c=>c.japanese))"),/Not shown for Japanese cards/);
+ assert.doesNotMatch(ui.run("researchBox(state.cards.find(c=>c.id==='xy5-151'))"),/Not shown/);
+ // Clear filters resets it.
+ ui.e('#reset-filters').onclick();assert.equal(ui.run('state.filters.research'),0);assert.equal(ui.run('filterCount()'),0);
+ // Legacy mode (rollback): slider, sort option and preset are hidden and an active value is dropped.
+ ui.run("state.filters.research=80;state.sort='research';state.research={mode:'legacy'};syncScreener();renderList();");
+ assert.equal(ui.e('#research-block').hidden,true);assert.equal(ui.e('#sort-research').hidden,true);assert.equal(ui.e('#preset-research').hidden,true);
+ assert.equal(ui.run('state.filters.research'),0);assert.equal(ui.run('state.sort'),'featured');assert.equal(ui.e('#score-head').textContent,'INV');
 });
 test('Card detail shows the investment score with its breakdown',async()=>{
  const ui=workspace();await ui.run('init()');await ui.run('loadScores()');

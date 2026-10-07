@@ -165,7 +165,7 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
 /* Two aligned rows: what to screen (era, language, set), then the thresholds (price, activity, score). */
 .screener-row{display:grid;gap:12px 24px;align-items:start;min-width:0}
 .scope-row{grid-template-columns:auto auto minmax(200px,1fr)}
-.range-row{grid-template-columns:minmax(220px,1.15fr) minmax(170px,1fr) minmax(170px,1fr)}
+.range-row{grid-template-columns:minmax(220px,1.15fr) repeat(3,minmax(150px,1fr))}
 .field-block{display:flex;flex-direction:column;gap:7px;min-width:0}
 .era-block,.lang-block{align-items:flex-start}
 .field-label{display:flex;align-items:center;gap:6px;min-height:18px;font-size:12px;color:var(--muted);white-space:nowrap}
@@ -242,6 +242,9 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
 .score-pill.good{color:var(--accent-text);background:var(--accent-soft);border-color:var(--accent-line)}
 .score-pill.fair{color:var(--warn);background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
 .score-pill.weak{color:var(--down);background:var(--down-soft);border-color:var(--down-line)}
+/* Research rank: dashed like the research box, because it is a shadow, unvalidated ranking. */
+.score-pill.research{border-style:dashed}
+.score-pill.research.strong,.score-pill.research.good{border-color:var(--accent-line)}
 .star-button{display:grid;place-items:center;width:30px;height:30px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--faint);font-size:19px}
 .star-button:hover{background:var(--panel-3);color:var(--accent-text)}
 .star-button.saved{color:var(--accent)}
@@ -626,9 +629,13 @@ dialog::backdrop{background:#000000bd}
 /* ---------- Wide ---------- */
 @media(min-width:1600px){
  .workspace{grid-template-columns:minmax(0,1fr) 420px}
+ .detail-image,.detail-image-wrap{width:110px}.detail-image{height:154px}
+}
+
+/* Screener rows side by side only where the scope row and all four range controls fit. */
+@media(min-width:2200px){
  .screener-body{grid-template-columns:auto minmax(0,1fr);column-gap:32px}
  .range-row{padding-left:32px;border-left:1px solid var(--line)}
- .detail-image,.detail-image-wrap{width:110px}.detail-image{height:154px}
 }
 
 /* ---------- Laptop ---------- */
