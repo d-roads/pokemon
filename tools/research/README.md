@@ -64,3 +64,10 @@ Cards without one unique source product stay unpriced. Reports distinguish expos
 - `train-investment-model.mjs` + `investment-model.config.json`: the regularized 12-month net-return model with purged fit / tune / calibrate / test windows, benchmarks, E10 calibration and the frozen promotion gate. Writes `site/data/investment-model.json` and `investment-model-report.json`. Current result: not promoted.
 
 Both read saved data only: `node tools/research/backtest-investment.mjs`, `node tools/research/train-investment-model.mjs` (about 15 s and 45 s).
+
+## Japanese catalog (October 2026, task 1 of 2)
+
+- `git clone --depth 1 https://github.com/tcgdex/cards-database /tmp/tcgdex`, then `node tools/research/gen-japanese.mjs /tmp/tcgdex` (about 40 s to read the TypeScript records; a cached JSON dump of `loadTcgdex()` also works). `tcgdex-load.mjs` evaluates each record as a plain object literal in an empty sandbox.
+- `japanese-sets.json` is the authoritative list of Japanese sets: TCGdex id, English name, era, kind, and the PriceCharting console. `pricechartingListed:true` (97 of 199) means the console appeared in PriceCharting's category page on October 6, 2026; the others are best guesses to confirm before capture. The Chinese `CS*` placeholder sets and TCGdex's duplicate `+` sets are not included; BW3b and BW8b are added by hand (TCGdex repeats BW3a/BW8a).
+- Eligibility: rarity R and above, promos, and, when TCGdex records no rarity, cards numbered past the set total or ending in ex/EX/GX/V/VMAX/VSTAR.
+- English links: our English sets are paired with TCGdex English sets by name (with a short override list) and checked card by card (146 pairs; Celebrations Classic Collection, Scarlet & Violet Energies and 30th Celebration Classic Collection are not paired because their numbering differs). Matching rules are described in `site/README.md`. `japanese-coverage.json` reports per-set link counts, ambiguous cards and sets without card lists.

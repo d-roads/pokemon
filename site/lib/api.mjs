@@ -190,6 +190,7 @@ export async function api(request,env,ctx){
    let market=await fullMarket(db,card.id);const mode=scoreMode(env);
    const extras=async()=>({score:(await scoreTable(db)).full.get(card.id)||null,investment:mode==='legacy'?null:marketInvestment(await researchFor(db,mode),card,market)});
    if(url.searchParams.get('refresh')==='1'){
+    if(!card.source)return json({market,refreshed:false,warning:'Japanese prices are not loaded yet. They arrive once each Japanese card is matched to its exact price-guide product.',...await extras()});
     try{const live=parseMarket(await sourceFetch(card.source,env),card);market=mergeMarket(market,live);await saveMarket(db,card,market);await logCapture(db,env,ctx,card,live);return json({market,refreshed:true,...await extras()});}
     catch(e){return json({market,refreshed:false,warning:e.message,...await extras()});}
    }
@@ -198,6 +199,8 @@ export async function api(request,env,ctx){
   if(path==='/api/refresh' && request.method==='POST'){
    const set=sets.find(s=>s.id===(url.searchParams.get('set')||'xy5'));
    if(!set)return json({error:'Choose a set to refresh.'},400);
+   // Japanese sets have no verified price products yet (Japanese work, task 2).
+   if(set.lang==='ja')return json({refreshed:false,count:0,warning:'Japanese prices are not loaded yet. They arrive once each Japanese card is matched to its exact price-guide product.'});
    try{
     const guides=parseSet(await sourceFetch(set.marketSource,env),cards.filter(c=>c.setId===set.id&&c.eligible)),cached=await cachedMarkets(db),markets={};
     for(const [id,g] of Object.entries(guides)){const previous=mergeMarket(snapshots[id],cached[id]);markets[id]=mergeMarket(previous,g);await logCapture(db,env,ctx,cardById.get(id),g);}
@@ -210,7 +213,8 @@ export async function api(request,env,ctx){
    const era=scopeId.startsWith('era:')?scopeId.slice(4).toUpperCase():null;
    if(scopeId!=='all'&&!era&&!sets.some(s=>s.id===scopeId))return json({error:'Choose a supported set.'},400);
    if(era&&!series.some(s=>s.id===era))return json({error:'Choose a supported era.'},400);
-   const scope=cards.filter(c=>c.eligible&&(scopeId==='all'||(era?c.series===era:c.setId===scopeId)));
+   // Only cards with a price source are fetched; Japanese cards join once their products are verified.
+   const scope=cards.filter(c=>c.eligible&&c.source&&(scopeId==='all'||(era?c.series===era:c.setId===scopeId)));
    if(!Number.isInteger(offset)||offset<0||offset>scope.length)return json({error:'Invalid sales batch.'},400);
    if(env.NETWORK_DISABLED)return json({refreshed:false,attempted:0,total:scope.length,done:true,warning:'Live sales refresh is unavailable in this workspace. Showing the last researched sales.'});
    const batch=scope.slice(offset,offset+4),cached=await cachedMarkets(db),markets={},failures=[];

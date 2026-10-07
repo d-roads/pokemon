@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {cards,sets,series} from '../data/catalog.mjs';
+import {cards as allCards,sets as allSets,series} from '../data/catalog.mjs';
+// These checks describe the English catalogs; Japanese cards have their own tests (japanese.test.mjs).
+const cards=allCards.filter(c=>!c.japanese),sets=allSets.filter(s=>s.lang!=='ja');
 import {matchesCard,gradeOf} from '../lib/sales.mjs';
 import {classifyCapture,expandCapture} from '../lib/capture.mjs';
 import {parseMarket,parseSet} from '../lib/provider.mjs';

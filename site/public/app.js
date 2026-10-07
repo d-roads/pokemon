@@ -19,7 +19,7 @@ const ago=iso=>{const m=Math.round((Date.now()-Date.parse(iso))/60000);return m<
 const signed=v=>v==null?'—':(v>0?'+':v<0?'−':'')+money(Math.abs(v));
 const pct=v=>v==null?'':(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(1)+'%';
 const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
-const state={sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],filters:{min:null,max:null,activity:0,invest:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
+const state={sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],langs:['en','ja'],filters:{min:null,max:null,activity:0,invest:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
  dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
 // Crashes in the page are sent to the server, which forwards them to Sentry only when SENTRY_DSN is set. At most 5 per page load.
@@ -51,9 +51,11 @@ const scoreOf=(id,grade=state.grade)=>state.scores?.[id]?.[SCORE_INDEX[grade]]??
 const ratingOf=v=>v==null?null:v>=80?'Strong':v>=65?'Good':v>=50?'Fair':v>=35?'Weak':'Poor';
 const ratingClass=v=>v==null?'none':v>=80?'strong':v>=65?'good':v>=50?'fair':'weak';
 const activeEras=()=>state.setId.startsWith('era:')?[state.setId.slice(4)]:state.setId==='all'?state.eras:[activeSet()?.series].filter(Boolean);
-const filterCount=()=>{const f=state.filters;return (f.min!=null)+(f.max!=null)+(f.activity>0)+(f.invest>0)+(state.setId==='all'&&state.eras.length<state.series.length);};
+const filterCount=()=>{const f=state.filters;return (f.min!=null)+(f.max!=null)+(f.activity>0)+(f.invest>0)+(state.setId==='all'&&state.eras.length<state.series.length)+(state.langs.length<LANGS.length);};
 const activeSeries=()=>state.setId.startsWith('era:')?state.series.find(s=>s.id===state.setId.slice(4)):state.series.find(s=>s.id===activeSet()?.series);
-const inScope=c=>state.setId==='all'?(!state.eras.length||state.eras.includes(c.series)):state.setId.startsWith('era:')?c.series===state.setId.slice(4):c.setId===state.setId;
+const LANGS=[{id:'en',label:'English'},{id:'ja',label:'Japanese'}];
+const langOf=c=>c.lang||'en';
+const inScope=c=>state.setId!=='all'&&!state.setId.startsWith('era:')?c.setId===state.setId:state.langs.includes(langOf(c))&&(state.setId==='all'?(!state.eras.length||state.eras.includes(c.series)):c.series===state.setId.slice(4));
 const scopedCards=()=>state.cards.filter(c=>inScope(c)&&(c.eligible||state.view==='watch'&&matchingWatch(c.id)));
 const owned=id=>state.dex.entries.filter(e=>e.card_id===id);
 function stats(){
@@ -69,7 +71,7 @@ function stats(){
 const priority=['xy5-147','xy5-55','xy5-156','xy5-151'];
 const cardNumber=c=>{const n=String(c.number).toUpperCase(),special=n.match(/^([A-Z]+)(\d+)/);return special?1000+Number(special[2]):Number.parseInt(n,10);};
 function filteredCards(){
- let list=scopedCards().filter(c=>(state.view!=='watch'||matchingWatch(c.id))&&(state.category==='all'||state.category==='chase'&&c.chase||(state.category==='Pokémon EX'?c.name.endsWith('EX'):c.category===state.category))&&(!state.query||(c.name+' '+c.numberLabel+' '+c.setName+' '+c.setId).toLowerCase().includes(state.query)));
+ let list=scopedCards().filter(c=>(state.view!=='watch'||matchingWatch(c.id))&&(state.category==='all'||state.category==='chase'&&c.chase||(state.category==='Pokémon EX'?c.name.endsWith('EX'):c.category===state.category))&&(!state.query||(c.name+' '+(c.nameJa||'')+' '+c.numberLabel+' '+c.setName+' '+c.setId+(c.japanese?' japanese jp':'')).toLowerCase().includes(state.query)));
  const analyses=new Map(),get=c=>{if(!analyses.has(c.id))analyses.set(c.id,analyze(state.markets[c.id],state.grade));return analyses.get(c.id);};
  const f=state.filters;
  if(f.min!=null||f.max!=null)list=list.filter(c=>{const p=get(c).current;return p!=null&&(f.min==null||p>=f.min)&&(f.max==null||p<=f.max);});
@@ -85,7 +87,7 @@ function renderList(){
  if(!list.length){$('#card-list').innerHTML=`<div class="empty-state"><strong>${state.view==='watch'&&!state.watch.length?'Your next pickup starts here.':'No cards match.'}</strong><p>${state.view==='watch'&&!state.watch.length?'Tap the star beside a card to save it with its grade and buy target.':(state.filters.invest>0&&!state.scores?(state.scoreError?scoreProblem()+' Clear the score filter to see cards without it.':'Investment scores are still loading.'):'Try another grade, search, category, or loosen the filters.')}</p><button class="button primary" id="clear-filters">${state.view==='watch'?'Browse cards':'Clear filters'}</button></div>`;$('#clear-filters').onclick=()=>{state.view=state.view==='watch'&&!state.watch.length?'browse':state.view;state.category='all';state.query='';$('#search').value='';resetFilters(false);updateView();};return;}
  $('#card-list').innerHTML=list.slice(0,state.limit).map(c=>{
   const a=analyze(state.markets[c.id],state.grade),w=matchingWatch(c.id),target=w?.target??a.target,own=owned(c.id).length;
-  return `<div class="card-row ${c.id===state.selected?'selected':''}" data-id="${c.id}"><button class="card-open" data-open="${c.id}" aria-label="View ${esc(c.name)} number ${c.number}" ${c.id===state.selected?'aria-current="true"':''}><img class="card-thumb" src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><span class="card-name">${esc(c.name)}${own?'<span class="owned-dot" title="In your Dex">●</span>':''}</span><span class="card-sub">#${c.numberLabel} · ${esc(c.category)}<span class="row-set">${esc(c.setName)}</span></span></span></button><div class="price-cell">${money(a.current)}<small>${a.priceSource==='sales'?'Sold median':a.current?'Source guide':'Awaiting source'}</small></div><div class="target-cell ${target==null?'missing':''}">${target==null?'Needs sales':money(target)}${w?.target!=null?'<small class="card-sub">Your target</small>':''}</div><div class="score-cell"><span class="score-pill ${ratingClass(scoreOf(c.id))}" title="${scoreOf(c.id)==null?'No investment score: not enough recent matching sales':'Investment score '+scoreOf(c.id)+' / 100 · '+ratingOf(scoreOf(c.id))}">${scoreOf(c.id)??'—'}</span></div><button class="star-button ${w?'saved':''}" data-watch="${c.id}" aria-label="${w?'Remove':'Add'} ${esc(c.name)} ${gradeNames[state.grade]} ${w?'from':'to'} watchlist" aria-pressed="${!!w}">${w?icon('star-fill'):icon('star')}</button></div>`;
+  return `<div class="card-row ${c.id===state.selected?'selected':''}" data-id="${c.id}"><button class="card-open" data-open="${c.id}" aria-label="View ${esc(c.name)} number ${c.number}" ${c.id===state.selected?'aria-current="true"':''}><img class="card-thumb" src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><span class="card-name">${esc(c.name)}${c.japanese?'<span class="lang-tag" title="Japanese card">JP</span>':''}${own?'<span class="owned-dot" title="In your Dex">●</span>':''}</span><span class="card-sub">#${c.numberLabel} · ${esc(c.category)}<span class="row-set">${esc(c.setName)}</span></span></span></button><div class="price-cell">${money(a.current)}<small>${a.priceSource==='sales'?'Sold median':a.current?'Source guide':c.japanese?'JP prices soon':'Awaiting source'}</small></div><div class="target-cell ${target==null?'missing':''}">${target==null?'Needs sales':money(target)}${w?.target!=null?'<small class="card-sub">Your target</small>':''}</div><div class="score-cell"><span class="score-pill ${ratingClass(scoreOf(c.id))}" title="${scoreOf(c.id)==null?'No investment score: not enough recent matching sales':'Investment score '+scoreOf(c.id)+' / 100 · '+ratingOf(scoreOf(c.id))}">${scoreOf(c.id)??'—'}</span></div><button class="star-button ${w?'saved':''}" data-watch="${c.id}" aria-label="${w?'Remove':'Add'} ${esc(c.name)} ${gradeNames[state.grade]} ${w?'from':'to'} watchlist" aria-pressed="${!!w}">${w?icon('star-fill'):icon('star')}</button></div>`;
  }).join('');
  $('#card-list').querySelectorAll('[data-open]').forEach(el=>el.onclick=()=>select(el.dataset.open));
  $('#card-list').querySelectorAll('.card-row').forEach(el=>el.onclick=e=>{if(!e.target.closest('button'))select(el.dataset.id);});
@@ -228,7 +230,7 @@ function scoreBox(c){
 }
 function renderDetail(){
  const c=cardById(state.selected);if(!c){$('#detail').innerHTML='<div class="empty-state"><strong>Select a card</strong><p>Card insights will appear here.</p></div>';return;}
- const sourceSet=state.sets.find(s=>s.id===c.setId);$('#set-market-source').href=sourceSet.marketSource;$('#set-checklist-source').href=sourceSet.checklistSource;
+ const sourceSet=state.sets.find(s=>s.id===c.setId);$('#set-market-source').href=sourceSet.marketSource||sourceSet.checklistSource;$('#set-checklist-source').href=sourceSet.checklistSource;
  const m=state.markets[c.id],a=analyze(m,state.grade),w=matchingWatch(c.id),target=w?.target??a.target,mine=owned(c.id);
  const salesChecked=m?.research?.checkedAt||m?.observedAt;
  const fresh=salesChecked&&Number.isFinite(Date.parse(salesChecked))&&(Date.now()-Date.parse(salesChecked))/86400000<=14;
@@ -251,12 +253,25 @@ function renderDetail(){
  const researchSec=`<div class="detail-section research"><h3>Sales coverage</h3>${c.printing?`<p>English · ${esc(c.printing)}. Sales must match this printing; other variants have separate values.</p>`:''}${c.modern&&!c.sourceVerified?'<p>Exact product source not verified; prices and scores are withheld.</p>':''}<p>${['raw','psa9','psa10'].map(g=>gradeNames[g]+': '+analyze(m,g).comparable.length+' matching sales').join(' · ')}</p>${popLine(m)}<p>${m?.research?.status==='full'?'Read from the full source page'+(m.research.checkedAt?' on '+new Date(m.research.checkedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'')+'. Listings with other graders, wrong numbers or variants are left out. This is a source-page snapshot, not complete eBay sales history.':m?.research?.status==='unavailable'?'The public source could not be retrieved. Saved guides keep their original date.':'Coverage reflects the public sales retrieved, and can be incomplete. Targets use only matching recent sales.'}</p></div>`;
  const scenarioSec=`<div class="detail-section scenarios"><h3>Five-year scenarios <span class="muted">· 2031</span></h3><div class="scenario-grid">${['Bear','Steady','Strong'].map((label,i)=>`<div><span>${label}</span><strong>${forecasts[i]}</strong><small>${['−7%','+5%','+12%'][i]} / year</small></div>`).join('')}</div><p class="sales-note">Illustrative scenarios, using the ${comparison} comparable median. Not a backtested forecast.</p></div>`;
  const footer=`<button class="mobile-expand" id="expand-details">${state.expanded?'Show fewer details':'See sales & five-year scenarios'}</button><div class="source-line"><span>${(referenceSource?.observedAt||m?.observedAt)?'Checked '+new Date(referenceSource?.observedAt||m.observedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'Price data not yet loaded'}</span><a href="${esc(referenceSource?.url||m?.sourceUrl||c.source)}" target="_blank" rel="noopener noreferrer">${referenceSource?.name?esc(referenceSource.name)+' · ':m?.source?esc(m.source)+' · ':''}View source</a></div>`;
- el.innerHTML=f?focusBar(c)+`<div class="focus-body"><div class="focus-hero">${top}<div class="focus-key">${buy}${metrics}${actions}</div></div><div class="focus-grid"><div class="focus-col">${scoreHtml}${limitSec}${researchSec}${scenarioSec}</div><div class="focus-col wide">${chartSec}${historySec}${salesSec}</div></div>${footer}</div>`
-  :top+buy+metrics+scoreHtml+chartSec+actions+limitSec+salesSec+historySec+researchSec+scenarioSec+footer;
+ // Language versions: an English card lists its Japanese printings; a Japanese card links to its English counterpart.
+ const goto=(id,label)=>{const t=cardById(id);return t?`<button class="lang-link" data-goto="${t.id}"><img src="${t.image}"${t.imageAlt?` data-alt="${t.imageAlt}"`:''} alt="" loading="lazy"><span><strong>${esc(t.name)}${t.japanese?'<span class="lang-tag">JP</span>':''}</strong><small>${esc(t.setName)} · #${esc(t.numberLabel)}${label?' · '+esc(label):''}</small></span></button>`:'';};
+ const langSec=c.japanese?`<div class="detail-section lang-versions"><h3>English version</h3>${c.englishId?goto(c.englishId,'')+`<p class="sales-note">Same artwork and card${/stats/.test(c.englishLink||'')?' (matched on attacks and HP; the Japanese record has no illustrator)':''}. Prices are kept separately: Japanese and English copies sell at different prices.</p>`:`<p class="sales-note">${c.englishCandidates?'Several English cards share this artwork, so none is linked rather than guessing.':'No English printing of this exact card was found. It may be Japan-only.'}</p>`}</div>`
+  :c.japaneseIds?.length?`<div class="detail-section lang-versions"><h3>Japanese version${c.japaneseIds.length>1?'s':''}</h3>${c.japaneseIds.map(id=>goto(id,'')).join('')}<p class="sales-note">Same artwork, printed in Japan. Prices are tracked separately.</p></div>`:'';
+ if(c.japanese){
+  const jaTop=top.replace(`<h2>${esc(c.name)}</h2>`,`<h2>${esc(c.name)}</h2>${c.nameIsJapanese?'':`<p class="name-ja" lang="ja">${esc(c.nameJa)}</p>`}`).replace(`<span class="type-pill">${esc(c.type)}</span>`,`<span class="type-pill lang-pill">Japanese</span><span class="type-pill">${esc(c.rarity)}</span>`);
+  const pending=`<div class="buy-box insufficient jp-pending"><div class="eyebrow">JAPANESE PRICES</div><div class="buy-amount"><strong>Coming soon</strong></div><p>${esc('Japanese prices, sales history and investment scores are being added. Until this card’s exact price-guide product is verified, no price is shown rather than borrowing the English card’s value.')}</p></div>`;
+  const jaActions=actions.replace(/<button class="button" id="refresh-card"[\s\S]*?<\/button>/,'');
+  const jaSource=`<div class="detail-section research"><h3>Card data</h3><p>Japanese checklist${c.illustrator?' · illustrated by '+esc(c.illustrator):''}.${c.nameIsJapanese?' No English name is recorded for this card yet.':''}</p><p class="sales-note">Listing alerts, movers, investments and scores include Japanese cards once their prices are loaded.</p></div>`;
+  const jaFooter=`<div class="source-line"><span>Japanese checklist</span><a href="${esc(sourceSet.checklistSource)}" target="_blank" rel="noopener noreferrer">TCGdex · View source</a></div>`;
+  el.innerHTML=f?focusBar(c)+`<div class="focus-body"><div class="focus-hero">${jaTop}<div class="focus-key">${pending}${jaActions}</div></div><div class="focus-grid"><div class="focus-col">${limitSec}${jaSource}</div><div class="focus-col wide">${langSec}</div></div>${jaFooter}</div>`
+   :jaTop+pending+jaActions+langSec+limitSec+jaSource+jaFooter;
+ }else el.innerHTML=f?focusBar(c)+`<div class="focus-body"><div class="focus-hero">${top}<div class="focus-key">${buy}${metrics}${actions}</div></div><div class="focus-grid"><div class="focus-col">${scoreHtml}${langSec}${limitSec}${researchSec}${scenarioSec}</div><div class="focus-col wide">${chartSec}${historySec}${salesSec}</div></div>${footer}</div>`
+  :top+buy+metrics+scoreHtml+chartSec+actions+langSec+limitSec+salesSec+historySec+researchSec+scenarioSec+footer;
  $('#detail-watch').onclick=()=>toggleWatch(c.id,$('#detail-watch'));
  $('#detail-dex').onclick=()=>openDexDialog({card_id:c.id,grade:state.grade});
- $('#refresh-card').onclick=()=>refreshCard(c);
- $('#expand-details').onclick=()=>{state.expanded=!state.expanded;renderDetail();};
+ if($('#refresh-card'))$('#refresh-card').onclick=()=>refreshCard(c);
+ if($('#expand-details'))$('#expand-details').onclick=()=>{state.expanded=!state.expanded;renderDetail();};
+ $('#detail').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>goToCard(b.dataset.goto));
  if($('#detail-focus'))$('#detail-focus').onclick=()=>setFocus(true);
  if(f)wireFocusBar();
  if($('#score-method'))$('#score-method').onclick=()=>$('#method-dialog').showModal();
@@ -296,7 +311,7 @@ async function refreshCard(c){const b=$('#refresh-card');b.disabled=true;b.textC
 let refreshRun;
 // Fetch the newest sold prices for one or more scopes ('all', 'era:XY' or a set id), a few cards at a time.
 // What is fetched is saved as it goes, so cancelling keeps the progress.
-const scopeSize=sc=>state.cards.filter(c=>c.eligible&&(sc==='all'||(sc.startsWith('era:')?c.series===sc.slice(4):c.setId===sc))).length;
+const scopeSize=sc=>state.cards.filter(c=>c.eligible&&c.source&&(sc==='all'||(sc.startsWith('era:')?c.series===sc.slice(4):c.setId===sc))).length;
 const updateLabel=()=>'Update sales · '+state.cards.filter(c=>c.eligible&&state.marketSeries.includes(c.series)).length.toLocaleString()+' cards';
 function setRefreshLabels(text){
  const busy=!!text,b=$('#refresh-set');
@@ -510,6 +525,12 @@ async function loadMovers(period,force=false){
  try{const r=await request('/api/movers?period='+period+'&series='+encodeURIComponent(marketSeriesKey()));r._at=Date.now();state.movers.data[key]=r;state.movers.error=null;}catch(e){if(!have)state.movers.error=e.message;}
  if(state.view==='movers')renderMovers();
 }
+// Jump to another card (e.g. the Japanese printing), keeping the grade; widens the scope only when needed.
+function goToCard(id){
+ const c=cardById(id);if(!c)return;
+ if(!filteredCards().some(x=>x.id===id)){const lang=langOf(c);if(!state.langs.includes(lang))state.langs=[...state.langs,lang];if(state.setId!=='all'){state.setId='all';state.eras=state.series.map(x=>x.id);}state.category='all';state.query='';$('#search').value='';state.filters={min:null,max:null,activity:0,invest:0};updateView();}
+ select(id);
+}
 function openCard(id,grade){
  const c=cardById(id);if(!c)return;
  state.view='browse';state.setId=c.setId;state.category='all';state.grade=grade;$('#grade').value=grade;state.query='';$('#search').value='';resetFilters(false);
@@ -586,7 +607,7 @@ function renderSettings(){
 const PRESETS={strong:{invest:80},good:{invest:65},liquid:{activity:60},under100:{max:100,min:null},mid:{min:100,max:500},high:{min:500,max:null}};
 function resetFilters(scope=true){
  state.filters={min:null,max:null,activity:0,invest:0};
- if(scope){state.eras=state.series.map(x=>x.id);if(state.setId==='all'||state.setId.startsWith('era:'))state.setId='all';}
+ if(scope){state.eras=state.series.map(x=>x.id);state.langs=LANGS.map(l=>l.id);if(state.setId==='all'||state.setId.startsWith('era:'))state.setId='all';}
  syncScreener();
 }
 function syncScreener(){
@@ -597,10 +618,18 @@ function syncScreener(){
  $('#price-grade').textContent=gradeNames[state.grade].replace(' · near mint',' NM');
  $('#era-chips').innerHTML=state.series.map(x=>`<button data-era="${x.id}" class="${eras.includes(x.id)?'active':''}" aria-pressed="${eras.includes(x.id)}" title="${esc(x.name)} · ${esc(x.years)}">${marketSeriesLabel(x.id)}</button>`).join('');
  $('#era-chips').querySelectorAll('[data-era]').forEach(b=>b.onclick=()=>toggleEra(b.dataset.era));
+ if($('#lang-chips')){$('#lang-chips').innerHTML=LANGS.map(l=>`<button data-lang="${l.id}" class="${state.langs.includes(l.id)?'active':''}" aria-pressed="${state.langs.includes(l.id)}">${l.label}</button>`).join('');$('#lang-chips').querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>toggleLang(b.dataset.lang));}
  const n=filterCount();$('#filter-count').textContent=n;$('#filter-count').hidden=!n;
  $('#reset-filters').disabled=!n&&state.setId==='all';
  $('#filters-toggle').setAttribute('aria-expanded',String(state.filtersOpen));$('#screener').classList.toggle('open',state.filtersOpen);
  document.querySelectorAll('[data-preset]').forEach(b=>{const p=PRESETS[b.dataset.preset],on=Object.entries(p).every(([k,v])=>f[k]===v);b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
+}
+function toggleLang(id){
+ const on=state.langs.includes(id);
+ if(on&&state.langs.length===1){toast('Keep at least one language included.');return;}
+ state.langs=LANGS.map(l=>l.id).filter(x=>x===id?!on:state.langs.includes(x));
+ if(!state.setId.startsWith('era:')&&state.setId!=='all'&&!state.langs.includes(langOf({lang:activeSet()?.lang})))state.setId='all';
+ updateView();
 }
 function toggleEra(id){
  const current=activeEras(),on=current.includes(id);
@@ -614,11 +643,12 @@ function applyFilters(){state.limit=60;$('#card-list').scrollTop=0;syncScreener(
 function renderFilterChips(){
  const f=state.filters,chips=[];
  if(state.setId==='all'&&state.eras.length&&state.eras.length<state.series.length)chips.push(['eras','Eras: '+state.eras.map(marketSeriesLabel).join(', ')]);
+ if(state.langs.length<LANGS.length)chips.push(['langs',state.langs.map(l=>LANGS.find(x=>x.id===l).label).join(', ')+' only']);
  if(f.min!=null||f.max!=null)chips.push(['price',(f.min!=null&&f.max!=null?wholeMoney(f.min)+'–'+wholeMoney(f.max):f.min!=null?wholeMoney(f.min)+'+':'Up to '+wholeMoney(f.max))+' · '+gradeNames[state.grade].replace(' · near mint',' NM')]);
  if(f.activity>0)chips.push(['activity','Activity '+f.activity+'+']);
  if(f.invest>0)chips.push(['invest','Inv. score '+f.invest+'+']);
  const box=$('#active-filters');box.innerHTML=chips.map(([k,l])=>`<button class="chip" data-unfilter="${k}" aria-label="Remove filter: ${esc(l)}">${esc(l)}<span aria-hidden="true">×</span></button>`).join('');
- box.querySelectorAll('[data-unfilter]').forEach(b=>b.onclick=()=>{const k=b.dataset.unfilter;if(k==='eras'){state.eras=state.series.map(x=>x.id);updateView();return;}if(k==='price'){f.min=null;f.max=null;}else f[k]=0;applyFilters();});
+ box.querySelectorAll('[data-unfilter]').forEach(b=>b.onclick=()=>{const k=b.dataset.unfilter;if(k==='eras'){state.eras=state.series.map(x=>x.id);updateView();return;}if(k==='langs'){state.langs=LANGS.map(l=>l.id);updateView();return;}if(k==='price'){f.min=null;f.max=null;}else f[k]=0;applyFilters();});
 }
 function readPrice(el){const v=el.value.trim();if(v==='')return null;const n=Number(v);return Number.isFinite(n)&&n>=0?n:null;}
 let priceTimer;
@@ -696,7 +726,9 @@ function updateView(){
 }
 function setOptions(){
  const opt=s=>`<option value="${s.id}">${esc(s.name)} · ${s.total} cards</option>`;
- return `<option value="all">All sets in selected eras</option>`+state.series.map(e=>`<option value="era:${e.id}">All ${esc(e.name)} sets</option>`).join('')+state.series.map(e=>`<optgroup label="${esc(e.label)}">${state.sets.filter(s=>s.series===e.id).map(opt).join('')}</optgroup>`).join('');
+ const en=s=>s.lang!=='ja',ja=s=>s.lang==='ja';
+ return `<option value="all">All sets in selected eras</option>`+state.series.map(e=>`<option value="era:${e.id}">All ${esc(e.name)} sets</option>`).join('')+state.series.map(e=>`<optgroup label="${esc(e.label)}">${state.sets.filter(s=>s.series===e.id&&en(s)).map(opt).join('')}</optgroup>`).join('')
+  +state.series.map(e=>{const list=state.sets.filter(s=>s.series===e.id&&ja(s));return list.length?`<optgroup label="Japanese · ${esc(e.label)}">${list.map(opt).join('')}</optgroup>`:'';}).join('');
 }
 $('#search').oninput=e=>{state.query=e.target.value.toLowerCase().trim();state.limit=60;$('#card-list').scrollTop=0;renderList();};
 $('#grade').onchange=e=>{state.grade=e.target.value;updateView();};

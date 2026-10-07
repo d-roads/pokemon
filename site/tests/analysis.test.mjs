@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {analyze,median,trendProjection} from '../lib/analysis.mjs';
-import {cards,sets} from '../data/catalog.mjs';
+import {cards as allCards,sets as allSets} from '../data/catalog.mjs';
+// These checks describe the English catalogs; Japanese cards have their own tests (japanese.test.mjs).
+const cards=allCards.filter(c=>!c.japanese),sets=allSets.filter(s=>s.lang!=='ja');
 import {captureCount,snapshots} from '../data/market.mjs';
 const now=Date.parse('2026-10-01T00:00:00Z');
 test('All EX through Sun & Moon catalogs are complete and uniquely keyed',()=>{assert.equal(cards.filter(c=>!['SWSH','SV','ME'].includes(c.series)).length,11315);assert.equal(sets.filter(s=>!['SWSH','SV','ME'].includes(s.series)).length,93);assert.equal(cards.filter(c=>c.series==='EX').length,1722);assert.equal(cards.filter(c=>c.series==='DP').length,1881);assert.equal(cards.filter(c=>c.series==='XY').length,1865);assert.equal(cards.filter(c=>c.series==='BW').length,1336);assert.equal(cards.filter(c=>c.series==='SM').length,2722);assert.equal(new Set(cards.map(c=>c.id)).size,cards.length);for(const set of sets){const subset=cards.filter(c=>c.setId===set.id);assert.equal(subset.length,set.total,set.name);for(let n=1;n<=set.printedTotal&&!['SWSH','SV','ME'].includes(set.series);n++)assert.ok(subset.some(c=>c.number===n),set.name+' #'+n);}assert.equal(cards.find(c=>c.id==='ex8-107').name,'Rayquaza ★');assert.equal(cards.find(c=>c.id==='dp7-103').name,'Charizard');assert.equal(cards.find(c=>c.id==='hgss1-113').name,'Lugia LEGEND');assert.equal(cards.find(c=>c.id==='xy5-151').name,'Primal Groudon EX');assert.equal(cards.find(c=>c.id==='dc1-15').name,"Team Magma's Groudon EX");});

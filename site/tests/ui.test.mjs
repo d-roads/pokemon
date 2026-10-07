@@ -49,7 +49,7 @@ test('Tunnel redirects and non-JSON failures are explained instead of becoming e
 
 test('Wizards era and vintage card coverage render in Browse',async()=>{
  const ui=workspace();await ui.run('init()');assert.match(ui.e('#set-select').innerHTML,/Wizards of the Coast/);assert.match(ui.e('#set-select').innerHTML,/Aquapolis/);
- ui.e('#set-select').onchange({target:{value:'era:WOTC'}});assert.equal(ui.run('filteredCards().length'),741);assert.match(ui.e('#page-title').textContent,/Wizards of the Coast/);
+ ui.e('#set-select').onchange({target:{value:'era:WOTC'}});assert.equal(ui.run('filteredCards().filter(c=>!c.japanese).length'),741);assert.match(ui.e('#page-title').textContent,/Wizards of the Coast/);
  ui.run("state.selected='base1-4';state.grade='psa9';renderDetail()");const detail=ui.e('#detail').innerHTML;assert.match(detail,/Standard \/ unlimited/);assert.match(detail,/not complete eBay sales history/);
 });
 test('Set picker, all-set search, and Radiant Collection render correct cards',async()=>{
@@ -62,11 +62,13 @@ test('Set picker, all-set search, and Radiant Collection render correct cards',a
  ui.e('#grade').onchange({target:{value:'raw'}});ui.e('#search').oninput({target:{value:'RC30'}});assert.match(ui.e('#card-list').innerHTML,/Gardevoir/);assert.match(ui.e('#card-list').innerHTML,/RC30\/RC32/);assert.doesNotMatch(ui.e('#card-list').innerHTML,/\/160/);
  ui.e('#set-select').onchange({target:{value:'all'}});ui.run("state.category='all';updateView();");ui.e('#search').oninput({target:{value:'Flashfire'}});
  assert.equal(ui.run('filteredCards().length'),46);assert.match(ui.e('#set-count').innerHTML,new RegExp(String(cards.filter(c=>c.eligible).length)));
- ui.e('#search').oninput({target:{value:''}});ui.e('#set-select').onchange({target:{value:'era:EX'}});assert.match(ui.e('#set-count').innerHTML,/687/);assert.equal(ui.e('#page-title').textContent,'Explore the EX era');
+ ui.e('#search').oninput({target:{value:''}});ui.e('#set-select').onchange({target:{value:'era:EX'}});assert.match(ui.e('#set-count').innerHTML,new RegExp('^'+cards.filter(c=>c.eligible&&c.series==='EX').length+' '));assert.equal(ui.e('#page-title').textContent,'Explore the EX era');
+ // English only: the original 687 EX-era rares.
+ ui.run("toggleLang('ja')");assert.match(ui.e('#set-count').innerHTML,/^687 /);ui.run("toggleLang('ja')");
  ui.e('#set-select').onchange({target:{value:'col1'}});ui.e('#search').oninput({target:{value:'SL10'}});assert.match(ui.e('#card-list').innerHTML,/Rayquaza/);assert.match(ui.e('#card-list').innerHTML,/#SL10 · Shiny rare/);
  ui.e('#search').oninput({target:{value:''}});ui.e('#set-select').onchange({target:{value:'era:BW'}});assert.match(ui.e('#set-count').innerHTML,/553/);assert.equal(ui.e('#page-title').textContent,'Explore the Black & White era');
  ui.e('#set-select').onchange({target:{value:'bw11'}});ui.e('#search').oninput({target:{value:'RC24'}});assert.match(ui.e('#card-list').innerHTML,/Mew EX/);assert.match(ui.e('#card-list').innerHTML,/RC24\/RC25/);
- ui.e('#set-select').onchange({target:{value:'era:SM'}});assert.match(ui.e('#set-count').innerHTML,/1380/);assert.equal(ui.e('#page-title').textContent,'Explore the Sun & Moon era');
+ ui.e('#set-select').onchange({target:{value:'era:SM'}});assert.match(ui.e('#set-count').innerHTML,new RegExp('^'+cards.filter(c=>c.eligible&&c.series==='SM').length+' '));assert.equal(ui.run("filteredCards().filter(c=>!c.japanese).length")+0>0,true);ui.run("toggleLang('ja')");assert.match(ui.e('#set-count').innerHTML,/^1380 /);ui.run("toggleLang('ja')");assert.equal(ui.e('#page-title').textContent,'Explore the Sun & Moon era');
  ui.e('#set-select').onchange({target:{value:'sm115'}});ui.e('#search').oninput({target:{value:'SV49'}});assert.match(ui.e('#card-list').innerHTML,/Charizard GX/);assert.match(ui.e('#card-list').innerHTML,/SV49\/SV94/);
  ui.e('#set-select').onchange({target:{value:'dc1'}});ui.e('#search').oninput({target:{value:'Groudon'}});assert.match(ui.e('#card-list').innerHTML,/Team Magma/);assert.match(ui.e('#card-list').innerHTML,/15\/34/);
 });
@@ -261,4 +263,23 @@ test('Research rank panel: shadow label, evidence, price check and withheld fore
  ui.e('#ask-price').value='5000';ui.e('#ask-price').oninput();assert.match(ui.e('#cost-out').innerHTML,/At \$5,000\.00 asking/);assert.match(ui.e('#cost-out').innerHTML,/class="down"/);
  // Legacy mode (rollback) hides the panel entirely.
  ui.run("state.research={mode:'legacy'};renderDetail()");assert.doesNotMatch(ui.e('#detail').innerHTML,/Research rank/);
+});
+test('Japanese cards: language filter, set picker groups, card panel and links to the English card',async()=>{
+ const ui=workspace();await ui.run('init()');
+ const all=ui.run('filteredCards().length'),jp=ui.run('filteredCards().filter(c=>c.japanese).length');
+ assert.ok(jp>5000,'Japanese cards are in the default all-cards view');
+ assert.match(ui.e('#set-select').innerHTML,/Japanese · Scarlet &amp; Violet|Japanese · Scarlet & Violet/);
+ ui.run("toggleLang('ja')");assert.equal(ui.run('filteredCards().length'),all-jp);assert.match(ui.e('#active-filters').innerHTML,/English only/);
+ ui.run("toggleLang('en')");assert.equal(ui.run('state.langs.length'),1,'the last language cannot be removed');
+ ui.run("toggleLang('ja')");assert.equal(ui.run('filteredCards().length'),all);
+ // Search matches Japanese names too.
+ ui.e('#search').oninput({target:{value:'リザードンex'}});assert.match(ui.e('#card-list').innerHTML,/JP<\/span>/);ui.e('#search').oninput({target:{value:''}});
+ // Japanese card panel: no price, link to the English card, no refresh button.
+ ui.run("state.selected='ja-sv2a-201';renderDetail()");let html=ui.e('#detail').innerHTML;
+ assert.match(html,/JAPANESE PRICES/);assert.match(html,/English version/);assert.match(html,/data-goto="sv3pt5-199"/);assert.match(html,/リザードンex/);assert.match(html,/Special Art Rare \(SAR\)/);
+ assert.doesNotMatch(html,/id="refresh-card"/);assert.doesNotMatch(html,/SUGGESTED MAXIMUM PRICE/);
+ ui.run("setFocus(true)");assert.match(ui.e('#detail').innerHTML,/JAPANESE PRICES/);ui.run("setFocus(false)");
+ // English card panel lists its Japanese printing; following the link widens an English-only view.
+ ui.run("state.selected='sv3pt5-199';renderDetail()");html=ui.e('#detail').innerHTML;assert.match(html,/Japanese version/);assert.match(html,/data-goto="ja-sv2a-201"/);
+ ui.run("toggleLang('ja')");ui.run("goToCard('ja-sv2a-201')");assert.equal(ui.run('state.selected'),'ja-sv2a-201');assert.ok(ui.run("state.langs.includes('ja')"));
 });

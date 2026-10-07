@@ -139,6 +139,8 @@ export async function runScan({db,user,cards,marketFor,settings,fetchImpl=fetch,
   const token=await ebayToken(s,fetchImpl,now);
   for(const w of watch.slice(0,60)){
    const card=byId.get(w.card_id);if(!card){skipped.push({card_id:w.card_id,grade:w.grade,reason:'Not in catalog'});continue;}
+   // Listing matching rejects Japanese titles for English cards; Japanese cards need their own rules (task 2).
+   if(card.japanese){skipped.push({card_id:w.card_id,grade:w.grade,reason:'Listing alerts for Japanese cards are not available yet.'});continue;}
    const market=marketFor(card.id),limit=alertLimit(w,market,s,now);
    if(!limit){skipped.push({card_id:w.card_id,grade:w.grade,reason:'No buy limit yet. Set one on the card to get alerts.'});continue;}
    const items=await searchListings(card,w.grade,limit.limit,s,{fetchImpl,token});checked++;

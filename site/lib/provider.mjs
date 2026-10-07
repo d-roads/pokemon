@@ -41,6 +41,7 @@ export function parsePage(html){
 }
 
 export function parseMarket(html,card,now=new Date().toISOString()){
+ if(card.japanese&&!card.sourceVerified)throw new Error('Japanese prices are not loaded yet. They arrive once each Japanese card is matched to its exact price-guide product.');
  if((card.vintage||card.modern)&&!card.sourceVerified)throw new Error('An exact source match is required before this card can be priced.');
  const page=parsePage(html);
  if((card.vintage||card.modern)&&!matchesCard(page.name,card))throw new Error('The source page does not match this card and printing.');
@@ -56,6 +57,7 @@ export function parseSet(html,cards){
   const name=htmlText(title),n=name.match(/#([A-Z]*\d+[a-z]?)(?![a-z0-9])/i)?.[1]?.toUpperCase();if(!n||name.includes('['))continue;
   const normalize=n=>String(n).toUpperCase().replace(/^([A-Z]*)0+(?=\d)/,'$1');
   const card=cards.find(c=>normalize(c.number)===normalize(n));if(!card)continue;
+  if(card.japanese&&!card.sourceVerified)continue;
   if((card.vintage||card.modern)&&(!card.sourceVerified||!matchesCard(name+' '+card.setName,card)))continue;
   const values=[...row.matchAll(/<td\b[^>]*class=["'][^"']*\bprice\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/gi)].map(x=>dollars(x[1]));
   if(values.length<3||!values[0])continue;

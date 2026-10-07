@@ -995,3 +995,13 @@ html.intro-pending .brand-mark,html.intro-playing .brand-mark{visibility:hidden}
 .build-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 7px;border:1px solid var(--line);border-radius:999px;font:600 10.5px/1.4 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.02em;color:var(--muted);white-space:nowrap;align-self:center}
 .build-badge.beta{color:var(--accent-text);background:var(--accent-soft);border-color:var(--accent-line)}
 .build-badge.local-test{color:var(--warn);background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+
+/* Japanese cards */
+.lang-tag{display:inline-block;margin-left:6px;padding:0 5px;border:1px solid var(--line);border-radius:4px;font:700 10px/1.5 'JetBrains Mono',ui-monospace,monospace;color:var(--info);background:var(--info-soft);vertical-align:1px;letter-spacing:.03em}
+.lang-pill{color:var(--info);background:var(--info-soft)}
+.name-ja{margin:-2px 0 6px;color:var(--muted);font-size:14px}
+.lang-versions .lang-link{display:flex;align-items:center;gap:10px;width:100%;margin:6px 0;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink);text-align:left;cursor:pointer;font:inherit}
+.lang-versions .lang-link:hover{border-color:var(--accent-line);background:var(--accent-soft)}
+.lang-versions .lang-link img{width:34px;height:47px;object-fit:cover;border-radius:3px;flex:none}
+.lang-versions .lang-link small{display:block;color:var(--muted);font-size:12px}
+.jp-pending .buy-amount strong{font-size:22px}

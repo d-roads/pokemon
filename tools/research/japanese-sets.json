@@ -1,0 +1,1602 @@
+{
+ "note": "Japanese sets covered by FutureSight. English names follow PriceCharting where its console list (fetched Oct 6, 2026, partial) shows them; pricechartingListed=false means the console slug is a best guess that Task 2 must confirm before capture. Card lists come from TCGdex (MIT).",
+ "sets": [
+  {
+   "tcgdex": "PMCG1",
+   "name": "Expansion Pack",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-expansion-pack",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "PMCG2",
+   "name": "Jungle",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-jungle",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "PMCG3",
+   "name": "Mystery of the Fossils",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-mystery-of-the-fossils",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "PMCG4",
+   "name": "Rocket Gang",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-rocket-gang",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "PMCG5",
+   "name": "Leaders' Stadium",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-leaders%27-stadium",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "PMCG6",
+   "name": "Challenge from the Darkness",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-challenge-from-the-darkness",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "neo1",
+   "name": "Gold, Silver, New World",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-gold-silver-new-world",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "neo2",
+   "name": "Crossing the Ruins",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-crossing-the-ruins",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "neo3",
+   "name": "Awakening Legends",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-awakening-legends",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "neo4",
+   "name": "Darkness, and to Light",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-darkness-and-to-light",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "VS1",
+   "name": "VS",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-vs",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "web1",
+   "name": "Web",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-web",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "E1",
+   "name": "Expedition Expansion Pack",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-expedition-expansion-pack",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "E2",
+   "name": "The Town on No Map",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-the-town-on-no-map",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "E3",
+   "name": "Wind from the Sea",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-wind-from-the-sea",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "E4",
+   "name": "Split Earth",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-split-earth",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "E5",
+   "name": "Mysterious Mountains",
+   "era": "WOTC",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-mysterious-mountains",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "ADV1",
+   "name": "ADV Expansion Pack",
+   "era": "EX",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-adv-expansion-pack",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "ADV2",
+   "name": "Miracle of the Desert",
+   "era": "EX",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-miracle-of-the-desert",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "ADV3",
+   "name": "Rulers of the Heavens",
+   "era": "EX",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-rulers-of-the-heavens",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "ADV4",
+   "name": "Magma VS Aqua: Two Ambitions",
+   "era": "EX",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-magma-vs-aqua-two-ambitions",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "ADV5",
+   "name": "Undone Seal",
+   "era": "EX",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-undone-seal",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "PCG1",
+   "name": "Flight of Legends",
+   "era": "EX",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-flight-of-legends",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "PCG2",
+   "name": "Clash of the Blue Sky",
+   "era": "EX",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-clash-of-the-blue-sky",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "PCG3",
+   "name": "Rocket Gang Strikes Back",
+   "era": "EX",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-rocket-gang-strikes-back",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "PCG4",
+   "name": "Golden Sky, Silvery Ocean",
+   "era": "EX",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-golden-sky-silvery-ocean",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "PCG5",
+   "name": "Mirage Forest",
+   "era": "EX",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-mirage-forest",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "PCG6",
+   "name": "Holon Research",
+   "era": "EX",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-holon-research",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "PCG7",
+   "name": "Holon Phantom",
+   "era": "EX",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-holon-phantom",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "PCG8",
+   "name": "Miracle Crystal",
+   "era": "EX",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-miracle-crystal",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "PCG9",
+   "name": "Offense and Defense of the Furthest Ends",
+   "era": "EX",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-offense-and-defense-of-the-furthest-ends",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "PCG10",
+   "name": "World Champions Pack",
+   "era": "EX",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-world-champions-pack",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "DP1a",
+   "name": "Space-Time Creation: Diamond Collection",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-space-time-creation-diamond-collection",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "DP1b",
+   "name": "Space-Time Creation: Pearl Collection",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-space-time-creation-pearl-collection",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "DP2",
+   "name": "Secret of the Lakes",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-secret-of-the-lakes",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "DP3",
+   "name": "Shining Darkness",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-shining-darkness",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "DP4a",
+   "name": "Moonlit Pursuit",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-moonlit-pursuit",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "DP4b",
+   "name": "Dawn Dash",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-dawn-dash",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "DP5a",
+   "name": "Cry from the Mysterious",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-cry-from-the-mysterious",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "DP5b",
+   "name": "Temple of Anger",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-temple-of-anger",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "DP6",
+   "name": "Intense Fight in the Destroyed Sky",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-intense-fight-in-the-destroyed-sky",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "Pt1",
+   "name": "Galactic's Conquest",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-galactic%27s-conquest",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "Pt2",
+   "name": "Bonds to the End of Time",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-bonds-to-the-end-of-time",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "Pt3",
+   "name": "Beat of the Frontier",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-beat-of-the-frontier",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "Pt4",
+   "name": "Advent of Arceus",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-advent-of-arceus",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "L1a",
+   "name": "HeartGold Collection",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-heartgold-collection",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "L1b",
+   "name": "SoulSilver Collection",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-soulsilver-collection",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "L2",
+   "name": "Reviving Legends",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-reviving-legends",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "LL",
+   "name": "Lost Link",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-lost-link",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "L3",
+   "name": "Clash at the Summit",
+   "era": "DP",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-clash-at-the-summit",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "BW1a",
+   "name": "Black Collection",
+   "era": "BW",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-black-collection",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "BW1b",
+   "name": "White Collection",
+   "era": "BW",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-white-collection",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "BW2",
+   "name": "Red Collection",
+   "era": "BW",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-red-collection",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "BW3a",
+   "name": "Psycho Drive",
+   "era": "BW",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-psycho-drive",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "BW3b",
+   "name": "Hail Blizzard",
+   "era": "BW",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-hail-blizzard",
+   "pricechartingListed": false,
+   "release": "2011-09-16",
+   "printedTotal": 52
+  },
+  {
+   "tcgdex": "BW4",
+   "name": "Dark Rush",
+   "era": "BW",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-dark-rush",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "DS",
+   "name": "Dragon Selection",
+   "era": "BW",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-dragon-selection",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "BW5a",
+   "name": "Dragon Blast",
+   "era": "BW",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-dragon-blast",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "BW5b",
+   "name": "Dragon Blade",
+   "era": "BW",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-dragon-blade",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "BW6a",
+   "name": "Freeze Bolt",
+   "era": "BW",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-freeze-bolt",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "BW6b",
+   "name": "Cold Flare",
+   "era": "BW",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-cold-flare",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "BW7",
+   "name": "Plasma Gale",
+   "era": "BW",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-plasma-gale",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "BW8a",
+   "name": "Spiral Force",
+   "era": "BW",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-spiral-force",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "BW8b",
+   "name": "Thunder Knuckle",
+   "era": "BW",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-thunder-knuckle",
+   "pricechartingListed": false,
+   "release": "2012-12-14",
+   "printedTotal": 51
+  },
+  {
+   "tcgdex": "SC",
+   "name": "Shiny Collection",
+   "era": "BW",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-shiny-collection",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "BW9",
+   "name": "Megalo Cannon",
+   "era": "BW",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-megalo-cannon",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "EBB",
+   "name": "EX Battle Boost",
+   "era": "BW",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-ex-battle-boost",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "XY1a",
+   "name": "Collection X",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-collection-x",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "XY1b",
+   "name": "Collection Y",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-collection-y",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "XY2",
+   "name": "Wild Blaze",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-wild-blaze",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "XY3",
+   "name": "Rising Fist",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-rising-fist",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "XY4",
+   "name": "Phantom Gate",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-phantom-gate",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "XY5a",
+   "name": "Gaia Volcano",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-gaia-volcano",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "XY5b",
+   "name": "Tidal Storm",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-tidal-storm",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "CP1",
+   "name": "Double Crisis",
+   "era": "XY",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-double-crisis",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "XY6",
+   "name": "Emerald Break",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-emerald-break",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "XY7",
+   "name": "Bandit Ring",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-bandit-ring",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "CP2",
+   "name": "Legendary Shine Collection",
+   "era": "XY",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-legendary-shine-collection",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "XY8a",
+   "name": "Blue Shock",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-blue-shock",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "XY8b",
+   "name": "Red Flash",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-red-flash",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "XY9",
+   "name": "Rage of the Broken Heavens",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-rage-of-the-broken-heavens",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "CP3",
+   "name": "PokeKyun Collection",
+   "era": "XY",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-pokekyun-collection",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "XY10",
+   "name": "Awakening Psychic King",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-awakening-psychic-king",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "CP4",
+   "name": "Premium Champion Pack",
+   "era": "XY",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-premium-champion-pack",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "XY11a",
+   "name": "Explosive Fighter",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-explosive-fighter",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "XY11b",
+   "name": "Cruel Traitor",
+   "era": "XY",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-cruel-traitor",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "CP5",
+   "name": "Dream Shine Collection",
+   "era": "XY",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-dream-shine-collection",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "CP6",
+   "name": "20th Anniversary",
+   "era": "XY",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-20th-anniversary",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "XY",
+   "name": "Best of XY",
+   "era": "XY",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-best-of-xy",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SM0",
+   "name": "Pikachu's New Friends",
+   "era": "SM",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-pikachu%27s-new-friends",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM1M",
+   "name": "Collection Moon",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-collection-moon",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM1S",
+   "name": "Collection Sun",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-collection-sun",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM1p",
+   "name": "Sun & Moon Strengthening Expansion",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-sun-&-moon-strengthening-expansion",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM2K",
+   "name": "Islands Await You",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-islands-await-you",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM2L",
+   "name": "Alolan Moonlight",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-alolan-moonlight",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SM2p",
+   "name": "Beyond a New Challenge",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-beyond-a-new-challenge",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM3H",
+   "name": "To Have Seen the Battle Rainbow",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-to-have-seen-the-battle-rainbow",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM3N",
+   "name": "Darkness that Consumes Light",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-darkness-that-consumes-light",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM3p",
+   "name": "Shining Legends",
+   "era": "SM",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-shining-legends",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SM4A",
+   "name": "Ultradimensional Beasts",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-ultradimensional-beasts",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM4S",
+   "name": "Awakened Heroes",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-awakened-heroes",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM4p",
+   "name": "GX Battle Boost",
+   "era": "SM",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-gx-battle-boost",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SM5M",
+   "name": "Ultra Moon",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-ultra-moon",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM5S",
+   "name": "Ultra Sun",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-ultra-sun",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM5p",
+   "name": "Ultra Force",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-ultra-force",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM6",
+   "name": "Forbidden Light",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-forbidden-light",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM6a",
+   "name": "Dragon Storm",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-dragon-storm",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM6b",
+   "name": "Champion Road",
+   "era": "SM",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-champion-road",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM7",
+   "name": "Charisma of the Wrecked Sky",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-charisma-of-the-wrecked-sky",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM7a",
+   "name": "Thunderclap Spark",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-thunderclap-spark",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM7b",
+   "name": "Fairy Rise",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-fairy-rise",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM8",
+   "name": "Explosive Impact",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-explosive-impact",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM8a",
+   "name": "Dark Order",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-dark-order",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM8b",
+   "name": "GX Ultra Shiny",
+   "era": "SM",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-gx-ultra-shiny",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SM9",
+   "name": "Tag Bolt",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-tag-bolt",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SM9a",
+   "name": "Night Unison",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-night-unison",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM9b",
+   "name": "Full Metal Wall",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-full-metal-wall",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM10",
+   "name": "Double Blaze",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-double-blaze",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SM10a",
+   "name": "GG End",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-gg-end",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM10b",
+   "name": "Sky Legend",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-sky-legend",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SMP2",
+   "name": "Detective Pikachu",
+   "era": "SM",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-detective-pikachu",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SM11",
+   "name": "Miracle Twins",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-miracle-twins",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SM11a",
+   "name": "Remix Bout",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-remix-bout",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SM11b",
+   "name": "Dream League",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-dream-league",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SM12",
+   "name": "Alter Genesis",
+   "era": "SM",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-alter-genesis",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SM12a",
+   "name": "Tag All Stars",
+   "era": "SM",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-tag-all-stars",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S1H",
+   "name": "Shield",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-shield",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S1W",
+   "name": "Sword",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-sword",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S1a",
+   "name": "VMAX Rising",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-vmax-rising",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S2",
+   "name": "Rebellion Crash",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-rebellion-crash",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S2a",
+   "name": "Explosive Walker",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-explosive-walker",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S3",
+   "name": "Infinity Zone",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-infinity-zone",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S3a",
+   "name": "Legendary Heartbeat",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-legendary-heartbeat",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S4",
+   "name": "Amazing Volt Tackle",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-amazing-volt-tackle",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S4a",
+   "name": "Shiny Star V",
+   "era": "SWSH",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-shiny-star-v",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S5I",
+   "name": "Single Strike Master",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-single-strike-master",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S5R",
+   "name": "Rapid Strike Master",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-rapid-strike-master",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S5a",
+   "name": "Matchless Fighters",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-matchless-fighters",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S6H",
+   "name": "Silver Lance",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-silver-lance",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S6K",
+   "name": "Jet-Black Spirit",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-jet-black-spirit",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S6a",
+   "name": "Eevee Heroes",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-eevee-heroes",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S7D",
+   "name": "Skyscraping Perfection",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-skyscraping-perfection",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S7R",
+   "name": "Blue Sky Stream",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-blue-sky-stream",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S8",
+   "name": "Fusion Arts",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-fusion-arts",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S8a",
+   "name": "25th Anniversary Collection",
+   "era": "SWSH",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-25th-anniversary-collection",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S8b",
+   "name": "VMAX Climax",
+   "era": "SWSH",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-vmax-climax",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S9",
+   "name": "Star Birth",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-star-birth",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S9a",
+   "name": "Battle Region",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-battle-region",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S10D",
+   "name": "Time Gazer",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-time-gazer",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S10P",
+   "name": "Space Juggler",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-space-juggler",
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "S10a",
+   "name": "Dark Phantasma",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-dark-phantasma",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S10b",
+   "name": "Go",
+   "era": "SWSH",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-go",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S11",
+   "name": "Lost Abyss",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-lost-abyss",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S11a",
+   "name": "Incandescent Arcana",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-incandescent-arcana",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S12",
+   "name": "Paradigm Trigger",
+   "era": "SWSH",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-paradigm-trigger",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S12a",
+   "name": "VSTAR Universe",
+   "era": "SWSH",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-vstar-universe",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "S-P",
+   "name": "Sword & Shield Promos",
+   "era": "SWSH",
+   "kind": "promo",
+   "pricecharting": "pokemon-japanese-promo",
+   "pricechartingListed": true,
+   "release": "2019-11-29"
+  },
+  {
+   "tcgdex": "SV-P",
+   "name": "Scarlet & Violet Promos",
+   "era": "SV",
+   "kind": "promo",
+   "pricecharting": "pokemon-japanese-promo",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV1S",
+   "name": "Scarlet Ex",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-scarlet-ex",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV1V",
+   "name": "Violet Ex",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-violet-ex",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV1a",
+   "name": "Triplet Beat",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-triplet-beat",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV2D",
+   "name": "Clay Burst",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-clay-burst",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV2P",
+   "name": "Snow Hazard",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-snow-hazard",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV2a",
+   "name": "Scarlet & Violet 151",
+   "era": "SV",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-scarlet-&-violet-151",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV3",
+   "name": "Ruler of the Black Flame",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-ruler-of-the-black-flame",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV3a",
+   "name": "Raging Surf",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-raging-surf",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV4K",
+   "name": "Ancient Roar",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-ancient-roar",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV4M",
+   "name": "Future Flash",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-future-flash",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV4a",
+   "name": "Shiny Treasure ex",
+   "era": "SV",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-shiny-treasure-ex",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV5K",
+   "name": "Wild Force",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-wild-force",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV5M",
+   "name": "Cyber Judge",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-cyber-judge",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV5a",
+   "name": "Crimson Haze",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-crimson-haze",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV6",
+   "name": "Mask of Change",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-mask-of-change",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV6a",
+   "name": "Night Wanderer",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-night-wanderer",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV7",
+   "name": "Stellar Miracle",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-stellar-miracle",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV7a",
+   "name": "Paradise Dragona",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-paradise-dragona",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV8",
+   "name": "Super Electric Breaker",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-super-electric-breaker",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV8a",
+   "name": "Terastal Festival",
+   "era": "SV",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-terastal-festival",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV9",
+   "name": "Battle Partners",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-battle-partners",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV9a",
+   "name": "Heat Wave Arena",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-heat-wave-arena",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV10",
+   "name": "Glory of Team Rocket",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-glory-of-team-rocket",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV11B",
+   "name": "Black Bolt",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-black-bolt",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "SV11W",
+   "name": "White Flare",
+   "era": "SV",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-white-flare",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "WCS23",
+   "name": "World Championships 2023 Yokohama Deck: Pikachu",
+   "era": "SV",
+   "kind": "deck",
+   "pricecharting": null,
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SVK",
+   "name": "Deck Build Box Stellar Miracle",
+   "era": "SV",
+   "kind": "deck",
+   "pricecharting": null,
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SVLN",
+   "name": "Starter Set Stellar Sylveon ex",
+   "era": "SV",
+   "kind": "deck",
+   "pricecharting": null,
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "SVLS",
+   "name": "Starter Set Stellar Ceruledge ex",
+   "era": "SV",
+   "kind": "deck",
+   "pricecharting": null,
+   "pricechartingListed": false
+  },
+  {
+   "tcgdex": "M-P",
+   "name": "Mega Promos",
+   "era": "ME",
+   "kind": "promo",
+   "pricecharting": "pokemon-japanese-promo",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "M1L",
+   "name": "Mega Brave",
+   "era": "ME",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-mega-brave",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "M1S",
+   "name": "Mega Symphonia",
+   "era": "ME",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-mega-symphonia",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "M2",
+   "name": "Inferno X",
+   "era": "ME",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-inferno-x",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "M2a",
+   "name": "Mega Dream ex",
+   "era": "ME",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-mega-dream-ex",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "MC",
+   "name": "Start Deck 100 Battle Collection",
+   "era": "ME",
+   "kind": "deck",
+   "pricecharting": "pokemon-japanese-start-deck-100-battle-collection",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "M3",
+   "name": "Nihil Zero",
+   "era": "ME",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-nihil-zero",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "M4",
+   "name": "Ninja Spinner",
+   "era": "ME",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-ninja-spinner",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "M5",
+   "name": "Abyss Eye",
+   "era": "ME",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-abyss-eye",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "M6",
+   "name": "Storm Emeralda",
+   "era": "ME",
+   "kind": "expansion",
+   "pricecharting": "pokemon-japanese-storm-emeralda",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "M6a",
+   "name": "30th Celebration",
+   "era": "ME",
+   "kind": "special",
+   "pricecharting": "pokemon-japanese-30th-celebration",
+   "pricechartingListed": true
+  },
+  {
+   "tcgdex": "MF",
+   "name": "30th Celebration Premium Deck Set: Espeon & Umbreon",
+   "era": "ME",
+   "kind": "deck",
+   "pricecharting": null,
+   "pricechartingListed": false
+  }
+ ]
+}
