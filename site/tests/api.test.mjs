@@ -78,6 +78,17 @@ test('Alert settings keep secrets server-side and validate notification targets'
  const list=await(await api(req('/api/alerts','GET',null,'alert-user'),env)).json();assert.equal(list.alerts.length,0);assert.equal(list.live,true);
  const scan=await(await api(req('/api/alerts/scan','POST',{},'alert-user'),env)).json();assert.match(scan.error,/unavailable/);
 });
+test('SerpApi can enable live scans without an eBay account and keeps its key server-side',async()=>{
+ const post=b=>api(req('/api/alerts/settings','POST',b,'serp-user'),env);
+ assert.equal((await post({provider:'serpapi',enabled:true})).status,400);
+ const saved=await(await post({provider:'serpapi',serpapi:{apiKey:'private-serp-key'},enabled:true})).json();
+ assert.equal(saved.settings.provider,'serpapi');assert.equal(saved.settings.configured,true);assert.equal(saved.settings.ebay.configured,false);
+ assert.ok(!JSON.stringify(saved).includes('private-serp-key'));
+ const state=await(await api(req('/api/alerts','GET',null,'serp-user'),env)).json();assert.equal(state.live,true);
+ assert.equal((await post({serpapi:{apiKey:''},enabled:true})).status,200);
+ assert.equal((await post({provider:'unknown'})).status,400);
+ const cleared=await(await post({enabled:false,serpapi:{clear:true}})).json();assert.equal(cleared.settings.configured,false);
+});
 test('Movers endpoint returns per-grade lists and rejects unknown periods',async()=>{
  const r=await api(req('/api/movers?period=month'),env);assert.equal(r.status,200);const d=await r.json();
  assert.deepEqual(Object.keys(d.grades),['psa10','psa9','raw']);assert.equal(d.period,'month');assert.ok(d.grades.psa10.movers.length<=20);

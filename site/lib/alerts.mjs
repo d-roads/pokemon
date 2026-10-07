@@ -8,29 +8,34 @@ import {japaneseTitleMatches} from './japanese.mjs';
 import {analyze} from './analysis.mjs';
 
 export const EBAY_CATEGORY='183454';
-export const DEFAULT_SETTINGS={enabled:false,intervalMinutes:30,includeAuctions:false,useSuggested:true,ebay:{clientId:'',clientSecret:''},notify:{ntfy:'',discord:''}};
+export const DEFAULT_SETTINGS={enabled:false,provider:'ebay',intervalMinutes:30,includeAuctions:false,useSuggested:true,ebay:{clientId:'',clientSecret:''},serpapi:{apiKey:''},notify:{ntfy:'',discord:''}};
 const GRADE_QUERY={raw:'',psa9:'PSA 9',psa10:'PSA 10'};
 
 export function normalizeSettings(raw){
  const s=raw&&typeof raw==='object'?raw:{};
- return {enabled:!!s.enabled,intervalMinutes:Math.min(720,Math.max(10,Math.round(Number(s.intervalMinutes)||DEFAULT_SETTINGS.intervalMinutes))),includeAuctions:!!s.includeAuctions,useSuggested:s.useSuggested!==false,
+ return {enabled:!!s.enabled,provider:s.provider==='serpapi'?'serpapi':'ebay',intervalMinutes:Math.min(720,Math.max(10,Math.round(Number(s.intervalMinutes)||DEFAULT_SETTINGS.intervalMinutes))),includeAuctions:!!s.includeAuctions,useSuggested:s.useSuggested!==false,
   ebay:{clientId:String(s.ebay?.clientId||'').trim().slice(0,200),clientSecret:String(s.ebay?.clientSecret||'').trim().slice(0,200)},
+  serpapi:{apiKey:String(s.serpapi?.apiKey||'').trim().slice(0,200)},
   notify:{ntfy:String(s.notify?.ntfy||'').trim().slice(0,300),discord:String(s.notify?.discord||'').trim().slice(0,300)}};
 }
 // Merge a settings update. Blank secrets keep the saved value so the page never needs to hold them.
 export function updateSettings(current,input){
- const base=normalizeSettings(current),next=normalizeSettings({...base,...input,ebay:{...base.ebay,...(input?.ebay||{})},notify:{...base.notify,...(input?.notify||{})}});
+ const base=normalizeSettings(current),next=normalizeSettings({...base,...input,ebay:{...base.ebay,...(input?.ebay||{})},serpapi:{...base.serpapi,...(input?.serpapi||{})},notify:{...base.notify,...(input?.notify||{})}});
  if(input?.ebay&&!input.ebay.clientSecret)next.ebay.clientSecret=base.ebay.clientSecret;
  if(input?.ebay?.clear)next.ebay={clientId:'',clientSecret:''};
+ if(input?.serpapi&&!input.serpapi.apiKey)next.serpapi.apiKey=base.serpapi.apiKey;
+ if(input?.serpapi?.clear)next.serpapi={apiKey:''};
  const errors=[];
+ if(input?.provider&&!['ebay','serpapi'].includes(input.provider))errors.push('Choose eBay or SerpApi as the listing provider.');
  if(next.notify.ntfy&&!ntfyUrl(next.notify.ntfy))errors.push('Enter an ntfy topic (letters, numbers, - or _) or an https:// ntfy URL.');
  if(next.notify.discord&&!/^https:\/\/(?:ptb\.|canary\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[\w-]+$/.test(next.notify.discord))errors.push('Enter a Discord webhook URL that starts with https://discord.com/api/webhooks/.');
  return {settings:next,errors};
 }
 export const hasEbayKeys=s=>!!(s?.ebay?.clientId&&s?.ebay?.clientSecret);
+export const hasListingAccess=s=>s?.provider==='serpapi'?!!s?.serpapi?.apiKey:hasEbayKeys(s);
 export function publicSettings(s){
  const n=normalizeSettings(s),id=n.ebay.clientId;
- return {enabled:n.enabled,intervalMinutes:n.intervalMinutes,includeAuctions:n.includeAuctions,useSuggested:n.useSuggested,notify:n.notify,
+ return {enabled:n.enabled,provider:n.provider,configured:hasListingAccess(n),serpapi:{configured:!!n.serpapi.apiKey,hasSecret:!!n.serpapi.apiKey},intervalMinutes:n.intervalMinutes,includeAuctions:n.includeAuctions,useSuggested:n.useSuggested,notify:n.notify,
   ebay:{configured:hasEbayKeys(n),clientId:id?id.slice(0,6)+'…'+id.slice(-4):'',hasSecret:!!n.ebay.clientSecret}};
 }
 export function ntfyUrl(value){
@@ -120,6 +125,39 @@ export async function searchListings(card,grade,limit,settings,{fetchImpl=fetch,
  const body=await r.json();return body.itemSummaries||[];
 }
 
+// SerpApi's documented eBay organic results, converted to the same strict matching pipeline.
+// https://serpapi.com/ebay-search-api — never use related results or variation price ranges.
+export function serpapiItems(body){
+ const out=[];
+ for(const r of body.organic_results||[]){
+  const id=String(r.product_id||''),p=r.price;
+  let link;try{link=new URL(r.link);}catch{continue;}
+  if(!/^\d+$/.test(id)||link.protocol!=='https:'||!['ebay.com','www.ebay.com'].includes(link.hostname)||!new RegExp('/itm/(?:[^/]+/)?'+id+'/?$').test(link.pathname)||link.searchParams.has('var'))continue;
+  if(!p||p.from||p.to||typeof p.extracted!=='number'||!(p.extracted>0)||!/^\$[\d,.]+$/.test(p.raw||''))continue;
+  const shipping=String(r.shipping||'').trim();
+  const paid=shipping.match(/^\+?\s*\$([\d,]+(?:\.\d{1,2})?)\s+(?:shipping|delivery)\b/i);
+  const cost=/^Free (?:shipping|delivery)\b/i.test(shipping)?0:paid?Number(paid[1].replaceAll(',','')):null;
+  if(cost==null||!Number.isFinite(cost))continue;
+  const option={buy_it_now:'FIXED_PRICE',best_offer:'BEST_OFFER',auction:'AUCTION'}[r.buying_format];
+  if(!option)continue;
+  out.push({itemId:'v1|'+id+'|0',title:[r.title,r.subtitle].filter(Boolean).join(' '),price:{value:p.extracted,currency:'USD'},shippingOptions:[{shippingCost:{value:cost,currency:'USD'}}],buyingOptions:[option],itemWebUrl:'https://www.ebay.com/itm/'+id,image:r.thumbnail?{imageUrl:r.thumbnail}:undefined,seller:r.seller});
+ }
+ return out;
+}
+export async function serpapiListings(card,grade,limit,settings,{fetchImpl=fetch}={}){
+ const params=new URLSearchParams({engine:'ebay',ebay_domain:'ebay.com',_nkw:searchQuery(card,grade),category_id:EBAY_CATEGORY,_udhi:String(limit),_sop:'10',_ipg:'50',api_key:settings.serpapi.apiKey});
+ if(!settings.includeAuctions)params.set('buying_format','BIN');
+ let response;
+ try{response=await fetchImpl('https://serpapi.com/search.json?'+params,{signal:AbortSignal.timeout(30000)});}catch{throw new Error('SerpApi could not be reached. Try again later.');}
+ if(response.status===401||response.status===403)throw new Error('SerpApi did not accept this key. Check your SerpApi dashboard.');
+ if(response.status===429)throw new Error('SerpApi search allowance or rate limit reached. Check your plan before scanning again.');
+ if(!response.ok)throw new Error('SerpApi search failed ('+response.status+').');
+ const body=await response.json().catch(()=>null);
+ if(!body||body.error||body.search_metadata?.status!=='Success')throw new Error('SerpApi could not complete this search. Check your dashboard and try again later.');
+ if(!Array.isArray(body.organic_results)&&body.search_information?.total_results!==0)throw new Error('SerpApi returned an unexpected listing response.');
+ return serpapiItems(body);
+}
+
 // Turn search results into alert candidates for one watched card and grade.
 export function candidates(items,card,grade,limit,settings){
  const out=[];
@@ -142,18 +180,18 @@ const changes=r=>Number(r?.changes??r?.meta?.changes??0);
 export async function runScan({db,user,cards,marketFor,settings,fetchImpl=fetch,now=Date.now(),notify=sendNotifications}){
  const s=normalizeSettings(settings);
  const started=new Date(now).toISOString();
- if(!hasEbayKeys(s))return {checked:0,found:[],skipped:[],error:'Add your eBay API keys to scan live listings.'};
+ if(!hasListingAccess(s))return {checked:0,found:[],skipped:[],error:s.provider==='serpapi'?'Add your SerpApi key to scan live listings.':'Add your eBay API keys to scan live listings.'};
  const watch=(await db.prepare('SELECT card_id,grade,target FROM watchlist WHERE user_id = ? ORDER BY created_at DESC').bind(user).all()).results||[];
  const byId=new Map(cards.map(c=>[c.id,c])),found=[],skipped=[];let checked=0,error=null;
  try{
-  const token=await ebayToken(s,fetchImpl,now);
+  const token=s.provider==='ebay'?await ebayToken(s,fetchImpl,now):null;
   for(const w of watch.slice(0,60)){
    const card=byId.get(w.card_id);if(!card){skipped.push({card_id:w.card_id,grade:w.grade,reason:'Not in catalog'});continue;}
    // Listing matching rejects Japanese titles for English cards; Japanese cards need their own rules (task 2).
-   if(card.japanese&&!card.source){skipped.push({card_id:w.card_id,grade:w.grade,reason:'This Japanese card has no matched price product yet. Refresh its set first.'});continue;}
+   if(card.japanese&&!card.source&&!(w.target>0)){skipped.push({card_id:w.card_id,grade:w.grade,reason:'This Japanese card has no matched price product yet. Refresh its set first.'});continue;}
    const market=marketFor(card.id),limit=alertLimit(w,market,s,now);
    if(!limit){skipped.push({card_id:w.card_id,grade:w.grade,reason:'No buy limit yet. Set one on the card to get alerts.'});continue;}
-   const items=await searchListings(card,w.grade,limit.limit,s,{fetchImpl,token});checked++;
+   const items=s.provider==='serpapi'?await serpapiListings(card,w.grade,limit.limit,s,{fetchImpl}):await searchListings(card,w.grade,limit.limit,s,{fetchImpl,token});checked++;
    const marketPrice=analyze(market,w.grade,15,now).current;
    for(const c of candidates(items,card,w.grade,limit.limit,s)){
     const r=await db.prepare('INSERT OR IGNORE INTO alerts (user_id,card_id,grade,listing_id,title,price,shipping,total,currency,url,image,buying_option,limit_price,limit_source,market_price,seller,listed_at,found_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')

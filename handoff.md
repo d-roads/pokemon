@@ -1,3 +1,19 @@
+# FutureSight — October 7, 2026: live eBay alerts through SerpApi (dev)
+
+Owner's eBay developer registration was rejected. They requested a working live listing source and explicitly chose live listings rather than a demo. No public/shared credentials were downloaded or used.
+
+- Added **SerpApi** as an alternative provider alongside eBay Browse, with provider selection and private-key input/removal in Alerts. Its free plan currently offers 250 searches/month: https://serpapi.com/pricing. No eBay developer account is required, but the owner must create a SerpApi account and enter their own key in the app. The signup link is in the settings UI. No packages are needed.
+- Uses the documented real eBay search endpoint (https://serpapi.com/ebay-search-api), newest-first, US domain, price/category/Buy It Now filters. SerpApi can serve cached results up to one hour old. Each watched card/grade uses a request, capped at 60 per scan; start with manual scans to preserve the free quota.
+- Adapter accepts exact USD prices, known shipping, recognized buying formats and direct eBay item URLs. Price ranges, variation URLs, foreign currency, related results and unknown shipping are excluded. Listings then use the existing card/grade checks, shipping-inclusive limit, persisted alert deduplication and notifications. Provider access/quota failures are reported; key-bearing request URLs and provider error bodies are not returned or stored in error messages.
+- Provider credentials are stored server-side in the existing local settings record. API responses expose only configuration flags. Existing eBay setups remain the default; saving a SerpApi key does not automatically enable scanning or change an existing provider selection. Japanese cards with a manual target no longer require a price-product mapping to scan.
+- Validation: **199/199 tests pass** (`npm test`, Node 24.21); build and bundled/local server syntax checks pass (249.2 MB Worker). New tests cover conversion, shipping-inclusive thresholds, masking/keeping/clearing credentials, provider selection, real scan-path persistence/deduplication, quota/error handling and the UI controls. No authenticated live request has been made: the owner key is still missing and this session has restricted networking. Do not claim live delivery is verified until a real Scan now succeeds.
+- Owner activation: restart the Ubuntu/WSL dev server, open Alerts, choose SerpApi, paste the account key, save with automatic scanning off, star a card and set a limit, then Scan now. Configure ntfy/Discord and Send a test if desired. Restart command and separate test DB are in the previous entry below. This sandbox still cannot host a listening server.
+- eBay appeal: https://developer.ebay.com/support/developer-account-support has a dedicated rejected-registration form. Describe the use case as watching exact Pokémon card listings, comparing asking price plus shipping with personal buy limits and linking back to eBay; no automatic purchases.
+
+This entry is included in the dev provider integration commit. Prior handoff follows.
+
+---
+
 # FutureSight — October 7, 2026: exact language counterparts completed on dev
 
 Owner authorized diagnosis, implementation, committing to `dev`, updating this handoff and starting a local test server. Official EN/JA names and numbers may differ for the exact printing.

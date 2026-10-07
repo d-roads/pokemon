@@ -5,7 +5,7 @@ import {gzipSync} from 'node:zlib';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {api,readSettings,scanForUser} from './lib/api.mjs';
-import {hasEbayKeys} from './lib/alerts.mjs';
+import {hasListingAccess} from './lib/alerts.mjs';
 import {reportError} from './lib/report.mjs';
 import {accountStore,seedAdmin,readCookie,sessionCookie,clearCookie,attemptLimiter,usernameProblem,passwordProblem} from './lib/accounts.mjs';
 import {requestLocation} from './lib/origin.mjs';
@@ -117,7 +117,7 @@ async function scheduledScan(){
   scanning=true;
   for(const user of accounts.userKeys()){
    const settings=await readSettings(DB,user);
-   if(!settings.enabled||!hasEbayKeys(settings))continue;
+   if(!settings.enabled||!hasListingAccess(settings))continue;
    if(Date.now()-(lastScan.get(user)||0)<settings.intervalMinutes*60000)continue;
    lastScan.set(user,Date.now());
    const r=await scanForUser(env,user);

@@ -8,7 +8,7 @@ import {topMovers,PERIODS} from './movers.mjs';
 import {potentialInvestments} from './invest.mjs';
 import {investmentScores} from './score.mjs';
 import {validateEntry} from './portfolio.mjs';
-import {DEFAULT_SETTINGS,normalizeSettings,updateSettings,publicSettings,hasEbayKeys,runScan,sendNotifications,ebaySearchUrl,alertLimit} from './alerts.mjs';
+import {DEFAULT_SETTINGS,normalizeSettings,updateSettings,publicSettings,hasListingAccess,runScan,sendNotifications,ebaySearchUrl,alertLimit} from './alerts.mjs';
 import {isPlainObject,oneOf,optionalPrice,boundedText,optionalText,shapeError} from './schema.mjs';
 import {reportError} from './report.mjs';
 import {analyze} from './analysis.mjs';
@@ -146,7 +146,7 @@ async function alertState(db,user){
  const settings=await readSettings(db,user);
  const alerts=(await db.prepare('SELECT id,card_id,grade,listing_id,title,price,shipping,total,currency,url,image,buying_option,limit_price,limit_source,market_price,seller,listed_at,found_at,seen FROM alerts WHERE user_id = ? AND dismissed = 0 ORDER BY found_at DESC,id DESC LIMIT 200').bind(user).all()).results||[];
  const lastRun=await db.prepare('SELECT started_at,finished_at,checked,found,error FROM alert_runs WHERE user_id = ? ORDER BY id DESC LIMIT 1').bind(user).first();
- return {settings:publicSettings(settings),alerts,unseen:alerts.filter(a=>!a.seen).length,lastRun:lastRun||null,live:hasEbayKeys(settings)&&settings.enabled};
+ return {settings:publicSettings(settings),alerts,unseen:alerts.filter(a=>!a.seen).length,lastRun:lastRun||null,live:hasListingAccess(settings)&&settings.enabled};
 }
 export async function scanForUser(env,user,options={}){
  const db=database(env),settings=await readSettings(db,user);
@@ -220,7 +220,7 @@ export async function api(request,env,ctx){
    if(request.method==='POST'){
     let body;try{body=await input(request);}catch{return json({error:'The settings request was invalid.'},400);}
     const {settings,errors}=updateSettings(await readSettings(db,user),body);if(errors.length)return json({error:errors[0],errors},400);
-    if(settings.enabled&&!hasEbayKeys(settings))return json({error:'Add your eBay Client ID and Client Secret before turning on live alerts.'},400);
+    if(settings.enabled&&!hasListingAccess(settings))return json({error:'Add credentials for the selected listing provider before turning on live alerts.'},400);
     await writeSettings(db,user,settings);
    }else if(request.method!=='GET')return json({error:'Method not allowed.'},405);
    return json({settings:publicSettings(await readSettings(db,user))});

@@ -3,9 +3,47 @@ import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
 import {cards} from '../data/catalog.mjs';
-import {listingMatches,searchQuery,candidates,listingPrice,runScan,updateSettings,publicSettings,ntfyUrl,ebaySearchUrl,alertLimit,resetTokenCache} from '../lib/alerts.mjs';
+import {listingMatches,searchQuery,candidates,listingPrice,runScan,updateSettings,publicSettings,ntfyUrl,ebaySearchUrl,alertLimit,resetTokenCache,serpapiItems,serpapiListings,hasListingAccess} from '../lib/alerts.mjs';
 const card=id=>cards.find(c=>c.id===id);
 const groudon=card('xy5-151'),umbreon=card('xy10-119'),mrayquaza=card('xy6-105'),promo=card('xyp-XY121'),rc=card('bw11-RC24'),shiny=card('sm115-SV49'),tag=card('sm9-170');
+const serpResult=(extra={})=>({product_id:'123456789012',title:'Primal Groudon EX 151/160 PSA 9',link:'https://www.ebay.com/itm/123456789012',price:{raw:'$100.00',extracted:100},shipping:'+$4.00 delivery',buying_format:'buy_it_now',...extra});
+test('SerpApi accepts only exact USD listing prices with known shipping and an item URL',()=>{
+ const results=[serpResult(),serpResult({price:{from:{raw:'$90.00',extracted:90},to:{raw:'$110.00',extracted:110}}}),serpResult({shipping:'Shipping calculated at checkout'}),serpResult({price:{raw:'C$100.00',extracted:100}}),serpResult({link:'https://www.ebay.com/itm/123456789012?var=42'}),serpResult({link:'https://ebay.com.evil.test/itm/123456789012'}),serpResult({buying_format:'unknown'})];
+ const items=serpapiItems({organic_results:results});assert.equal(items.length,1);
+ assert.equal(candidates(items,groudon,'psa9',104,{}).length,1);
+ assert.equal(candidates(items,groudon,'psa9',103,{}).length,0,'shipping counts toward the limit');
+ assert.equal(candidates(items,groudon,'psa10',104,{}).length,0);
+ assert.equal(serpapiItems({organic_results:[serpResult({shipping:'Free shipping'})]})[0].shippingOptions[0].shippingCost.value,0);
+});
+test('SerpApi settings retain blank secrets, clear explicitly and expose no key',()=>{
+ const {settings,errors}=updateSettings({},{provider:'serpapi',serpapi:{apiKey:'private-key'}});assert.deepEqual(errors,[]);
+ assert.equal(hasListingAccess(settings),true);assert.equal(publicSettings(settings).configured,true);
+ assert.equal(publicSettings(settings).ebay.configured,false);assert.ok(!JSON.stringify(publicSettings(settings)).includes('private-key'));
+ assert.equal(updateSettings(settings,{serpapi:{apiKey:''}}).settings.serpapi.apiKey,'private-key');
+ assert.equal(hasListingAccess(updateSettings(settings,{serpapi:{clear:true}}).settings),false);
+ assert.equal(hasListingAccess({...settings,provider:'ebay'}),false);
+ assert.ok(updateSettings(settings,{provider:'unknown'}).errors.length);
+});
+test('SerpApi scans use live search results and store and notify once without eBay credentials',async()=>{
+ const sqlite=new DatabaseSync(':memory:');sqlite.exec(readFileSync(new URL('../db/schema.sql',import.meta.url),'utf8'));const db=dbAdapter(sqlite);
+ sqlite.prepare('INSERT INTO watchlist (user_id,card_id,grade,target,created_at) VALUES (?,?,?,?,?)').run('me',groudon.id,'psa9',104,'2026-10-01T00:00:00Z');
+ const calls=[];let notified=0;
+ const options={db,user:'me',cards,marketFor:()=>null,settings:{provider:'serpapi',serpapi:{apiKey:'private-key'}},notify:async found=>{notified+=found.length;},fetchImpl:async url=>{
+  const u=new URL(url);calls.push(u);assert.equal(u.hostname,'serpapi.com');assert.equal(u.searchParams.get('engine'),'ebay');assert.equal(u.searchParams.get('_sop'),'10');assert.equal(u.searchParams.get('buying_format'),'BIN');
+  assert.equal(u.searchParams.get('_udhi'),'104');assert.equal(u.searchParams.get('api_key'),'private-key');
+  return Response.json({search_metadata:{status:'Success'},organic_results:[serpResult(),serpResult({product_id:'234567890123',link:'https://www.ebay.com/itm/234567890123',title:'Primal Groudon EX 151/160 PSA 10'})]});
+ }};
+ const first=await runScan(options);assert.equal(first.error,null);assert.equal(first.checked,1);assert.equal(first.found.length,1);
+ assert.equal((await runScan(options)).found.length,0);assert.equal(notified,1);assert.equal(calls.length,2);
+ assert.equal(sqlite.prepare('SELECT count(*) AS n FROM alerts').get().n,1);sqlite.close();
+});
+test('SerpApi failures report access and quota problems without exposing a key',async()=>{
+ const settings={serpapi:{apiKey:'private-key'}};
+ await assert.rejects(serpapiListings(groudon,'psa9',104,settings,{fetchImpl:async()=>new Response('{}',{status:401})}),/did not accept/);
+ await assert.rejects(serpapiListings(groudon,'psa9',104,settings,{fetchImpl:async()=>new Response('{}',{status:429})}),/allowance/);
+ await assert.rejects(serpapiListings(groudon,'psa9',104,settings,{fetchImpl:async()=>{throw Error('url?api_key=private-key');}}),e=>!e.message.includes('private-key')&&e.message.includes('could not be reached'));
+ await assert.rejects(serpapiListings(groudon,'psa9',104,settings,{fetchImpl:async()=>Response.json({error:'private-key'})}),e=>!e.message.includes('private-key'));
+});
 test('Search words drop the Mega prefix and EX suffix but keep the number and grade',()=>{
  assert.equal(searchQuery(groudon,'psa9'),'pokemon Primal Groudon 151 PSA 9');
  assert.equal(searchQuery(mrayquaza,'psa10'),'pokemon Rayquaza 105 PSA 10');

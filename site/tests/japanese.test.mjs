@@ -173,18 +173,22 @@ test('Mapping a Japanese set saves verified products and guide prices; refresh t
  }finally{globalThis.fetch=realFetch;forgetSourceMap();forgetListings();}
 });
 
-test('An unmatched Japanese card stays unpriced; matched Japanese cards get Japanese listing alerts',async()=>{
+test('An unmatched Japanese card stays unpriced but a manual limit enables Japanese listing alerts',async()=>{
  forgetSourceMap();
  const card=byId.get('ja-sv2a-201');
  assert.throws(()=>parseMarket('<h1 id="product_name">Charizard EX #201</h1>PriceCharting',card),/not loaded yet/);
  resetTokenCache();
  const s=new DatabaseSync(':memory:');s.exec(sql);const db=dbAdapter(s);
- s.prepare('INSERT INTO watchlist (user_id,card_id,grade,target,created_at) VALUES (?,?,?,?,?)').run('me','ja-sv2a-201','psa10',500,'2026-10-01T00:00:00Z');
+ s.prepare('INSERT INTO watchlist (user_id,card_id,grade,target,created_at) VALUES (?,?,?,?,?)').run('me','ja-sv2a-201','psa10',null,'2026-10-01T00:00:00Z');
  const searched=[];const fetchImpl=async url=>{if(String(url).includes('/oauth2/token'))return new Response(JSON.stringify({access_token:'t',expires_in:7200}),{status:200});searched.push(String(url));return new Response(JSON.stringify({itemSummaries:[]}),{status:200});};
  const settings={enabled:true,ebay:{clientId:'id',clientSecret:'secret'},notify:{ntfy:'t'}};
  let r=await runScan({db,user:'me',cards,marketFor:()=>null,settings,fetchImpl,notify:async()=>{}});
  assert.equal(r.checked,0);assert.equal(searched.length,0);assert.match(r.skipped[0].reason,/Japanese card has no matched price product/);
- // Once matched, it is searched as a Japanese listing and only Japanese titles qualify.
+ // A collector's explicit target does not require price-guide data.
+ s.prepare('UPDATE watchlist SET target = 500 WHERE user_id = ?').run('me');
+ r=await runScan({db,user:'me',cards,marketFor:()=>null,settings,fetchImpl,notify:async()=>{}});
+ assert.equal(r.checked,1);assert.match(decodeURIComponent(searched[0]),/japanese/i);
+ // Once matched, it is still searched as a Japanese listing and only Japanese titles qualify.
  card.source='https://www.pricecharting.com/game/pokemon-japanese-scarlet-&-violet-151/charizard-ex-201';card.sourceVerified=true;card.pcName='Charizard EX';
  try{
   assert.match(searchQuery(card,'psa10'),/japanese/i);

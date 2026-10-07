@@ -89,6 +89,16 @@ test('Dex and Alerts views open without the set browser',async()=>{
  ui.e('#alerts-nav').onclick();assert.equal(ui.e('#alerts-view').hidden,false);assert.equal(ui.e('#dex-view').hidden,true);await ui.run('loadAlerts()');assert.match(ui.e('#alerts-view').innerHTML,/Alert settings/);
  ui.e('#browse-nav').onclick();assert.equal(ui.e('#workspace').hidden,false);
 });
+test('Alerts enables live SerpApi scans without eBay keys and offers the provider controls',async()=>{
+ const ui=workspace();await ui.run('init()');
+ ui.responses['/api/alerts']={alerts:[],unseen:0,searches:[],live:false,settings:{provider:'serpapi',configured:true,enabled:false,intervalMinutes:30,ebay:{configured:false},serpapi:{configured:true,hasSecret:true},notify:{ntfy:'',discord:''}}};
+ await ui.run('loadAlerts()');ui.run('renderAlerts()');
+ assert.match(ui.e('#alerts-view').innerHTML,/id="al-provider"/);
+ assert.match(ui.e('#alerts-view').innerHTML,/id="al-serpapi" type="password"/);
+ assert.doesNotMatch(ui.e('#alerts-view').innerHTML,/id="alerts-scan"[^>]*disabled/);
+ ui.responses['/api/alerts/scan']={...ui.responses['/api/alerts'],found:0,checked:1,skipped:[],error:null};
+ await ui.e('#alerts-scan').onclick();assert.ok(ui.calls.includes('/api/alerts/scan'));
+});
 test('Dex date entry uses bounded month, day, and year controls',async()=>{
  const ui=workspace();await ui.run('init()');ui.run('openDexDialog({})');const form=ui.e('#dex-form').innerHTML;
  assert.match(form,/id="dex-date-month"/);assert.match(form,/id="dex-date-day"/);assert.match(form,/id="dex-date-year"/);assert.match(form,/>2010</);assert.doesNotMatch(form,/value="2009"/);assert.match(form,/Today/);assert.match(form,/2010 or later/);
