@@ -14,9 +14,25 @@ $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 $here = [System.IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\')
 
-# Find the beta's site folder: ..\..\primal-watch\site next to this test folder, unless given.
-if (-not $BetaSite) { $BetaSite = Join-Path (Split-Path -Parent (Split-Path -Parent $here)) 'primal-watch\site' }
+# Find the beta's site folder: a 'primal-watch\site' folder beside this test folder or beside any
+# folder above it (so unzipping one level deeper still works), unless -BetaSite is given.
+if (-not $BetaSite) {
+  $dir = Split-Path -Parent $here
+  for ($i = 0; $i -lt 6 -and $dir; $i++) {
+    $candidate = Join-Path $dir 'primal-watch\site'
+    if (Test-Path -LiteralPath (Join-Path $candidate 'data\primal-watch.sqlite')) { $BetaSite = $candidate; break }
+    $dir = Split-Path -Parent $dir
+  }
+}
+if (-not $BetaSite) {
+  Write-Host ''
+  Write-Host 'Could not find the beta folder (primal-watch\site) above this folder.' -ForegroundColor Red
+  Write-Host 'Run again and point to it, for example:' -ForegroundColor Red
+  Write-Host '  .\Start-LocalTest.ps1 -BetaSite "C:\Users\b345t\.codex\.chatgpt-projects\g-p-6a72b895d6288191b4624c5f5479fcae\primal-watch\site"' -ForegroundColor Red
+  exit 1
+}
 $BetaSite = [System.IO.Path]::GetFullPath($BetaSite).TrimEnd('\')
+Write-Host "Beta folder: $BetaSite"
 if ($BetaSite -ieq $here) {
   throw 'This is the beta folder. Unzip the local test build into its own folder (for example futuresight-local-test) and run Start-LocalTest.ps1 from there.'
 }
@@ -29,18 +45,14 @@ New-Item -ItemType Directory -Path (Join-Path $here 'data') -Force | Out-Null
 if ($FreshCopy -and (Test-Path -LiteralPath $testDb)) {
   Remove-Item -LiteralPath $testDb, "$testDb-wal", "$testDb-shm" -Force -ErrorAction SilentlyContinue
 }
-if (-not (Test-Path -LiteralPath $testDb)) {
-  if (Test-Path -LiteralPath $betaDb) {
-    Write-Host "Copying the beta's accounts, watchlists, Dex and saved sales into the test database..."
-    node copy-db.mjs "$betaDb" "$testDb"
-    if ($LASTEXITCODE -ne 0) { throw 'Could not copy the beta database.' }
-    Write-Host "Test database ready: $testDb"
-  } else {
-    Write-Host "No beta database found at $betaDb. Starting with an empty test database (sign in with the admin password from .env)." -ForegroundColor Yellow
-  }
-}
+if (-not (Test-Path -LiteralPath $betaDb)) { throw "No beta database at $betaDb. Check the -BetaSite folder." }
+# Copies the beta's accounts, watchlists, Dex and saved sales. A test database that already has
+# accounts is kept; an empty one (from an earlier start that missed the beta) is replaced.
+node copy-db.mjs "$betaDb" "$testDb" --replace-empty
+if ($LASTEXITCODE -ne 0) { throw 'Could not copy the beta database.' }
 # Admin password and other optional settings: reuse the beta's .env if this copy has none.
 $betaEnv = Join-Path $BetaSite '.env'
+# (The admin password lives in the copied database; .env adds optional settings such as Sentry.)
 if (-not (Test-Path -LiteralPath (Join-Path $here '.env')) -and (Test-Path -LiteralPath $betaEnv)) {
   Copy-Item -LiteralPath $betaEnv -Destination (Join-Path $here '.env')
 }
