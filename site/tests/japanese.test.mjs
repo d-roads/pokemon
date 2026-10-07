@@ -1,10 +1,13 @@
-// Japanese cards, task 1: catalog, links to English cards, and the guards that keep them unpriced
-// until their PriceCharting products are verified (task 2).
+// Japanese cards: catalog and links to English cards (task 1); matching to exact PriceCharting
+// products, Japanese sale and listing rules, and language-separated rankings (task 2).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
-import {api} from '../lib/api.mjs';
+import {api,forgetSourceMap} from '../lib/api.mjs';
+import {parseJapaneseListing,matchJapaneseListing,japaneseTitleMatches} from '../lib/japanese.mjs';
+import {matchesCard} from '../lib/sales.mjs';
+import {listingMatches,searchQuery} from '../lib/alerts.mjs';
 import {parseMarket,parseSet} from '../lib/provider.mjs';
 import {runScan,resetTokenCache} from '../lib/alerts.mjs';
 import {cards,sets} from '../data/catalog.mjs';
@@ -53,32 +56,109 @@ test('Japanese rarity codes follow each era and names are English where known',(
  const named=ja.filter(c=>!c.nameIsJapanese).length;assert.ok(named/ja.length>0.75,'most cards carry an English name');
 });
 
-test('Japanese cards are never fetched or priced before their product is verified',async()=>{
- const env={DB,NETWORK_DISABLED:false};
- const card=byId.get('ja-sv2a-201');
- assert.throws(()=>parseMarket('<h1>Charizard ex #201</h1>',card),/Japanese prices are not loaded yet/);
- // A set listing row with the same number is ignored for a Japanese card (nothing usable is read).
- assert.throws(()=>parseSet('<tr><td class="title">Charizard ex #201</td><td class="price">$1</td><td class="price">$2</td><td class="price">$3</td></tr>',[card]),/could not be read/);
- const m=await(await api(req('/api/market?id=ja-sv2a-201&refresh=1'),env)).json();
- assert.equal(m.refreshed,false);assert.match(m.warning,/Japanese prices/);
- const set=await(await api(req('/api/refresh?set=ja-sv2a','POST'),env)).json();
- assert.equal(set.refreshed,false);assert.equal(set.count,0);
- const research=await(await api(req('/api/research?set=all','POST'),{DB,NETWORK_DISABLED:true})).json();
- assert.equal(research.total,cards.filter(c=>c.eligible&&!c.japanese).length);
- const catalog=await(await api(req('/api/catalog'),env)).json();
- assert.ok(catalog.cards.some(c=>c.id==='ja-sv2a-201'));assert.equal(catalog.markets['ja-sv2a-201'],undefined);
+// PriceCharting markup, as captured from the live Japanese listing and product pages (Oct 7, 2026).
+const listingRow=(id,slug,title,used,cib,nw)=>`<tr id="product-${id}" data-product="${id}"><td class="image"><a href="https://www.pricecharting.com/game/pokemon-japanese-scarlet-&amp;-violet-151/${slug}"></a></td><td class="title" title="${id}"><a href="/game/pokemon-japanese-scarlet-&amp;-violet-151/${slug}">${title}</a></td><td class="price numeric used_price"><span class="js-price">$${used}</span></td><td class="price numeric cib_price"><span class="js-price">$${cib}</span></td><td class="price numeric new_price"><span class="js-price">$${nw}</span></td></tr>`;
+const listing=(rows,cursor)=>`<html><table>${rows.join('')}</table>${cursor?`<form><input type="hidden" name="cursor" value="${cursor}"></form>`:''}</html>`;
+const saleRow=(title,price,id,date='2026-09-29')=>`<tr id="ebay-${id}"><td class="date">${date}</td><td class="image"></td><td class="title"><a target="_blank" class="js-ebay-completed-sale" href="https://www.ebay.com/itm/${id}?nordt=true">${title}</a></td><td class="numeric"><span class="js-price">$${price}</span></td><td class="numeric listed-price"></td></tr>`;
+const section=(name,rows)=>`<div class="completed-auctions-${name}"><table><tbody>${rows.join('')}</tbody></table></div>`;
+const productPage=(...sections)=>`<html>PriceCharting<h1 id="product_name" class="chart_title" title="5326231">Charizard EX #201 <a href="/console/pokemon-japanese-scarlet-&-violet-151">Pokemon Japanese Scarlet &amp; Violet 151</a></h1><table><tr><td id="used_price"><span class="price js-price">$327.00</span></td><td id="graded_price"><span class="price js-price">$381.97</span></td><td id="manual_only_price"><span class="price js-price">$546.14</span></td></tr></table>${sections.join('')}<script>VGPC.chart_data = {"used":[[1693526400000,30000],[1696118400000,32700]],"graded":[],"manualonly":[]};
+VGPC.pop_data = {"psa":[0,0,0,0,0,0,1,4,90,410]};</script></html>`;
+
+test('Listing pages are read and Japanese cards are matched to exact products only',()=>{
+ const page=parseJapaneseListing(listing([
+  listingRow(5326231,'charizard-ex-201','Charizard EX #201','327.00','381.97','546.14'),
+  listingRow(5326232,'charizard-ex-201-master-ball','Charizard EX [Master Ball] #201','900.00','',''),
+  listingRow(5326214,'pikachu-173','Pikachu #173','28.41','52.64','106.44'),
+  listingRow(5326300,'bulbasaur-166','Bulbasaur #166','12.00','',''),
+  listingRow(5326301,'bulbasaur-166-2','Bulbasaur #166','10.00','','')],'150'));
+ assert.equal(page.cursor,'150');assert.equal(page.rows.length,5);
+ assert.deepEqual(page.rows[0],{productId:'5326231',path:'/game/pokemon-japanese-scarlet-&-violet-151/charizard-ex-201',title:'Charizard EX #201',name:'Charizard EX',number:'201',variant:false,prices:[327,381.97,546.14]});
+ assert.equal(page.rows[1].variant,true);
+ const set=cards.filter(c=>c.setId==='ja-sv2a');
+ const {matches,unmatched}=matchJapaneseListing(page.rows,set);
+ assert.equal(matches.get('ja-sv2a-201').productId,'5326231','the plain product, never the Master Ball variant');
+ assert.equal(matches.get('ja-sv2a-201').rule,'number+name');
+ assert.equal(matches.get('ja-sv2a-173')?.productId,'5326214');
+ // Two products with the same name and number: left unmatched rather than guessed.
+ const c166=set.find(c=>c.number===166);assert.equal(c166.name,'Bulbasaur');assert.ok(!matches.has(c166.id));
+ assert.match(unmatched.find(u=>u.id===c166.id).reason,/several products/);
+ // Wizards-era Japanese cards are listed by Pokédex number, with a name check.
+ const wotc=cards.find(c=>c.id==='ja-pmcg1-011');// Venusaur
+ const w=matchJapaneseListing(parseJapaneseListing(listing([listingRow(1,'venusaur-3','Venusaur #3','100','200','900'),listingRow(2,'ivysaur-2','Ivysaur #2','5','','')])).rows,[wotc]);
+ assert.equal(w.matches.get('ja-pmcg1-011')?.productId,'1');
 });
 
-test('Japanese cards can be watched and added to the Dex, but alert scans skip them',async()=>{
+test('Japanese sale titles: Japanese printing, right card and number, no other language',()=>{
+ const card=byId.get('ja-sv2a-201');
+ for(const t of ['2023 Pokemon Japanese 151 Charizard EX SAR 201 NM Japanese 201/165','2023 POKEMON JAPANESE SV2A-POKEMON 151 SPECIAL ART RARE #201 CHARIZARD EX PSA 9 #201','Pokemon Card Game Charizard ex SAR 201/165 sv2a 151 Scarlet & Violet TCG Holo Japanese'])assert.equal(japaneseTitleMatches(t,card),true,t);
+ for(const t of ['Charizard ex 199/165 English 151','Charizard ex 201/165 korean','Charizard ex lot 201/165','Charizard ex 006/165 Japanese','Charizard ex 201/165 Master Ball Japanese'])assert.equal(japaneseTitleMatches(t,card),false,t);
+ // The shared matcher sends Japanese cards to these rules and still rejects Japanese titles for English cards.
+ assert.equal(matchesCard('Charizard ex 201/165 Japanese',card),true);
+ assert.equal(matchesCard('Charizard ex 199/165 Japanese 151',byId.get('sv3pt5-199')),false);
+ const wotc={...byId.get('ja-pmcg1-011'),name:'Venusaur'};
+ assert.equal(japaneseTitleMatches('1996 POKEMON BASE SET JAPANESE #3 VENUSAUR-HOLO PSA 9',wotc),true);
+ assert.equal(japaneseTitleMatches('Pokemon PSA 6/5/7 Venusaur Charizard Blastoise #3-6-9 Holo Base Set Japanese',wotc),false);
+});
+
+test('Mapping a Japanese set saves verified products and guide prices; refresh then reads Japanese sales',async()=>{
+ const s=new DatabaseSync(':memory:');s.exec(sql);const db=dbAdapter(s),env={DB:db,NETWORK_DISABLED:false};
+ const realFetch=globalThis.fetch,asked=[];
+ globalThis.fetch=async url=>{url=String(url);asked.push(url);
+  if(url.includes('/console/pokemon-japanese-scarlet-&-violet-151?view=table&cursor=150'))return new Response(listing([listingRow(5326214,'pikachu-173','Pikachu #173','28.41','52.64','106.44')]));
+  if(url.includes('/console/pokemon-japanese-scarlet-&-violet-151?view=table'))return new Response(listing([listingRow(5326231,'charizard-ex-201','Charizard EX #201','327.00','381.97','546.14')],'150'));
+  if(url.includes('/game/pokemon-japanese-scarlet-&-violet-151/charizard-ex-201'))return new Response(productPage(
+   section('used',[saleRow('2023 Pokemon Japanese 151 Charizard EX SAR 201 NM Japanese 201/165',323.99,1001),saleRow('Charizard ex 199/165 English 151 SIR',150,1002),saleRow('Charizard ex 201/165 Korean',90,1003)]),
+   section('graded',[saleRow('2023 POKEMON JAPANESE SV2A-POKEMON 151 SPECIAL ART RARE #201 CHARIZARD EX PSA 9 #201',295,1004)]),
+   section('manual-only',[saleRow('2023 Pokemon SV 151 JP Charizard ex Special Art Rare #201/165 PSA 10 GEM MINT',606,1005)])));
+  return new Response('not found',{status:404});};
+ try{
+  forgetSourceMap();
+  const r=await(await api(req('/api/refresh?set=ja-sv2a','POST'),env)).json();
+  assert.equal(r.refreshed,true);assert.equal(r.mapped,2);assert.equal(r.pages,2);
+  assert.equal(r.sources['ja-sv2a-201'].source,'https://www.pricecharting.com/game/pokemon-japanese-scarlet-&-violet-151/charizard-ex-201');
+  assert.deepEqual(r.markets['ja-sv2a-201'].guide,{raw:327,grade9:381.97,psa10:546.14});
+  assert.equal(s.prepare('SELECT count(*) n FROM source_map').get().n,2);
+  const card=byId.get('ja-sv2a-201');assert.equal(card.sourceVerified,true);assert.equal(card.pcName,'Charizard EX');
+  // Update sales now includes the matched Japanese cards, and only them with lang=ja.
+  const research=await(await api(req('/api/research?set=era:SV&lang=ja','POST'),{DB:db,NETWORK_DISABLED:true})).json();assert.equal(research.total,2);
+  // Full page: only the Japanese sales of this card count.
+  const m=await(await api(req('/api/market?id=ja-sv2a-201&refresh=1'),env)).json();
+  assert.equal(m.refreshed,true,m.warning);
+  assert.deepEqual(m.market.sales.map(x=>[x.grade,x.price]).sort(),[['psa10',606],['psa9',295],['raw',323.99]]);
+  assert.equal(m.market.research.excluded.raw,2);
+  // The mapping survives a restart: a fresh process reads it back from the database.
+  forgetSourceMap();assert.equal(card.source,null);
+  await api(req('/api/catalog'),env);assert.equal(card.source,r.sources['ja-sv2a-201'].source);
+  // Observations record the language.
+  assert.ok(s.prepare("SELECT count(*) n FROM sales_observations WHERE card_id='ja-sv2a-201' AND language='ja'").get().n>=3);
+ }finally{globalThis.fetch=realFetch;forgetSourceMap();}
+});
+
+test('An unmatched Japanese card stays unpriced; matched Japanese cards get Japanese listing alerts',async()=>{
+ forgetSourceMap();
+ const card=byId.get('ja-sv2a-201');
+ assert.throws(()=>parseMarket('<h1 id="product_name">Charizard EX #201</h1>PriceCharting',card),/not loaded yet/);
  resetTokenCache();
  const s=new DatabaseSync(':memory:');s.exec(sql);const db=dbAdapter(s);
  s.prepare('INSERT INTO watchlist (user_id,card_id,grade,target,created_at) VALUES (?,?,?,?,?)').run('me','ja-sv2a-201','psa10',500,'2026-10-01T00:00:00Z');
  const searched=[];const fetchImpl=async url=>{if(String(url).includes('/oauth2/token'))return new Response(JSON.stringify({access_token:'t',expires_in:7200}),{status:200});searched.push(String(url));return new Response(JSON.stringify({itemSummaries:[]}),{status:200});};
- const r=await runScan({db,user:'me',cards,marketFor:()=>null,settings:{enabled:true,ebay:{clientId:'id',clientSecret:'secret'},notify:{ntfy:'t'}},fetchImpl,notify:async()=>{}});
- assert.equal(r.checked,0);assert.equal(searched.length,0);assert.match(r.skipped[0].reason,/Japanese/);
+ const settings={enabled:true,ebay:{clientId:'id',clientSecret:'secret'},notify:{ntfy:'t'}};
+ let r=await runScan({db,user:'me',cards,marketFor:()=>null,settings,fetchImpl,notify:async()=>{}});
+ assert.equal(r.checked,0);assert.equal(searched.length,0);assert.match(r.skipped[0].reason,/Japanese card has no matched price product/);
+ // Once matched, it is searched as a Japanese listing and only Japanese titles qualify.
+ card.source='https://www.pricecharting.com/game/pokemon-japanese-scarlet-&-violet-151/charizard-ex-201';card.sourceVerified=true;card.pcName='Charizard EX';
+ try{
+  assert.match(searchQuery(card,'psa10'),/japanese/i);
+  assert.equal(listingMatches('Charizard ex SAR 201/165 Pokemon 151 Japanese PSA 10',card,'psa10'),true);
+  assert.equal(listingMatches('Charizard ex SAR 201/165 Pokemon 151 PSA 10',card,'psa10'),false,'must say Japanese');
+  assert.equal(listingMatches('Charizard ex SIR 199/165 Pokemon 151 PSA 10',byId.get('sv3pt5-199'),'psa10'),true,'English rules unchanged');
+  assert.equal(listingMatches('Charizard ex SIR 199/165 Pokemon 151 Japanese PSA 10',byId.get('sv3pt5-199'),'psa10'),false);
+  r=await runScan({db,user:'me',cards,marketFor:()=>null,settings,fetchImpl,notify:async()=>{}});
+  assert.equal(r.checked,1);assert.match(decodeURIComponent(searched[0]),/japanese/i);
+ }finally{forgetSourceMap();}
 });
 
-test('Movers, investments and scores stay English-only while Japanese cards have no prices',async()=>{
+test('With no Japanese prices loaded, movers, investments and scores contain no Japanese cards',async()=>{
  const env={DB,NETWORK_DISABLED:true};
  const scores=await(await api(req('/api/scores'),env)).json();
  assert.ok(Object.keys(scores.scores||{}).every(id=>!id.startsWith('ja-')));

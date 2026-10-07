@@ -279,7 +279,7 @@ test('Japanese cards: language switch, set picker groups, info-screen language a
  ui.run("state.selected='ja-sv2a-201';renderDetail()");let html=ui.e('#detail').innerHTML;
  assert.match(html,/JAPANESE PSA 9 PRICES/);assert.match(html,/English version/);assert.match(html,/data-version="sv3pt5-199"/);assert.match(html,/リザードンex/);assert.match(html,/Special Art Rare \(SAR\)/);
  assert.match(html,/data-detail-lang="ja" class="active"/);assert.match(html,/data-detail-grade="psa10"/);
- assert.doesNotMatch(html,/id="refresh-card"/);assert.doesNotMatch(html,/SUGGESTED MAXIMUM PRICE/);
+ assert.match(html,/Not matched yet/);assert.match(html,/id="refresh-card"[^>]*>[\s\S]*?Find prices/);assert.doesNotMatch(html,/SUGGESTED MAXIMUM PRICE/);
  // Swap the info screen to English: the list selection stays, the English card is shown.
  ui.run("showVersion('en')");html=ui.e('#detail').innerHTML;assert.equal(ui.run('state.selected'),'ja-sv2a-201');assert.equal(ui.run('shownCard().id'),'sv3pt5-199');
  assert.match(html,/data-detail-lang="en" class="active"/);assert.match(html,/Japanese version/);assert.match(html,/data-version="ja-sv2a-201"/);
@@ -293,6 +293,10 @@ test('Japanese cards: language switch, set picker groups, info-screen language a
  assert.equal(ui.run('shownCard().id'),lone);assert.match(ui.e('#detail').innerHTML,/No Japanese printing of this card/);
  // Choosing a Browse language resets the info screen to follow it.
  ui.run("setLangMode('en')");assert.equal(ui.run('state.detailLang'),null);
+ // Once matched to its product (Find prices / Update sales), a Japanese card gets the full price panel.
+ ui.run("setLangMode('all');applyMapping({sources:{'ja-sv2a-201':{source:'https://www.pricecharting.com/game/pokemon-japanese-scarlet-&-violet-151/charizard-ex-201',name:'Charizard EX'}},markets:{'ja-sv2a-201':{guide:{raw:327,grade9:381.97,psa10:546.14},observedAt:'2026-10-07T00:00:00Z',source:'PriceCharting',sales:[]}}},'ja-sv2a');state.selected='ja-sv2a-201';state.detailLang=null;state.grade='psa10';renderDetail()");
+ html=ui.e('#detail').innerHTML;assert.doesNotMatch(html,/Not matched yet/);assert.match(html,/\$546\.14/);assert.match(html,/Japanese printing · price-guide product “Charizard EX”/);assert.match(html,/scored and ranked against Japanese cards only/);
+ for(const c of cards.filter(c=>c.setId==='ja-sv2a')){c.source=null;c.sourceVerified=false;delete c.pcName;delete c.mapTried;}
 });
 
 test('Top movers and Investments switch language and rank each language separately',async()=>{

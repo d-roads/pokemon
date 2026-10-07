@@ -20,7 +20,8 @@ export function parseJapaneseListing(html){
   const a=row.match(/<td\b[^>]*class=["'][^"']*\btitle\b[^"']*["'][^>]*>[\s\S]*?<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/i);if(!a)continue;
   const path=decodeJa(a[1]).replace(/^https?:\/\/[^/]+/,''),title=textJa(a[2]);
   const prices=[...row.matchAll(/<td\b[^>]*class=["'][^"']*\bprice\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/gi)].map(x=>dollarsJa(x[1]));
-  const number=title.match(/#\s*([A-Z]*-?\d+[a-z]?)(?![a-z0-9])/i)?.[1]?.toUpperCase()||null;
+  // Promos carry their series code: "Pikachu #227/S-P".
+  const number=title.match(/#\s*([A-Z]*-?\d+[a-z]?(?:\s*\/\s*[A-Z]+-?P\b)?)(?![a-z0-9])/i)?.[1]?.toUpperCase().replace(/\s+/g,'')||null;
   rows.push({productId:id,path,title,name:title.replace(/\s*#.*$/,'').trim(),number,variant:/\[[^\]]+\]/.test(title),prices});
  }
  const cursor=String(html).match(/name=["']cursor["']\s+value=["']([^"']+)["']/)?.[1]||null;
@@ -35,13 +36,18 @@ export function nameForms(card){
  const out=new Set(),base=String(card.name||'');
  if(!card.nameIsJapanese&&base)out.add(jaWords(base));
  if(card.pcName)out.add(jaWords(card.pcName));
+ if(!out.size&&card.species)out.add(jaWords(card.species));
  for(const n of [...out]){if(n.startsWith('mega '))out.add('m '+n.slice(5));if(n.startsWith('m '))out.add('mega '+n.slice(2));}
  return [...out].filter(Boolean);
 }
 const sameName=(a,b)=>a===b||a.replace(/ (ex|gx|v|vmax|vstar|break|lv x)$/,'')===b.replace(/ (ex|gx|v|vmax|vstar|break|lv x)$/,'')&&/ (ex|gx|v|vmax|vstar|break|lv x)$/.test(a)===/ (ex|gx|v|vmax|vstar|break|lv x)$/.test(b);
 // The number PriceCharting files a card under: its collector number, except Wizards-era
 // Japanese cards (no printed collector numbers), which it lists by Pokédex number.
-export const listedNumber=card=>card.series==='WOTC'&&card.dexId?.length===1?String(card.dexId[0]):String(card.number);
+// The original Wizards sets and Neo have no printed collector numbers, so PriceCharting lists them by
+// Pokédex number; e-Card, VS and web have printed numbers. Promos are listed as 227/S-P.
+const DEX_LISTED=/^ja-(?:pmcg|neo)\d/,PROMO_CODE={'ja-sp':'S-P','ja-svp':'SV-P','ja-mp':'M-P'};
+export const dexListed=card=>DEX_LISTED.test(card.setId||'')&&card.dexId?.length===1;
+export const listedNumber=card=>dexListed(card)?String(card.dexId[0]):PROMO_CODE[card.setId]?jaNumber(card.number)+'/'+PROMO_CODE[card.setId]:String(card.number);
 
 // Map every card of one Japanese set to at most one listing row, and each row to at most one card.
 export function matchJapaneseListing(rows,cards){
@@ -52,8 +58,13 @@ export function matchJapaneseListing(rows,cards){
   const pool=byNumber.get(jaNumber(listedNumber(card)))||[],forms=nameForms(card);
   let pick=null,rule=null;
   const named=pool.filter(r=>forms.some(f=>sameName(jaWords(r.name),f)));
+  // Fallback: the same Pokémon under a prefix we could not translate (e.g. "Dark Arbok" for わるいアーボック),
+  // when exactly one product with this number names that species.
+  const species=card.species?jaWords(card.species):null;
+  const bySpecies=species&&!named.length?pool.filter(r=>(' '+jaWords(r.name)+' ').includes(' '+species+' ')):[];
   if(named.length===1){pick=named[0];rule='number+name';}
-  else if(!named.length&&pool.length===1&&(card.nameIsJapanese||!forms.length)&&card.series!=='WOTC'){pick=pool[0];rule='number-only';}
+  else if(bySpecies.length===1){pick=bySpecies[0];rule='number+species';}
+  else if(!named.length&&pool.length===1&&(card.nameIsJapanese||!forms.length)&&!dexListed(card)){pick=pool[0];rule='number-only';}
   if(!pick||used.has(pick.productId)){unmatched.push({id:card.id,number:card.number,reason:!pool.length?'no product with this number':named.length>1?'several products with this name and number':pick?'product already used':'name differs: '+pool.map(r=>r.name).slice(0,3).join(' / ')});continue;}
   used.add(pick.productId);matches.set(card.id,{...pick,rule});
  }
@@ -81,9 +92,11 @@ export function japaneseTitleMatches(title,card){
  if(!nameForms(card).some(f=>tw.includes(' '+f+' ')||tw.includes(' '+f.replace(/ (ex|gx|v|vmax|vstar)$/,'')+' ')))return false;
  const titleAnd=(t.match(/\s&\s/g)||[]).length,nameAnd=(String(card.pcName||card.name).match(/\s&\s/g)||[]).length,setAnd=(String(card.setName).match(/\s&\s/g)||[]).length;
  if(titleAnd>nameAnd+setAnd)return false;
- const expected=jaNumber(listedNumber(card)),own=jaNumber(card.number);
+ const code=PROMO_CODE[card.setId];
+ if(code&&!new RegExp('promo|'+code.replace('-','-?'),'i').test(t))return false;
+ const expected=code?jaNumber(card.number):jaNumber(listedNumber(card)),own=jaNumber(card.number);
  const fractions=[...t.matchAll(/\b([A-Z]*\d+[a-z]?)\s*\/\s*([A-Z-]*\d+[a-z]?)\b/gi)].filter(m=>!/^psa$/i.test(m[1]));
- if(fractions.length)return fractions.every(m=>jaNumber(m[1])===own&&(!card.printedTotal||jaNumber(m[2])===String(card.printedTotal)));
+ if(fractions.length&&!code)return fractions.every(m=>jaNumber(m[1])===own&&(!card.printedTotal||jaNumber(m[2])===String(card.printedTotal)));
  // No fraction: the number must appear as #201, No.201, 201 or 0201 (graded and year numbers ignored).
  const parts=expected.match(/^([A-Z]*-?)(\d+)([A-Z]?)$/);if(!parts)return false;
  const cleaned=t.replace(/\bPSA\s*\d+(?:\.\d)?/gi,' ').replace(/\b(?:19|20)\d{2}\b/g,' ');

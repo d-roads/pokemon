@@ -81,7 +81,7 @@ function rarityLabel(r,era,link){
  return RARITY_LABEL[r]||r;
 }
 // English for common name prefixes, so unlinked Pokémon still get a readable English name.
-const PREFIX=[['ロケット団の',"Team Rocket's "],['ロケットの',"Rocket's "],['ヒスイ',"Hisuian "],['ガラル',"Galarian "],['アローラ',"Alolan "],['パルデア',"Paldean "],['かがやく',"Radiant "],['ひかる',"Shining "],['ダーク',"Dark "],['ライト',"Light "],['れんげき',"Rapid Strike "],['いちげき',"Single Strike "],['シロナの',"Cynthia's "],['ナンジャモの',"Iono's "],['Nの',"N's "],['エリカの',"Erika's "],['カスミの',"Misty's "],['タケシの',"Brock's "],['マチスの',"Lt. Surge's "],['ナツメの',"Sabrina's "],['キョウの',"Koga's "],['カツラの',"Blaine's "],['サカキの',"Giovanni's "],['リーリエの',"Lillie's "],['ホップの',"Hop's "],['マリィの',"Marnie's "],['ペパーの',"Arven's "],['ヒビキの',"Ethan's "],['ダイゴの',"Steven's "],['アオキの',"Larry's "],['メガ',"Mega "]];
+const PREFIX=[['ロケット団の',"Team Rocket's "],['ロケットの',"Rocket's "],['ヒスイ',"Hisuian "],['ガラル',"Galarian "],['アローラ',"Alolan "],['パルデア',"Paldean "],['かがやく',"Radiant "],['ひかる',"Shining "],['ダーク',"Dark "],['ライト',"Light "],['れんげき',"Rapid Strike "],['いちげき',"Single Strike "],['シロナの',"Cynthia's "],['ナンジャモの',"Iono's "],['Nの',"N's "],['エリカの',"Erika's "],['カスミの',"Misty's "],['タケシの',"Brock's "],['マチスの',"Lt. Surge's "],['ナツメの',"Sabrina's "],['キョウの',"Koga's "],['カツラの',"Blaine's "],['サカキの',"Giovanni's "],['リーリエの',"Lillie's "],['ホップの',"Hop's "],['マリィの',"Marnie's "],['ペパーの',"Arven's "],['ヒビキの',"Ethan's "],['ダイゴの',"Steven's "],['アオキの',"Larry's "],['わるい',"Dark "],['かるい',"Light "],['軽い',"Light "],['フォークナーの',"Falkner's "],['ツクシの',"Bugsy's "],['アカネの',"Whitney's "],['マツバの',"Morty's "],['シジマの',"Chuck's "],['ミカンの',"Jasmine's "],['ヤナギの',"Pryce's "],['イブキの',"Clair's "],['カリンの',"Karen's "],['ワタルの',"Lance's "],['シバの',"Bruno's "],['イツキの',"Will's "],['メガ',"Mega "]];
 const TAIL=/(VMAX|VSTAR|V-UNION|V|GX|EX|ex|BREAK|LV\.X|☆|◇|δ|プリズムスター)$/;
 const tailOf=ja=>{const m=String(ja).replace(/\s+/g,'').match(TAIL);return m?m[1]:'';};
 const TAIL_EN={'☆':' ☆','◇':' ◇','プリズムスター':' ◇','δ':' δ','LV.X':' LV.X'};
@@ -187,6 +187,7 @@ for(const p of pending){
  const number=String(c.localId),name=englishName(c,link);
  const card={number,name:name||c.name.ja,nameJa:c.name.ja,...(name?{}:{nameIsJapanese:true}),rarity:rarityLabel(c.rarity,row.era,link&&enById.get(link.id)),category:categoryOf(c,row,row.era,p.secret),...(c.dexId?.length?{dexId:c.dexId}:{}),...(c.illustrator?{illustrator:c.illustrator}:{}),
   image:`https://assets.tcgdex.net/ja/${tSets.get(row.tcgdex)?.serie||c.serie}/${row.tcgdex}/${c.localId}/high.webp`,
+  ...(c.category==='Pokemon'&&c.dexId?.length===1&&speciesName(c.dexId[0])?{species:speciesName(c.dexId[0])}:{}),
   ...(link?{englishId:link.id,englishLink:method}:{englishCandidates:cands.length})};
  set.cards.push(card);
 }
