@@ -1,8 +1,59 @@
+# FutureSight — session handoff, October 7, 2026 (early morning; last updated Oct 6, ~11:55 PM Pacific)
+
+Repository `d-roads/pokemon`. Work this session is on branch **`dev`** only. `main`, `beta` and the beta folder are unchanged.
+
+## Start here (next session)
+- **Branches:** `beta` = what outside testers run (`4bdf0c8`, v1.0.0). `dev` = v1.1.0-dev with this session's UI polish and Japanese fixes. `main` still equals `beta`. Do not touch the beta folder or `beta`/`main` unless the owner asks for a beta update.
+- **Owner's PC (linked this session through WSL):** local test copy at `C:\Users\b345t\.codex\.chatgpt-projects\g-p-6a72b895d6288191b4624c5f5479fcae\futuresight-local-test-1.1.0-dev\futuresight-local-test\site` (`/mnt/c/...` from WSL). The owner signed in fine there and ran Japanese Update sales, so the launcher fix from last session works. The changed files from this session were copied into that folder; **close the test server window and run `Start-LocalTest.ps1` again** (the server loads `lib/` and the catalog only at start).
+- **Then (owner):** Top movers or Investments → Language **Japanese** → **Update sales**. It now continues where the last run stopped (cards read in the last 6 hours are skipped), so it only fetches the ~3,850 Japanese cards that have no sales yet, unread cards first and most valuable first. Expect roughly an hour. Re-run it if it stops; the summary toast says how many cards could not be read.
+- **Network:** this session's WSL shell **could** reach PriceCharting directly (≈1 request/s was fine; 6 parallel page reads were fine; no 429 seen). Images on storage.googleapis.com and the TCGdex API were reachable too.
+- **Local tools in WSL (not in git):** Node 24.9 in `~/.local/node/bin`; Playwright Chromium in the session's `work/pw` folder, run with `LD_LIBRARY_PATH=~/.local/pwlibs/root/usr/lib/x86_64-linux-gnu` (libnss3/libnspr4/libasound extracted from Ubuntu .debs, no sudo).
+- **Tests:** 174/174 with `npm test` (Node 24).
+
+## This session (October 6–7, night): UI polish, Japanese sales, images and English names
+
+Owner's requests: polish the screener on desktop and phone and the Investments tab on phone (from screenshots), fix Japanese cards that showed no sales after refreshing and no images, and show Japanese cards and sets in English by default with Japanese as an option.
+
+### Why Japanese cards had no sales
+Checked against a snapshot of the owner's local-test database (copied with SQLite's backup API; the owner's file was never written):
+- The owner's Update sales run had **matched 5,019 Japanese cards** (13 of them wrongly, see Bug 3) (guide prices only) and then **captured full sale pages for only 1,158** in about 18 minutes before it stopped. 3,847 matched cards had no sales at all.
+- The capture itself works: a random sample of 60 matched cards fetched live gave sales for 56. The four misses were one timeout and three cards from **Dream League**.
+- **Bug 1 (Dream League etc.):** the Japanese title rules exclude "league", "stamp", "bundle", "custom", "jumbo"… but those words are part of some set and card names (Dream League, World Championships 2023 deck, Reset Stamp, Iron Bundle, Custom Catcher, Custom Vest, Jumbo Ice Cream). Every product page and every sale for those ~42 cards was rejected. Now a word that appears in the card's own name, its product name or its set name does not exclude a title (`ownWords`/`foreignTerm` in `lib/japanese.mjs`). Live check: Dream League Piplup went from rejected to 78 accepted sales.
+- **Bug 2 (runs that stop are lost):** Update sales restarted from the first card every time, a single failed request ended the whole run, and per-card failures were ignored. Now:
+  - The page builds the queue itself and calls the new `POST /api/research?ids=a,b,c,d` (≤4 rare cards with a source; old `set=&offset=` form still works). Cards whose full page was read in the last **6 hours** are skipped, never-read cards go first (highest guide price first), then the oldest reads.
+  - Server: a 429/5xx/timeout on a card page is retried twice (`cardPage`, 4 s then 8 s). Page: a failed request is retried twice (3 s, 6 s) before the run stops; failed cards get one more pass at the end. The toast reports updated / skipped / could-not-read counts; stopping says the next run continues from there.
+- **Bug 3 (wrong prices, pre-existing):** in Pokédex-numbered sets (Wizards sets and Neo) a trainer could be matched "by number alone" to the Pokémon with that Pokédex number: Devolution Spray #086 → Seel, Dowsing Machine → Dewgong, Misty's Wish → Misty's Seel, Sabrina's… 13 cards in the owner's database. Number-only matching is now off in those sets (`numberOnlyAllowed`), `JA_MAP_VERSION` is `ja-map-2026.10.08`, and on start the server deletes existing number-only mappings in those sets **and their cached prices** (they were another card's prices). Those 13 cards show "Not matched yet".
+
+### Japanese images
+- Every TCGdex link was broken: TCGdex paths are case-sensitive (`ja/SV/SV2a/201`, the catalog had `ja/sv/sv2a/201`), and 87 of the 120 sets have no TCGdex scans at all. Only 1,631 of 5,726 cards have a real TCGdex scan.
+- PriceCharting's set listings carry a photo for every product (`…/images.pricecharting.com/<id>/60|240|1600.jpg`; ids are hex or short lowercase strings). `parseJapaneseListing` now reads it (`row.image`, 240 px).
+- New `tools/research/japanese-images.mjs` rewrites `site/data/japanese-catalogs.json`: the correct TCGdex scan where one exists (PriceCharting photo as `imageAlt`), otherwise the matched product's photo, and writes `tools/research/japanese-images-report.json`. Result: 1,631 TCGdex scans, 3,406 product photos, 689 placeholders (5,037 of 5,726 cards with a real image). Cards with neither get a plain "JP" card placeholder (`imagePlaceholder`), replaced by the product photo when the owner's own mapping matches them.
+
+### English names by default
+- 951 cards had only a Japanese name. The generator stores the matched product's English name as `nameEn` (catalog shows it as `name`, flagged `nameDisplayOnly`: it is **never** used as matching evidence, because it came from a match; using it caused a circular match during this session, caught and fixed). 681 cards got an English name; 270, mostly promos, still have only a Japanese name; their details say so.
+- The card panel no longer shows the Japanese name line by default. **Settings → Japanese cards → "Show Japanese names alongside English"** (localStorage `futuresight-japanese-text`, default off) adds the Japanese card and set names under the title. Set names were already English.
+
+### UI polish
+- **Desktop screener** (screenshot: one 5-column grid with 6 fields, so "Min investment score" sat alone on a second row; labels misaligned): two aligned rows, *Era · Language · Set* and *Price · Min activity · Min investment*, labels top-aligned, consistent 36 px controls. At ≥1600 px both rows sit side by side with a divider; ≤1100 px the era chips take their own line.
+- **Phone header:** the nav icons scrolled off to the right (Dex, Alerts, Settings unreachable without swiping) and on the local test copy the build badge covered the tabs. Now two rows: logo · build badge · account · info, then all seven tabs spread across the full width. Username hidden under 480 px (Sign out stays); the badge truncates with an ellipsis.
+- **Phone screener:** quick screens and era chips wrap instead of scrolling off the edge (era chips in an even grid); Language switch spans the width; sliders full width.
+- **Phone Investments:** the card name and price overlapped (name squeezed to one word per line). Each pick is now card → price strip (price, label, score pill, research line) → reasons → compact demand line. The signal legend and the era filter wrap cleanly (no oval pill).
+- Checked in headless Chromium at 1440×900, 1920×1000, 2517×1000, 430×932, 390×844 and 360×780 against a copy of the owner's database: no page errors.
+
+### Tests
+174/174 (`npm test`, Node 24.9). New/changed: own-name words in Japanese titles; product photo parsing; catalog images (case-correct TCGdex, product photo or placeholder) and English names; Pokédex-numbered sets and the clean-up of old matches; `/api/research?ids=`; resumable Update sales (skip recent, unread first, one retry pass); English-only detail by default and the Japanese-names setting.
+
+### Left for later
+- ~689 Japanese cards (unmatched products, mostly promos and Neo/WOTC gaps) still have no image, 270 only a Japanese name.
+- The research rank is still English-only.
+
+---
+
 # FutureSight — session handoff, October 6–7, 2026 (late night; last updated Oct 6, 9:35 PM Pacific)
 
 Repository `d-roads/pokemon`. Work this session is on branch **`dev`** only. `main` and the beta are unchanged.
 
-## Start here (next session)
+## Start here (as of the previous session)
 - **Branches:** `beta` = what outside testers run (`4bdf0c8`, v1.0.0). `dev` = everything from this session (v1.1.0-dev, latest `Start-LocalTest` fix). `main` still equals `beta`. Do not touch the beta folder or `beta`/`main` unless the owner asks for a beta update.
 - **Owner's PC (not linked this session):** beta in `...\g-p-6a72b895d6288191b4624c5f5479fcae\primal-watch\site`; local test copy unzipped at `...\g-p-6a72b895d6288191b4624c5f5479fcae\futuresight-local-test-1.1.0-dev\futuresight-local-test\site` (one folder deeper than planned). Folder access was declined this session, so builds went out as zips/files in chat.
 - **Open item:** the owner's first local-test start could not find the beta folder (because of the extra folder level) and created a blank database, so `admin` sign-in failed. Fixed in `Start-LocalTest.ps1` + `copy-db.mjs` (search upward for `primal-watch\site`; `--replace-empty` swaps a blank test DB for a copy of the beta's). The two files were sent to the owner to drop in; **confirm sign-in works** before anything else.
