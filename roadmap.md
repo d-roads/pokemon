@@ -100,57 +100,66 @@ The first two items are also the answer to faster price updates (see Phase 0's m
 
 ## Phase 2 — Card page (like a stock's quote page)
 
-- Price chart: raw / PSA 9 / PSA 10 toggle, 3 months to all time, monthly sales-count bars, and markers
-  for set release and population jumps.
-- Grade spreads: PSA 10 vs PSA 9 and PSA 10 vs raw multiples, over time.
-- Grading calculator: raw price plus grading fee and shipping, weighed against the expected value at
-  this card's PSA 10 rate.
-- Population panel: PSA population over time, gem rate, how fast new copies are graded.
-- Liquidity: sales per month, median days between sales, active listings (SerpApi/eBay).
-- Risk: volatility, worst drop from peak, how closely it follows its era index.
-- English vs Japanese price gap for the 5,767 linked printings.
-- Comparables: same Pokémon, same artist, same rarity tier, side by side.
-- Character context: this Pokémon's index, demand rank and demand trend next to the card, and whether
-  the card is priced above or below the character's usual premium.
-- Fair value and deal check: a fair-value range from recent matching sales, and live listings
-  (SerpApi/eBay) marked as below, at or above it.
-- Sell-side Price check: net proceeds after eBay / TCGplayer fees, shipping and tax at today's median,
-  next to the existing buy-side break-even (`lib/investment-costs.mjs`).
+Done items are in the card panel's **Market metrics** section (`marketSection` in `public/app.js`).
+
+- [ ] Price chart: raw / PSA 9 / PSA 10 toggle, 3 months to all time, monthly sales-count bars, and markers
+  for set release and population jumps. (The existing sales chart and monthly guide chart remain.)
+- [x] Grade spreads today (PSA 10 / PSA 9, PSA 10 / raw). [ ] The same over time.
+- [x] Grading calculator (raw copies): raw sold median + editable grading fee and shipping, against the
+  expected value at the card's PSA population odds (PSA 8 and 7 at their guides, 6 and below at the
+  ungraded guide), with the break-even PSA 10 rate. Notes that submitted copies are better than average.
+- [x] Population today: PSA graded, gem rate, 90-day growth once population history exists.
+  [ ] Population over time chart.
+- [x] Liquidity: sales in 30 / 90 days, days since last sale. [ ] Active listings (SerpApi/eBay).
+- [x] Risk: volatility, drawdown from peak, 52-week range. [ ] How closely it follows its era index.
+- [x] English vs Japanese price gap (verified printings, same grade).
+- [~] Comparables: the card's set, Pokémon, tier and artist indices are listed and open their pages,
+  whose member tables compare the cards side by side.
+- [x] Character context: the Pokémon's demand premium and index returns next to the card, and the card's
+  own premium over peers.
+- [ ] Fair value and deal check against live listings.
+- [x] Sell-side: what selling today nets at the sold median (or guide) after the Price check cost
+  assumptions. [ ] Marketplace presets (eBay, TCGplayer).
 
 ## Phase 3 — Character demand
 
-Which Pokémon collectors are paying up for, and whether that is rising or fading.
+The **Market → Pokémon** tab and each Pokémon's index page.
 
-- Character leaderboard: Pokémon ranked by demand premium, index return (30 days / 90 days / 1 year),
-  sales volume and breadth, with rising and falling demand flagged.
-- Character pages: index chart and demand premium over time; every card of that Pokémon sorted by
-  value or return; which eras, sets and rarity tiers carry the premium; the cheapest card with
-  steady sales (the entry point).
-- Money flow: each character's share of total sales value over time, to show where buying is moving.
-- Undervalued cards of in-demand characters: priced below the character's usual premium for their
-  rarity and set (extends the existing "cheap" signal from `lib/invest.mjs`).
-- English vs Japanese demand: characters whose Japanese cards trade at an unusual premium or
-  discount to their English cards.
+- [x] Character leaderboard: demand premium (shrunk for Pokémon with few cards), its change over a year,
+  index returns (typical card or by value), breadth, cards, sales and value; Rising and Fading demand lists.
+- [x] Character pages: index chart (typical card and by value, 6M–all), demand premium over time,
+  every card with price, returns, premium over peers, sales and last sale.
+  [ ] Which eras, sets and tiers carry the premium; the entry-point card.
+- [ ] Money flow: each character's share of total sales value over time.
+- [ ] Undervalued cards of in-demand characters as a list.
+- [ ] English vs Japanese demand.
+- Note: the catalog cannot tell items from trainer characters, so a few items (Energy Switch, Rare Candy)
+  appear as "Pokémon". Energy cards are left out.
 
 ## Phase 4 — Set trends
 
-- Set pages as "sectors": set index, total value, how much of it sits in the top cards, best and
-  worst performers, gem rate and how fast the set is being graded.
-- Set lifecycle curves: each set's index by months since release, overlaid on its era's typical curve,
-  to show where a set sits (post-release dip, recovery, out-of-print climb).
-- Set comparison: two or more sets side by side on index, returns, volatility and liquidity.
-- Rarity-tier trends: how each tier is moving across sets, and within a set (chase cards vs the rest).
-- Out-of-print effect: how set indices moved before and after print runs ended.
+The **Market → Sets** tab and each set's index page.
+
+- [x] Set pages as "sectors": index, value, top-5 share, breadth, gem rate, sales, member cards.
+  [ ] How fast the set is being graded (needs population history).
+- [x] Set lifecycle curves: each set's index by months since release (rebased to 100 at its first month)
+  against its era's median path, with how far above or below typical each set sits now.
+  On the local-test data, Scarlet & Violet sets fall to ~56% of launch by month 7 and recover to ~90%
+  by month 26.
+- [~] Set comparison: pick several sets on the lifecycle chart. [ ] A side-by-side table.
+- [x] Rarity-tier trends across sets (Market → Rarity, and the overview's tier list).
+- [ ] Out-of-print effect (needs print status).
 
 ## Phase 5 — Market overview
 
-- Index cards with sparklines; index detail pages with their members.
-- Heatmap: sets as boxes, sized by total value and coloured by % change (1 day / 7 days / 30 days / 1 year).
-  The same view by Pokémon and by rarity tier.
-- Market breadth: cards up vs down, new 52-week highs and lows, sales volume against average.
-- Top movers by group: the sets, Pokémon, rarity tiers and artists moving most, beside the existing
-  card movers.
-- Sales tape: a live, filterable feed of newly seen sales, flagging sales far above or below fair value.
+The **Market → Overview** tab.
+
+- [x] Index cards with sparklines (all cards, top 100, each era); index pages with their members.
+  Top 100 uses today's members, so its history flatters it.
+- [x] Heatmap of sets, sized by value and coloured by 1D / 7D / 30D / 1Y change. [ ] By Pokémon and tier.
+- [x] Market breadth: up vs down over 30 days, 52-week highs and lows, sales in 30 days.
+- [~] Top movers by group: every Market table sorts by any return. [ ] A combined movers panel.
+- [ ] Sales tape.
 
 ## Phase 6 — Screener, portfolio, alerts
 

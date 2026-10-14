@@ -1,3 +1,39 @@
+# FutureSight — October 14, 2026 (evening): investing roadmap, Phase 1 data foundation, Market view (dev)
+
+Owner asked to trim the roadmap to features that inform buying, selling and investing, add character demand and
+set trends, then start building. `roadmap.md` has the details and checkboxes; this is the short version.
+
+- **Roadmap:** terminal-interface phase and format rotation removed; Character demand (Phase 3) and Set trends
+  (Phase 4) added; old Phases 3–4 are now 5–6.
+- **Phase 0 done:** the page rejoins a running Update sales job after a reload (`resumeUpdate`).
+- **Light records:** `market_cache` has `light`/`light_key` columns (added on first use, plus a trigger that clears
+  a stale light copy). `/api/catalog` 2.5 s → 0.9 s on the local-test DB; alerts and set refresh read only their cards.
+- **Guide sweep** (`/api/sweep`, `startSweep`): every page of every set listing through the shared pace.
+  Real run on a copy of the local-test DB: 136 English listings in 11.4 min, 97% of English rares priced.
+  Tables: `set_sweeps`. Browse's set refresh now reads every listing page too.
+- **Metrics** (`lib/metrics.mjs` pure, `lib/metrics-store.mjs` DB): `price_points` (daily guide prices,
+  change + 14-day heartbeat), `card_metrics`, `index_metrics`, `market_index`, `metrics_runs`. Indices per language
+  and grade: all, top 100, era, set, Pokémon, rarity tier, artist; chain-linked, value- and equal-weighted, with
+  premium over peers (= Pokémon demand) over time. Rebuild ~25–30 s, ~250 MB extra, yields to requests
+  (longest pause 0.4 s). Runs after each Update sales / sweep and nightly; `POST /api/metrics/rebuild` forces one.
+- **Nightly** (`runNightly`, `FUTURESIGHT_UPDATE_HOUR`, `FUTURESIGHT_NIGHTLY_PAGES` default 1500): sweep → card
+  pages due by tier (daily: watched/owned/$1,000+; weekly: $100–$1,000; monthly: rest) → rebuild. Off unless the
+  hour is set. `/api/schedule` shows tiers and the last run.
+- **Market view** (new nav item): Overview (index cards, breadth, set heatmap, tiers), Pokémon (demand
+  leaderboard, rising/fading demand), Sets (table + lifecycle curves vs era median), Rarity, Artists, and index
+  pages (stats, level and premium charts, member cards). Typical card / By value switch.
+- **Card panel:** Market metrics section (returns, 52-week range, risk, liquidity, spreads, population, premium,
+  language gap, its indices, selling proceeds, grading calculator for raw).
+- **Tests:** 222/222 (`npm test`). The two Top movers tests that failed on `dev` now use the bundled data's date.
+- **Data notes:** PSA 10 guides of thinly traded cards jump a lot month to month (Base Set Charizard PSA 10:
+  $30k → $12k → $24k → $12k), so value-weighted indices can swing; the Typical card view is steadier.
+  1-day returns stay blank until the guide has been read on consecutive days (the nightly sweep does that).
+- **Owner, to try it:** restart the server; run a sweep (Market shows a button when there are no metrics yet) or
+  Update sales, then open Market. Set `FUTURESIGHT_UPDATE_HOUR=3` in `.env` for the nightly run. Not copied to the
+  beta folder.
+- **Next:** screener v2 on `card_metrics`, portfolio analytics against the indices, metric-based alerts; money flow,
+  undervalued in-demand cards, EN vs JA demand; population history; fair-value deal check with live listings.
+
 # FutureSight — October 14, 2026: roadmap and Phase 0, Update sales on the server (dev)
 
 Owner asked for a "Bloomberg terminal for Pokémon cards" plan and faster price updates (~1 card/s, too slow for ~17k cards). The plan is in `roadmap.md` (Phases 0–5). Phase 0 is implemented here.
