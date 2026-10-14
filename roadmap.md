@@ -32,7 +32,7 @@ elsewhere:
       up to 3 times. The job keeps going if the tab is closed. The page shows progress and new prices
       as they arrive, and falls back to the old batch loop where background jobs are not available.
 - [x] Redraw the list at most every 2 s during an update.
-- [ ] Rejoin a running update after a page reload (today you rejoin it by pressing Update sales again).
+- [x] Rejoin a running update after a page reload.
 
 **Measured result (Oct 14, 2026, one set of ~50 cards each, against a copy of the local-test database).**
 

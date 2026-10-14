@@ -203,6 +203,22 @@ test('Update sales follows the server job and shows new prices as they arrive',a
  assert.ok(!ui.calls.some(u=>u.startsWith('/api/research')),'the page does not read batches itself');
  assert.match(ui.e('#toast').textContent,/Refreshed sales for 1 of 8 rare cards · 5 already checked .* · 1 could not be read/);
 });
+test('After a reload the page rejoins a running server update from where it is now',async()=>{
+ const ui=workspace();await ui.run('init()');ui.context.setTimeout=f=>{f();return 0;};
+ const id=ui.run("state.cards.find(c=>c.source&&c.eligible&&c.setId==='xy5').id"),seen=[];
+ const job=extra=>({id:4,state:'running',total:50,done:20,updated:20,failed:0,skipped:0,grand:50,changed:[],next:20,...extra});
+ ui.responses['/api/update']=url=>{
+  seen.push(url);
+  if(seen.length===1){assert.match(url,/since=\d{10,}$/,'the first look asks for no cards: the catalog already has them');return {job:job(),mine:false};}
+  assert.match(url,/since=20$/);
+  return {job:job({state:'done',done:50,updated:21,changed:[id],next:21,markets:{[id]:{guide:{psa10:4321},s:[]}}})};
+ };
+ await ui.run('resumeUpdate()');
+ assert.equal(seen.length,2);assert.ok(!ui.calls.some(u=>u.startsWith('/api/refresh')),'no Japanese matching on resume');
+ assert.equal(ui.run(`state.markets['${id}'].guide.psa10`),4321);
+ assert.match(ui.e('#toast').textContent,/Refreshed sales for 21 of 50 rare cards/);
+ ui.responses['/api/update']=()=>({job:null});seen.length=0;await ui.run('resumeUpdate()');assert.equal(ui.run('refreshRun'),null,'nothing to follow');
+});
 test('Update sales resumes: recently read cards are skipped, unread cards go first, failures are retried once',async()=>{
  const ui=workspace();await ui.run('init()');ui.context.setTimeout=f=>{f();return 0;};
  const scope=ui.run("state.cards.filter(c=>c.source&&c.eligible&&c.setId==='xy5').map(c=>c.id)");assert.ok(scope.length>8);

@@ -404,9 +404,10 @@ function applyMarkets(markets){for(const [id,m] of Object.entries(markets||{})){
 const updateSummary=(updated,grand,skipped,failed)=>'Refreshed sales for '+updated.toLocaleString()+' of '+grand.toLocaleString()+' rare cards'+(skipped?' · '+skipped.toLocaleString()+' already checked in the last '+FRESH_HOURS+' h':'')+(failed?' · '+failed+' could not be read (try again later)':'')+'.';
 // The server reads the pages itself and keeps going if this page is closed; the page follows its
 // progress and shows new prices as they arrive. Returns null where the server cannot run the job
-// (then the page reads batches itself).
-async function followServerUpdate(scopes,langs,signal){
- const start=await request('/api/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scopes,langs}),signal});
+// (then the page reads batches itself). `resume` is a job already running when the page loaded:
+// the page follows it from where it is now (the catalog it just loaded has the earlier cards).
+async function followServerUpdate(scopes,langs,signal,resume=null){
+ const start=resume||await request('/api/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scopes,langs}),signal});
  if(start.unavailable||(!start.job&&start.grand==null&&!start.warning))return null;
  if(start.warning){toast(start.warning);return {job:null,updated:0};}
  if(!start.job){toast(start.grand?'Every card here was checked in the last '+FRESH_HOURS+' hours. Nothing to update.':'No cards here have a price source yet.');return {job:null,updated:0};}
@@ -414,7 +415,7 @@ async function followServerUpdate(scopes,langs,signal){
  // Cancel stops the server's job (only the account that started it can); otherwise it just stops following.
  const stop=()=>{if(start.mine)request('/api/update',{method:'DELETE'}).catch(()=>{});};
  signal.addEventListener('abort',stop,{once:true});
- let job=start.job,since=0,updated=0;
+ let job=start.job,since=resume?job.next:0,updated=0;
  try{
   for(;;){
    setRefreshLabels('Cancel · '+job.done.toLocaleString()+' / '+job.total.toLocaleString());
@@ -428,14 +429,14 @@ async function followServerUpdate(scopes,langs,signal){
  }finally{signal.removeEventListener('abort',stop);}
  return {job,updated};
 }
-async function refreshSales(scopes,langs=LANGS.map(l=>l.id)){
+async function refreshSales(scopes,langs=LANGS.map(l=>l.id),resume=null){
  if(refreshRun){refreshRun.abort();return;}
  const controller=new AbortController();refreshRun=controller;
  let updated=0,grand=0,skipped=0;const failed=new Map();
  setRefreshLabels('Cancel update');
  try{
-  await mapJapaneseSets(scopes,langs,controller.signal,setRefreshLabels);
-  const served=await followServerUpdate(scopes,langs,controller.signal);
+  if(!resume)await mapJapaneseSets(scopes,langs,controller.signal,setRefreshLabels);
+  const served=await followServerUpdate(scopes,langs,controller.signal,resume);
   if(served){
    const j=served.job;updated=served.updated;if(!j)return;
    toast(j.state==='cancelled'?'Update stopped. Retrieved sales are saved; the next update continues from here.':j.state==='failed'?(j.error||'The update failed.')+' Retrieved sales are saved; run the update again to continue.':updateSummary(j.updated,j.grand,j.skipped,j.failed));
@@ -475,6 +476,10 @@ async function refreshSales(scopes,langs=LANGS.map(l=>l.id)){
 function refreshSet(){
  const scope=state.setId;
  return refreshSales(scope==='all'&&state.eras.length<state.series.length?state.eras.map(e=>'era:'+e):[scope],scope!=='all'&&!scope.startsWith('era:')?[activeSet()?.lang||'en']:state.langs);
+}
+// After a reload, follow an Update sales job that is still running on the server.
+async function resumeUpdate(){
+ try{const r=await request('/api/update?since='+Number.MAX_SAFE_INTEGER);if(r.job?.state!=='running'||refreshRun)return;toast('Update sales is still running'+(r.mine?'':' from another account')+'. Showing its progress.');await refreshSales(null,null,r);}catch{}
 }
 function updateMarketSales(){
  return refreshSales(state.marketSeries.length===state.series.length?['all']:state.marketSeries.map(e=>'era:'+e),[state.marketLang]);
@@ -937,7 +942,7 @@ async function init(){
   state.markets=Object.fromEntries(Object.entries(catalog.markets).map(([id,m])=>[id,expandMarket(m)]));state.watch=watch.watchlist;
   const checked=Object.values(catalog.markets).map(m=>m?.research?.checkedAt||m?.observedAt).filter(Boolean).sort().at(-1);
   updateView();const checkedText=checked?'Sales checked '+new Date(checked).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'Dated source snapshots';$('#snapshot-label').textContent=checkedText;$('#status-data').textContent=checkedText+' · '+state.cards.filter(c=>c.eligible).length.toLocaleString()+' rare cards';
-  loadScores();loadTicker();
+  loadScores();loadTicker();resumeUpdate();
   loadDex().then(()=>{stats();renderList();if(state.view==='dex')renderDex();});
   loadAlerts(true);setInterval(()=>{if(document.visibilityState!=='hidden')loadAlerts(true);},60000);
  }catch(e){error(e.message);$('#card-list').innerHTML='<div class="empty-state"><strong>Couldn’t load the set.</strong><p>Keep this page open and try again.</p><button class="button" id="retry-load">Try again</button></div>';$('#retry-load').onclick=init;}
