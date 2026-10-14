@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {cards} from '../data/catalog.mjs';
 import {snapshots} from '../data/market.mjs';
-import {measureMove,topMovers,MOVER_RULES} from '../lib/movers.mjs';
+import {measureMove,topMovers,MOVER_RULES,checkedAt} from '../lib/movers.mjs';
 
 const NOW=Date.parse('2026-10-01T20:00:00Z');
 const day=n=>new Date(Date.parse('2026-10-01T00:00:00Z')-n*86400000).toISOString().slice(0,10);
@@ -35,8 +35,10 @@ test('Raw movers count near-mint sales only',()=>{
 });
 test('Top movers over the real data are capped, sorted and pass every rule',()=>{
  const entries=cards.map(c=>[c,snapshots[c.id]]);
+ // The bundled data's own date, so the result does not depend on when the tests run.
+ const now=Date.parse(entries.map(([,m])=>checkedAt(m)).filter(Boolean).sort().at(-1));
  for(const period of ['week','month']){
-  const r=topMovers(entries,period);
+  const r=topMovers(entries,period,{now});
   assert.deepEqual(Object.keys(r.grades),['psa10','psa9','raw']);assert.ok(r.checkedAt);
   for(const [grade,col] of Object.entries(r.grades)){
    assert.ok(col.movers.length<=MOVER_RULES.limit);assert.ok(col.qualified>=col.movers.length);
@@ -50,5 +52,5 @@ test('Top movers over the real data are capped, sorted and pass every rule',()=>
   assert.ok(r.grades.raw.movers.length>0,'some raw card should qualify in the snapshot');
  }
  // The month view, with more evidence, fills all 20 places for every grade.
- const month=topMovers(entries,'month');for(const col of Object.values(month.grades))assert.equal(col.movers.length,20);
+ const month=topMovers(entries,'month',{now});for(const col of Object.values(month.grades))assert.equal(col.movers.length,20);
 });

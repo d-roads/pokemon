@@ -13,7 +13,7 @@ import {investmentScores} from '../lib/score.mjs';
 import {normalizeCosts,costSummary,netReturn,maxBuyPrice,DEFAULT_COSTS} from '../lib/investment-costs.mjs';
 import {investmentTable,investmentView} from '../lib/investment.mjs';
 const investData=potentialInvestments(cards.map(c=>[c,snapshots[c.id]]));
-const moverData=topMovers(cards.map(c=>[c,snapshots[c.id]]),'week');
+const moverData=topMovers(cards.map(c=>[c,snapshots[c.id]]),'week',{now:Date.parse(Object.values(snapshots).map(m=>m?.research?.checkedAt||m?.observedAt).filter(Boolean).sort().at(-1))});
 const scoreData=investmentScores(cards.map(c=>[c,snapshots[c.id]]));
 
 // Exercise the UI's controls and rendered output without a browser runtime.
