@@ -145,3 +145,27 @@ export async function cardMetricsFor(db,ids,grade){
  for(let i=0;i<ids.length;i+=99){const part=ids.slice(i,i+99),r=await db.prepare(`SELECT * FROM card_metrics WHERE grade = ? AND card_id IN (${part.map(()=>'?').join(',')})`).bind(grade,...part).all();for(const row of r.results||[])out[row.card_id]=metPlain(row);}
  return out;
 }
+// Month-end levels (equal- and value-weighted) of every index of one kind, for sparklines: the last
+// `months` month ends and today. Ids of a kind share a prefix, so this reads one key range.
+export async function indexSparks(db,{lang,kind,grade,days}){
+ const lo=`${lang}:${kind}:`,hi=`${lang}:${kind};`,out={};
+ const list=days.map(()=>'?').join(',');
+ const rows=(await db.prepare(`SELECT index_id,day,level,level_eq FROM market_index WHERE index_id >= ? AND index_id < ? AND grade = ? AND day IN (${list})`).bind(lo,hi,grade,...days).all()).results||[];
+ for(const r of rows)(out[r.index_id]||=[]).push([r.day,r.level,r.level_eq]);
+ for(const v of Object.values(out))v.sort((a,b)=>a[0].localeCompare(b[0]));
+ return out;
+}
+// Breadth across every priced card of a language and grade: how many rose or fell over 30 days, and how
+// many sit at a new 52-week high or low.
+export async function marketBreadth(db,{lang,grade}){
+ return await db.prepare(`SELECT COUNT(*) AS cards,COUNT(price) AS priced,SUM(ret_30d > 0) AS up_30d,SUM(ret_30d < 0) AS down_30d,SUM(ret_7d > 0) AS up_7d,SUM(ret_7d < 0) AS down_7d,
+  SUM(price IS NOT NULL AND high_52w IS NOT NULL AND price >= high_52w) AS highs,SUM(price IS NOT NULL AND low_52w IS NOT NULL AND price <= low_52w AND high_52w > low_52w) AS lows,
+  SUM(sales_30d) AS sales_30d,SUM(sales_90d) AS sales_90d,MAX(as_of) AS as_of FROM card_metrics WHERE lang = ? AND grade = ?`).bind(lang,grade).first();
+}
+// Month-end levels of every set index in a language, for lifecycle curves.
+export async function setHistories(db,{lang,grade}){
+ const out={};
+ const rows=(await db.prepare('SELECT index_id,day,level,level_eq FROM market_index WHERE index_id >= ? AND index_id < ? AND grade = ? ORDER BY index_id,day').bind(`${lang}:set:`,`${lang}:set;`,grade).all()).results||[];
+ for(const r of rows){const d=new Date(r.day+'T00:00:00Z'),next=new Date(d.getTime()+86400000);if(next.getUTCDate()!==1)continue;(out[r.index_id.slice(lang.length+5)]||=[]).push([r.day.slice(0,7),r.level,r.level_eq]);}
+ return out;
+}

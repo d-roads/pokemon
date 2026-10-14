@@ -459,3 +459,26 @@ test('Language switching refuses unreviewed, ambiguous and unrelated printings i
  ui.run("state.cards=state.cards.map(c=>c.id==='sv3pt5-199'?{...c,japaneseIds:['ja-sv2a-201']}:c.id==='ja-sv2a-201'?{...c,englishId:'sv3pt5-6'}:c)");
  assert.equal(ui.run("counterpart(cardById('sv3pt5-199'),'ja')"),null);
 });
+test('Market shows indices, breadth and the set heatmap, a Pokémon demand table, set lifecycles and an index page',async()=>{
+ const ui=workspace();await ui.run('init()');
+ const run={as_of:'2026-10-14',finished_at:'2026-10-14T10:00:00Z'};
+ const row=(kind,key,name,extra={})=>({index_id:'en:'+kind+':'+key,kind,key,name,grade:'psa10',lang:'en',as_of:'2026-10-14',level:150,ret_30d:.1,ret_90d:.2,ret_1y:.5,eq_ret_30d:.05,eq_ret_90d:.1,eq_ret_1y:.3,priced:40,members:42,value:2500000,breadth_30d:.6,sales_90d:300,premium:3.2,premium_1y:2,spark:[['2025-10-31',100,100],['2026-10-14',150,130]],...extra});
+ ui.responses['/api/market-overview']={run,breadth:{priced:9000,up_30d:5000,down_30d:3000,highs:900,lows:200,sales_30d:12000},indices:[row('all','all','All English cards'),row('era','WOTC','Wizards of the Coast'),row('tier','sir','Special illustration rare',{ret_1y:-.4,eq_ret_1y:-.3})],sets:[row('set','base1','Base Set',{series:'WOTC',release:'1999-01-09'}),row('set','sv3pt5','151',{value:900000,ret_30d:-.2,eq_ret_30d:-.2})]};
+ ui.responses['/api/indices']={run,rows:[row('char','Gengar','Gengar',{premium:8.9,premium_1y:6.3}),row('char','Pidgey','Pidgey',{premium:.8,premium_1y:1.1,priced:12}),row('char','Rare','Rare',{priced:2})]};
+ ui.responses['/api/lifecycle']={curves:[{set_id:'sv3pt5',name:'151',start:0,points:[[0,100,100],[6,60,58],[12,90,85]]}],typical:[[0,100,10],[6,62,10],[12,70,10]]};
+ ui.responses['/api/index']={id:'en:char:Gengar',name:'Gengar',metrics:row('char','Gengar','Gengar',{premium:8.9,premium_1y:6.3,drawdown:-.1,volatility:.3,low_52w:90,high_52w:160,top5_share:.5,gem_rate:.2}),history:[['2025-10-31',100,100,30,1e6,6.3],['2026-09-30',140,125,40,2e6,8.5],['2026-10-14',150,130,40,2.5e6,8.9]],members:[{card_id:'base1-4',price:12000,ret_30d:.1,ret_1y:.5,premium:4},{card_id:'base1-2',price:900,ret_30d:-.1}]};
+ ui.e('#market-nav').onclick();await new Promise(r=>setImmediate(r));
+ let html=ui.e('#market-view').innerHTML;
+ assert.match(html,/All English cards/);assert.match(html,/Wizards of the Coast/);assert.match(html,/data-index="en:set:base1"/,'a heatmap tile per set');
+ assert.match(html,/5,000/);assert.match(html,/\+5\.0%/,'typical-card returns by default');
+ ui.run("state.market.weight='value';renderMarket()");assert.match(ui.e('#market-view').innerHTML,/\+10\.0%/,'value-weighted on request');ui.run("state.market.weight='eq'");
+ ui.run("state.market.tab='char';renderMarket()");await ui.run("loadMarket('char')");html=ui.e('#market-view').innerHTML;
+ assert.match(html,/Gengar/);assert.match(html,/8\.9×/);assert.match(html,/Rising demand/);assert.match(html,/Fading demand/);
+ assert.doesNotMatch(html,/data-open-index="en:char:Rare"/,'too few cards for the default minimum');
+ assert.ok(html.indexOf('en:char:Gengar')<html.indexOf('en:char:Pidgey'),'sorted by demand');
+ ui.run("state.market.tab='set';renderMarket()");await ui.run("loadMarket('set')");await new Promise(r=>setImmediate(r));
+ html=ui.e('#market-view').innerHTML;assert.match(html,/Set lifecycles/);assert.match(html,/Era median/);assert.match(html,/above typical by 21%/);
+ await ui.run("openIndex('en:char:Gengar');loadIndex('en:char:Gengar')");html=ui.e('#market-view').innerHTML;
+ assert.match(html,/Demand premium/);assert.match(html,/data-card="base1-4"/);assert.match(html,/6\.3× a year ago/);
+ ui.run("openCard('base1-4','psa10')");assert.equal(ui.run('state.view'),'browse');assert.equal(ui.run('state.selected'),'base1-4');
+});

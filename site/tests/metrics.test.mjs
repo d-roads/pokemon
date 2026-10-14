@@ -116,4 +116,10 @@ test('A rebuild saves daily prices, card and index metrics, and the routes serve
  const schedule=await(await api(req('/api/schedule'),env)).json();
  assert.equal(schedule.enabled,false);assert.deepEqual(schedule.tiers.map(t=>t.id),['daily','weekly','monthly']);
  assert.ok(schedule.tiers.reduce((n,t)=>n+t.cards,0)>0);
+ const overview=await(await api(req('/api/market-overview?grade=psa10'),env)).json();
+ assert.ok(overview.indices.some(i=>i.index_id==='en:all:all'&&Array.isArray(i.spark)));assert.ok(overview.sets.some(x=>x.index_id==='en:set:base1'&&x.release));
+ assert.ok(overview.breadth.priced>=4);
+ const life=await(await api(req('/api/lifecycle?grade=psa10&era=WOTC'),env)).json();assert.ok(Array.isArray(life.curves)&&Array.isArray(life.typical));
+ assert.equal((await api(req('/api/lifecycle?era=NOPE'),env)).status,400);
+ const sparks=await(await api(req('/api/indices?kind=set&grade=psa10&spark=1'),env)).json();assert.ok(sparks.rows.every(r=>Array.isArray(r.spark)));
 });

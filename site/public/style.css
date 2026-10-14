@@ -1067,3 +1067,84 @@ html.intro-pending .brand-mark,html.intro-playing .brand-mark{visibility:hidden}
 .market-lang{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:13px;color:var(--muted)}
 .market-lang .segmented button{padding:5px 12px}
 .market-lang-note{margin:0 0 12px;padding:10px 12px;border:1px dashed var(--line);border-radius:8px;font-size:13px;color:var(--muted)}
+/* ---------- Market: indices, Pokémon demand, set trends ---------- */
+/* Eight top-bar items: tighten the bar and keep only the (i) of "How targets work" below 1520px. */
+@media(max-width:1520px){.nav-item{padding:0 9px}.nav-item.active::after{left:9px;right:9px}.method-link{padding:6px}.method-link .method-text{display:none}}
+@media(min-width:981px) and (max-width:1280px){.sidebar{gap:12px}.nav-item{padding:0 7px;font-size:12.5px}.nav-item.active::after{left:7px;right:7px}}
+.market-head .head-actions{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.market-head .segmented button{padding:5px 12px}
+.market-tabs{display:flex;gap:4px;margin:12px 0;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.market-tabs button{border:0;background:none;color:var(--muted);font-size:14px;font-weight:550;padding:9px 14px;border-bottom:2px solid transparent;white-space:nowrap}
+.market-tabs button:hover{color:var(--ink)}
+.market-tabs button.active{color:var(--ink);border-bottom-color:var(--accent)}
+.index-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin:0 0 12px}
+.index-card{display:flex;flex-direction:column;gap:6px;text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(180deg,var(--panel-2),var(--panel));color:var(--ink);min-width:0}
+.index-card:hover,.index-card:focus-visible{border-color:var(--accent-line)}
+.index-card strong{font-size:14px;font-weight:650;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.index-kind{font:600 10px/1.4 var(--mono);letter-spacing:1.2px;text-transform:uppercase;color:var(--faint)}
+.index-rets{display:flex;gap:14px;font:600 13px var(--mono)}
+.index-rets small{display:block;font:500 10px var(--mono);color:var(--faint)}
+.index-foot{font:500 11px var(--mono);color:var(--muted)}
+.spark{display:block;fill:none;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.spark.up{stroke:var(--up)}.spark.down{stroke:var(--down)}
+.spark.empty{display:inline-block;width:84px;height:1px;background:var(--line)}
+.index-card .spark{width:100%;height:34px}
+.market-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 12px;align-items:start}
+.breadth-body{padding:4px 18px 18px}
+.breadth-bar{display:flex;height:10px;border-radius:999px;overflow:hidden;background:var(--panel-3)}
+.breadth-bar i.up{background:var(--up)}.breadth-bar i.down{background:var(--down)}
+.breadth-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:12px;margin-top:14px}
+.breadth-stats small,.index-stats small{display:block;font:500 10px/1.5 var(--mono);letter-spacing:.6px;text-transform:uppercase;color:var(--faint)}
+.breadth-stats b,.index-stats b{font:650 16px var(--mono);font-variant-numeric:tabular-nums}
+.tier-list{list-style:none;margin:0;padding:0 8px 10px}
+.tier-list button{display:grid;grid-template-columns:minmax(0,1fr) auto 84px 64px;align-items:center;gap:10px;width:100%;padding:7px 10px;border:0;border-radius:var(--radius-sm);background:transparent;color:var(--ink);text-align:left;font-size:13px}
+.tier-list button:hover{background:var(--panel-3)}
+.tier-list small{font:500 11px var(--mono);color:var(--muted);white-space:nowrap}
+.tier-list .pl{text-align:right;font:600 13px var(--mono)}
+.heat-panel{margin:0 0 12px}
+.heatmap{position:relative;margin:0 18px 18px;aspect-ratio:1000/520;border-radius:var(--radius-sm);overflow:hidden;background:var(--panel-3)}
+.heat-tile{position:absolute;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;padding:2px;border:1px solid var(--panel);color:var(--ink);font-size:11px;line-height:1.15;text-align:center;overflow:hidden}
+.heat-tile span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.heat-tile b{font:600 11px var(--mono)}
+.heat-tile:hover,.heat-tile:focus-visible{outline:2px solid var(--ink);outline-offset:-2px;z-index:1}
+.table-tools{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:0 18px 12px;font-size:13px}
+.table-tools input[type=search]{flex:1 1 220px;max-width:320px;padding:7px 10px}
+.table-tools select{padding:6px 8px}
+.table-wrap{overflow-x:auto;border-top:1px solid var(--line)}
+.market-table{width:100%;border-collapse:collapse;font-size:13px}
+.market-table th{position:sticky;top:0;background:var(--panel-2);text-align:left;font:600 10px/1.4 var(--mono);letter-spacing:.8px;text-transform:uppercase;color:var(--faint);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.market-table th button{border:0;background:none;padding:0;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit}
+.market-table th button.on,.market-table th button:hover{color:var(--ink)}
+.market-table td{padding:8px 10px;border-bottom:1px solid var(--line-soft);vertical-align:middle;white-space:nowrap}
+.market-table td small{display:block;font:500 11px var(--mono);color:var(--muted)}
+.market-table .num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.market-table tbody tr{cursor:pointer}
+.market-table tbody tr:hover,.market-table tbody tr:focus-visible{background:var(--panel-3);outline:none}
+.show-more{display:block;margin:12px auto 16px}
+.member-card{display:flex;align-items:center;gap:10px;white-space:normal;min-width:220px}
+.member-card img{width:30px;height:42px;object-fit:cover;border-radius:3px;flex-shrink:0}
+.back-link{display:inline-flex;align-items:center;gap:4px;margin:0 0 10px;text-decoration:none;font-size:13px}
+.back-link .icon{width:15px;height:15px}
+.index-page{margin:0 0 12px}
+.index-page .panel-head h2{font-size:22px}
+.index-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:14px;padding:4px 18px 16px}
+.index-stats b small{display:inline;text-transform:none;letter-spacing:0}
+.index-chart{padding-top:12px}
+.lifecycle{margin:0 0 12px}
+.lifecycle .panel-head{flex-wrap:wrap}
+.era-pick{flex-wrap:wrap;border-radius:var(--radius-sm)}
+.era-pick button{padding:4px 10px;font-size:12px;border-radius:5px}
+.life-chart{padding:0 18px}
+.life-sets{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 14px;padding:10px 18px 18px}
+.life-set{display:flex;align-items:flex-start;gap:8px;font-size:13px}
+.life-set input{margin-top:3px}
+.life-set small{display:block;font:500 11px var(--mono);color:var(--muted)}
+@media(max-width:790px){
+ .market-grid{grid-template-columns:minmax(0,1fr)}
+ .market-head .head-actions{justify-content:flex-start}
+ .index-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .tier-list button{grid-template-columns:minmax(0,1fr) 70px 58px}
+ .tier-list small{display:none}
+ .heatmap{margin:0 10px 12px;aspect-ratio:1000/700}
+ .table-tools{padding:0 14px 10px}
+}

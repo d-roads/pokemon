@@ -24,7 +24,7 @@ const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
 const JA_TEXT_KEY='futuresight-japanese-text';
 function savedJapaneseText(){try{return localStorage.getItem(JA_TEXT_KEY)==='on';}catch{return false;}}
 const state={showJapanese:savedJapaneseText(),sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],langs:['en','ja'],detailLang:null,detailAlt:null,detailGrade:null,marketLang:'en',filters:{min:null,max:null,activity:0,invest:0,research:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
- dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
+ dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},market:{tab:'overview',grade:'psa10',weight:'eq',data:{},error:null,index:null,period:'ret_30d',sorts:{},query:'',minCards:5,limit:100,memberLimit:100,memberSort:{key:'price',dir:-1},range:'1y',era:null,lifeSets:{}},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
 // Crashes in the page are sent to the server, which forwards them to Sentry only when SENTRY_DSN is set. At most 5 per page load.
 let crashReports=0;
@@ -131,7 +131,7 @@ function chart(a,wide=false,history=[]){
 // Line charts with a crosshair and tooltip. Each series: {label, color, dash, points:[[label, value]], area}.
 const C={accent:'var(--accent)',cost:'var(--warn)'};
 const charts=new Map();let chartSeq=0;
-function lineChart({series,height=170,width=560,label,format=money,reference}){
+function lineChart({series,height=170,width=560,label,format=money,tick=compact,reference}){
  const all=series.flatMap(s=>s.points.map(p=>p[1])).concat(reference?[reference.value]:[]).filter(v=>v!=null);
  const n=Math.max(...series.map(s=>s.points.length));
  if(n<2||!all.length)return '<div class="chart-empty">Not enough price history to chart yet.</div>';
@@ -139,7 +139,7 @@ function lineChart({series,height=170,width=560,label,format=money,reference}){
  let lo=Math.min(...all),hi=Math.max(...all);if(lo===hi){lo*=.9;hi*=1.1;}const padY=(hi-lo)*.12;lo=Math.max(0,lo-padY);hi+=padY;
  const X=i=>left+i*(w-left-right)/(n-1),Y=v=>top+(hi-v)/(hi-lo||1)*(h-top-bottom);
  const ticks=[0,.5,1].map(t=>lo+(hi-lo)*t);
- const grid=ticks.map(v=>`<line x1="${left}" x2="${w-right}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" class="grid"/><text x="${left-8}" y="${(Y(v)+3).toFixed(1)}" text-anchor="end" class="tick">${compact(v)}</text>`).join('');
+ const grid=ticks.map(v=>`<line x1="${left}" x2="${w-right}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" class="grid"/><text x="${left-8}" y="${(Y(v)+3).toFixed(1)}" text-anchor="end" class="tick">${tick(v)}</text>`).join('');
  const labels=series[0].points;const xt=[0,Math.floor((n-1)/2),n-1].map(i=>`<text x="${X(i).toFixed(1)}" y="${h-6}" text-anchor="${i===0?'start':i===n-1?'end':'middle'}" class="tick">${esc(labels[i]?.[2]||labels[i]?.[0]||'')}</text>`).join('');
  const paths=series.map(s=>{const pts=s.points.map((p,i)=>p[1]==null?null:[X(i),Y(p[1])]).filter(Boolean);if(!pts.length)return '';const d='M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join('L');
   const area=s.area?`<path d="${d}L${pts.at(-1)[0].toFixed(1)},${(h-bottom).toFixed(1)}L${pts[0][0].toFixed(1)},${(h-bottom).toFixed(1)}Z" style="fill:${s.color}" opacity=".12"/>`:'';
@@ -875,7 +875,216 @@ function renderTicker(){
 }
 
 // ---------- Views ----------
+
+// ---------- Market: indices, Pokémon demand, set trends ----------
+// Everything here reads the precomputed metrics (/api/market-overview, /api/indices, /api/index,
+// /api/lifecycle), rebuilt on the server after each update and nightly. Index levels come from guide
+// prices; "Typical card" is the equal-weighted index, "By value" weights cards by price.
+const MARKET_TABS=[['overview','Overview'],['char','Pokémon'],['set','Sets'],['tier','Rarity'],['artist','Artists']];
+const RET_KEYS=[['ret_1d','1D'],['ret_7d','7D'],['ret_30d','30D'],['ret_90d','90D'],['ret_1y','1Y']];
+// The equal-weighted ("typical card") version of a return, where one exists.
+const retOf=(r,k)=>state.market.weight==='eq'&&r?.['eq_'+k]!==undefined?r['eq_'+k]:r?.[k];
+const retCell=v=>v==null?'<span class="pl flat">—</span>':`<span class="pl ${v>0?'up':v<0?'down':'flat'}">${pct(v)}</span>`;
+const times=v=>v==null?'—':v.toFixed(v>=10?0:v>=3?1:2)+'×';
+const share=v=>v==null?'—':Math.round(v*100)+'%';
+const marketKey=(...parts)=>[state.marketLang,state.market.grade,...parts].join('|');
+const bigMoney=v=>v==null?'—':Math.abs(v)>=1e6?'$'+(v/1e6).toFixed(Math.abs(v)>=1e7?0:1)+'M':compact(v);
+const ageText=release=>{const m=Math.max(0,Math.round((Date.now()-Date.parse(release+'T00:00:00Z'))/2629800000));return m<24?m+' mo':(m/12).toFixed(m<120?1:0)+' yr';};
+// A small line of the last year's month ends, green when it ends higher than it started.
+function sparkSvg(points,{w=84,h=24}={}){
+ const vals=(points||[]).map(p=>state.market.weight==='eq'?p[2]:p[1]).filter(v=>v>0);
+ if(vals.length<2)return '<span class="spark empty"></span>';
+ const lo=Math.min(...vals),hi=Math.max(...vals),X=i=>1+i*(w-2)/(vals.length-1),Y=v=>h-2-(v-lo)/(hi-lo||1)*(h-4);
+ return `<svg class="spark ${vals.at(-1)>=vals[0]?'up':'down'}" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><polyline points="${vals.map((v,i)=>X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ')}"/></svg>`;
+}
+async function loadMarket(kind,force=false){
+ const key=marketKey(kind),have=state.market.data[key];
+ if(have&&!force&&Date.now()-have._at<FRESH_MS)return;
+ try{
+  const r=kind==='overview'?await request('/api/market-overview?lang='+state.marketLang+'&grade='+state.market.grade):await request('/api/indices?spark=1&kind='+kind+'&lang='+state.marketLang+'&grade='+state.market.grade);
+  r._at=Date.now();state.market.data[key]=r;state.market.error=null;
+ }catch(e){if(!have)state.market.error=e.message;}
+ if(state.view==='market')renderMarket();
+}
+async function loadIndex(id,force=false){
+ const key=marketKey('index',id),have=state.market.data[key];
+ if(have&&!force&&Date.now()-have._at<FRESH_MS)return;
+ try{const r=await request('/api/index?id='+encodeURIComponent(id)+'&grade='+state.market.grade);r._at=Date.now();state.market.data[key]=r;state.market.error=null;}
+ catch(e){state.market.data[key]={_at:Date.now(),missing:e.message};}
+ if(state.view==='market'&&state.market.index===id)renderMarket();
+}
+async function loadLifecycle(era){
+ const key=marketKey('life',era);if(state.market.data[key])return;
+ try{const r=await request('/api/lifecycle?lang='+state.marketLang+'&grade='+state.market.grade+'&era='+era);r._at=Date.now();state.market.data[key]=r;}catch(e){state.market.data[key]={_at:Date.now(),curves:[],typical:[],error:e.message};}
+ if(state.view==='market'&&state.market.tab==='set')renderMarket();
+}
+function openIndex(id){state.market.index=id;state.market.memberSort={key:'price',dir:-1};renderMarket();loadIndex(id);$("#market-view").scrollTop=0;globalThis.scrollTo?.(0,0);}
+const KIND_LABEL={all:'Market',top100:'Top 100',era:'Era',set:'Set',char:'Pokémon',tier:'Rarity tier',artist:'Artist'};
+// Sortable tables: columns are [key, label, render(row), {num, title}].
+function sortRows(rows,sort){const {key,dir}=sort,val=r=>typeof key==='function'?key(r):r[key];return [...rows].sort((a,b)=>{const x=val(a),y=val(b);if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;return (typeof x==='string'?x.localeCompare(y):x-y)*dir;});}
+function marketTable(rows,columns,sort,{id,rowAttr}){
+ const head=columns.map(([key,label,,opt={}])=>{const k=opt.sortKey||key,on=sort.key===k||(typeof sort.key==='string'&&sort.key===k);return `<th class="${opt.num?'num':''}"${opt.title?` title="${esc(opt.title)}"`:''}>${opt.nosort?esc(label):`<button data-sort="${esc(typeof k==='string'?k:key)}" class="${on?'on':''}">${esc(label)}${on?(sort.dir<0?' ↓':' ↑'):''}</button>`}</th>`;}).join('');
+ return `<div class="table-wrap"><table class="market-table" id="${id}"><thead><tr>${head}</tr></thead><tbody>${rows.map(r=>`<tr ${rowAttr(r)} tabindex="0">${columns.map(([,,render,opt={}])=>`<td class="${opt.num?'num':''}">${render(r)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function wireTable(view,id,sortState,rerender,open){
+ const t=view.querySelector('#'+id);if(!t)return;
+ t.querySelectorAll('[data-sort]').forEach(b=>b.onclick=()=>{const k=b.dataset.sort;if(sortState.key===k)sortState.dir*=-1;else{sortState.key=k;sortState.dir=-1;}rerender();});
+ t.querySelectorAll('tbody tr').forEach(tr=>{tr.onclick=()=>open(tr);tr.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();open(tr);}};});
+}
+// Squarified treemap of `items` ({value}) in a w×h box. Returns [{item,x,y,w,h}].
+function treemap(items,w,h){
+ const out=[],list=items.filter(i=>i.value>0).sort((a,b)=>b.value-a.value),total=list.reduce((n,i)=>n+i.value,0);if(!total)return out;
+ let x=0,y=0,W=w,H=h,rest=list.map(i=>({item:i,area:i.value/total*w*h}));
+ const worst=(row,side)=>{const s=row.reduce((n,r)=>n+r.area,0),mx=Math.max(...row.map(r=>r.area)),mn=Math.min(...row.map(r=>r.area));return Math.max(side*side*mx/(s*s),s*s/(side*side*mn));};
+ while(rest.length){
+  const side=Math.min(W,H),row=[rest[0]];let i=1;
+  while(i<rest.length&&worst([...row,rest[i]],side)<=worst(row,side)){row.push(rest[i]);i++;}
+  const s=row.reduce((n,r)=>n+r.area,0);
+  if(W>=H){const cw=s/H;let cy=y;for(const r of row){const rh=r.area/cw;out.push({item:r.item,x,y:cy,w:cw,h:rh});cy+=rh;}x+=cw;W-=cw;}
+  else{const rh=s/W;let cx=x;for(const r of row){const rw=r.area/rh;out.push({item:r.item,x:cx,y,w:rw,h:rh});cx+=rw;}y+=rh;H-=rh;}
+  rest=rest.slice(i);
+ }
+ return out;
+}
+const heatColor=v=>{if(v==null)return 'var(--panel-3)';const a=Math.min(1,Math.abs(v)/.5);return v>=0?`color-mix(in srgb, var(--up) ${Math.round(18+a*62)}%, var(--panel))`:`color-mix(in srgb, var(--down) ${Math.round(18+a*62)}%, var(--panel))`;};
+function marketHead(){
+ const m=state.market,d=m.data[marketKey('overview')]||m.data[marketKey(m.tab)],run=d?.run;
+ const built=run?.finished_at?'Metrics built '+new Date(run.finished_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
+ const seg=(name,list,on)=>`<div class="segmented" role="group" aria-label="${name}">${list.map(([k,l])=>`<button data-m-${name.toLowerCase()}="${k}" class="${on===k?'active':''}" aria-pressed="${on===k}">${l}</button>`).join('')}</div>`;
+ return `<section class="panel movers-head market-head"><div><h2>${m.index?'Index':'Market terminal'}</h2><p>Indices for the whole market, each era, set, Pokémon, rarity tier and artist, from guide prices read every day. ${esc(built)}</p></div><div class="head-actions">${seg('Lang',LANGS.map(l=>[l.id,l.label]),state.marketLang)}${seg('Grade',MOVER_GRADES.map(g=>[g,shortGrade(g)]),m.grade)}${seg('Weight',[['eq','Typical card'],['value','By value']],m.weight)}</div></section>`
+  +(m.index?'':`<nav class="market-tabs" aria-label="Market sections">${MARKET_TABS.map(([k,l])=>`<button data-m-tab="${k}" class="${m.tab===k?'active':''}" aria-pressed="${m.tab===k}">${l}</button>`).join('')}</nav>`);
+}
+function noMetrics(){return `<div class="panel empty-state"><strong>No market metrics yet</strong><p>They are built after Update sales or a guide sweep, and every night. Run a sweep to build them now.</p><button class="button primary" id="m-sweep">${icon('refresh')} Sweep guide prices</button></div>`;}
+function renderMarket(){
+ const view=$('#market-view'),m=state.market;
+ if(m.index){renderIndexPage(view);return;}
+ const kind=m.tab,d=m.data[marketKey(kind)];
+ let body;
+ if(!d)body=m.error?`<div class="panel empty-state"><strong>The market couldn't be loaded.</strong><p>${esc(m.error)}</p><button class="button" id="m-retry">Try again</button></div>`:'<div class="loading"><span class="spinner"></span>Loading the market…</div>';
+ else if(!d.run?.as_of)body=noMetrics();
+ else body=kind==='overview'?overviewView(d):indexTableView(kind,d);
+ view.innerHTML=marketHead()+body;
+ wireMarket(view);
+ if(d?.run?.as_of&&kind!=='overview')wireIndexTable(view,kind);
+}
+function wireMarket(view){
+ const m=state.market,reload=()=>{renderMarket();if(m.index)loadIndex(m.index);else loadMarket(m.tab);};
+ view.querySelectorAll('[data-m-tab]').forEach(b=>b.onclick=()=>{m.tab=b.dataset.mTab;m.index=null;reload();});
+ view.querySelectorAll('[data-m-lang]').forEach(b=>b.onclick=()=>{state.marketLang=b.dataset.mLang;if(m.index)m.index=m.index.replace(/^(en|ja):/,state.marketLang+':');reload();});
+ view.querySelectorAll('[data-m-grade]').forEach(b=>b.onclick=()=>{m.grade=b.dataset.mGrade;reload();});
+ view.querySelectorAll('[data-m-weight]').forEach(b=>b.onclick=()=>{m.weight=b.dataset.mWeight;renderMarket();});
+ view.querySelectorAll('[data-index]').forEach(b=>b.onclick=()=>openIndex(b.dataset.index));
+ view.querySelectorAll('[data-m-period]').forEach(b=>b.onclick=()=>{m.period=b.dataset.mPeriod;renderMarket();});
+ if($('#m-retry'))$('#m-retry').onclick=()=>{m.error=null;reload();};
+ if($('#m-sweep'))$('#m-sweep').onclick=startSweep;
+ if($('#m-back'))$('#m-back').onclick=()=>{m.index=null;renderMarket();loadMarket(m.tab);};
+ wireCharts(view);wireImages();
+}
+function overviewView(d){
+ const m=state.market,idx=d.indices,b=d.breadth||{};
+ const order=[...idx.filter(i=>i.kind==='all'),...idx.filter(i=>i.kind==='top100'),...state.series.map(s=>idx.find(i=>i.kind==='era'&&i.key===s.id)).filter(Boolean)];
+ const cards=order.map(i=>`<button class="index-card" data-index="${esc(i.index_id)}"><span class="index-kind">${esc(KIND_LABEL[i.kind])}</span><strong>${esc(i.name)}</strong><span class="index-rets">${[['ret_30d','30D'],['ret_1y','1Y']].map(([k,l])=>`<span><small>${l}</small>${retCell(retOf(i,k))}</span>`).join('')}</span>${sparkSvg(i.spark,{w:150,h:34})}<small class="index-foot">${i.priced.toLocaleString()} cards · ${bigMoney(i.value)}</small></button>`).join('');
+ const total=(b.up_30d||0)+(b.down_30d||0),upShare=total?b.up_30d/total:0;
+ const breadth=`<section class="panel breadth"><div class="panel-head"><div><h2>Market breadth</h2><p>${(b.priced||0).toLocaleString()} priced ${shortGrade(m.grade)} cards · guide prices</p></div></div><div class="breadth-body"><div class="breadth-bar" role="img" aria-label="${b.up_30d||0} cards up and ${b.down_30d||0} down over 30 days"><i class="up" style="width:${(upShare*100).toFixed(1)}%"></i><i class="down" style="width:${((1-upShare)*100).toFixed(1)}%"></i></div><div class="breadth-stats"><div><small>Up 30D</small><b class="pl up">${(b.up_30d||0).toLocaleString()}</b></div><div><small>Down 30D</small><b class="pl down">${(b.down_30d||0).toLocaleString()}</b></div><div><small>52-week highs</small><b>${(b.highs||0).toLocaleString()}</b></div><div><small>52-week lows</small><b>${(b.lows||0).toLocaleString()}</b></div><div><small>Sales, 30 days</small><b>${(b.sales_30d||0).toLocaleString()}</b></div></div></div></section>`;
+ const periods=[['ret_1d','1D'],['ret_7d','7D'],['ret_30d','30D'],['ret_1y','1Y']],period=m.period||'ret_30d';
+ const tiles=treemap(d.sets.map(s=>({...s,value:s.value})),1000,520);
+ const heat=`<section class="panel heat-panel"><div class="panel-head"><div><h2>Sets heatmap</h2><p>Each box is a set, sized by the total guide value of its rare cards and coloured by its index change. Select a set to open it.</p></div><div class="segmented" role="group" aria-label="Period">${periods.map(([k,l])=>`<button data-m-period="${k}" class="${period===k?'active':''}" aria-pressed="${period===k}">${l}</button>`).join('')}</div></div>
+  <div class="heatmap" role="list">${tiles.map(t=>{const v=retOf(t.item,period),big=t.w>70&&t.h>34;return `<button role="listitem" class="heat-tile" data-index="${esc(t.item.index_id)}" style="left:${(t.x/10).toFixed(3)}%;top:${(t.y/5.2).toFixed(3)}%;width:${(t.w/10).toFixed(3)}%;height:${(t.h/5.2).toFixed(3)}%;background:${heatColor(v)}" title="${esc(t.item.name)} · ${v==null?'no change data':pct(v)} · ${bigMoney(t.item.value)}">${big?`<span>${esc(t.item.name)}</span><b>${v==null?'—':pct(v)}</b>`:''}</button>`;}).join('')}</div></section>`;
+ const tiers=idx.filter(i=>i.kind==='tier'),best=sortRows(tiers,{key:r=>retOf(r,'ret_1y'),dir:-1});
+ const tierPanel=`<section class="panel"><div class="panel-head"><div><h2>Rarity tiers · 1 year</h2><p>Which kinds of card have done best.</p></div></div><ol class="tier-list">${best.map(i=>`<li><button data-index="${esc(i.index_id)}"><span>${esc(i.name)}</span><small>${i.priced.toLocaleString()} cards</small>${sparkSvg(i.spark)}${retCell(retOf(i,'ret_1y'))}</button></li>`).join('')}</ol></section>`;
+ return `<div class="index-cards">${cards}</div><div class="market-grid">${breadth}${tierPanel}</div>${heat}<p class="sales-note">Guide prices are PriceCharting's (ungraded is mixed condition; Grade 9 includes other graders). Indices are chain-linked, so cards joining or leaving never move them. Past changes are not a forecast.</p>`;
+}
+// Columns per kind. Pokémon add demand: the premium their cards sell at over same-era, same-rarity cards.
+function indexColumns(kind){
+ const name=['name',kind==='char'?'Pokémon':kind==='set'?'Set':kind==='tier'?'Rarity tier':'Artist',r=>`<b>${esc(r.name)}</b>${kind==='set'&&r.release?`<small>${esc(r.series||'')} · ${ageText(r.release)} old</small>`:''}`];
+ const ret=([k,l])=>[k,l,r=>retCell(retOf(r,k)),{num:true,sortKey:k}];
+ const common=[ret(['ret_30d','30D']),ret(['ret_90d','90D']),ret(['ret_1y','1Y']),['spark','12 months',r=>sparkSvg(r.spark),{nosort:true}],['breadth_30d','Breadth',r=>share(r.breadth_30d),{num:true,title:'Share of its priced cards up over 30 days'}],['priced','Cards',r=>r.priced.toLocaleString(),{num:true}],['sales_90d','Sales 90D',r=>r.sales_90d==null?'—':r.sales_90d.toLocaleString(),{num:true,title:'Matching sales in the 90 days before each card was last read'}],['value','Value',r=>bigMoney(r.value),{num:true,title:'Total guide value of its priced cards'}]];
+ if(kind==='char')return [name,['premium','Demand',r=>times(r.premium),{num:true,title:'How many times more its cards sell for than same-era, same-rarity cards (shrunk toward 1× for Pokémon with few cards)'}],['demand_change','Demand 1Y',r=>retCell(r.demand_change),{num:true,title:'Change in the demand premium over the last year'}],...common];
+ if(kind==='set')return [name,...common,['top5_share','Top 5',r=>share(r.top5_share),{num:true,title:'Share of the set\'s value in its 5 most valuable cards'}],['gem_rate','Gem rate',r=>share(r.gem_rate),{num:true,title:'PSA 10s as a share of all PSA-graded copies'}]];
+ return [name,...common];
+}
+function indexTableView(kind,d){
+ const m=state.market,minCards=kind==='set'||kind==='tier'?1:m.minCards,q=m.query.trim().toLowerCase();
+ const rows=d.rows.map(r=>({...r,demand_change:r.premium&&r.premium_1y?r.premium/r.premium_1y-1:null})).filter(r=>r.priced>=minCards&&(!q||r.name.toLowerCase().includes(q)));
+ const sort=m.sorts[kind]||(m.sorts[kind]={key:kind==='char'?'premium':kind==='set'?'value':'ret_1y',dir:-1});
+ const sorted=sortRows(rows,{...sort,key:['ret_30d','ret_90d','ret_1y'].includes(sort.key)?r=>retOf(r,sort.key):sort.key});
+ const intro={char:'Demand is how many times more a Pokémon\'s cards sell for than same-era, same-rarity cards of other Pokémon. Demand 1Y shows whether that premium is growing or fading. Returns are its cards\' index.',set:'Each set as a sector: its index, how widely its cards are rising, how concentrated its value is, and how often its graded copies get a 10.',tier:'Rarity tiers across every set: which kinds of card collectors are paying up for.',artist:'Illustrators, from the Japanese checklist. English cards take the illustrator of their verified Japanese printing.'}[kind];
+ let extra='';
+ if(kind==='char'){
+  const big=rows.filter(r=>r.priced>=8&&r.demand_change!=null),up=sortRows(big,{key:'demand_change',dir:-1}).slice(0,5),down=sortRows(big,{key:'demand_change',dir:1}).slice(0,5);
+  const list=(title,items)=>`<section class="panel demand-panel"><div class="panel-head"><div><h2>${title}</h2><p>Pokémon with 8+ priced cards, by change in demand premium over a year.</p></div></div><ol class="tier-list">${items.map(i=>`<li><button data-index="${esc(i.index_id)}"><span>${esc(i.name)}</span><small>${times(i.premium_1y)} → ${times(i.premium)}</small>${sparkSvg(i.spark)}${retCell(i.demand_change)}</button></li>`).join('')||'<li class="sales-note">Not enough history yet.</li>'}</ol></section>`;
+  extra=`<div class="market-grid">${list('Rising demand',up)}${list('Fading demand',down)}</div>`;
+ }
+ if(kind==='set')extra=lifecycleView();
+ const filters=`<div class="table-tools"><input type="search" id="m-query" placeholder="Search ${kind==='char'?'Pokémon':kind==='set'?'sets':kind==='tier'?'tiers':'artists'}" value="${esc(m.query)}" aria-label="Search">${kind==='char'||kind==='artist'?`<label>At least <select id="m-min">${[3,5,8,15,30].map(n=>`<option value="${n}" ${m.minCards===n?'selected':''}>${n} cards</option>`).join('')}</select></label>`:''}<span class="muted">${sorted.length.toLocaleString()} shown</span></div>`;
+ return `${extra}<section class="panel"><div class="panel-head"><div><h2>${esc(MARKET_TABS.find(t=>t[0]===kind)[1])}</h2><p>${esc(intro)}</p></div></div>${filters}${marketTable(sorted.slice(0,m.limit),indexColumns(kind),sort,{id:'m-table',rowAttr:r=>`data-open-index="${esc(r.index_id)}"`})}${sorted.length>m.limit?`<button class="button show-more" id="m-more">Show more</button>`:''}</section>`;
+}
+// Sets of one era on the same clock: each set's index by months since release, against the era's median path.
+function lifecycleView(){
+ const m=state.market,era=m.era||state.series.at(-2)?.id||'SV',d=m.data[marketKey('life',era)];
+ if(!d)loadLifecycle(era);
+ const pick=`<div class="segmented era-pick" role="group" aria-label="Era">${state.series.map(s=>`<button data-m-era="${s.id}" class="${era===s.id?'active':''}" aria-pressed="${era===s.id}">${marketSeriesLabel(s.id)}</button>`).join('')}</div>`;
+ let chart='<div class="loading"><span class="spinner"></span>Loading set histories…</div>',notes='';
+ if(d){
+  const curves=d.curves.filter(c=>c.start<=3),shown=(m.lifeSets[era]||curves.slice(-4).map(c=>c.set_id)).filter(id=>curves.some(c=>c.set_id===id));
+  const months=Math.max(0,...curves.filter(c=>shown.includes(c.set_id)).map(c=>c.points.at(-1)[0]),...d.typical.map(t=>t[0]));
+  const idx=state.market.weight==='eq'?2:1,palette=['var(--info)','var(--warn)','#c07cff','#ff8fb8','#7dd3fc','#fca5a5'];
+  const series=[];
+  if(d.typical.length>=2)series.push({label:'Era median',color:C.accent,points:Array.from({length:months+1},(_,i)=>[String(i),d.typical.find(t=>t[0]===i)?.[1]??null,'Month '+i])});
+  shown.forEach((id,n)=>{const c=curves.find(x=>x.set_id===id);series.push({label:c.name,color:palette[n%palette.length],dash:false,points:Array.from({length:months+1},(_,i)=>[String(i),c.points.find(p=>p[0]===i)?.[idx]??null,'Month '+i])});});
+  chart=series.length?lineChart({series,height:260,width:820,label:'Set index by months since release',format:v=>v.toFixed(1),tick:v=>v.toFixed(0)}):'<div class="chart-empty">No set in this era has an index from its first months yet.</div>';
+  // Where each set sits now against the era's median at the same age.
+  notes=`<div class="life-sets">${curves.map(c=>{const last=c.points.at(-1),typ=d.typical.find(t=>t[0]===last[0])?.[1],vs=typ?last[idx]/typ-1:null;return `<label class="life-set"><input type="checkbox" data-life="${c.set_id}" ${shown.includes(c.set_id)?'checked':''}><span>${esc(c.name)}<small>${last[0]} mo · ${last[idx].toFixed(0)}${vs!=null?' · '+(vs>=0?'above':'below')+' typical by '+Math.abs(Math.round(vs*100))+'%':''}</small></span></label>`;}).join('')}</div>`;
+ }
+ return `<section class="panel lifecycle"><div class="panel-head"><div><h2>Set lifecycles</h2><p>Each set's index from its first month (=100), by months since release, with the era's median path. Shows whether a set is still in its post-release dip, recovering, or running ahead of its era.</p></div>${pick}</div><div class="life-chart">${chart}</div>${notes}</section>`;
+}
+function wireIndexTable(view,kind){
+ const m=state.market;
+ wireTable(view,'m-table',m.sorts[kind],renderMarket,tr=>openIndex(tr.dataset.openIndex));
+ const q=view.querySelector('#m-query');if(q)q.oninput=()=>{m.query=q.value;const pos=q.selectionStart;renderMarket();const again=$('#m-query');again.focus();again.setSelectionRange?.(pos,pos);};
+ const min=view.querySelector('#m-min');if(min)min.onchange=()=>{m.minCards=Number(min.value);renderMarket();};
+ const more=view.querySelector('#m-more');if(more)more.onclick=()=>{m.limit+=100;renderMarket();};
+ view.querySelectorAll('[data-m-era]').forEach(b=>b.onclick=()=>{m.era=b.dataset.mEra;renderMarket();});
+ view.querySelectorAll('[data-life]').forEach(c=>c.onchange=()=>{const era=m.era||state.series.at(-2)?.id||'SV',d=m.data[marketKey('life',era)],cur=m.lifeSets[era]||d.curves.filter(x=>x.start<=3).slice(-4).map(x=>x.set_id);m.lifeSets[era]=c.checked?[...cur,c.dataset.life]:cur.filter(id=>id!==c.dataset.life);renderMarket();});
+}
+function renderIndexPage(view){
+ const m=state.market,id=m.index,d=m.data[marketKey('index',id)];
+ const back=`<button class="link-button back-link" id="m-back">${icon('chev-left')} ${esc(MARKET_TABS.find(t=>t[0]===m.tab)?.[1]||'Market')}</button>`;
+ if(!d){view.innerHTML=marketHead()+back+'<div class="loading"><span class="spinner"></span>Loading the index…</div>';wireMarket(view);return;}
+ if(d.missing){view.innerHTML=marketHead()+back+`<div class="panel empty-state"><strong>No data for this index</strong><p>${esc(d.missing)}</p></div>`;wireMarket(view);return;}
+ const x=d.metrics,kind=x.kind,range=m.range||'1y',cut={'6m':183,'1y':366,'3y':1096,all:1e6}[range],since=new Date(Date.now()-cut*86400000).toISOString().slice(0,10);
+ // Levels are month-end before the last 100 days and daily after. Charts take month ends (and today) for a
+ // year or more, and weekly points for six months, so the spacing stays even.
+ const monthEnd=day=>new Date(Date.parse(day+'T00:00:00Z')+86400000).getUTCDate()===1,lastDay=d.history.at(-1)?.[0];
+ const weekly=day=>Math.round((Date.parse(lastDay)-Date.parse(day))/86400000)%7===0;
+ const hist=d.history.filter(h=>h[0]>=since&&(h[0]===lastDay||(range==='6m'?weekly(h[0])&&Date.parse(lastDay)-Date.parse(h[0])<100*86400000||monthEnd(h[0])&&Date.parse(lastDay)-Date.parse(h[0])>=100*86400000:monthEnd(h[0])))),base=hist[0];
+ const chart=hist.length>=2?lineChart({series:[{label:'Typical card',color:C.accent,area:m.weight==='eq',points:hist.map(h=>[h[0],h[2]/base[2]*100,date(h[0])])},{label:'By value',color:'var(--info)',dash:m.weight==='eq',area:m.weight!=='eq',points:hist.map(h=>[h[0],h[1]/base[1]*100,date(h[0])])}],height:250,width:820,label:d.name+' index',format:v=>v.toFixed(1),tick:v=>v.toFixed(0)}):'<div class="chart-empty">Not enough history yet.</div>';
+ const prem=kind==='char'||kind==='artist'||kind==='set'?hist.filter(h=>h[5]!=null):[];
+ const premChart=prem.length>=2?`<div class="panel-sub"><h3>${kind==='char'?'Demand premium':'Premium over peers'}</h3><p class="sales-note">How many times more these cards sell for than same-era, same-rarity cards, over time.</p>${lineChart({series:[{label:'Premium',color:'var(--warn)',points:prem.map(h=>[h[0],h[5],date(h[0])])}],height:150,width:820,label:'Premium over time',format:v=>v.toFixed(2)+'×',tick:v=>v.toFixed(1)+'×'})}</div>`:'';
+ const stat=(label,value,title='')=>`<div${title?` title="${esc(title)}"`:''}><small>${label}</small><b>${value}</b></div>`;
+ const stats=`<div class="index-stats">${RET_KEYS.map(([k,l])=>stat(l,retCell(retOf(x,k)))).join('')}${stat('52-week range',x.low_52w!=null?`${(x.low_52w/x.level*100-100).toFixed(0)}% to +${(x.high_52w/x.level*100-100).toFixed(0)}%`:'—','Low and high of the value-weighted level over 52 weeks, against today')}${stat('From peak',retCell(x.drawdown))}${stat('Volatility',x.volatility==null?'—':Math.round(x.volatility*100)+'%','Annualised, from month-end levels')}${stat('Cards',`${x.priced.toLocaleString()} / ${x.members.toLocaleString()}`)}${stat('Value',bigMoney(x.value))}${stat('Breadth 30D',share(x.breadth_30d),'Share of priced cards up over 30 days')}${stat('Top 5',share(x.top5_share),'Share of value in the 5 most valuable cards')}${stat('Gem rate',share(x.gem_rate))}${x.premium!=null?stat(kind==='char'?'Demand':'Premium',times(x.premium)+(x.premium_1y?` <small>${times(x.premium_1y)} a year ago</small>`:'')):''}</div>`;
+ const ranges=`<div class="segmented" role="group" aria-label="Range">${[['6m','6M'],['1y','1Y'],['3y','3Y'],['all','All']].map(([k,l])=>`<button data-m-range="${k}" class="${range===k?'active':''}" aria-pressed="${range===k}">${l}</button>`).join('')}</div>`;
+ const sort=m.memberSort,cols=[['name','Card',r=>{const c=cardById(r.card_id);return c?`<span class="member-card"><img src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><b>${esc(c.name)}</b><small>${esc(c.setName)} · ${numberCaption(c)}</small></span></span>`:esc(r.card_id);}],['price','Price',r=>money(r.price),{num:true}],['ret_30d','30D',r=>retCell(r.ret_30d),{num:true}],['ret_1y','1Y',r=>retCell(r.ret_1y),{num:true}],['premium','vs peers',r=>times(r.premium),{num:true,title:'Price over the median of same-era, same-rarity cards'}],['sales_90d','Sales 90D',r=>r.sales_90d??'—',{num:true}],['days_since_sale','Last sale',r=>r.days_since_sale==null?'—':r.days_since_sale+' d',{num:true}]];
+ const members=sortRows(d.members.map(r=>({...r,name:cardById(r.card_id)?.name||r.card_id})),sort);
+ view.innerHTML=marketHead()+back+`<section class="panel index-page"><div class="panel-head"><div><span class="index-kind">${esc(KIND_LABEL[kind]||kind)} · ${shortGrade(m.grade)}</span><h2>${esc(d.name)}</h2><p>Level ${x.level.toFixed(1)} (value-weighted, from 100 at its start) · as of ${date(x.as_of)}</p></div>${ranges}</div>${stats}<div class="panel-sub index-chart">${chart}</div>${premChart}</section>
+  <section class="panel"><div class="panel-head"><div><h2>Cards</h2><p>${members.length.toLocaleString()} cards · select one to open it.</p></div></div>${marketTable(members.slice(0,m.memberLimit),cols,sort,{id:'m-members',rowAttr:r=>`data-card="${esc(r.card_id)}"`})}${members.length>m.memberLimit?`<button class="button show-more" id="m-more-members">Show more</button>`:''}</section>`;
+ wireMarket(view);
+ view.querySelectorAll('[data-m-range]').forEach(b=>b.onclick=()=>{m.range=b.dataset.mRange;renderMarket();});
+ wireTable(view,'m-members',sort,renderMarket,tr=>openCard(tr.dataset.card,m.grade));
+ const more=view.querySelector('#m-more-members');if(more)more.onclick=()=>{m.memberLimit+=100;renderMarket();};
+}
+// Starts a guide sweep (every set listing) and follows it; metrics are rebuilt when it ends.
+async function startSweep(){
+ try{
+  const r=await send('/api/sweep','POST',{langs:[state.marketLang]});
+  if(r.unavailable||r.warning){toast(r.warning||'Guide sweeps run only on the FutureSight server.');return;}
+  if(!r.job){toast('Every set was swept in the last 20 hours.');return;}
+  toast(r.joined?'A guide sweep is already running. Metrics rebuild when it ends.':'Guide sweep started: '+r.job.total+' listings. Metrics rebuild when it ends.');
+ }catch(e){toast(e.message);}
+}
+
 const PAGES={
+ market:{eyebrow:'MARKET <span>TERMINAL</span>',title:'Market',description:'Indices, Pokémon demand and set trends across every card.',crumb:'Market',name:'Market'},
  invest:{eyebrow:'MARKET <span>INVESTMENTS</span>',title:'Potential investments',description:'High-demand cards whose sales history suggests a closer look.',crumb:'Market',name:'Investments'},
  movers:{eyebrow:'MARKET <span>MOVERS</span>',title:'Top movers',description:'Which cards rose the most in sold price, by grade.',crumb:'Market',name:'Top movers'},
  dex:{eyebrow:'YOUR COLLECTION <span>DEX</span>',title:'Your Dex',description:'Every card you own, what it is worth today, and how it has done since you bought it.',crumb:'Your workspace',name:'Dex'},
@@ -885,7 +1094,7 @@ const PAGES={
 function updateView(){
  const v=state.view,catalogView=v==='browse'||v==='watch';
  if(!catalogView&&state.focus)setFocus(false);
- for(const name of ['browse','movers','invest','watch','dex','alerts','settings']){const nav=$('#'+name+'-nav');nav.classList.toggle('active',v===name);nav.setAttribute('aria-current',v===name?'page':'false');}
+ for(const name of ['browse','market','movers','invest','watch','dex','alerts','settings']){const nav=$('#'+name+'-nav');nav.classList.toggle('active',v===name);nav.setAttribute('aria-current',v===name?'page':'false');}
  for(const s of ['#screener','#summary-grid','#workspace','#heading-tools'])$(s).hidden=!catalogView;
  for(const name of Object.keys(PAGES))$('#'+name+'-view').hidden=v!==name;
  const set=activeSet(),era=activeSeries(),partial=state.setId==='all'&&state.eras.length<state.series.length,name=set?.name||(state.setId==='all'?(partial?state.eras.map(marketSeriesLabel).join(' · ')+' sets':'All sets'):'All '+(era?.name||'')+' sets');
@@ -895,6 +1104,7 @@ function updateView(){
   $('#breadcrumb-series').textContent=page.crumb;$('#breadcrumb-set').textContent=page.name;
   if(v==='dex'){loadDex().then(()=>{if(state.view==='dex')renderDex();});renderDex();}
   else if(v==='alerts'){if(!state.alerts.data)loadAlerts();renderAlerts();}
+  else if(v==='market'){renderMarket();if(state.market.index)loadIndex(state.market.index);else loadMarket(state.market.tab);}
   else if(v==='movers'){renderMovers();loadMovers(state.movers.period);}
   else if(v==='invest'){renderInvest();loadInvest();}
   else if(v==='settings')renderSettings();
@@ -929,7 +1139,7 @@ $('#grade').onchange=e=>{state.grade=e.target.value;state.detailGrade=null;updat
 $('#sort').onchange=e=>{state.sort=e.target.value;renderList();};
 document.querySelectorAll('[data-category]').forEach(b=>b.onclick=()=>{state.category=b.dataset.category;updateView();});
 $('#browse-nav').onclick=()=>{state.view='browse';updateView();};$('#watch-nav').onclick=()=>{state.view='watch';state.setId='all';state.category='all';state.query='';$('#search').value='';resetFilters(true);updateView();};
-$('#dex-nav').onclick=()=>{state.view='dex';updateView();};$('#movers-nav').onclick=()=>{state.view='movers';updateView();};$('#invest-nav').onclick=()=>{state.view='invest';updateView();};$('#alerts-nav').onclick=()=>{state.view='alerts';updateView();};$('#settings-nav').onclick=()=>{state.view='settings';updateView();};
+$('#dex-nav').onclick=()=>{state.view='dex';updateView();};$('#market-nav').onclick=()=>{state.view='market';updateView();};$('#movers-nav').onclick=()=>{state.view='movers';updateView();};$('#invest-nav').onclick=()=>{state.view='invest';updateView();};$('#alerts-nav').onclick=()=>{state.view='alerts';updateView();};$('#settings-nav').onclick=()=>{state.view='settings';updateView();};
 $('#set-select').onchange=e=>{const v=e.target.value;state.setId=v;if(v==='all')state.eras=state.series.map(x=>x.id);else if(v.startsWith('era:'))state.eras=[v.slice(4)];else{const set=state.sets.find(x=>x.id===v);if(set&&!state.eras.includes(set.series))state.eras=[...state.eras,set.series];}state.category='all';state.query='';$('#search').value='';updateView();};
 wireScreener();
 $('#show-more').onclick=()=>{state.limit+=24;renderList();};$('#refresh-set').onclick=refreshSet;

@@ -35,6 +35,7 @@
    </g>
   </symbol>
   <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M2.5 12.5h4l2.5-6 4.5 12 3-7.5h5"/></symbol>
   <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol>
   <symbol id="i-gem" viewBox="0 0 24 24"><path d="M6.5 3.5h11l4 5.5L12 20.5 2.5 9z"/><path d="M2.5 9h19M9 3.5l3 5.5 3-5.5M12 9v11.5"/></symbol>
   <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.25 4.1 1 5.8L12 16.9l-5.25 2.7 1-5.8L3.5 9.7l5.9-.9z"/></symbol>
@@ -58,6 +59,7 @@
       <p class="nav-label">YOUR WORKSPACE</p>
       <nav aria-label="Main navigation">
         <button class="nav-item active" id="browse-nav" aria-current="page"><span class="nav-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-grid"/></svg></span>Browse sets</button>
+        <button class="nav-item" id="market-nav"><span class="nav-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-pulse"/></svg></span>Market</button>
         <button class="nav-item" id="movers-nav"><span class="nav-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-trend"/></svg></span>Top movers</button>
         <button class="nav-item" id="invest-nav"><span class="nav-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-gem"/></svg></span>Investments</button>
         <button class="nav-item" id="watch-nav"><span class="nav-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-star"/></svg></span>Watchlist<span class="nav-count" id="watch-count">0</span></button>
@@ -67,7 +69,7 @@
       </nav>
       <div class="account" id="account" hidden><span class="account-avatar" aria-hidden="true"><svg viewBox="0 0 64 64" width="22" height="22" focusable="false"><use href="#fs-glint"/></svg></span><span class="account-name" id="account-name"></span><button class="account-out" id="sign-out" type="button">Sign out</button></div>
       <div class="set-nav"><p class="nav-label">EXPLORING</p><div class="set-indicator"><span class="set-symbol" id="series-symbol">XY</span><span><span id="sidebar-set">Primal Clash</span><small id="sidebar-year">English · 2015</small></span></div></div>
-      <div class="sidebar-bottom"><button id="method-button" class="method-link"><span class="info-circle">i</span>How targets work</button><p>For the collector.<br>With the numbers in view.</p><div class="sidebar-rule"></div><span class="beta">FUTURESIGHT <b>v4</b></span></div>
+      <div class="sidebar-bottom"><button id="method-button" class="method-link" aria-label="How targets work"><span class="info-circle">i</span><span class="method-text">How targets work</span></button><p>For the collector.<br>With the numbers in view.</p><div class="sidebar-rule"></div><span class="beta">FUTURESIGHT <b>v4</b></span></div>
     </aside>
     <main>
       <header class="topbar"><div class="breadcrumb">Pokémon TCG <span>/</span> <span id="breadcrumb-series">XY Series</span> <span>/</span> <strong id="breadcrumb-set">Primal Clash</strong></div><span class="workspace-badge">Personal workspace</span></header>
@@ -101,6 +103,7 @@
           </section>
           <aside id="detail" class="detail-panel" tabindex="0" aria-label="Selected card"><div class="loading">Loading card details…</div></aside>
         </div>
+        <section id="market-view" class="view-panel" aria-label="Market" tabindex="-1" hidden></section>
         <section id="movers-view" class="view-panel" aria-label="Top movers" tabindex="-1" hidden></section>
         <section id="invest-view" class="view-panel" aria-label="Potential investments" tabindex="-1" hidden></section>
         <section id="dex-view" class="view-panel" aria-label="Your Dex" tabindex="-1" hidden></section>

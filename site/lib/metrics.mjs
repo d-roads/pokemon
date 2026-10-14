@@ -72,7 +72,8 @@ export function artistOf(card,byId){
  if(card.languagePairVerified&&card.japaneseIds?.length)return byId.get(card.japaneseIds[0])?.illustrator||null;
  return null;
 }
-export const charactersOfCard=card=>card.nameIsJapanese?[]:charactersOf(card.name);
+// Energy cards are not characters.
+export const charactersOfCard=card=>card.nameIsJapanese?[]:charactersOf(card.name).filter(n=>!/\bEnergy$/i.test(n));
 // Index ids: "<lang>:<kind>:<key>", e.g. en:set:base1, en:char:Charizard, ja:tier:sir, en:all:all.
 export function indexKeysOf(card,byId){
  const out=[['all','all'],['era',card.series],['set',card.setId],['tier',tierOf(card)]];
@@ -221,10 +222,13 @@ export async function buildMetrics(catalog,facts,today,rules=METRIC_RULES,{pause
    const priced=list.filter(c=>marks.get(c.id)?.[last]>0),vals=priced.map(c=>marks.get(c.id)[last]).sort((a,b)=>b-a),total=vals.reduce((a,b)=>a+b,0);
    const rets=priced.map(c=>cardRet.get(c.id)?.ret_30d).filter(v=>v!=null);
    const sum=k=>{let s=0,n=0;for(const c of list){const v=cardRet.get(c.id)?.[k];if(v!=null){s+=v;n++;}}return n?s:null;};
+   // Short returns come from members' own returns, which need a fresh price at both ends: a level carried
+   // forward between reads would put a week's change on the day it was read.
+   const shortRet=k=>{let then=0,now=0,n=0;for(const c of list){const r=cardRet.get(c.id);if(r?.[k]==null||!(r.price>0))continue;const p0=r.price/(1+r[k]);then+=p0;now+=r.price;n++;}return n>=rules.minMembers?now/then-1:null;};
    const pops=list.map(c=>facts.get(c.id)).filter(f=>f.popTotal>0),popTotal=pops.reduce((a,f)=>a+f.popTotal,0);
    const [lang,kind,...rest]=id.split(':'),key=rest.join(':');
    indexRows.push({index_id:id,grade:g,lang,kind,key,as_of:dayStr(today),level:metRound(level[last]),
-    ret_1d:ret(lv,1),ret_7d:ret(lv,7),ret_30d:ret(lv,30),ret_90d:ret(lv,90),ret_1y:ret(lv,365),
+    ret_1d:shortRet('ret_1d'),ret_7d:shortRet('ret_7d'),ret_30d:ret(lv,30),ret_90d:ret(lv,90),ret_1y:ret(lv,365),
     eq_ret_30d:ret(eq,30),eq_ret_90d:ret(eq,90),eq_ret_1y:ret(eq,365),
     high_52w:yearLevels.length?Math.max(...yearLevels):null,low_52w:yearLevels.length?Math.min(...yearLevels):null,
     drawdown:peak>0?level[last]/peak-1:null,volatility:metVolatility(ends,rules),

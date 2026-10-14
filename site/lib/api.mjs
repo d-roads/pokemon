@@ -18,8 +18,8 @@ import {pacer,startJob,cancelJob,jobStatus} from './updater.mjs';
 import {investmentTable,investmentView,scoreMode,modelVersion,archiveScores,researchLanguages,mergeInvestmentTables} from './investment.mjs';
 import {DEFAULT_COSTS,maxBuyPrice,netReturn,COST_PROFILE_VERSION} from './investment-costs.mjs';
 import {parseJapaneseListing,matchJapaneseListing,listingGuide,numberOnlyAllowed,JA_MAP_VERSION} from './japanese.mjs';
-import {METRIC_GRADES,indexKeysOf} from './metrics.mjs';
-import {METRIC_TABLES,rebuildMetrics,rebuildState,lastRun,cardMetrics,indexList,indexDetail,indexName,cardMetricsFor} from './metrics-store.mjs';
+import {METRIC_GRADES,indexKeysOf,dayNum,dayStr} from './metrics.mjs';
+import {METRIC_TABLES,rebuildMetrics,rebuildState,lastRun,cardMetrics,indexList,indexDetail,indexName,cardMetricsFor,indexSparks,marketBreadth,setHistories} from './metrics-store.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const cardById=new Map(cards.map(c=>[c.id,c]));
 const seriesIds=series.map(item=>item.id);
@@ -398,6 +398,22 @@ export function queueRebuild(env){
  return p;
 }
 const INDEX_KINDS=['all','top100','era','set','char','tier','artist'];
+// The last 12 month ends before `asOf`, then `asOf` itself: the points of a sparkline.
+function sparkDays(asOf){const t=dayNum(asOf),d=new Date(t*86400000),out=[];for(let k=12;k>=1;k--)out.push(dayStr(Math.floor(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()-k+1,0)/86400000)));out.push(asOf);return [...new Set(out)];}
+// Each set's index by months since release, rebased to 100 at its first month, and the era's median path.
+function lifecycle(histories,lang,era){
+ const curves=[];
+ for(const set of sets){
+  if((set.lang||'en')!==lang||(era&&set.series!==era))continue;const h=histories[set.id];if(!h?.length)continue;
+  const [ry,rm]=set.release.split('-').map(Number),age=ym=>{const [y,m]=ym.split('-').map(Number);return (y-ry)*12+(m-rm);};
+  const points=h.map(([ym,level,eq])=>[age(ym),level,eq]).filter(p=>p[0]>=0);if(points.length<2)continue;
+  const base=points[0];curves.push({set_id:set.id,name:set.name,release:set.release,series:set.series,start:base[0],points:points.map(([m,l,e])=>[m,Math.round(l/base[1]*1000)/10,Math.round(e/base[2]*1000)/10])});
+ }
+ // Sets whose index starts within 3 months of release, so their paths begin at the same point.
+ const early=curves.filter(c=>c.start<=3),typical=[];
+ for(let m=0;m<=120;m++){const v=early.map(c=>c.points.find(p=>p[0]===m)?.[2]).filter(x=>x!=null).sort((a,b)=>a-b);if(v.length>=3)typical.push([m,v[Math.floor(v.length/2)],v.length]);}
+ return {curves,typical};
+}
 // Cards in an index: from the catalog, except Top 100 which is today's most valuable cards.
 async function indexMembers(db,id,grade){
  const [lang,kind]=id.split(':');
@@ -606,8 +622,24 @@ export async function api(request,env,ctx){
   if(path==='/api/indices'&&request.method==='GET'){
    const lang=insightLanguage(url),kind=url.searchParams.get('kind')||'set',grade=url.searchParams.get('grade')||'psa10';
    if(!lang||!INDEX_KINDS.includes(kind)||!METRIC_GRADES.includes(grade))return json({error:'Choose a language, index kind and grade.'},400);
-   const rows=(await indexList(db,{lang,kind,grade})).map(r=>({...r,name:indexName(r.index_id,{sets,series})}));
-   return json({lang,kind,grade,rows,run:await lastRun(db)});
+   const run=await lastRun(db),sparks=url.searchParams.get('spark')==='1'&&run?.as_of?await indexSparks(db,{lang,kind,grade,days:sparkDays(run.as_of)}):null;
+   const rows=(await indexList(db,{lang,kind,grade})).map(r=>({...r,name:indexName(r.index_id,{sets,series}),...(sparks?{spark:sparks[r.index_id]||[]}:{})}));
+   return json({lang,kind,grade,rows,run});
+  }
+  if(path==='/api/market-overview'&&request.method==='GET'){
+   const lang=insightLanguage(url),grade=url.searchParams.get('grade')||'psa10';
+   if(!lang||!METRIC_GRADES.includes(grade))return json({error:'Choose a language and grade.'},400);
+   const run=await lastRun(db),named=r=>({...r,name:indexName(r.index_id,{sets,series})});
+   if(!run?.as_of)return json({lang,grade,run,indices:[],sets:[],breadth:null});
+   const days=sparkDays(run.as_of),lists=await Promise.all(['all','top100','era','tier'].map(kind=>indexList(db,{lang,kind,grade})));
+   const sparks=Object.assign({},...await Promise.all(['all','top100','era','tier'].map(kind=>indexSparks(db,{lang,kind,grade,days}))));
+   const setRows=(await indexList(db,{lang,kind:'set',grade})).map(r=>{const set=sets.find(s=>s.id===r.key);return {...named(r),series:set?.series,release:set?.release};});
+   return json({lang,grade,run,indices:lists.flat().map(r=>({...named(r),spark:sparks[r.index_id]||[]})),sets:setRows,breadth:await marketBreadth(db,{lang,grade})});
+  }
+  if(path==='/api/lifecycle'&&request.method==='GET'){
+   const lang=insightLanguage(url),grade=url.searchParams.get('grade')||'psa10',era=url.searchParams.get('era')||null;
+   if(!lang||!METRIC_GRADES.includes(grade)||(era&&!series.some(s=>s.id===era)))return json({error:'Choose a language, grade and era.'},400);
+   return json({lang,grade,era,...lifecycle(await setHistories(db,{lang,grade}),lang,era)});
   }
   if(path==='/api/index'&&request.method==='GET'){
    const id=url.searchParams.get('id')||'',grade=url.searchParams.get('grade')||'psa10';
