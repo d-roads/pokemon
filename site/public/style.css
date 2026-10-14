@@ -618,7 +618,7 @@ dialog::backdrop{background:#000000bd}
  .card-list{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
  .detail-panel{position:relative;top:auto;height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
  .card-list:focus-visible,.detail-panel:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
- #dex-view:not([hidden]),#alerts-view:not([hidden]),#movers-view:not([hidden]),#invest-view:not([hidden]),#settings-view:not([hidden]){flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding-right:2px}
+ #dex-view:not([hidden]),#alerts-view:not([hidden]),#movers-view:not([hidden]),#invest-view:not([hidden]),#market-view:not([hidden]),#settings-view:not([hidden]){flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding-right:2px}
 }
 @media(min-width:791px) and (max-height:1080px){.summary-grid{display:none}}
 @media(min-width:791px) and (max-height:820px){
