@@ -187,6 +187,22 @@ test('Update sales fetches in batches from the Movers and Investments tabs and t
  assert.equal(posted.length,Math.ceil(n/4));assert.ok(posted.every(b=>b.length>=1&&b.length<=4));assert.equal(new Set(posted.flat()).size,n,'each card once');
  assert.ok(ui.calls.filter(u=>u.startsWith('/api/movers')).length>m,'the list is rebuilt once the sales are in');
 });
+test('Update sales follows the server job and shows new prices as they arrive',async()=>{
+ const ui=workspace();await ui.run('init()');ui.context.setTimeout=f=>{f();return 0;};
+ const id=ui.run("state.cards.find(c=>c.source&&c.eligible&&c.setId==='xy5').id");let polls=0;
+ const job=extra=>({id:1,state:'running',total:3,done:0,updated:0,failed:0,skipped:5,grand:8,changed:[],next:0,...extra});
+ ui.responses['/api/update']=url=>{
+  if(!url.includes('since='))return {job:job(),mine:true};
+  polls++;
+  if(polls===1){assert.match(url,/since=0$/);return {job:job({done:2,updated:1,failed:1,changed:[id],next:1,markets:{[id]:{guide:{psa10:999},research:{status:'full',checkedAt:new Date().toISOString()},s:[]}}})};}
+  assert.match(url,/since=1$/,'the next poll asks only for newer cards');
+  return {job:job({state:'done',done:3,updated:1,failed:1,next:1,markets:{},failures:[{card_id:'x',message:'(404)'}]})};
+ };
+ await ui.run("refreshSales(['xy5'],['en'])");
+ assert.equal(polls,2);assert.equal(ui.run(`state.markets['${id}'].guide.psa10`),999);
+ assert.ok(!ui.calls.some(u=>u.startsWith('/api/research')),'the page does not read batches itself');
+ assert.match(ui.e('#toast').textContent,/Refreshed sales for 1 of 8 rare cards · 5 already checked .* · 1 could not be read/);
+});
 test('Update sales resumes: recently read cards are skipped, unread cards go first, failures are retried once',async()=>{
  const ui=workspace();await ui.run('init()');ui.context.setTimeout=f=>{f();return 0;};
  const scope=ui.run("state.cards.filter(c=>c.source&&c.eligible&&c.setId==='xy5').map(c=>c.id)");assert.ok(scope.length>8);

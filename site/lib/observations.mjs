@@ -57,11 +57,17 @@ export function observationRows(card,market,{recordedAt=new Date().toISOString()
 }
 
 const obsInsert=(db,table,row)=>{const cols=Object.keys(row);return db.prepare(`INSERT OR IGNORE INTO ${table} (${cols.join(',')}) VALUES (${cols.map(()=>'?').join(',')})`).bind(...cols.map(c=>row[c]));};
-// Append a capture. Rows already stored (same content) are ignored, so re-recording is harmless.
-export async function recordObservations(db,card,market,options){
- const rows=observationRows(card,market,options);if(!rows)return {recorded:false};
+// The inserts for one capture, so a caller can save them in the same transaction as the card's price.
+export function observationStatements(db,card,market,options){
+ const rows=observationRows(card,market,options);if(!rows)return null;
  const statements=[obsInsert(db,'market_observations',rows.market),...rows.sales.map(r=>obsInsert(db,'sales_observations',r)),...rows.guides.map(r=>obsInsert(db,'guide_observations',r))];
  if(rows.population)statements.push(obsInsert(db,'population_observations',rows.population));
+ return {rows,statements};
+}
+// Append a capture. Rows already stored (same content) are ignored, so re-recording is harmless.
+export async function recordObservations(db,card,market,options){
+ const built=observationStatements(db,card,market,options);if(!built)return {recorded:false};
+ const {rows,statements}=built;
  await db.batch(statements);
  return {recorded:true,sales:rows.sales.length,guides:rows.guides.length,population:!!rows.population};
 }

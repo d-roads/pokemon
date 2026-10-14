@@ -13,7 +13,8 @@ import {DEFAULT_SETTINGS,normalizeSettings,updateSettings,publicSettings,hasList
 import {isPlainObject,oneOf,optionalPrice,boundedText,optionalText,shapeError} from './schema.mjs';
 import {reportError} from './report.mjs';
 import {analyze} from './analysis.mjs';
-import {recordObservations} from './observations.mjs';
+import {recordObservations,observationStatements} from './observations.mjs';
+import {pacer,startJob,cancelJob,jobStatus} from './updater.mjs';
 import {investmentTable,investmentView,scoreMode,modelVersion,archiveScores,researchLanguages,mergeInvestmentTables} from './investment.mjs';
 import {DEFAULT_COSTS,maxBuyPrice,netReturn,COST_PROFILE_VERSION} from './investment-costs.mjs';
 import {parseJapaneseListing,matchJapaneseListing,listingGuide,numberOnlyAllowed,JA_MAP_VERSION} from './japanese.mjs';
@@ -92,7 +93,19 @@ async function mapJapaneseSet(db,env,ctx,set){
  if(statements.length)await db.batch(statements);
  return {mapped:matches.size,total:setCards.length,unmatched,pages,sources,markets:Object.fromEntries(Object.entries(markets).map(([id,m])=>[id,lightMarket(m)]))};
 }
-async function saveMarket(db,card,market){await db.prepare('INSERT INTO market_cache (card_id,payload,fetched_at) VALUES (?,?,?) ON CONFLICT(card_id) DO UPDATE SET payload=excluded.payload,fetched_at=excluded.fetched_at').bind(card.id,JSON.stringify(market),market.observedAt).run();}
+const marketStatement=(db,card,market)=>db.prepare('INSERT INTO market_cache (card_id,payload,fetched_at) VALUES (?,?,?) ON CONFLICT(card_id) DO UPDATE SET payload=excluded.payload,fetched_at=excluded.fetched_at').bind(card.id,JSON.stringify(market),market.observedAt);
+async function saveMarket(db,card,market){await marketStatement(db,card,market).run();}
+// Read one card's page, merge it with what is saved and store the price and its observation rows in one
+// transaction. Only this card's cached record is read. If the observation rows cannot be written,
+// the price is still saved (as logCapture does).
+async function captureCard(db,env,ctx,card,html){
+ const live=parseMarket(html,card),market=mergeMarket(mergeMarket(snapshots[card.id],await cachedMarket(db,card.id)),live),save=marketStatement(db,card,market);
+ let observed=null;try{observed=observationStatements(db,card,live);}catch(e){console.error('Observation log:',e.message);ctx?.waitUntil?.(reportError(env,e,{source:'observations'}));}
+ if(!observed){await save.run();return market;}
+ try{await db.batch([save,...observed.statements]);}
+ catch(e){console.error('Observation log:',e.message);ctx?.waitUntil?.(reportError(env,e,{source:'observations'}));await save.run();}
+ return market;
+}
 async function input(request){if(!request.headers.get('Content-Type')?.includes('application/json'))throw new Error('Send JSON data.');const raw=await request.text();if(raw.length>8192)throw new Error('The request was too large.');const body=JSON.parse(raw);if(!isPlainObject(body))throw new Error('Send a JSON object.');return body;}
 export async function readSettings(db,user){const row=await db.prepare('SELECT payload FROM alert_settings WHERE user_id = ?').bind(user).first();return normalizeSettings(row?JSON.parse(row.payload):DEFAULT_SETTINGS);}
 async function writeSettings(db,user,settings){await db.prepare('INSERT INTO alert_settings (user_id,payload,updated_at) VALUES (?,?,?) ON CONFLICT(user_id) DO UPDATE SET payload=excluded.payload,updated_at=excluded.updated_at').bind(user,JSON.stringify(settings),new Date().toISOString()).run();}
@@ -141,6 +154,61 @@ function marketInvestment(table,card,market){
  if(!table)return null;
  const out={};for(const g of ['raw','psa9','psa10']){const a=analyze(market,g);out[g]=investmentView(table,card.id,g,{reference:a.fair,referenceLabel:a.fair?a.priceLabel:null});}
  return out;
+}
+// ---------- Update sales as a server job ----------
+// Node only: a Worker request cannot outlive its response, so there env.BACKGROUND_JOBS is unset and
+// the page falls back to /api/research batches. One job runs at a time and is shared by every account.
+let updateJob=null;
+const FRESH_HOURS=6,RATE_DEFAULT=1;
+const inUpdateScope=(card,scopes,langs)=>card.eligible&&card.source&&langs.includes(langOf(card))&&scopes.some(sc=>sc==='all'||(sc.startsWith('era:')?card.series===sc.slice(4):card.setId===sc));
+const validScope=sc=>typeof sc==='string'&&(sc==='all'||(sc.startsWith('era:')&&series.some(s=>s.id===sc.slice(4)))||sets.some(s=>s.id===sc));
+// The same order as the page used: cards read in the last 6 hours are skipped, never-read cards come
+// first (most valuable first), then the oldest reads. Only two small fields of each saved record are read.
+async function updateQueue(db,scopes,langs,now=Date.now()){
+ const inScope=cards.filter(c=>inUpdateScope(c,scopes,langs));
+ const saved=new Map(((await db.prepare("SELECT card_id,json_extract(payload,'$.research.checkedAt') AS checked,json_extract(payload,'$.guide') AS guide FROM market_cache").all()).results||[]).map(r=>[r.card_id,r]));
+ const rows=inScope.map(card=>{
+  const row=saved.get(card.id),snap=snapshots[card.id];let guide=snap?.guide||{};
+  if(row?.guide)try{guide={...guide,...JSON.parse(row.guide)};}catch{}
+  return {card,checked:Date.parse(row?.checked||snap?.research?.checkedAt||'')||0,value:Math.max(guide.psa10||0,guide.grade9||0,guide.raw||0)};
+ });
+ const queue=rows.filter(r=>now-r.checked>=FRESH_HOURS*3600000).sort((a,b)=>(a.checked?1:0)-(b.checked?1:0)||a.checked-b.checked||b.value-a.value);
+ return {queue:queue.map(r=>r.card),grand:inScope.length};
+}
+// Light records for the cards a job saved, read 100 at a time (D1 allows 100 bound values per query).
+async function lightMarkets(db,ids){
+ const out={};
+ for(let i=0;i<ids.length;i+=100){
+  const part=ids.slice(i,i+100),r=await db.prepare(`SELECT card_id,payload FROM market_cache WHERE card_id IN (${part.map(()=>'?').join(',')})`).bind(...part).all();
+  for(const row of r.results||[])out[row.card_id]=lightMarket(mergeMarket(snapshots[row.card_id],JSON.parse(row.payload)));
+ }
+ return out;
+}
+async function updateRoute(request,env,ctx,db,url,user){
+ if(!env.BACKGROUND_JOBS)return json({job:null,unavailable:true});
+ if(request.method==='GET'){
+  const status=jobStatus(updateJob,url.searchParams.get('since'));
+  if(status)status.markets=await lightMarkets(db,status.changed);
+  return json({job:status,mine:!!updateJob&&updateJob.owner===user});
+ }
+ if(request.method==='DELETE'){
+  if(updateJob?.state==='running'&&updateJob.owner!==user)return json({error:'Only the account that started this update can stop it.'},403);
+  cancelJob(updateJob);return json({job:jobStatus(updateJob,0,0)});
+ }
+ if(request.method!=='POST')return json({error:'Unsupported request.'},405);
+ // Someone else's update is already running: follow it instead of starting another.
+ if(updateJob?.state==='running')return json({job:jobStatus(updateJob,0,0),joined:true,mine:updateJob.owner===user});
+ const body=await input(request);
+ const scopes=body.scopes,langs=body.langs??LANGUAGES;
+ if(!Array.isArray(scopes)||!scopes.length||scopes.length>40||!scopes.every(validScope))return json({error:'Choose the sets or eras to update.'},400);
+ if(!Array.isArray(langs)||!langs.length||!langs.every(l=>LANGUAGES.includes(l)))return json({error:'Choose English or Japanese.'},400);
+ if(env.NETWORK_DISABLED)return json({job:null,warning:'Live sales refresh is unavailable in this workspace. Showing the last researched sales.'});
+ const {queue,grand}=await updateQueue(db,scopes,langs);
+ if(!queue.length)return json({job:null,total:0,grand});
+ const configured=Number(env.FUTURESIGHT_UPDATE_RATE),rate=configured>0?Math.min(10,configured):RATE_DEFAULT;
+ const job=updateJob=startJob(queue,{owner:user,pace:pacer({rate}),fetchPage:page=>sourceFetch(page,env),capture:(card,html)=>captureCard(db,env,ctx,card,html),info:{grand,skipped:grand-queue.length}});
+ job.finished.then(()=>console.log(`Update sales ${job.state}: ${job.updated} of ${job.total} cards saved, ${job.failures.size} failed, in ${Math.round((Date.parse(job.finishedAt)-Date.parse(job.startedAt))/60000)} min.`));
+ return json({job:jobStatus(job,0,0),mine:true});
 }
 export async function fullMarket(db,id){return mergeMarket(snapshots[id],await cachedMarket(db,id))||null;}
 async function alertState(db,user){
@@ -295,11 +363,12 @@ export async function api(request,env,ctx){
     return json({markets:Object.fromEntries(Object.entries(markets).map(([id,m])=>[id,lightMarket(m)])),refreshed:true,count:Object.keys(markets).length});
    }catch(e){return json({refreshed:false,warning:e.message});}
   }
+  if(path==='/api/update')return await updateRoute(request,env,ctx,db,url,user);
   if(path==='/api/research'&&request.method==='POST'){
    // Cards named by id (at most 4 per call): the page orders the queue, skips cards checked recently and retries failures.
    const captureBatch=async batch=>{
-    const cached=await cachedMarkets(db),markets={},failures=[];
-    await Promise.all(batch.map(async card=>{try{const live=parseMarket(await cardPage(card.source,env),card),market=mergeMarket(mergeMarket(snapshots[card.id],cached[card.id]),live);await saveMarket(db,card,market);await logCapture(db,env,ctx,card,live);markets[card.id]=lightMarket(market);}catch(e){failures.push({card_id:card.id,message:e.message});}}));
+    const markets={},failures=[];
+    await Promise.all(batch.map(async card=>{try{markets[card.id]=lightMarket(await captureCard(db,env,ctx,card,await cardPage(card.source,env)));}catch(e){failures.push({card_id:card.id,message:e.message});}}));
     return {markets,failures};
    };
    if(url.searchParams.has('ids')){

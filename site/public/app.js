@@ -397,6 +397,37 @@ async function researchBatch(batch,signal){
   catch(e){if(e.name==='AbortError'||attempt>=2||(e.status&&e.status<500&&e.status!==429))throw e;await pause(3000*(attempt+1));}
  }
 }
+// The list holds thousands of cards, so an update redraws it at most once every 2 seconds.
+let lastDraw=0;
+function drawProgress(force){if(!force&&Date.now()-lastDraw<2000)return;lastDraw=Date.now();if(state.view==='browse'||state.view==='watch'){stats();renderList();renderDetail();}}
+function applyMarkets(markets){for(const [id,m] of Object.entries(markets||{})){state.markets[id]=expandMarket(m);delete state.full[id];delete state.scoreDetail[id];delete state.investDetail[id];}}
+const updateSummary=(updated,grand,skipped,failed)=>'Refreshed sales for '+updated.toLocaleString()+' of '+grand.toLocaleString()+' rare cards'+(skipped?' · '+skipped.toLocaleString()+' already checked in the last '+FRESH_HOURS+' h':'')+(failed?' · '+failed+' could not be read (try again later)':'')+'.';
+// The server reads the pages itself and keeps going if this page is closed; the page follows its
+// progress and shows new prices as they arrive. Returns null where the server cannot run the job
+// (then the page reads batches itself).
+async function followServerUpdate(scopes,langs,signal){
+ const start=await request('/api/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scopes,langs}),signal});
+ if(start.unavailable||(!start.job&&start.grand==null&&!start.warning))return null;
+ if(start.warning){toast(start.warning);return {job:null,updated:0};}
+ if(!start.job){toast(start.grand?'Every card here was checked in the last '+FRESH_HOURS+' hours. Nothing to update.':'No cards here have a price source yet.');return {job:null,updated:0};}
+ if(start.joined)toast('An update is already running'+(start.mine?'':' from another account')+'. Showing its progress.');
+ // Cancel stops the server's job (only the account that started it can); otherwise it just stops following.
+ const stop=()=>{if(start.mine)request('/api/update',{method:'DELETE'}).catch(()=>{});};
+ signal.addEventListener('abort',stop,{once:true});
+ let job=start.job,since=0,updated=0;
+ try{
+  for(;;){
+   setRefreshLabels('Cancel · '+job.done.toLocaleString()+' / '+job.total.toLocaleString());
+   if(job.state!=='running'&&since>=job.updated)break;
+   if(job.state==='running')await pause(1500);
+   if(signal.aborted){const e=new Error('The update was stopped.');e.name='AbortError';throw e;}
+   const r=await request('/api/update?since='+since,{signal});if(!r.job)break;
+   job=r.job;applyMarkets(job.markets);since=job.next;updated+=Object.keys(job.markets||{}).length;
+   if(job.changed.length)drawProgress();
+  }
+ }finally{signal.removeEventListener('abort',stop);}
+ return {job,updated};
+}
 async function refreshSales(scopes,langs=LANGS.map(l=>l.id)){
  if(refreshRun){refreshRun.abort();return;}
  const controller=new AbortController();refreshRun=controller;
@@ -404,6 +435,12 @@ async function refreshSales(scopes,langs=LANGS.map(l=>l.id)){
  setRefreshLabels('Cancel update');
  try{
   await mapJapaneseSets(scopes,langs,controller.signal,setRefreshLabels);
+  const served=await followServerUpdate(scopes,langs,controller.signal);
+  if(served){
+   const j=served.job;updated=served.updated;if(!j)return;
+   toast(j.state==='cancelled'?'Update stopped. Retrieved sales are saved; the next update continues from here.':j.state==='failed'?(j.error||'The update failed.')+' Retrieved sales are saved; run the update again to continue.':updateSummary(j.updated,j.grand,j.skipped,j.failed));
+   return;
+  }
   const now=Date.now(),inScope=state.cards.filter(c=>c.source&&scopes.some(sc=>inRefreshScope(c,sc,langs)));
   const queue=inScope.filter(c=>now-checkedAt(c)>=FRESH_HOURS*3600000).sort((a,b)=>(checkedAt(a)?1:0)-(checkedAt(b)?1:0)||checkedAt(a)-checkedAt(b)||guideValue(b)-guideValue(a));
   grand=inScope.length;skipped=grand-queue.length;
@@ -411,10 +448,10 @@ async function refreshSales(scopes,langs=LANGS.map(l=>l.id)){
   const run=async list=>{
    for(let i=0;i<list.length;i+=4){
     const batch=list.slice(i,i+4),r=await researchBatch(batch,controller.signal);
-    if(r.markets)for(const [id,m] of Object.entries(r.markets)){state.markets[id]=expandMarket(m);delete state.full[id];delete state.scoreDetail[id];delete state.investDetail[id];failed.delete(id);}
+    applyMarkets(r.markets);for(const id of Object.keys(r.markets||{}))failed.delete(id);
     for(const f of r.failures||[])failed.set(f.card_id,f.message);
     updated+=r.count||0;n+=batch.length;
-    if(state.view==='browse'||state.view==='watch'){stats();renderList();renderDetail();}
+    drawProgress();
     if(r.warning){toast(r.warning);return false;}
     setRefreshLabels('Cancel · '+n.toLocaleString()+' / '+queue.length.toLocaleString());
    }
@@ -428,11 +465,11 @@ async function refreshSales(scopes,langs=LANGS.map(l=>l.id)){
    const retry=[...failed.keys()].map(cardById).filter(Boolean);failed.clear();
    n=0;if(!await run(retry))return;
   }
-  toast('Refreshed sales for '+updated.toLocaleString()+' of '+grand.toLocaleString()+' rare cards'+(skipped?' · '+skipped.toLocaleString()+' already checked in the last '+FRESH_HOURS+' h':'')+(failed.size?' · '+failed.size+' could not be read (try again later)':'')+'.');
+  toast(updateSummary(updated,grand,skipped,failed.size));
  }catch(e){toast(e.name==='AbortError'?'Update stopped. Retrieved sales are saved; the next update continues from here.':e.message+' Retrieved sales are saved; run the update again to continue.');}
  finally{
   refreshRun=null;setRefreshLabels('');
-  if(updated){$('#snapshot-label').textContent='Sales checked just now';$('#status-data').textContent='Sales checked just now · '+state.cards.filter(c=>c.eligible).length.toLocaleString()+' rare cards';invalidateMarketViews();}
+  if(updated){drawProgress(true);$('#snapshot-label').textContent='Sales checked just now';$('#status-data').textContent='Sales checked just now · '+state.cards.filter(c=>c.eligible).length.toLocaleString()+' rare cards';invalidateMarketViews();}
  }
 }
 function refreshSet(){

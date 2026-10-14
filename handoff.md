@@ -1,3 +1,28 @@
+# FutureSight — October 14, 2026: roadmap and Phase 0, Update sales on the server (dev)
+
+Owner asked for a "Bloomberg terminal for Pokémon cards" plan and faster price updates (~1 card/s, too slow for ~17k cards). The plan is in `roadmap.md` (Phases 0–5). Phase 0 is implemented here.
+
+- **Why it was slow.** For every batch of 4 cards, `captureBatch` reloaded the whole `market_cache`: 131 MB of JSON and 1.2 s on the local-test database. Batches ran in lockstep through the browser, and the list was redrawn after each one.
+- **Changes**
+  - `captureCard` (`lib/api.mjs`) reads only that card's cached record and saves its price plus observation rows in one transaction (`observationStatements` in `lib/observations.mjs`). If the observation rows fail, the price is still saved.
+  - New `lib/updater.mjs`: `pacer` evenly spaces requests and halves its pace with a 15 s pause on 429/5xx, recovering slowly. `startJob` runs up to 6 workers; busy or timed-out pages are requeued, 3 reads in all. `jobStatus` pages through saved cards.
+  - New `/api/update` routes:
+    - `POST {scopes,langs}` starts the job, or joins one already running
+    - `GET ?since=n` returns progress plus light records for newly saved cards
+    - `DELETE` cancels; only the account that started the job can
+  - The job uses the same queue order the page used: cards read in the last 6 h are skipped, never-read cards go first (highest value first), then the oldest reads. Only `json_extract` fields are read.
+  - Only `server.mjs` sets `BACKGROUND_JOBS`. Elsewhere (the Worker build, tests without it) the route answers `{unavailable:true}` and the page keeps the old `/api/research?ids=` batch loop.
+  - The page (`followServerUpdate` in `public/app.js`) polls every 1.5 s and redraws at most every 2 s.
+  - `sourceFetch` accepts `env.fetch` for tests.
+- **Measured** on a copy of `work/language-local-test.sqlite`, real network, about 50 cards each:
+  - Old loop: 29 of 52 saved, 23 lost to HTTP 429, in 104 s
+  - New job: 50 of 51 saved in 463 s
+
+  **PriceCharting rate-limited this WSL address even at ~1 page/s today**, and the job settled at ~6–7 pages/min. That is why the default `FUTURESIGHT_UPDATE_RATE` is 1, not 3. The remaining speed-up has to come from fewer requests (Phase 1: set-listing guide sweep, tiered refresh, PriceCharting's paid API), not from more parallel requests.
+- **Not done yet:** rejoining a running update after a page reload (pressing Update sales rejoins it); the nightly schedule.
+- **Tests:** 209/211 (`npm test`, Node 24.21). New: `tests/updater.test.mjs` (pacer, retries, cancel, API route end to end with a stubbed page, one-transaction saves) and a UI test for following the server job. **The 2 failing Top movers tests were already failing on `dev` before these changes** (`movers.test.mjs` "real data … capped" 17 ≠ 20, and the matching UI test). They read the bundled data relative to today's date and need a fixed clock; not touched here. `node build.mjs` and a syntax check of the bundle pass.
+- **Owner:** restart the dev server to load the new routes. Nothing in the database changes. An optional `FUTURESIGHT_UPDATE_RATE` is in `.env.example`.
+
 # FutureSight — October 7, 2026: manual eBay searches and EPN preparation (dev)
 
 Owner entered a SerpApi key and requested polished manual searching and affiliate support. They confirmed **no EPN campaign ID yet**; tracking remains disabled until they obtain and configure an approved campaign. No credentials or database rows were modified.
