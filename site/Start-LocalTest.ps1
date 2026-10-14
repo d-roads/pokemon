@@ -4,13 +4,18 @@
 #   - its own database (data\local-test.sqlite, copied once from the beta's database).
 # Nothing here is reachable by beta testers: it listens on this computer only and opens no tunnel.
 # Use -Network to also allow other devices on the home network, and -FreshCopy to re-copy the beta's data.
+# The browser opens on its own once the server is ready (-NoBrowser to skip). Double-click
+# Start-LocalTest.cmd to run this without changing PowerShell's script policy.
 param(
   [string]$BetaSite = '',
   [int]$Port = 5180,
   [switch]$Network,
-  [switch]$FreshCopy
+  [switch]$FreshCopy,
+  [switch]$NoBrowser
 )
 $ErrorActionPreference = 'Stop'
+# On a problem, keep the window open so the message can be read (otherwise it closes at once).
+trap { Write-Host ''; Write-Host $_ -ForegroundColor Red; Read-Host 'Press Enter to close'; exit 1 }
 Set-Location -LiteralPath $PSScriptRoot
 $here = [System.IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\')
 
@@ -29,6 +34,7 @@ if (-not $BetaSite) {
   Write-Host 'Could not find the beta folder (primal-watch\site) above this folder.' -ForegroundColor Red
   Write-Host 'Run again and point to it, for example:' -ForegroundColor Red
   Write-Host '  .\Start-LocalTest.ps1 -BetaSite "C:\Users\b345t\.codex\.chatgpt-projects\g-p-6a72b895d6288191b4624c5f5479fcae\primal-watch\site"' -ForegroundColor Red
+  Read-Host 'Press Enter to close'
   exit 1
 }
 $BetaSite = [System.IO.Path]::GetFullPath($BetaSite).TrimEnd('\')
@@ -37,6 +43,12 @@ if ($BetaSite -ieq $here) {
   throw 'This is the beta folder. Unzip the local test build into its own folder (for example futuresight-local-test) and run Start-LocalTest.ps1 from there.'
 }
 if ($Port -eq 5173 -or $Port -eq 5174) { throw 'Ports 5173 and 5174 belong to the beta. Choose another port.' }
+# An older test server still on this port would keep the new one from starting: close it (node only).
+foreach ($c in @(Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)) {
+  $proc = Get-Process -Id $c.OwningProcess -ErrorAction SilentlyContinue
+  if ($proc -and $proc.ProcessName -eq 'node') { Write-Host "Stopping the old test server on port $Port."; Stop-Process -Id $proc.Id -Force; Start-Sleep -Seconds 1 }
+  elseif ($proc) { throw "Port $Port is used by $($proc.ProcessName). Close it or run with -Port 5181." }
+}
 
 # The test database: a consistent snapshot of the beta's database (safe while the beta runs).
 $testDb = Join-Path $here 'data\local-test.sqlite'
@@ -67,4 +79,19 @@ Write-Host "  LOCAL TEST build:  http://127.0.0.1:$Port" -ForegroundColor Yellow
 Write-Host '  Beta testers are NOT affected. The beta keeps running as is.' -ForegroundColor Yellow
 Write-Host '==============================================================' -ForegroundColor Yellow
 Write-Host ''
+# Open the page once the server answers (loading the catalog takes a few seconds).
+if (-not $NoBrowser) {
+  $url = "http://127.0.0.1:$Port"
+  $null = Start-Job -ArgumentList $url -ScriptBlock {
+    param($u)
+    for ($i = 0; $i -lt 90; $i++) {
+      try { Invoke-WebRequest -UseBasicParsing -Uri "$u/api/version" -TimeoutSec 2 | Out-Null; Start-Process $u; return } catch { Start-Sleep -Seconds 1 }
+    }
+  }
+}
 node server.mjs
+if ($LASTEXITCODE -ne 0) {
+  Write-Host ''
+  Write-Host "The test server stopped (exit code $LASTEXITCODE). The messages above say why." -ForegroundColor Red
+  Read-Host 'Press Enter to close'
+}

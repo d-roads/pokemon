@@ -15,7 +15,7 @@ Your watchlist, buy limits, Dex and alert settings are stored in `data/primal-wa
 ## Beta and local test copies
 
 - **The beta runs the `beta` branch** (version 1.0.0, "beta 1": commit `4bdf0c8`). Outside testers reach it through `Start-Beta.ps1` (port 5173, Quick Tunnel, invite codes). Update it only on purpose.
-- **New work is tested in a separate copy.** Unzip a newer build into its own folder next to the beta folder (never on top of it) and run `Start-LocalTest.ps1` there. It uses port 5180, listens on this computer only (`-Network` to allow the home network), opens no tunnel, and keeps its own database `data\local-test.sqlite`, copied once from the beta's database with `copy-db.mjs` (safe while the beta runs; `-FreshCopy` re-copies it).
+- **New work is tested in a separate copy.** Unzip a newer build into its own folder next to the beta folder (never on top of it) and run `Start-LocalTest.ps1` there (or double-click `Start-LocalTest.cmd`, which runs it without changing PowerShell's script policy, keeps the window open on a problem and opens the browser once the server is ready). It uses port 5180, listens on this computer only (`-Network` to allow the home network), opens no tunnel, and keeps its own database `data\local-test.sqlite`, copied once from the beta's database with `copy-db.mjs` (safe while the beta runs; `-FreshCopy` re-copies it).
 - Every page shows which copy it is beside the logo and on the sign-in page: **Beta · v…**, **Local test · v…** or **Local · v…** (`GET /api/version`; set by `FUTURESIGHT_CHANNEL`). `FUTURESIGHT_DB` points a copy at another database file.
 
 ## Accounts and sharing on your home network
