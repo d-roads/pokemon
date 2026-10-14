@@ -1,7 +1,8 @@
 # FutureSight roadmap: a market terminal for Pokémon cards
 
 Goal: give collectors and investors the depth of a financial terminal: every price, every sale, every
-spread and every population change for ~18,000 rare cards, kept fresh daily and readable at a glance.
+spread and every population change for ~18,000 rare cards, plus how demand is moving by Pokémon,
+set and rarity, kept fresh daily and readable at a glance.
 
 Work happens on `dev` and is promoted to `beta` once a phase looks good. Each phase ends with tests
 passing (`npm test` in `site/`) and a short entry in `handoff.md`.
@@ -67,7 +68,16 @@ The first two items are also the answer to faster price updates (see Phase 0's m
   - Sales count and days since last sale
   - Grade spreads, gem rate and population growth
   - English vs Japanese price gap
-- **Indices** in a `market_index` table: top 100, each era, each grade, English vs Japanese.
+  - Character premium (from `demandOf`) and months since the set's release
+- **`character_metrics` table**, one row per Pokémon, grade and day: character index, returns,
+  demand premium, sales count and sales value across all their cards, breadth (share of their cards
+  up over 30 days), number of priced cards. Kept daily so demand can be charted over time, not only
+  read as today's score.
+- **Set facts:** release date, era, print status (in print / out of print) and card count per set,
+  for set-age comparisons.
+- **Indices** in a `market_index` table: top 100, each era, each grade, English vs Japanese, each set,
+  each Pokémon with enough priced cards, each rarity tier (Gold Star, secret rare, full art, alt art,
+  special illustration rare, …) and each artist with enough priced cards.
 - **Stop reloading the whole cache on page load.** `/api/catalog` and alert scans still read every
   cached record on each call. Serve light records from a small summary column or from `card_metrics`.
 - **Consider PriceCharting's paid API / price-guide download.** One daily file would cover every guide
@@ -85,24 +95,58 @@ The first two items are also the answer to faster price updates (see Phase 0's m
 - Risk: volatility, worst drop from peak, how closely it follows its era index.
 - English vs Japanese price gap for the 5,767 linked printings.
 - Comparables: same Pokémon, same artist, same rarity tier, side by side.
+- Character context: this Pokémon's index, demand rank and demand trend next to the card, and whether
+  the card is priced above or below the character's usual premium.
+- Fair value and deal check: a fair-value range from recent matching sales, and live listings
+  (SerpApi/eBay) marked as below, at or above it.
+- Sell-side Price check: net proceeds after eBay / TCGplayer fees, shipping and tax at today's median,
+  next to the existing buy-side break-even (`lib/investment-costs.mjs`).
 
-## Phase 3 — Market overview
+## Phase 3 — Character demand
+
+Which Pokémon collectors are paying up for, and whether that is rising or fading.
+
+- Character leaderboard: Pokémon ranked by demand premium, index return (30 days / 90 days / 1 year),
+  sales volume and breadth, with rising and falling demand flagged.
+- Character pages: index chart and demand premium over time; every card of that Pokémon sorted by
+  value or return; which eras, sets and rarity tiers carry the premium; the cheapest card with
+  steady sales (the entry point).
+- Money flow: each character's share of total sales value over time, to show where buying is moving.
+- Undervalued cards of in-demand characters: priced below the character's usual premium for their
+  rarity and set (extends the existing "cheap" signal from `lib/invest.mjs`).
+- English vs Japanese demand: characters whose Japanese cards trade at an unusual premium or
+  discount to their English cards.
+
+## Phase 4 — Set trends
+
+- Set pages as "sectors": set index, total value, how much of it sits in the top cards, best and
+  worst performers, gem rate and how fast the set is being graded.
+- Set lifecycle curves: each set's index by months since release, overlaid on its era's typical curve,
+  to show where a set sits (post-release dip, recovery, out-of-print climb).
+- Set comparison: two or more sets side by side on index, returns, volatility and liquidity.
+- Rarity-tier trends: how each tier is moving across sets, and within a set (chase cards vs the rest).
+- Out-of-print effect: how set indices moved before and after print runs ended.
+
+## Phase 5 — Market overview
 
 - Index cards with sparklines; index detail pages with their members.
 - Heatmap: sets as boxes, sized by total value and coloured by % change (1 day / 7 days / 30 days / 1 year).
+  The same view by Pokémon and by rarity tier.
 - Market breadth: cards up vs down, new 52-week highs and lows, sales volume against average.
+- Top movers by group: the sets, Pokémon, rarity tiers and artists moving most, beside the existing
+  card movers.
 - Sales tape: a live, filterable feed of newly seen sales, flagging sales far above or below fair value.
-- Set pages as "sectors": set index, total value, how much of it sits in the top cards.
 
-## Phase 4 — Screener, portfolio, alerts
+## Phase 6 — Screener, portfolio, alerts
 
-- Screener v2: filter and sort on any `card_metrics` column, save screens, export CSV.
-- Portfolio analytics:
+- Screener v2: filter and sort on any `card_metrics` column, including character premium, character
+  index return and set age; save screens, export CSV.
+- Portfolio analytics (Dex):
   - Realized and unrealized profit and loss
-  - Allocation by era, grade and set
+  - Allocation by era, grade, set and Pokémon
   - Performance against the indices
-  - Risk and concentration
-  - What-if scenarios
+  - Risk and concentration, including exposure to a single Pokémon or set
+  - What-if: portfolio value if a set, Pokémon or grade index moves by a chosen %
 - Alert types:
   - Price crosses a level
   - % move in a period
@@ -110,16 +154,24 @@ The first two items are also the answer to faster price updates (see Phase 0's m
   - Unusual sales volume
   - PSA 10 / PSA 9 spread widening
   - New 52-week high or low
-
-## Phase 5 — Terminal interface
-
-- Command bar: type `CHARIZARD BASE PSA10` and press Enter, with short commands for each view
-  (`GP` chart, `POP`, `SALES`, `CMP`).
-- Multi-panel layouts you can save; a ticker strip of watched cards; a dense dark theme; keyboard
-  navigation throughout.
+  - A Pokémon's or set's index moves by a chosen % or its demand rank jumps
+  - A live listing appears below fair value (not only below a manual buy limit)
 
 ## Later (needs new data sources)
 
 - Sealed products (booster boxes, ETBs) and their indices.
-- Release, reprint and rotation calendar.
+- Release and reprint calendar, with markers on charts: new sets, reprints of a Pokémon or artwork,
+  and demand catalysts (new games, anime and movie releases, Pokémon Presents, anniversary sets).
+- Search interest per Pokémon (e.g. Google Trends) beside its demand premium.
+- Supply on the market: active-listing counts over time and listings per monthly sale (needs regular
+  SerpApi/eBay reads, which cost credits).
 - Other marketplaces and graders (CGC, BGS population).
+
+## Out of scope (removed Oct 14, 2026)
+
+Every item must help decide what to buy, hold or sell. These did not, and were taken off:
+
+- The terminal interface phase: command bar and view codes, saved multi-panel layouts, a ticker strip,
+  a dense dark theme and keyboard navigation. They change how pages are reached, not what they show.
+  The dark terminal theme and the status-bar ticker already exist.
+- Format rotation on the calendar: it moves tournament playables, not the collector cards tracked here.
