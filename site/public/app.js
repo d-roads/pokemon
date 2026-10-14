@@ -1,7 +1,7 @@
 import {manualSearchQuery,manualSearchUrl} from '/ebay-links.mjs';
 import {analyze as computeAnalysis,gradeNames,trendProjection} from '/analysis.mjs';
 import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE} from '/portfolio.mjs';
-import {normalizeCosts,costSummary,netReturn,maxBuyPrice,DEFAULT_COSTS} from '/investment-costs.mjs';
+import {normalizeCosts,costSummary,netReturn,maxBuyPrice,netProceeds,saleFee,DEFAULT_COSTS} from '/investment-costs.mjs';
 const analysisCache=new WeakMap();
 const analyze=(market,grade)=>{if(!market)return computeAnalysis(market,grade);const day=Math.floor(Date.now()/86400000);let cache=analysisCache.get(market);if(!cache||cache.day!==day){cache={day,grades:{}};analysisCache.set(market,cache);}return cache.grades[grade]??=(computeAnalysis(market,grade));};
 const $=s=>document.querySelector(s);
@@ -24,7 +24,7 @@ const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
 const JA_TEXT_KEY='futuresight-japanese-text';
 function savedJapaneseText(){try{return localStorage.getItem(JA_TEXT_KEY)==='on';}catch{return false;}}
 const state={showJapanese:savedJapaneseText(),sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],langs:['en','ja'],detailLang:null,detailAlt:null,detailGrade:null,marketLang:'en',filters:{min:null,max:null,activity:0,invest:0,research:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
- dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},market:{tab:'overview',grade:'psa10',weight:'eq',data:{},error:null,index:null,period:'ret_30d',sorts:{},query:'',minCards:5,limit:100,memberLimit:100,memberSort:{key:'price',dir:-1},range:'1y',era:null,lifeSets:{}},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
+ dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},cardMetrics:{},grading:null,market:{tab:'overview',grade:'psa10',weight:'eq',data:{},error:null,index:null,period:'ret_30d',sorts:{},query:'',minCards:5,limit:100,memberLimit:100,memberSort:{key:'price',dir:-1},range:'1y',era:null,lifeSets:{}},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
 // Crashes in the page are sent to the server, which forwards them to Sentry only when SENTRY_DSN is set. At most 5 per page load.
 let crashReports=0;
@@ -272,6 +272,57 @@ function versionBar(base,c,withGrades){
  const tab=l=>{const target=counterpart(base,l),on=langOf(c)===l;return `<button data-detail-lang="${l}" class="${on?'active':''}" aria-pressed="${on}" ${target?'':'disabled'} title="${target?(l==='ja'?'Japanese printing':'English printing'):l==='ja'?'No verified Japanese counterpart of this printing':'No verified English counterpart of this printing'}">${l==='ja'?'Japanese':'English'}</button>`;};
  return `<div class="version-bar"><div class="segmented lang-tabs" role="group" aria-label="Card language">${tab('en')}${tab('ja')}</div>${withGrades?`<div class="segmented grade-tabs-inline" role="group" aria-label="Grade">${['raw','psa9','psa10'].map(g=>`<button data-detail-grade="${g}" class="${g===viewGrade()?'active':''}" aria-pressed="${g===viewGrade()}">${{raw:'Raw NM',psa9:'PSA 9',psa10:'PSA 10'}[g]}</button>`).join('')}</div>`:''}${missing?`<span class="version-note">No verified ${state.detailLang==='ja'?'Japanese':'English'} counterpart of this printing.</span>`:''}</div>`;
 }
+// ---------- Card market metrics ----------
+// Returns, range, liquidity, grade spreads, population and relative value from /api/metrics, plus the
+// card's set, Pokémon, rarity tier and artist indices for context.
+const metricsPending=new Set();
+async function loadCardMetrics(id){
+ if(state.cardMetrics[id]||metricsPending.has(id))return;metricsPending.add(id);
+ try{state.cardMetrics[id]=await request('/api/metrics?id='+encodeURIComponent(id));}catch{state.cardMetrics[id]={error:true,grades:{},indices:[]};}
+ finally{metricsPending.delete(id);}
+ if(shownCard()?.id===id)renderDetail();
+}
+const GRADING_KEY='futuresight-grading',GRADING_DEFAULT={fee:25,shipping:15};
+function savedGrading(){try{return {...GRADING_DEFAULT,...JSON.parse(localStorage.getItem(GRADING_KEY)||'{}')};}catch{return {...GRADING_DEFAULT};}}
+// Grading: what a raw copy is worth sent to PSA, at this card's population odds. Each grade is valued at
+// its sold median when there is one, else the guide (8 and below at the Grade 8 / Grade 7 guides, or raw).
+function gradingView(c,m,metrics){
+ const psa=m?.pop?.psa,total=Array.isArray(psa)?psa.reduce((a,b)=>a+(b||0),0):0;
+ if(!(total>=20))return `<div class="grading"><h4>Grading calculator</h4><p class="score-note">Needs a PSA population of 20 or more copies${total?' (this card has '+total+')':''}.</p></div>`;
+ const g=state.grading??=savedGrading(),value=gr=>analyze(m,gr).fair??metrics[gr]?.price??null,raw=value('raw'),p10=value('psa10'),p9=value('psa9'),g8=m.guide?.grade8||null,g7=m.guide?.grade7||raw;
+ if(!(raw>0&&p10>0&&p9>0))return `<div class="grading"><h4>Grading calculator</h4><p class="score-note">Needs raw, PSA 9 and PSA 10 prices.</p></div>`;
+ // PSA 8 at the Grade 8 guide, 7 at the Grade 7 guide, 6 and below at the ungraded guide (mixed condition).
+ const n10=psa[9]||0,n9=psa[8]||0,n8=psa[7]||0,n7=psa[6]||0,low=total-n10-n9-n8-n7,lowValue=m.guide?.raw||raw,cost=raw+g.fee+g.shipping;
+ const below=n9*p9+n8*(g8||g7)+n7*g7+low*lowValue,ev=(n10*p10+below)/total,gain=ev-cost;
+ // The PSA 10 share at which grading breaks even, with the other grades in their current proportions.
+ const other=total-n10?below/(total-n10):g7,need=p10>other?(cost-other)/(p10-other):null;
+ return `<div class="grading"><h4>Grading calculator</h4><div class="grading-inputs"><label>Grading fee<span class="unit-input"><i>$</i><input type="number" min="0" step="1" data-grading="fee" value="${g.fee}"></span></label><label>Shipping &amp; insurance<span class="unit-input"><i>$</i><input type="number" min="0" step="1" data-grading="shipping" value="${g.shipping}"></span></label></div>
+  <div class="grading-out"><div><small>Raw copy + costs</small><b>${money(cost)}</b></div><div><small>Expected graded value</small><b>${money(ev)}</b></div><div><small>Expected gain</small><b class="pl ${gain>=0?'up':'down'}">${signed(gain)}</b></div><div><small>Break-even PSA 10 rate</small><b>${need==null?'—':need>1?'Over 100%':need<=0?'Pays without a 10':(need*100).toFixed(need<.1?1:0)+'%'}</b></div></div>
+  <p class="score-note">At this card's PSA odds: ${share(n10/total)} PSA 10, ${share(n9/total)} PSA 9, ${share((n8+n7)/total)} PSA 7–8, ${share(low/total)} lower (${total.toLocaleString()} graded). Values: PSA 10 ${money(p10)}, PSA 9 ${money(p9)}, raw ${money(raw)}. Copies people choose to grade are better than average, so your own odds may be lower. Selling fees not included.</p></div>`;
+}
+function marketSection(c,m){
+ const d=state.cardMetrics[c.id];
+ if(!d){loadCardMetrics(c.id);return `<div class="detail-section card-metrics"><div class="section-heading"><h3>Market metrics</h3><small>Loading…</small></div></div>`;}
+ const g=viewGrade(),x=d.grades?.[g];
+ if(!x||x.price==null)return d.error?'':`<div class="detail-section card-metrics"><div class="section-heading"><h3>Market metrics</h3></div><p class="sales-note">${d.run?'No guide price for this grade yet.':'Market metrics are built after Update sales or a guide sweep, and nightly.'}</p></div>`;
+ const cell=(label,value,title='')=>`<div${title?` title="${esc(title)}"`:''}><small>${label}</small><b>${value}</b></div>`;
+ const pos=x.high_52w>x.low_52w?Math.min(100,Math.max(0,(x.price-x.low_52w)/(x.high_52w-x.low_52w)*100)):null;
+ const range=x.low_52w!=null?`<div class="range52"><div class="range-head"><small>52-week range</small><span>${money(x.low_52w)} – ${money(x.high_52w)}</span></div><div class="range-bar">${pos!=null?`<i style="left:${pos.toFixed(1)}%"></i>`:''}</div></div>`:'';
+ const gap=x.lang_gap==null?'—':(x.lang_gap>=0?'+':'−')+Math.abs(Math.round(x.lang_gap*100))+'%';
+ const stats=`<div class="metric-grid">${cell('Guide',money(x.price),'PriceCharting guide for this grade, read '+date(x.as_of))}${cell('From peak',retCell(x.drawdown),'Below the highest guide price on record')}${cell('Volatility',x.volatility==null?'—':Math.round(x.volatility*100)+'%','Annualised, from month-end guide prices')}${cell('Sales 30D / 90D',x.sales_30d==null?'—':x.sales_30d+' / '+x.sales_90d,'Matching sales in the 30 and 90 days before the card was last read')}${cell('Last sale',x.days_since_sale==null?'—':x.days_since_sale+' d ago')}${cell('vs peers',times(x.premium),'Guide price over the median of same-era, same-rarity cards')}${cell('PSA 10 / PSA 9',times(x.spread_10_9))}${cell('PSA 10 / raw',times(x.spread_10_raw))}${cell('PSA graded',x.pop_total==null?'—':x.pop_total.toLocaleString()+(x.pop_growth_90d!=null?` <small>${pct(x.pop_growth_90d)} 90D</small>`:''),'All PSA-graded copies; growth over 90 days when known')}${cell('Gem rate',share(x.gem_rate),'PSA 10s as a share of PSA-graded copies')}${cell(langOf(c)==='en'?'Japanese copy':'English copy',gap,'Price of the verified '+(langOf(c)==='en'?'Japanese':'English')+' printing against this one, same grade')}</div>`;
+ const rets=`<div class="ret-strip">${RET_KEYS.map(([k,l])=>`<div><small>${l}</small>${retCell(x[k])}</div>`).join('')}</div>`;
+ const order=['set','char','tier','artist','era'],idx=[...(d.indices||[])].filter(i=>i.grades?.[g]).sort((a,b)=>order.indexOf(a.kind)-order.indexOf(b.kind));
+ const context=idx.length?`<div class="index-context"><h4>Its indices · ${shortGrade(g)}</h4>${idx.map(i=>{const r=i.grades[g];return `<button data-open-market="${esc(i.id)}"><span><small>${esc(KIND_LABEL[i.kind]||i.kind)}</small>${esc(i.name)}</span>${i.kind==='char'&&r.premium!=null?`<span class="ctx-demand" title="Demand premium">${times(r.premium)}</span>`:'<span class="ctx-demand"></span>'}<span>${retCell(retOf(r,'ret_30d'))}<small>30D</small></span><span>${retCell(retOf(r,'ret_1y'))}<small>1Y</small></span></button>`;}).join('')}</div>`:'';
+ // Selling today: the sold median (or guide) less the fees and shipping set in Price check's cost assumptions.
+ const sale=analyze(m,g).fair??x.price,costs=userCosts(),net=netProceeds(sale,costs);
+ const sell=sale>0?`<div class="sell-side"><h4>If you sold today</h4><p><span>${money(sale)} ${analyze(m,g).fair?'sold median':'guide'}</span><span>− ${money(saleFee(sale,costs)+(costs.shippingOut||0)+(costs.holdingCost||0))} fees &amp; shipping</span><b>= ${money(net)} to you</b></p><p class="score-note">${esc(costs.label)}. Change these under Price check's cost assumptions.</p></div>`:'';
+ return `<div class="detail-section card-metrics"><div class="section-heading"><h3>Market metrics</h3><small>${shortGrade(g)} · guide prices · ${date(x.as_of)}</small></div>${rets}${range}${stats}${context}${sell}${g==='raw'?gradingView(c,m,d.grades):''}</div>`;
+}
+function wireCardMetrics(){
+ const box=$('#detail');if(!box?.querySelectorAll)return;
+ box.querySelectorAll('[data-open-market]').forEach(b=>b.onclick=()=>{const id=b.dataset.openMarket;state.view='market';state.market.tab=({char:'char',set:'set',tier:'tier',artist:'artist'})[id.split(':')[1]]||'overview';state.market.grade=viewGrade();state.marketLang=id.split(':')[0];state.market.index=id;updateView();openIndex(id);});
+ box.querySelectorAll('[data-grading]').forEach(input=>input.onchange=()=>{const v=Number(input.value);if(!(v>=0&&v<=10000))return;state.grading={...(state.grading||savedGrading()),[input.dataset.grading]:v};try{localStorage.setItem(GRADING_KEY,JSON.stringify(state.grading));}catch{}renderDetail();});
+}
 function renderDetail(){
  const base=cardById(state.selected),c=shownCard();if(!c){$('#detail').innerHTML='<div class="empty-state"><strong>Select a card</strong><p>Card insights will appear here.</p></div>';return;}
  const sourceSet=state.sets.find(s=>s.id===c.setId);$('#set-market-source').href=sourceSet.marketSource||sourceSet.checklistSource;$('#set-checklist-source').href=sourceSet.checklistSource;
@@ -288,7 +339,7 @@ function renderDetail(){
  const top=`<div class="detail-top"><div class="detail-eyebrow"><span>CARD INSIGHT</span><span class="eyebrow-end"><span>${gradeNames[viewGrade()]}</span><button class="icon-button expand-button" id="detail-focus" aria-label="Expand card details" title="Expand (reading view)">${icon('expand')}</button></span></div><div class="detail-identity"><div class="detail-image-wrap"><img class="detail-image" src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="${esc(c.name)} ${c.numberLabel}"></div><div><h2>${esc(c.name)}</h2><p>${esc(c.setName)} · ${numberCaption(c)}<br>${esc(c.category)}</p><span class="type-pill">${esc(c.type)}</span>${mine.length?`<span class="type-pill owned-pill">In your Dex · ${mine.reduce((n,e)=>n+(e.quantity||1),0)}</span>`:''}</div></div></div>`;
  const buy=`<div class="buy-box ${target==null?'insufficient':''}"><div class="eyebrow">${w?.target!=null?'YOUR BUY TARGET':'SUGGESTED MAXIMUM PRICE'}</div><div class="buy-amount"><strong>${target==null?'Waiting for evidence':money(target)}</strong>${a.target!=null && w?.target==null?'<span class="discount-tag">15% below median</span>':''}</div><p>${w?.target!=null?'Your saved limit, before shipping and tax.':esc(a.reason)}</p></div>`;
  const metrics=`<div class="detail-metrics"><div><span class="metric-label">Current reference</span><strong>${money(a.current)}</strong><small>${esc(a.priceLabel)}</small>${viewGrade()==='psa9'&&a.guidePrice?`<small>Mixed Grade 9 guide: ${money(a.guidePrice)}</small>`:''}${a.sampleCount?`<span class="sample-badge">${a.sampleCount} matching sales</span>`:''}</div><div><span class="metric-label">Activity score</span><div class="demand-wrap"><strong>${a.score??'—'}</strong><em>/ 100</em></div><div class="demand-bar"><span style="width:${a.score??0}%"></span></div><small>Sales activity · ${conf.toLowerCase()}</small></div></div>`;
- const scoreHtml=`${scoreBox(c)}${researchBox(c)}`;
+ const scoreHtml=`${scoreBox(c)}${researchBox(c)}`,marketHtml=marketSection(c,m);
  const chartSec=`<div class="detail-chart"><div class="section-heading"><h3>Reported sales</h3><small>${gradeNames[viewGrade()]}</small></div><div class="trend-layout"><div>${chart(a,f,history)}</div><aside class="trend-projection" aria-label="Simple trend projection"><span>Simple trend projection</span>${projection.available?['1Y','2Y','3Y'].map((label,i)=>`<div><b>${label}</b><strong>${money(projection.values[i])}</strong></div>`).join(''):`<p>${esc(projection.historyReason&&/held-out/.test(projection.historyReason)?'No reliable trend: neither recent sales nor the monthly price history beat an unchanged price in a held-out test.':projection.historyReason&&/Needs 8 months/.test(projection.historyReason)&&/Needs 8 sale days/.test(projection.reason)?'Not enough history yet: needs 6+ months of sales or monthly source prices.':projection.reason)}</p>`}${pastChange(history)}</aside></div><p class="chart-caption">${a.usable.length} matching sales · ${a.windowDays} days · ${conf}${projection.available?` · ${signed(projection.annualIncrease)} / year trend`:''}</p><p class="sales-note">${projection.available&&projection.basis==='history'?`Projection applies the source's monthly ${viewGrade()==='psa9'?'Grade 9 (all graders) ':''}price trend over ${projection.months} months (${projection.annualRate>=0?'+':'−'}${Math.abs(Math.round(projection.annualRate*100))}% a year) to the sold median, because the source lists only recent sales. Held-out test: last ${projection.validation.months} months, ${Math.round(projection.validation.mape*100)}% average error (${Math.round(projection.validation.baselineMape*100)}% for unchanged prices). `:`Projection uses daily sold medians from the past year${projection.historyReason?'; the monthly source history was also checked':''}. ${projection.available?`Held-out test: ${Math.round(projection.validation.spanDays)} days, ${Math.round(projection.validation.mape*100)}% average error (${Math.round(projection.validation.baselineMape*100)}% for unchanged prices). `:''}`}The 1–3 year extrapolation is illustrative; its future accuracy is unverified. This is not investment advice.</p></div>`;
  const actions=`<div class="detail-actions"><button class="button primary" id="detail-watch">${w?icon('star-fill')+' Watching':icon('star')+' Add to watchlist'}</button><button class="button" id="detail-dex" aria-label="Add ${esc(c.name)} to your Dex">${icon('plus')} Dex</button><button class="button" id="refresh-card" aria-label="Refresh this card">${icon('refresh')}</button></div>`;
  const limitSec=`${w?`<div class="detail-section"><h3>Your buy limit</h3><form id="target-form" class="target-form"><label for="custom-target">Maximum price (USD)<input id="custom-target" type="number" min="0.01" max="1000000" step="0.01" value="${w.target??a.target??''}" placeholder="Set a price" required></label><button class="button" type="submit">Save</button></form><button id="reset-target" class="remove-watch">Use suggested target</button><p class="sales-note">Alerts fire when this card is listed at or under ${target!=null?money(target):'your limit'} including shipping. <button class="link-button" id="open-alerts">Alert settings</button></p></div>`:''}`;
@@ -310,8 +361,8 @@ function renderDetail(){
   const jaFooter=`<div class="source-line"><span>Japanese checklist</span><a href="${esc(sourceSet.checklistSource)}" target="_blank" rel="noopener noreferrer">TCGdex · View source</a></div>`;
   el.innerHTML=f?focusBar(c)+`<div class="focus-body">${versionBar(base,c,false)}<div class="focus-hero">${jaTop}<div class="focus-key">${pending}${jaActions}</div></div><div class="focus-grid"><div class="focus-col">${limitSec}${jaSource}</div><div class="focus-col wide">${langSec}</div></div>${jaFooter}</div>`
    :versionBar(base,c,true)+jaTop+pending+jaActions+langSec+limitSec+jaSource+jaFooter;
- }else el.innerHTML=f?focusBar(c)+`<div class="focus-body">${versionBar(base,c,false)}<div class="focus-hero">${jaTop}<div class="focus-key">${buy}${metrics}${actions}</div></div><div class="focus-grid"><div class="focus-col">${scoreHtml}${langSec}${limitSec}${researchSec}${scenarioSec}</div><div class="focus-col wide">${chartSec}${historySec}${salesSec}</div></div>${footer}</div>`
-  :versionBar(base,c,true)+jaTop+buy+metrics+scoreHtml+chartSec+actions+langSec+limitSec+salesSec+historySec+researchSec+scenarioSec+footer;
+ }else el.innerHTML=f?focusBar(c)+`<div class="focus-body">${versionBar(base,c,false)}<div class="focus-hero">${jaTop}<div class="focus-key">${buy}${metrics}${actions}</div></div><div class="focus-grid"><div class="focus-col">${marketHtml}${scoreHtml}${langSec}${limitSec}${researchSec}${scenarioSec}</div><div class="focus-col wide">${chartSec}${historySec}${salesSec}</div></div>${footer}</div>`
+  :versionBar(base,c,true)+jaTop+buy+metrics+marketHtml+scoreHtml+chartSec+actions+langSec+limitSec+salesSec+historySec+researchSec+scenarioSec+footer;
  $('#detail-watch').onclick=()=>toggleWatch(c.id,$('#detail-watch'));
  $('#detail-dex').onclick=()=>openDexDialog({card_id:c.id,grade:viewGrade()});
  if($('#refresh-card'))$('#refresh-card').onclick=()=>refreshCard(c);
@@ -324,7 +375,7 @@ function renderDetail(){
  if($('#score-method'))$('#score-method').onclick=()=>$('#method-dialog').showModal();
  if($('#score-retry'))$('#score-retry').onclick=()=>{state.scoreError=null;renderDetail();loadScores();};
  if(w){$('#target-form').onsubmit=e=>{e.preventDefault();saveTarget(c.id,Number($('#custom-target').value));};$('#reset-target').onclick=()=>saveTarget(c.id,null);$('#open-alerts').onclick=()=>{state.view='alerts';updateView();};}
- wireResearch(c);wireImages();wireCharts($('#detail'));
+ wireResearch(c);wireCardMetrics();wireImages();wireCharts($('#detail'));
  if(f){const again=keep&&document.getElementById?.(keep);(again||$('#focus-close'))?.focus?.();}
 }
 // Reading view: the card panel expanded over the page, with grade tabs and previous/next.
@@ -886,7 +937,7 @@ const RET_KEYS=[['ret_1d','1D'],['ret_7d','7D'],['ret_30d','30D'],['ret_90d','90
 const retOf=(r,k)=>state.market.weight==='eq'&&r?.['eq_'+k]!==undefined?r['eq_'+k]:r?.[k];
 const retCell=v=>v==null?'<span class="pl flat">—</span>':`<span class="pl ${v>0?'up':v<0?'down':'flat'}">${pct(v)}</span>`;
 const times=v=>v==null?'—':v.toFixed(v>=10?0:v>=3?1:2)+'×';
-const share=v=>v==null?'—':Math.round(v*100)+'%';
+const share=v=>v==null?'—':v>0&&v<.095?(v*100).toFixed(1)+'%':Math.round(v*100)+'%';
 const marketKey=(...parts)=>[state.marketLang,state.market.grade,...parts].join('|');
 const bigMoney=v=>v==null?'—':Math.abs(v)>=1e6?'$'+(v/1e6).toFixed(Math.abs(v)>=1e7?0:1)+'M':compact(v);
 const ageText=release=>{const m=Math.max(0,Math.round((Date.now()-Date.parse(release+'T00:00:00Z'))/2629800000));return m<24?m+' mo':(m/12).toFixed(m<120?1:0)+' yr';};

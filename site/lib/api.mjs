@@ -19,7 +19,7 @@ import {investmentTable,investmentView,scoreMode,modelVersion,archiveScores,rese
 import {DEFAULT_COSTS,maxBuyPrice,netReturn,COST_PROFILE_VERSION} from './investment-costs.mjs';
 import {parseJapaneseListing,matchJapaneseListing,listingGuide,numberOnlyAllowed,JA_MAP_VERSION} from './japanese.mjs';
 import {METRIC_GRADES,indexKeysOf,dayNum,dayStr} from './metrics.mjs';
-import {METRIC_TABLES,rebuildMetrics,rebuildState,lastRun,cardMetrics,indexList,indexDetail,indexName,cardMetricsFor,indexSparks,marketBreadth,setHistories} from './metrics-store.mjs';
+import {METRIC_TABLES,rebuildMetrics,rebuildState,lastRun,cardMetrics,indexList,indexDetail,indexName,cardMetricsFor,indexSparks,marketBreadth,setHistories,indexRowsFor} from './metrics-store.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const cardById=new Map(cards.map(c=>[c.id,c]));
 const seriesIds=series.map(item=>item.id);
@@ -617,7 +617,8 @@ export async function api(request,env,ctx){
   if(path==='/api/sweep')return await sweepRoute(request,env,db,url,user);
   if(path==='/api/metrics'&&request.method==='GET'){
    const card=cardById.get(url.searchParams.get('id'));if(!card)return json({error:'That card is not in the catalog.'},404);
-   return json({card_id:card.id,grades:await cardMetrics(db,card.id),indices:indexKeysOf(card,cardById).map(id=>({id,name:indexName(id,{sets,series})})),run:await lastRun(db)});
+   const ids=indexKeysOf(card,cardById),rows=await indexRowsFor(db,ids);
+   return json({card_id:card.id,grades:await cardMetrics(db,card.id),indices:ids.map(id=>({id,name:indexName(id,{sets,series}),kind:id.split(':')[1],grades:Object.fromEntries(rows.filter(r=>r.index_id===id).map(r=>[r.grade,r]))})),run:await lastRun(db)});
   }
   if(path==='/api/indices'&&request.method==='GET'){
    const lang=insightLanguage(url),kind=url.searchParams.get('kind')||'set',grade=url.searchParams.get('grade')||'psa10';

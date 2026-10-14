@@ -169,3 +169,9 @@ export async function setHistories(db,{lang,grade}){
  for(const r of rows){const d=new Date(r.day+'T00:00:00Z'),next=new Date(d.getTime()+86400000);if(next.getUTCDate()!==1)continue;(out[r.index_id.slice(lang.length+5)]||=[]).push([r.day.slice(0,7),r.level,r.level_eq]);}
  return out;
 }
+// index_metrics rows for the named indices (every grade).
+export async function indexRowsFor(db,ids){
+ const out=[];
+ for(let i=0;i<ids.length;i+=99){const part=ids.slice(i,i+99);out.push(...(((await db.prepare(`SELECT * FROM index_metrics WHERE index_id IN (${part.map(()=>'?').join(',')})`).bind(...part).all()).results)||[]).map(metPlain));}
+ return out;
+}

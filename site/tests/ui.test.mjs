@@ -10,7 +10,7 @@ import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE} fro
 import {topMovers} from '../lib/movers.mjs';
 import {potentialInvestments} from '../lib/invest.mjs';
 import {investmentScores} from '../lib/score.mjs';
-import {normalizeCosts,costSummary,netReturn,maxBuyPrice,DEFAULT_COSTS} from '../lib/investment-costs.mjs';
+import {normalizeCosts,costSummary,netReturn,maxBuyPrice,netProceeds,saleFee,DEFAULT_COSTS} from '../lib/investment-costs.mjs';
 import {investmentTable,investmentView} from '../lib/investment.mjs';
 const investData=potentialInvestments(cards.map(c=>[c,snapshots[c.id]]));
 const moverData=topMovers(cards.map(c=>[c,snapshots[c.id]]),'week',{now:Date.parse(Object.values(snapshots).map(m=>m?.research?.checkedAt||m?.observedAt).filter(Boolean).sort().at(-1))});
@@ -31,7 +31,7 @@ function workspace(){
  const document={querySelector:s=>elements.get(s)||null,querySelectorAll:s=>s==='[data-category]'?categories:[]};
  const responses={'/api/catalog':{cards,sets,series,markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/movers':moverData,'/api/investments':investData,'/api/scores':{grades:scoreData.grades,scores:scoreData.scores},'/api/market':{market:null,score:null},'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
  const calls=[];
- const context=vm.createContext({document,manualSearchQuery,manualSearchUrl,normalizeCosts,costSummary,netReturn,maxBuyPrice,DEFAULT_COSTS,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,calls,fetch:async url=>{const path=url.split('?')[0];calls.push(url);let r=responses[path];if(typeof r==='function')r=r(url);if(r?.__response)return r.__response;const headers=new Headers({'Content-Type':'application/json'});if(r&&r.__status)return {ok:false,status:r.__status,headers,json:async()=>r.body};return {ok:true,status:200,headers,json:async()=>r||{}};}});
+ const context=vm.createContext({document,manualSearchQuery,manualSearchUrl,normalizeCosts,costSummary,netReturn,maxBuyPrice,netProceeds,saleFee,DEFAULT_COSTS,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,calls,fetch:async url=>{const path=url.split('?')[0];calls.push(url);let r=responses[path];if(typeof r==='function')r=r(url);if(r?.__response)return r.__response;const headers=new Headers({'Content-Type':'application/json'});if(r&&r.__status)return {ok:false,status:r.__status,headers,json:async()=>r.body};return {ok:true,status:200,headers,json:async()=>r||{}};}});
  const source=readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/^import .*;\s*$/gm,'').replace(/init\(\);\s*$/,'');
  vm.runInContext(source,context);
  return {context,responses,calls,e:s=>elements.get(s),run:s=>vm.runInContext(s,context)};
@@ -481,4 +481,18 @@ test('Market shows indices, breadth and the set heatmap, a Pokémon demand table
  await ui.run("openIndex('en:char:Gengar');loadIndex('en:char:Gengar')");html=ui.e('#market-view').innerHTML;
  assert.match(html,/Demand premium/);assert.match(html,/data-card="base1-4"/);assert.match(html,/6\.3× a year ago/);
  ui.run("openCard('base1-4','psa10')");assert.equal(ui.run('state.view'),'browse');assert.equal(ui.run('state.selected'),'base1-4');
+});
+test('The card panel shows market metrics, its indices, selling proceeds and a grading calculator',async()=>{
+ const ui=workspace();await ui.run('init()');
+ const g=extra=>({price:400,as_of:'2026-10-14',ret_1d:null,ret_7d:.02,ret_30d:-.1,ret_90d:.05,ret_1y:.4,low_52w:300,high_52w:500,drawdown:-.2,volatility:.3,sales_30d:5,sales_90d:12,days_since_sale:3,premium:2.5,spread_10_9:3,spread_10_raw:20,pop_total:1000,pop_10:100,gem_rate:.1,lang_gap:.25,...extra});
+ ui.responses['/api/metrics']={card_id:'base1-4',run:{as_of:'2026-10-14'},grades:{raw:g(),psa9:g({price:2000}),psa10:g({price:8000})},indices:[{id:'en:set:base1',kind:'set',name:'Base Set',grades:{raw:{ret_30d:.1,eq_ret_30d:.08,ret_1y:.3,eq_ret_1y:.2}}},{id:'en:char:Charizard',kind:'char',name:'Charizard',grades:{raw:{premium:6,ret_30d:-.01,ret_1y:.33}}}]};
+ const sale=(grade,price,i)=>({id:grade+i,grade,date:new Date(Date.now()-i*86400000).toISOString().slice(0,10),price,condition:grade==='raw'?'NM':''});
+ ui.run(`state.markets['base1-4']={guide:{raw:300,grade9:2000,psa10:8000,grade8:900,grade7:600},pop:{psa:[50,50,50,50,100,150,200,150,100,100]},sales:${JSON.stringify([...[1,2,3,4].map(i=>sale('raw',400,i)),...[1,2,3].map(i=>sale('psa9',2000,i)),...[1,2,3].map(i=>sale('psa10',8000,i))])}};state.full['base1-4']=true;state.grade='raw';state.selected='base1-4';renderDetail()`);
+ await new Promise(r=>setImmediate(r));await new Promise(r=>setImmediate(r));
+ const html=ui.e('#detail').innerHTML;
+ assert.match(html,/Market metrics/);assert.match(html,/\+40\.0%/);assert.match(html,/2\.50×/);assert.match(html,/\+25%/,'the Japanese copy costs 25% more');
+ assert.match(html,/data-open-market="en:char:Charizard"/);assert.match(html,/6\.0×/,'Charizard demand');assert.match(html,/\+8\.0%/,'typical-card set return');
+ assert.match(html,/If you sold today/);assert.match(html,/\$400\.00 sold median/);assert.match(html,/\$335\.00 to you/,'15% fees and $5 shipping');
+ // EV: 10% × 8,000 + 10% × 2,000 + 15% × 900 (PSA 8) + 20% × 600 (PSA 7) + 45% × 300 = 1,390; cost 400 + 25 + 15 = 440.
+ assert.match(html,/Grading calculator/);assert.match(html,/\$1,390\.00/);assert.match(html,/\$440\.00/);assert.match(html,/\+\$950\.00/);
 });
