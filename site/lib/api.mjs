@@ -23,6 +23,12 @@ const cardById=new Map(cards.map(c=>[c.id,c]));
 const seriesIds=series.map(item=>item.id);
 function insightSeries(url){const raw=url.searchParams.get('series');if(raw==null)return seriesIds;const requested=new Set(raw.split(',').map(value=>value.trim().toUpperCase()).filter(Boolean));if(!requested.size||[...requested].some(id=>!seriesIds.includes(id)))return null;return seriesIds.filter(id=>requested.has(id));}
 async function cachedMarkets(db){const r=await db.prepare('SELECT card_id,payload FROM market_cache').all();return Object.fromEntries((r.results||[]).map(r=>[r.card_id,JSON.parse(r.payload)]));}
+// Saved records for the named cards only, 100 at a time (D1 allows 100 bound values per query).
+async function cachedMarketsFor(db,ids){
+ const out={},list=[...new Set(ids)];
+ for(let i=0;i<list.length;i+=100){const part=list.slice(i,i+100),r=await db.prepare(`SELECT card_id,payload FROM market_cache WHERE card_id IN (${part.map(()=>'?').join(',')})`).bind(...part).all();for(const row of r.results||[])out[row.card_id]=JSON.parse(row.payload);}
+ return out;
+}
 async function cachedMarket(db,id){const row=await db.prepare('SELECT payload FROM market_cache WHERE card_id = ?').bind(id).first();return row?JSON.parse(row.payload):null;}
 async function readWatch(db,user){const r=await db.prepare('SELECT card_id,grade,target,created_at FROM watchlist WHERE user_id = ? ORDER BY created_at DESC').bind(user).all();return r.results||[];}
 async function readCollection(db,user){const r=await db.prepare('SELECT id,card_id,grade,quantity,purchase_price,purchase_date,notes,created_at,updated_at FROM collection WHERE user_id = ? ORDER BY COALESCE(purchase_date,substr(created_at,1,10)) DESC,id DESC').bind(user).all();return r.results||[];}
@@ -79,7 +85,7 @@ export function forgetListings(){listingMemo.clear();}
 async function mapJapaneseSet(db,env,ctx,set){
  if(!set.marketSource)return {mapped:0,unmatched:[],warning:'This Japanese set has no price-guide listing.'};
  const {rows,pages}=await japaneseListing(set.marketSource,env);
- const setCards=cards.filter(c=>c.setId===set.id&&c.eligible),{matches,unmatched}=matchJapaneseListing(rows,setCards),now=new Date().toISOString(),cached=await cachedMarkets(db),markets={},sources={};
+ const setCards=cards.filter(c=>c.setId===set.id&&c.eligible),{matches,unmatched}=matchJapaneseListing(rows,setCards),now=new Date().toISOString(),cached=await cachedMarketsFor(db,[...matches.keys()]),markets={},sources={};
  const statements=[];
  for(const [id,row] of matches){
   const card=cardById.get(id),url='https://www.pricecharting.com'+row.path;
@@ -87,13 +93,13 @@ async function mapJapaneseSet(db,env,ctx,set){
   applySource(card,{url,product_id:row.productId,name:row.name,image:row.image});sources[id]={source:url,name:row.name,image:card.imageFromGuide?card.image:null};
   const g=listingGuide(row,card,now);if(!Object.keys(g.guide).length)continue;
   const m=mergeMarket(mergeMarket(snapshots[id],cached[id]),g);markets[id]=m;
-  statements.push(db.prepare('INSERT INTO market_cache (card_id,payload,fetched_at) VALUES (?,?,?) ON CONFLICT(card_id) DO UPDATE SET payload=excluded.payload,fetched_at=excluded.fetched_at').bind(id,JSON.stringify(m),m.observedAt));
+  statements.push(cacheStatement(db,id,m));
   await logCapture(db,env,ctx,card,g);
  }
  if(statements.length)await db.batch(statements);
  return {mapped:matches.size,total:setCards.length,unmatched,pages,sources,markets:Object.fromEntries(Object.entries(markets).map(([id,m])=>[id,lightMarket(m)]))};
 }
-const marketStatement=(db,card,market)=>db.prepare('INSERT INTO market_cache (card_id,payload,fetched_at) VALUES (?,?,?) ON CONFLICT(card_id) DO UPDATE SET payload=excluded.payload,fetched_at=excluded.fetched_at').bind(card.id,JSON.stringify(market),market.observedAt);
+const marketStatement=(db,card,market)=>cacheStatement(db,card.id,market);
 async function saveMarket(db,card,market){await marketStatement(db,card,market).run();}
 // Read one card's page, merge it with what is saved and store the price and its observation rows in one
 // transaction. Only this card's cached record is read. If the observation rows cannot be written,
@@ -134,6 +140,48 @@ const scoreTable=db=>insight(db,'scores',entries=>{
 // the market-cache count, newest capture and day are added by insight().
 const RELEASE=Object.fromEntries(sets.map(s=>[s.id,s.release]));
 const DATASET_REVISION=observedAt+'|'+cards.length;
+// ---------- Light records ----------
+// The catalog list needs only each card's guide prices and recent sales (lightMarket), so a light copy
+// is saved beside every record. light_key ties it to the record it was made from (bundled dataset,
+// capture time and payload size): a record rewritten without it is rebuilt on the next read, never trusted.
+const LIGHT_REV='light-1|'+DATASET_REVISION,LIGHT_DAYS=400;
+// Every sale is kept in the saved copy; the catalog trims to the last LIGHT_DAYS when it reads.
+const lightOf=(id,market)=>JSON.stringify(lightMarket(mergeMarket(snapshots[id],market),0));
+function cacheStatement(db,id,market){
+ const payload=JSON.stringify(market);
+ return db.prepare("INSERT INTO market_cache (card_id,payload,fetched_at,light,light_key) VALUES (?,?,?,?,?||'|'||?||'|'||octet_length(?)) ON CONFLICT(card_id) DO UPDATE SET payload=excluded.payload,fetched_at=excluded.fetched_at,light=excluded.light,light_key=excluded.light_key").bind(id,payload,market.observedAt,lightOf(id,market),LIGHT_REV,market.observedAt,payload);
+}
+// Databases made before light records existed get the two columns once. The trigger clears the light
+// copy whenever a record is rewritten without one (an import tool, an older build).
+const columnsReady=new WeakMap();
+function ensureColumns(db){
+ if(!columnsReady.has(db))columnsReady.set(db,(async()=>{
+  try{await db.prepare('SELECT light,light_key FROM market_cache LIMIT 0').all();}
+  catch{for(const name of ['light','light_key'])await db.prepare(`ALTER TABLE market_cache ADD COLUMN ${name} TEXT`).run().catch(()=>{});}
+  await db.prepare('CREATE TRIGGER IF NOT EXISTS market_cache_light AFTER UPDATE OF payload ON market_cache WHEN NEW.light_key IS OLD.light_key BEGIN UPDATE market_cache SET light = NULL, light_key = NULL WHERE card_id = NEW.card_id; END').run();
+ })().catch(e=>{columnsReady.delete(db);throw e;}));
+ return columnsReady.get(db);
+}
+const snapshotLight=new Map();
+const trimLight=(light,since)=>light&&{...light,s:(light.s||[]).filter(x=>x[0]>=since)};
+// Light records for every card with market data. Only records whose light copy is missing or out of
+// date are parsed in full, and their light copy is saved for next time.
+async function catalogMarkets(db,now=Date.now()){
+ const since=new Date(now-LIGHT_DAYS*86400000).toISOString().slice(0,10),markets={},repairs=[];
+ const rows=(await db.prepare("SELECT card_id,fetched_at,octet_length(payload) AS size,light,CASE WHEN light_key = ?||'|'||fetched_at||'|'||octet_length(payload) THEN NULL ELSE payload END AS payload FROM market_cache").bind(LIGHT_REV).all()).results||[];
+ for(const row of rows){
+  let text=row.light;
+  if(row.payload!=null){text=lightOf(row.card_id,JSON.parse(row.payload));repairs.push(db.prepare("UPDATE market_cache SET light = ?, light_key = ?||'|'||fetched_at||'|'||octet_length(payload) WHERE card_id = ? AND fetched_at = ? AND octet_length(payload) = ?").bind(text,LIGHT_REV,row.card_id,row.fetched_at,row.size));}
+  const light=trimLight(JSON.parse(text),since);if(light)markets[row.card_id]=light;
+ }
+ for(const id of Object.keys(snapshots)){
+  if(id in markets)continue;
+  if(!snapshotLight.has(id))snapshotLight.set(id,lightMarket(snapshots[id],0));
+  const light=trimLight(snapshotLight.get(id),since);if(light)markets[id]=light;
+ }
+ for(let i=0;i<repairs.length;i+=200)await db.batch(repairs.slice(i,i+200)).catch(e=>console.error('Light records:',e.message));
+ return markets;
+}
 // The research rank is a frozen model fit on English data. Japanese cards get their own table (ranked
 // only against Japanese cards) when FUTURESIGHT_JA_RESEARCH=shadow; by default English only.
 const researchFor=(db,mode,langs=['en'])=>insight(db,['research',modelVersion(),mode,COST_PROFILE_VERSION,'h12',DATASET_REVISION,langs.join('+')].join(':'),entries=>mergeInvestmentTables(langs.map(lang=>investmentTable(inLanguage(entries,lang),{release:RELEASE,mode,lang}))));
@@ -220,7 +268,7 @@ async function alertState(db,user){
 export async function scanForUser(env,user,options={}){
  const db=database(env),settings=await readSettings(db,user);
  if(env.NETWORK_DISABLED)return {checked:0,found:[],skipped:[],error:'Live listing scans are unavailable in this workspace.'};
- const markets=await cachedMarkets(db);
+ const markets=await cachedMarketsFor(db,(await readWatch(db,user)).map(w=>w.card_id));
  return runScan({db,user,cards,marketFor:id=>mergeMarket(snapshots[id],markets[id]),settings,fetchImpl:env.fetch||fetch,...options});
 }
 export async function api(request,env,ctx){
@@ -228,14 +276,13 @@ export async function api(request,env,ctx){
  const url=new URL(request.url),path=url.pathname;
  try{
   const db=database(env),user=env.LOCAL_USER_ID||request.headers.get('oai-authenticated-user-id');
+  await ensureColumns(db);
   if(request.method!=='GET' && request.method!=='HEAD'){
    const origin=request.headers.get('Origin');if(origin&&origin!==url.origin)return json({error:'This action must be made from your FutureSight page.'},403);
    if(!user)return json({error:'Sign in to save your watchlist.'},401);
   }
   if(path==='/api/catalog' && request.method==='GET'){
-   const cached=await cachedMarkets(db),markets={};
-   for(const id of new Set([...Object.keys(snapshots),...Object.keys(cached)])){const m=cached[id]?mergeMarket(snapshots[id],cached[id]):snapshots[id];if(m)markets[id]=lightMarket(m);}
-   return json({sets,series,cards,markets,local:!!env.LOCAL_USER_ID});
+   return json({sets,series,cards,markets:await catalogMarkets(db),local:!!env.LOCAL_USER_ID});
   }
   if(path==='/api/watchlist'){
    if(!user)return json({error:'Sign in to view your watchlist.'},401);
@@ -280,7 +327,7 @@ export async function api(request,env,ctx){
     else return json({error:'Choose an alert.'},400);
    }else if(request.method!=='GET')return json({error:'Method not allowed.'},405);
    const state=await alertState(db,user),watch=await readWatch(db,user),settings=await readSettings(db,user);
-   const cached=await cachedMarkets(db);
+   const cached=await cachedMarketsFor(db,watch.map(w=>w.card_id));
    const affiliate=affiliateOptions(env);
    const searches=watch.map(w=>{const card=cardById.get(w.card_id);if(!card)return null;const limit=alertLimit(w,mergeMarket(snapshots[w.card_id],cached[w.card_id]),settings);return {card_id:w.card_id,grade:w.grade,limit:limit?.limit??null,limit_source:limit?.source??null,query:manualSearchQuery(card,w.grade),url:ebaySearchUrl(card,w.grade,null,{auctions:settings.includeAuctions,affiliate}),limitedUrl:limit?ebaySearchUrl(card,w.grade,limit.limit,{auctions:settings.includeAuctions,affiliate}):null};}).filter(Boolean);
    return json({...state,searches,affiliate});
@@ -357,9 +404,9 @@ export async function api(request,env,ctx){
    // Japanese sets: match every card to its exact product, then save those products' guide prices.
    if(set.lang==='ja'){try{const r=await mapJapaneseSet(db,env,ctx,set);return json({refreshed:r.mapped>0,count:r.mapped,...r});}catch(e){return json({refreshed:false,count:0,warning:e.message});}}
    try{
-    const guides=parseSet(await sourceFetch(set.marketSource,env),cards.filter(c=>c.setId===set.id&&c.eligible)),cached=await cachedMarkets(db),markets={};
+    const guides=parseSet(await sourceFetch(set.marketSource,env),cards.filter(c=>c.setId===set.id&&c.eligible)),cached=await cachedMarketsFor(db,Object.keys(guides)),markets={};
     for(const [id,g] of Object.entries(guides)){const previous=mergeMarket(snapshots[id],cached[id]);markets[id]=mergeMarket(previous,g);await logCapture(db,env,ctx,cardById.get(id),g);}
-    await db.batch(Object.entries(markets).map(([id,m])=>db.prepare('INSERT INTO market_cache (card_id,payload,fetched_at) VALUES (?,?,?) ON CONFLICT(card_id) DO UPDATE SET payload=excluded.payload,fetched_at=excluded.fetched_at').bind(id,JSON.stringify(m),m.observedAt)));
+    await db.batch(Object.entries(markets).map(([id,m])=>cacheStatement(db,id,m)));
     return json({markets:Object.fromEntries(Object.entries(markets).map(([id,m])=>[id,lightMarket(m)])),refreshed:true,count:Object.keys(markets).length});
    }catch(e){return json({refreshed:false,warning:e.message});}
   }

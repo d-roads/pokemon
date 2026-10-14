@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS watchlist (user_id TEXT NOT NULL, card_id TEXT NOT NULL, grade TEXT NOT NULL, target REAL, created_at TEXT NOT NULL, PRIMARY KEY (user_id,card_id,grade));
-CREATE TABLE IF NOT EXISTS market_cache (card_id TEXT PRIMARY KEY NOT NULL, payload TEXT NOT NULL, fetched_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS market_cache (card_id TEXT PRIMARY KEY NOT NULL, payload TEXT NOT NULL, fetched_at TEXT NOT NULL, light TEXT, light_key TEXT);
 CREATE TABLE IF NOT EXISTS collection (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, card_id TEXT NOT NULL, grade TEXT NOT NULL, quantity INTEGER NOT NULL DEFAULT 1, purchase_price REAL, purchase_date TEXT, notes TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS collection_user ON collection (user_id, card_id);
 CREATE TABLE IF NOT EXISTS alert_settings (user_id TEXT PRIMARY KEY NOT NULL, payload TEXT NOT NULL, updated_at TEXT NOT NULL);

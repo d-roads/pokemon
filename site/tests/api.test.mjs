@@ -151,3 +151,19 @@ test('Research: market view and scores in shadow mode; legacy mode rolls back; i
  assert.equal((await (await api(req('/api/market?id=xy5-151'),legacy)).json()).investment,null);assert.equal((await (await api(req('/api/scores'),legacy)).json()).research,null);
  const cand=await (await api(req('/api/market?id=xy5-151'),{...env,FUTURESIGHT_SCORE_MODEL:'candidate'})).json();assert.equal(cand.investment.psa10.mode,'shadow','an unpromoted model cannot be switched on');
 });
+test('The catalog serves saved light records and rebuilds any that are missing or out of date',async()=>{
+ const old=new DatabaseSync(':memory:');
+ // A database from before light records: the columns are added on first use.
+ old.exec(sql.replace(', light TEXT, light_key TEXT',''));const env2={DB:dbAdapter(old),NETWORK_DISABLED:true};
+ const day=new Date().toISOString().slice(0,10),sale=price=>({id:'s'+price,number:'147',grade:'psa9',date:day,price,condition:'',title:'Primal Groudon EX 147/160 PSA 9'});
+ old.prepare('INSERT INTO market_cache (card_id,payload,fetched_at) VALUES (?,?,?)').run('xy5-147',JSON.stringify({guide:{grade9:300},sales:[sale(301)],observedAt:'2099-10-01T00:00:00Z'}),'2099-10-01T00:00:00Z');
+ const first=await(await api(req('/api/catalog'),env2)).json();
+ assert.equal(first.markets['xy5-147'].guide.grade9,300);assert.ok(first.markets['xy5-147'].s.some(s=>s[1]===301));
+ const saved=old.prepare("SELECT light,light_key FROM market_cache WHERE card_id='xy5-147'").get();assert.ok(saved.light&&saved.light_key,'the light copy is saved for next time');
+ // Rewritten without its light copy (an import tool, an older build): the stale copy is not trusted.
+ old.prepare("UPDATE market_cache SET payload = ? WHERE card_id='xy5-147'").run(JSON.stringify({guide:{grade9:444},sales:[sale(445)],observedAt:'2099-10-01T00:00:00Z'}));
+ const second=await(await api(req('/api/catalog'),env2)).json();assert.equal(second.markets['xy5-147'].guide.grade9,444);
+ // Cards without saved data still get their bundled snapshot.
+ const bundled=Object.keys(snapshots).find(id=>id!=='xy5-147'&&snapshots[id]?.guide);assert.deepEqual(second.markets[bundled].guide,snapshots[bundled].guide);
+ old.close();
+});
