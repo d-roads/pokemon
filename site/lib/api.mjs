@@ -2,7 +2,7 @@ import {manualSearchQuery,affiliateOptions} from './ebay-links.mjs';
 import {cards,sets,series} from '../data/catalog.mjs';
 import {snapshots,observedAt} from '../data/market.mjs';
 import {database} from './db.mjs';
-import {parseMarket,parseSet,sourceFetch} from './provider.mjs';
+import {parseMarket,parseSet,parseSetPage,listingCursor,listingPageUrl,sourceFetch} from './provider.mjs';
 import {mergeMarket} from './sales.mjs';
 import {lightMarket} from './payload.mjs';
 import {topMovers,PERIODS} from './movers.mjs';
@@ -18,6 +18,8 @@ import {pacer,startJob,cancelJob,jobStatus} from './updater.mjs';
 import {investmentTable,investmentView,scoreMode,modelVersion,archiveScores,researchLanguages,mergeInvestmentTables} from './investment.mjs';
 import {DEFAULT_COSTS,maxBuyPrice,netReturn,COST_PROFILE_VERSION} from './investment-costs.mjs';
 import {parseJapaneseListing,matchJapaneseListing,listingGuide,numberOnlyAllowed,JA_MAP_VERSION} from './japanese.mjs';
+import {METRIC_GRADES,indexKeysOf} from './metrics.mjs';
+import {METRIC_TABLES,rebuildMetrics,rebuildState,lastRun,cardMetrics,indexList,indexDetail,indexName,cardMetricsFor} from './metrics-store.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const cardById=new Map(cards.map(c=>[c.id,c]));
 const seriesIds=series.map(item=>item.id);
@@ -69,12 +71,17 @@ async function cardPage(url,env){
   catch(e){if(attempt<2&&/\((?:429|5\d\d)\)|timeout|aborted|fetch failed/i.test(e.message)){await pause(env.CAPTURE_RETRY_MS??4000*(attempt+1));continue;}throw e;}
  }
 }
-async function japaneseListing(source,env){
- const hit=listingMemo.get(source);if(hit&&Date.now()-hit.at<900000)return hit.value;
+// With a pace (the guide sweep job) every page waits its turn and a busy answer is left to the job to
+// retry; `first` is the first page when the job has already read it.
+async function japaneseListing(source,env,{pace=null,first=null}={}){
+ const hit=listingMemo.get(source);if(!pace&&hit&&Date.now()-hit.at<900000)return hit.value;
  const rows=[];let cursor=null,pages=0;const seen=new Set();
  do{
-  if(pages)await pause(env.LISTING_PAUSE_MS??800);
-  const page=parseJapaneseListing(await listingPage(source+'?view=table'+(cursor?'&cursor='+encodeURIComponent(cursor):''),env));
+  const url=source+'?view=table'+(cursor?'&cursor='+encodeURIComponent(cursor):'');let html;
+  if(!pages&&first!=null)html=first;
+  else if(pace){await pace.wait();html=await sourceFetch(url,env);pace.ok();}
+  else{if(pages)await pause(env.LISTING_PAUSE_MS??800);html=await listingPage(url,env);}
+  const page=parseJapaneseListing(html);
   rows.push(...page.rows);cursor=page.cursor;pages++;
   if(cursor&&seen.has(cursor))break;if(cursor)seen.add(cursor);
  }while(cursor&&pages<40);
@@ -82,9 +89,9 @@ async function japaneseListing(source,env){
 }
 export function forgetListings(){listingMemo.clear();}
 // Read every page of a Japanese set's listing, match products to cards, save the matches and their guide prices.
-async function mapJapaneseSet(db,env,ctx,set){
+async function mapJapaneseSet(db,env,ctx,set,{listing=null}={}){
  if(!set.marketSource)return {mapped:0,unmatched:[],warning:'This Japanese set has no price-guide listing.'};
- const {rows,pages}=await japaneseListing(set.marketSource,env);
+ const {rows,pages}=listing||await japaneseListing(set.marketSource,env);
  const setCards=cards.filter(c=>c.setId===set.id&&c.eligible),{matches,unmatched}=matchJapaneseListing(rows,setCards),now=new Date().toISOString(),cached=await cachedMarketsFor(db,[...matches.keys()]),markets={},sources={};
  const statements=[];
  for(const [id,row] of matches){
@@ -151,13 +158,16 @@ function cacheStatement(db,id,market){
  const payload=JSON.stringify(market);
  return db.prepare("INSERT INTO market_cache (card_id,payload,fetched_at,light,light_key) VALUES (?,?,?,?,?||'|'||?||'|'||octet_length(?)) ON CONFLICT(card_id) DO UPDATE SET payload=excluded.payload,fetched_at=excluded.fetched_at,light=excluded.light,light_key=excluded.light_key").bind(id,payload,market.observedAt,lightOf(id,market),LIGHT_REV,market.observedAt,payload);
 }
-// Databases made before light records existed get the two columns once. The trigger clears the light
+// Databases made before light records and sweeps existed get the new columns and table once. The trigger clears the light
 // copy whenever a record is rewritten without one (an import tool, an older build).
 const columnsReady=new WeakMap();
 function ensureColumns(db){
  if(!columnsReady.has(db))columnsReady.set(db,(async()=>{
   try{await db.prepare('SELECT light,light_key FROM market_cache LIMIT 0').all();}
   catch{for(const name of ['light','light_key'])await db.prepare(`ALTER TABLE market_cache ADD COLUMN ${name} TEXT`).run().catch(()=>{});}
+  await db.prepare('CREATE TABLE IF NOT EXISTS set_sweeps (set_id TEXT PRIMARY KEY NOT NULL, swept_at TEXT NOT NULL, pages INTEGER, priced INTEGER, wanted INTEGER)').run();
+  await db.prepare('CREATE TABLE IF NOT EXISTS nightly_runs (day TEXT PRIMARY KEY NOT NULL, started_at TEXT NOT NULL, finished_at TEXT, summary TEXT)').run();
+  for(const sql of METRIC_TABLES)await db.prepare(sql).run();
   await db.prepare('CREATE TRIGGER IF NOT EXISTS market_cache_light AFTER UPDATE OF payload ON market_cache WHEN NEW.light_key IS OLD.light_key BEGIN UPDATE market_cache SET light = NULL, light_key = NULL WHERE card_id = NEW.card_id; END').run();
  })().catch(e=>{columnsReady.delete(db);throw e;}));
  return columnsReady.get(db);
@@ -253,10 +263,189 @@ async function updateRoute(request,env,ctx,db,url,user){
  if(env.NETWORK_DISABLED)return json({job:null,warning:'Live sales refresh is unavailable in this workspace. Showing the last researched sales.'});
  const {queue,grand}=await updateQueue(db,scopes,langs);
  if(!queue.length)return json({job:null,total:0,grand});
- const configured=Number(env.FUTURESIGHT_UPDATE_RATE),rate=configured>0?Math.min(10,configured):RATE_DEFAULT;
- const job=updateJob=startJob(queue,{owner:user,pace:pacer({rate}),fetchPage:page=>sourceFetch(page,env),capture:(card,html)=>captureCard(db,env,ctx,card,html),info:{grand,skipped:grand-queue.length}});
- job.finished.then(()=>console.log(`Update sales ${job.state}: ${job.updated} of ${job.total} cards saved, ${job.failures.size} failed, in ${Math.round((Date.parse(job.finishedAt)-Date.parse(job.startedAt))/60000)} min.`));
+ const job=startUpdateJob(env,db,queue,{owner:user,info:{grand,skipped:grand-queue.length}});
  return json({job:jobStatus(job,0,0),mine:true});
+}
+function startUpdateJob(env,db,queue,{owner,info}){
+ const job=updateJob=startJob(queue,{owner,pace:sourcePace(db,env),fetchPage:page=>sourceFetch(page,env),capture:(card,html)=>captureCard(db,env,null,card,html),info});
+ job.finished.then(()=>{console.log(`Update sales ${job.state}: ${job.updated} of ${job.total} cards saved, ${job.failures.size} failed, in ${Math.round((Date.parse(job.finishedAt)-Date.parse(job.startedAt))/60000)} min.`);if(job.updated&&!job.nightly)queueRebuild(env);});
+ return job;
+}
+// Every job that reads the price source shares one pace per database, so an update and a sweep
+// running together still stay within FUTURESIGHT_UPDATE_RATE pages a second.
+const paces=new WeakMap();
+function sourcePace(db,env){
+ const configured=Number(env.FUTURESIGHT_UPDATE_RATE),rate=configured>0?Math.min(10,configured):RATE_DEFAULT;
+ let p=paces.get(db);if(!p||p.max!==rate){p=pacer({rate});p.max=rate;paces.set(db,p);}
+ return p;
+}
+// ---------- Guide-price sweep ----------
+// One request per listing page instead of one per card: a set's PriceCharting listing shows the
+// ungraded, Grade 9 and PSA 10 guide price of every product, about 150 rows a page. A few hundred
+// pages cover every set. Sales history and population still need each card's own page (Update sales).
+let sweepJob=null;
+const SWEEP_FRESH_HOURS=20;
+// Save guide-only captures: each card's merged record and its observation rows in one transaction,
+// 50 cards per batch.
+async function saveGuides(db,env,ctx,guides){
+ const ids=Object.keys(guides),cached=await cachedMarketsFor(db,ids),markets={},groups=[];
+ for(const id of ids){
+  const card=cardById.get(id),m=mergeMarket(mergeMarket(snapshots[id],cached[id]),guides[id]),list=[cacheStatement(db,id,m)];markets[id]=m;
+  try{const o=observationStatements(db,card,guides[id]);if(o)list.push(...o.statements);}catch(e){console.error('Observation log:',e.message);ctx?.waitUntil?.(reportError(env,e,{source:'observations'}));}
+  groups.push(list);
+ }
+ for(let i=0;i<groups.length;i+=50)await db.batch(groups.slice(i,i+50).flat());
+ return markets;
+}
+async function recordSweeps(db,rows){
+ const now=new Date().toISOString();
+ if(rows.length)await db.batch(rows.map(([id,pages,priced,wanted])=>db.prepare('INSERT INTO set_sweeps (set_id,swept_at,pages,priced,wanted) VALUES (?,?,?,?,?) ON CONFLICT(set_id) DO UPDATE SET swept_at=excluded.swept_at,pages=excluded.pages,priced=excluded.priced,wanted=excluded.wanted').bind(id,now,pages,priced,wanted)));
+}
+// English sets sharing one listing (the promo listing, a set and its trainer gallery) are read together,
+// page by page, until every rare card is found or the listing ends. With a pace (the sweep job) each page
+// waits its turn and a busy answer is left to the job to retry; without one (a single set from the page)
+// pages are read with a short pause and retried here.
+async function sweepEnglish(db,env,ctx,group,{pace=null,first=null}={}){
+ const bySet=group.map(set=>[set,cards.filter(c=>c.setId===set.id&&c.eligible&&c.source)]),wanted=bySet.reduce((n,[,list])=>n+list.length,0),guides={},now=new Date().toISOString();
+ let cursor=null,pages=0;const seen=new Set();
+ for(;;){
+  const url=listingPageUrl(group[0].marketSource,cursor);let html;
+  if(!pages&&first!=null)html=first;
+  else if(pace){await pace.wait();html=await sourceFetch(url,env);pace.ok();}
+  else{if(pages)await pause(env.LISTING_PAUSE_MS??800);html=await listingPage(url,env);}
+  pages++;
+  for(const [,list] of bySet)for(const [id,g] of Object.entries(parseSetPage(html,list,now).guides))guides[id]??=g;
+  cursor=listingCursor(html);
+  if(!cursor||seen.has(cursor)||pages>=40||Object.keys(guides).length>=wanted)break;
+  seen.add(cursor);
+ }
+ if(!Object.keys(guides).length)throw new Error('The set price guide could not be read.');
+ const markets=await saveGuides(db,env,ctx,guides);
+ await recordSweeps(db,bySet.map(([set,list])=>[set.id,pages,list.filter(c=>guides[c.id]).length,list.length]));
+ return {pages,wanted,priced:Object.keys(guides).length,markets};
+}
+async function sweepJapanese(db,env,ctx,group,{pace=null,first=null}={}){
+ const listing=await japaneseListing(group[0].marketSource,env,{pace,first}),rows=[];let priced=0,wanted=0;
+ for(const set of group){const r=await mapJapaneseSet(db,env,ctx,set,{listing}),n=Object.keys(r.markets||{}).length;priced+=n;wanted+=r.total||0;rows.push([set.id,listing.pages,n,r.total||0]);}
+ await recordSweeps(db,rows);
+ return {pages:listing.pages,wanted,priced};
+}
+// Listings to read: one per source page, with every set in scope that uses it.
+const inSweepScope=(set,scopes)=>scopes.some(sc=>sc==='all'||(sc.startsWith('era:')?set.series===sc.slice(4):set.id===sc));
+function sweepGroups(langs,scopes=['all']){
+ const groups=new Map();
+ for(const set of sets){
+  const lang=set.lang||'en';if(!set.marketSource||!langs.includes(lang)||!inSweepScope(set,scopes))continue;
+  if(!cards.some(c=>c.setId===set.id&&c.eligible&&(lang==='ja'||c.source)))continue;
+  const g=groups.get(set.marketSource)||groups.set(set.marketSource,{id:set.id,lang,sets:[]}).get(set.marketSource);g.sets.push(set);
+ }
+ return [...groups.values()].map(g=>({...g,id:g.sets.map(s=>s.id).join('+'),source:g.lang==='ja'?g.sets[0].marketSource+'?view=table':g.sets[0].marketSource}));
+}
+// Listings swept in the last SWEEP_FRESH_HOURS are skipped unless forced; the oldest go first.
+async function sweepQueue(db,langs,{scopes=['all'],force=false,now=Date.now()}={}){
+ const swept=new Map(((await db.prepare('SELECT set_id,swept_at FROM set_sweeps').all()).results||[]).map(r=>[r.set_id,Date.parse(r.swept_at)||0]));
+ const groups=sweepGroups(langs,scopes),last=g=>Math.min(...g.sets.map(s=>swept.get(s.id)||0));
+ const queue=groups.filter(g=>force||now-last(g)>=SWEEP_FRESH_HOURS*3600000).sort((a,b)=>last(a)-last(b)||a.id.localeCompare(b.id));
+ return {queue,grand:groups.length};
+}
+// Starts the sweep, or returns the one already running. Also used by the nightly schedule.
+export async function startSweep(env,{langs=LANGUAGES,scopes=['all'],force=false,owner=null}={}){
+ const db=database(env);await ensureColumns(db);await ensureSourceMap(db).catch(e=>console.error('Source map:',e.message));
+ if(sweepJob?.state==='running')return {job:sweepJob,joined:true};
+ if(env.NETWORK_DISABLED)return {job:null,warning:'Live price sweeps are unavailable in this workspace.'};
+ const {queue,grand}=await sweepQueue(db,langs,{scopes,force});
+ if(!queue.length)return {job:null,grand};
+ const pace=sourcePace(db,env);
+ const job=sweepJob=startJob(queue,{owner,pace,concurrency:2,fetchPage:url=>sourceFetch(url,env),capture:(group,html)=>(group.lang==='ja'?sweepJapanese:sweepEnglish)(db,env,null,group.sets,{pace,first:html}),info:{grand,skipped:grand-queue.length}});
+ job.finished.then(()=>{console.log(`Guide sweep ${job.state}: ${job.updated} of ${job.total} listings read, ${job.failures.size} failed, in ${Math.round((Date.parse(job.finishedAt)-Date.parse(job.startedAt))/60000)} min.`);if(job.updated&&owner!=='nightly')queueRebuild(env);});
+ return {job};
+}
+// When each set's guide prices were last swept.
+async function sweepSummary(db){
+ const r=(await db.prepare('SELECT COUNT(*) AS sets, MIN(swept_at) AS oldest, MAX(swept_at) AS newest, SUM(priced) AS priced FROM set_sweeps').first())||{};
+ return {sets:r.sets||0,oldest:r.oldest||null,newest:r.newest||null,priced:r.priced||0,listings:sweepGroups(LANGUAGES).length};
+}
+async function sweepRoute(request,env,db,url,user){
+ if(!env.BACKGROUND_JOBS)return json({job:null,unavailable:true,summary:await sweepSummary(db)});
+ const mine=()=>!!sweepJob&&sweepJob.owner===user;
+ if(request.method==='GET'){
+  const status=jobStatus(sweepJob,url.searchParams.get('since'),20);
+  if(status){const ids=new Set(status.changed.flatMap(id=>id.split('+')));status.markets=await lightMarkets(db,cards.filter(c=>ids.has(c.setId)).map(c=>c.id));}
+  return json({job:status,mine:mine(),summary:await sweepSummary(db)});
+ }
+ if(request.method==='DELETE'){
+  if(sweepJob?.state==='running'&&sweepJob.owner!==user)return json({error:'Only the account that started this sweep can stop it.'},403);
+  cancelJob(sweepJob);return json({job:jobStatus(sweepJob,0,0)});
+ }
+ if(request.method!=='POST')return json({error:'Unsupported request.'},405);
+ const body=await input(request),langs=body.langs??LANGUAGES,scopes=body.scopes??['all'];
+ if(!Array.isArray(scopes)||!scopes.length||scopes.length>40||!scopes.every(validScope))return json({error:'Choose the sets or eras to sweep.'},400);
+ if(!Array.isArray(langs)||!langs.length||!langs.every(l=>LANGUAGES.includes(l)))return json({error:'Choose English or Japanese.'},400);
+ const r=await startSweep(env,{langs,scopes,force:body.force===true,owner:user});
+ return json({job:jobStatus(r.job,0,0),joined:!!r.joined,mine:mine(),grand:r.grand??null,warning:r.warning||null});
+}
+// ---------- Metrics ----------
+// A rebuild reads every saved record (metrics-store.mjs). One runs at a time; a request made while one
+// runs starts another once it ends, so the newest prices are always included. Node only.
+let rebuildAgain=false;
+export function queueRebuild(env){
+ if(!env.BACKGROUND_JOBS)return null;
+ const db=database(env);
+ if(rebuildState().running){rebuildAgain=true;return null;}
+ const p=ensureColumns(db).then(()=>rebuildMetrics(db,{cards,snapshots,log:m=>console.log(m)}));
+ p.then(r=>console.log(`Metrics rebuilt: ${r.cards} cards, ${r.indices} indices, ${r.points} new daily prices, in ${Math.round(r.ms/1000)} s.`),e=>{console.error('Metrics:',e.message);reportError(env,e,{source:'metrics'});})
+  .finally(()=>{if(rebuildAgain){rebuildAgain=false;queueRebuild(env);}});
+ return p;
+}
+const INDEX_KINDS=['all','top100','era','set','char','tier','artist'];
+// Cards in an index: from the catalog, except Top 100 which is today's most valuable cards.
+async function indexMembers(db,id,grade){
+ const [lang,kind]=id.split(':');
+ if(kind==='top100')return ((await db.prepare('SELECT card_id FROM card_metrics WHERE lang = ? AND grade = ? AND price > 0 ORDER BY price DESC LIMIT 100').bind(lang,grade).all()).results||[]).map(r=>r.card_id);
+ return cards.filter(c=>c.eligible&&indexKeysOf(c,cardById).includes(id)).map(c=>c.id);
+}
+// ---------- Nightly ----------
+// Card pages (sales history and PSA population) are read on a schedule by tier; guide prices for every
+// card come from the sweep each night. Watched and owned cards and cards worth $1,000+ are read daily,
+// $100–$1,000 weekly, the rest monthly. FUTURESIGHT_NIGHTLY_PAGES caps one night's card pages.
+export const REFRESH_TIERS=[['daily',1,'Watched, owned, or worth $1,000+'],['weekly',7,'Worth $100–$1,000'],['monthly',30,'Under $100']];
+const NIGHTLY_PAGES=1500,TIER_SLACK_HOURS=4;
+async function tieredQueue(db,now=Date.now()){
+ const keep=new Set([...((await db.prepare('SELECT DISTINCT card_id FROM watchlist').all()).results||[]),...((await db.prepare('SELECT DISTINCT card_id FROM collection').all()).results||[])].map(r=>r.card_id));
+ const values=new Map(((await db.prepare('SELECT card_id,MAX(price) AS value FROM card_metrics GROUP BY card_id').all()).results||[]).map(r=>[r.card_id,r.value]));
+ const saved=new Map(((await db.prepare("SELECT card_id,json_extract(payload,'$.research.checkedAt') AS checked,json_extract(payload,'$.guide') AS guide FROM market_cache").all()).results||[]).map(r=>[r.card_id,r]));
+ const tiers=Object.fromEntries(REFRESH_TIERS.map(([t])=>[t,{cards:0,due:0}])),rows=[];
+ for(const card of cards){
+  if(!card.eligible||!card.source)continue;
+  const row=saved.get(card.id),snap=snapshots[card.id];let guide=snap?.guide||{};
+  if(row?.guide)try{guide={...guide,...JSON.parse(row.guide)};}catch{}
+  const value=values.get(card.id)??Math.max(guide.psa10||0,guide.grade9||0,guide.raw||0),checked=Date.parse(row?.checked||snap?.research?.checkedAt||'')||0;
+  const rank=keep.has(card.id)||value>=1000?0:value>=100?1:2,[tier,days]=REFRESH_TIERS[rank];
+  tiers[tier].cards++;
+  if(now-checked<days*86400000-TIER_SLACK_HOURS*3600000)continue;
+  tiers[tier].due++;rows.push({card,rank,checked,value});
+ }
+ rows.sort((a,b)=>a.rank-b.rank||(a.checked?1:0)-(b.checked?1:0)||a.checked-b.checked||b.value-a.value);
+ return {queue:rows.map(r=>r.card),tiers};
+}
+const localDay=(d=new Date())=>d.toLocaleDateString('en-CA');
+// Sweep every listing, then read the card pages that are due, then rebuild the metrics. Runs once a day.
+export async function runNightly(env,{force=false}={}){
+ const db=database(env);await ensureColumns(db);await ensureSourceMap(db).catch(()=>{});
+ const day=localDay(),started=new Date().toISOString();
+ if(!force&&await db.prepare('SELECT 1 AS x FROM nightly_runs WHERE day = ?').bind(day).first())return null;
+ await db.prepare('INSERT INTO nightly_runs (day,started_at) VALUES (?,?) ON CONFLICT(day) DO UPDATE SET started_at=excluded.started_at,finished_at=NULL,summary=NULL').bind(day,started).run();
+ const summary={};
+ try{
+  const sweep=await startSweep(env,{owner:'nightly'});if(sweep.job){await sweep.job.finished;summary.sweep={listings:sweep.job.updated,failed:sweep.job.failures.size};}
+  if(updateJob?.state==='running')await updateJob.finished;
+  const {queue,tiers}=await tieredQueue(db),configured=Number(env.FUTURESIGHT_NIGHTLY_PAGES),budget=configured>0?configured:NIGHTLY_PAGES;
+  summary.tiers=tiers;
+  if(queue.length&&!env.NETWORK_DISABLED){const job=startUpdateJob(env,db,queue.slice(0,budget),{owner:'nightly',info:{grand:queue.length,skipped:Math.max(0,queue.length-budget)}});job.nightly=true;await job.finished;summary.pages={read:job.updated,failed:job.failures.size,due:queue.length};}
+  const rebuilt=await queueRebuild(env);if(rebuilt)summary.metrics={cards:rebuilt.cards,indices:rebuilt.indices};
+ }catch(e){summary.error=e.message;reportError(env,e,{source:'nightly'});}
+ await db.prepare('UPDATE nightly_runs SET finished_at = ?, summary = ? WHERE day = ?').bind(new Date().toISOString(),JSON.stringify(summary),day).run();
+ return summary;
 }
 export async function fullMarket(db,id){return mergeMarket(snapshots[id],await cachedMarket(db,id))||null;}
 async function alertState(db,user){
@@ -404,13 +593,40 @@ export async function api(request,env,ctx){
    // Japanese sets: match every card to its exact product, then save those products' guide prices.
    if(set.lang==='ja'){try{const r=await mapJapaneseSet(db,env,ctx,set);return json({refreshed:r.mapped>0,count:r.mapped,...r});}catch(e){return json({refreshed:false,count:0,warning:e.message});}}
    try{
-    const guides=parseSet(await sourceFetch(set.marketSource,env),cards.filter(c=>c.setId===set.id&&c.eligible)),cached=await cachedMarketsFor(db,Object.keys(guides)),markets={};
-    for(const [id,g] of Object.entries(guides)){const previous=mergeMarket(snapshots[id],cached[id]);markets[id]=mergeMarket(previous,g);await logCapture(db,env,ctx,cardById.get(id),g);}
-    await db.batch(Object.entries(markets).map(([id,m])=>cacheStatement(db,id,m)));
-    return json({markets:Object.fromEntries(Object.entries(markets).map(([id,m])=>[id,lightMarket(m)])),refreshed:true,count:Object.keys(markets).length});
+    const r=await sweepEnglish(db,env,ctx,[set]);
+    return json({markets:Object.fromEntries(Object.entries(r.markets).map(([id,m])=>[id,lightMarket(m)])),refreshed:true,count:r.priced,pages:r.pages});
    }catch(e){return json({refreshed:false,warning:e.message});}
   }
   if(path==='/api/update')return await updateRoute(request,env,ctx,db,url,user);
+  if(path==='/api/sweep')return await sweepRoute(request,env,db,url,user);
+  if(path==='/api/metrics'&&request.method==='GET'){
+   const card=cardById.get(url.searchParams.get('id'));if(!card)return json({error:'That card is not in the catalog.'},404);
+   return json({card_id:card.id,grades:await cardMetrics(db,card.id),indices:indexKeysOf(card,cardById).map(id=>({id,name:indexName(id,{sets,series})})),run:await lastRun(db)});
+  }
+  if(path==='/api/indices'&&request.method==='GET'){
+   const lang=insightLanguage(url),kind=url.searchParams.get('kind')||'set',grade=url.searchParams.get('grade')||'psa10';
+   if(!lang||!INDEX_KINDS.includes(kind)||!METRIC_GRADES.includes(grade))return json({error:'Choose a language, index kind and grade.'},400);
+   const rows=(await indexList(db,{lang,kind,grade})).map(r=>({...r,name:indexName(r.index_id,{sets,series})}));
+   return json({lang,kind,grade,rows,run:await lastRun(db)});
+  }
+  if(path==='/api/index'&&request.method==='GET'){
+   const id=url.searchParams.get('id')||'',grade=url.searchParams.get('grade')||'psa10';
+   if(!METRIC_GRADES.includes(grade)||!/^(?:en|ja):[a-z0-9]+:.{1,120}$/i.test(id))return json({error:'Choose an index and grade.'},400);
+   const detail=await indexDetail(db,id,grade);if(!detail)return json({error:'That index has no data yet.'},404);
+   const ids=await indexMembers(db,id,grade),metrics=await cardMetricsFor(db,ids,grade);
+   const members=ids.map(card_id=>({card_id,...metrics[card_id]})).sort((a,b)=>(b.price||0)-(a.price||0));
+   return json({id,name:indexName(id,{sets,series}),grade,...detail,members});
+  }
+  if(path==='/api/metrics/rebuild'){
+   if(request.method==='POST'){if(!env.BACKGROUND_JOBS)return json({unavailable:true});queueRebuild(env);}
+   else if(request.method!=='GET')return json({error:'Unsupported request.'},405);
+   return json({...rebuildState(),run:await lastRun(db)});
+  }
+  if(path==='/api/schedule'&&request.method==='GET'){
+   const {tiers}=await tieredQueue(db),last=await db.prepare('SELECT day,started_at,finished_at,summary FROM nightly_runs ORDER BY day DESC LIMIT 1').first();
+   const hour=Number(env.FUTURESIGHT_UPDATE_HOUR),configured=Number(env.FUTURESIGHT_NIGHTLY_PAGES);
+   return json({enabled:!!env.BACKGROUND_JOBS&&Number.isInteger(hour)&&hour>=0&&hour<=23&&env.FUTURESIGHT_UPDATE_HOUR!=='',hour:Number.isInteger(hour)?hour:null,pages:configured>0?configured:NIGHTLY_PAGES,tiers:REFRESH_TIERS.map(([id,days,label])=>({id,days,label,...tiers[id]})),last:last?{...last,summary:last.summary?JSON.parse(last.summary):null}:null,sweeps:await sweepSummary(db),metrics:{...rebuildState(),run:await lastRun(db)}});
+  }
   if(path==='/api/research'&&request.method==='POST'){
    // Cards named by id (at most 4 per call): the page orders the queue, skips cards checked recently and retries failures.
    const captureBatch=async batch=>{

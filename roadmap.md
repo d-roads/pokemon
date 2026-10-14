@@ -53,35 +53,50 @@ sweep, tiered refresh and PriceCharting's paid API the top priority.**
 Everything after this phase depends on precomputed numbers, not on re-reading every card's full record.
 The first two items are also the answer to faster price updates (see Phase 0's measured result).
 
-- **Fast guide-price sweep.** Read each set's PriceCharting listing page (`parseSet` already reads it):
-  raw, Grade 9 and PSA 10 guide prices for every card in a few hundred requests, a few minutes for
-  the whole market.
-- **Tiered full-page refresh** (sales history and PSA population):
-  - Daily: watched, owned, recent movers, cards over a value threshold
-  - Weekly: mid-priced cards
-  - Monthly: cards under $25
-- **Nightly schedule.** The server starts the sweep and the daily tier on its own (setting
-  `FUTURESIGHT_UPDATE_HOUR`).
-- **`card_metrics` table**, rebuilt after each update. One row per card, grade and day:
-  - Price, returns over 1 day, 7 days, 30 days, 90 days and 1 year, 52-week high and low
-  - Volatility and drawdown
-  - Sales count and days since last sale
-  - Grade spreads, gem rate and population growth
-  - English vs Japanese price gap
-  - Character premium (from `demandOf`) and months since the set's release
-- **`character_metrics` table**, one row per Pokémon, grade and day: character index, returns,
-  demand premium, sales count and sales value across all their cards, breadth (share of their cards
-  up over 30 days), number of priced cards. Kept daily so demand can be charted over time, not only
-  read as today's score.
-- **Set facts:** release date, era, print status (in print / out of print) and card count per set,
-  for set-age comparisons.
-- **Indices** in a `market_index` table: top 100, each era, each grade, English vs Japanese, each set,
-  each Pokémon with enough priced cards, each rarity tier (Gold Star, secret rare, full art, alt art,
-  special illustration rare, …) and each artist with enough priced cards.
-- **Stop reloading the whole cache on page load.** `/api/catalog` and alert scans still read every
-  cached record on each call. Serve light records from a small summary column or from `card_metrics`.
-- **Consider PriceCharting's paid API / price-guide download.** One daily file would cover every guide
+- [x] **Fast guide-price sweep** (`/api/sweep`, `startSweep` in `lib/api.mjs`). Reads every page of each
+  set's PriceCharting listing (about 150 products a page, cursor paging) through the same pace as Update
+  sales. Sets sharing a listing are read once. Saves guide prices and observation rows, and records each
+  set in `set_sweeps`. Sets swept in the last 20 h are skipped unless forced. Set refresh in Browse now
+  reads every page as well.
+  **Measured (Oct 14, 2026, real network, rate-limited):** all 136 English listings in 11.4 min
+  (404 pages), pricing 9,445 of 9,734 English rare cards (97%). Update sales would need ~9,700 pages.
+  The only failure was Scarlet & Violet Energy. Cards the listing can't match (Unown letters, some
+  variants) still get prices from Update sales.
+- [x] **Tiered full-page refresh** (sales history and PSA population), by the card's most valuable grade:
+  - Daily: watched, owned, or worth $1,000+ (~1,800 cards)
+  - Weekly: $100–$1,000
+  - Monthly: under $100
+  Sizes on the local-test data put this at ~2,800 pages a day, so one night reads at most
+  `FUTURESIGHT_NIGHTLY_PAGES` (default 1,500). What is left goes first the next night. `/api/schedule`
+  shows the tiers and what is due.
+- [x] **Nightly schedule** (`runNightly`, `FUTURESIGHT_UPDATE_HOUR`): sweep, then due card pages, then a
+  metrics rebuild, once a day at or after that hour (a computer that was asleep catches up).
+- [x] **Daily prices** (`price_points`): each card's guide price per grade on the days it was read. A row
+  is saved when the price changes, and again after 14 days so an unchanged price is known to be current.
+  Together with each card's monthly guide history, this is the price series every metric uses.
+- [x] **`card_metrics`** (one row per card and grade, today's values; history comes from the price series):
+  - Price (guide), sold median, returns over 1 day, 7 days, 30 days, 90 days and 1 year, 52-week high and low
+  - Volatility (annualised, monthly) and drawdown from the all-time high
+  - Sales in 30 and 90 days, sales value, days since last sale
+  - PSA 10 / PSA 9 and PSA 10 / raw spreads, PSA population, gem rate, 90-day population growth
+  - English vs Japanese price gap (verified printings)
+  - Premium over same-era, same-rarity peers
+- [x] **Indices** (`market_index` daily levels, `index_metrics` today's values) for each language and
+  grade: all cards, top 100, each era, set, Pokémon (3+ cards), rarity tier and artist. Chain-linked;
+  value-weighted (`level`) and equal-weighted (`level_eq`). Each index also carries its premium over peers
+  over time, so a Pokémon's demand can be charted, plus breadth, sales volume, concentration and gem rate.
+  English cards take the illustrator of their verified Japanese printing (5,767 linked).
+  **Measured:** a full rebuild of the local-test data (17,043 cards, 2,150 indices, ~917k index levels)
+  takes ~25 s and ~250 MB above the server's normal memory. It runs after each Update sales or sweep, and nightly.
+  `character_metrics` became the `char` indices.
+- [x] **Stop reloading the whole cache on page load.** `market_cache` keeps a light copy of each record
+  (`light`, `light_key`, cleared by a trigger when the record is rewritten without it). `/api/catalog`:
+  2.5 s → 0.9 s. Alerts, set refreshes and Japanese matching read only the cards they need.
+- [ ] **Set print status** (in print / out of print). Release dates and eras are in the catalog. Print
+  status needs a source.
+- [ ] **Consider PriceCharting's paid API / price-guide download.** One daily file would cover every guide
   price, through an approved channel. Check plans and terms before relying on scraping at higher rates.
+- [x] The rebuild gives way to other requests between pages and batches (longest pause 0.4 s, measured).
 
 ## Phase 2 — Card page (like a stock's quote page)
 

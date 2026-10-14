@@ -50,7 +50,12 @@ export function parseMarket(html,card,now=new Date().toISOString()){
  const market=expandCapture(classifyCapture({...page,url:card.source,fetchedAt:now},card),card);
  return {...market,status:'refreshed'};
 }
-export function parseSet(html,cards){
+// A set's listing shows every product's ungraded, Grade 9 and PSA 10 guide price, about 150 rows a
+// page (most valuable first). parseSetPage reads one page for the given cards and returns the
+// cursor of the next page, if any.
+export const listingCursor=html=>String(html).match(/name=["']cursor["']\s+value=["']([^"']+)["']/)?.[1]||null;
+export function listingPageUrl(source,cursor){if(!cursor)return source;const u=new URL(source);u.searchParams.set('cursor',cursor);return u.toString();}
+export function parseSetPage(html,cards,now=new Date().toISOString()){
  const result={};
  for(const m of html.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)){
   const row=m[1],title=row.match(/<td\b[^>]*class=["'][^"']*\btitle\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/i)?.[1];if(!title)continue;
@@ -61,8 +66,12 @@ export function parseSet(html,cards){
   if((card.vintage||card.modern)&&(!card.sourceVerified||!matchesCard(name+' '+card.setName,card)))continue;
   const values=[...row.matchAll(/<td\b[^>]*class=["'][^"']*\bprice\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/gi)].map(x=>dollars(x[1]));
   if(values.length<3||!values[0])continue;
-  result[card.id]={number:card.number,guide:{raw:values[0],grade9:values[1],psa10:values[2]},sales:[],observedAt:new Date().toISOString(),source:'PriceCharting',sourceUrl:card.source,status:'refreshed',parserVersion:'set-guide-2026.10.06'};
+  result[card.id]={number:card.number,guide:{raw:values[0],grade9:values[1],psa10:values[2]},sales:[],observedAt:now,source:'PriceCharting',sourceUrl:card.source,status:'refreshed',parserVersion:'set-guide-2026.10.06'};
  }
+ return {guides:result,cursor:listingCursor(html)};
+}
+export function parseSet(html,cards){
+ const result=parseSetPage(html,cards).guides;
  if(!Object.keys(result).length)throw new Error('The set price guide could not be read.');return result;
 }
 export async function sourceFetch(url,env){

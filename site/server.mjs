@@ -4,7 +4,7 @@ import {readFileSync,existsSync,mkdirSync} from 'node:fs';
 import {gzipSync} from 'node:zlib';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
-import {api,readSettings,scanForUser} from './lib/api.mjs';
+import {api,readSettings,scanForUser,runNightly} from './lib/api.mjs';
 import {hasListingAccess} from './lib/alerts.mjs';
 import {reportError} from './lib/report.mjs';
 import {accountStore,seedAdmin,readCookie,sessionCookie,clearCookie,attemptLimiter,usernameProblem,passwordProblem} from './lib/accounts.mjs';
@@ -32,7 +32,7 @@ const PORT=Number(process.env.PORT||5173);
 const HOST=process.env.HOST||'127.0.0.1';
 // Which build this is, shown in the page so the beta and a local test copy can't be confused.
 const BUILD=buildInfo(JSON.parse(readFileSync(path.join(root,'package.json'),'utf8')).version,process.env.FUTURESIGHT_CHANNEL);
-const env={DB,EBAY_EPN_CAMPAIGN_ID:process.env.EBAY_EPN_CAMPAIGN_ID,EBAY_EPN_CUSTOM_ID:process.env.EBAY_EPN_CUSTOM_ID,SENTRY_DSN:process.env.SENTRY_DSN,SENTRY_ENV:process.env.SENTRY_ENV,FUTURESIGHT_SCORE_MODEL:process.env.FUTURESIGHT_SCORE_MODEL,FUTURESIGHT_JA_RESEARCH:process.env.FUTURESIGHT_JA_RESEARCH,FUTURESIGHT_UPDATE_RATE:process.env.FUTURESIGHT_UPDATE_RATE,BACKGROUND_JOBS:true,NETWORK_DISABLED:/127\.0\.0\.1:9\b/.test(process.env.HTTPS_PROXY||process.env.HTTP_PROXY||'')};
+const env={DB,EBAY_EPN_CAMPAIGN_ID:process.env.EBAY_EPN_CAMPAIGN_ID,EBAY_EPN_CUSTOM_ID:process.env.EBAY_EPN_CUSTOM_ID,SENTRY_DSN:process.env.SENTRY_DSN,SENTRY_ENV:process.env.SENTRY_ENV,FUTURESIGHT_SCORE_MODEL:process.env.FUTURESIGHT_SCORE_MODEL,FUTURESIGHT_JA_RESEARCH:process.env.FUTURESIGHT_JA_RESEARCH,FUTURESIGHT_UPDATE_RATE:process.env.FUTURESIGHT_UPDATE_RATE,FUTURESIGHT_UPDATE_HOUR:process.env.FUTURESIGHT_UPDATE_HOUR,FUTURESIGHT_NIGHTLY_PAGES:process.env.FUTURESIGHT_NIGHTLY_PAGES,BACKGROUND_JOBS:true,NETWORK_DISABLED:/127\.0\.0\.1:9\b/.test(process.env.HTTPS_PROXY||process.env.HTTP_PROXY||'')};
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.json':'application/json'};
 const SHARED_MODULES=new Set(['analysis.mjs','portfolio.mjs','investment-costs.mjs','ebay-links.mjs']);
 const PAGE_HEADERS={'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'same-origin','Cache-Control':'no-store'};
@@ -127,5 +127,18 @@ async function scheduledScan(){
 }
 const timer=setInterval(scheduledScan,60000);setTimeout(scheduledScan,15000);
 
+// Nightly update (FUTURESIGHT_UPDATE_HOUR, this computer's time): guide sweep, due card pages, metrics.
+// It runs once a day, at or after that hour, so a computer that was asleep catches up when it wakes.
+const UPDATE_HOUR=/^\d{1,2}$/.test(process.env.FUTURESIGHT_UPDATE_HOUR||'')?Number(process.env.FUTURESIGHT_UPDATE_HOUR):null;
+let nightlyRunning=false;
+async function nightly(){
+ if(UPDATE_HOUR==null||UPDATE_HOUR>23||nightlyRunning||env.NETWORK_DISABLED||new Date().getHours()<UPDATE_HOUR)return;
+ nightlyRunning=true;
+ try{const r=await runNightly(env);if(r)console.log('Nightly update:',JSON.stringify(r));}
+ catch(e){console.error('Nightly update:',e.message);reportError(env,e,{source:'nightly'});}
+ finally{nightlyRunning=false;}
+}
+const nightlyTimer=setInterval(nightly,60000);setTimeout(nightly,30000);
+
 server.listen(PORT,HOST,()=>console.log(`FutureSight ${BUILD.label} is ready at http://${HOST==='0.0.0.0'?'127.0.0.1':HOST}:${PORT}`+(process.env.FUTURESIGHT_DB?` (database: ${dbFile})`:'')));
-for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>{clearInterval(timer);server.close(()=>{sqlite.close();process.exit(0)});});
+for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>{clearInterval(timer);clearInterval(nightlyTimer);server.close(()=>{sqlite.close();process.exit(0)});});

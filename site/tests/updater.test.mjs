@@ -4,7 +4,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
 import {pacer,startJob,cancelJob,jobStatus} from '../lib/updater.mjs';
 import {api} from '../lib/api.mjs';
-import {cards} from '../data/catalog.mjs';
+import {cards,sets} from '../data/catalog.mjs';
 const sql=readFileSync(new URL('../db/schema.sql',import.meta.url),'utf8');
 
 test('Pacer spaces requests evenly, halves and pauses when busy, and recovers slowly',async()=>{
@@ -87,4 +87,37 @@ test('Update sales runs on the server: recent reads are skipped, each card is sa
  // Its one page may already be read before the cancel arrives; either way the job ends.
  for(let i=0;i<100&&(status.id!==again.job.id||status.state==='running');i++){status=(await(await api(req('/api/update'),env)).json()).job;await new Promise(r=>setTimeout(r,20));}
  assert.ok(['cancelled','done'].includes(status.state));assert.ok(fetched.length<=3);
+});
+
+// Mirrors a PriceCharting set listing: one product row per card, ungraded / Grade 9 / PSA 10 guide prices.
+const listingRow=(card,i,[raw,g9,p10])=>`<tr id="product-${9000+i}" data-product="${9000+i}"><td class="photo"></td><td class="title" title="${9000+i}"><a href="/game/pokemon-primal-clash/x-${i}">${card.name} #${card.number}</a></td><td class="price numeric used_price"><span class="js-price">$${raw}</span></td><td class="price numeric cib_price"><span class="js-price">$${g9}</span></td><td class="price numeric new_price"><span class="js-price">$${p10}</span></td></tr>`;
+const listing=(rows,cursor)=>`<html>PriceCharting<table id="games_table"><thead><tr><th>Card</th><th>Ungraded</th><th>Grade 9</th><th>PSA 10</th></tr></thead><tbody>${rows.join('')}</tbody></table>${cursor?`<form method="POST" action="" class="next_page js-next-page"><input type="hidden" name="cursor" value="${cursor}" /></form>`:''}</html>`;
+
+test('The guide sweep reads every page of a set listing, saves guide prices with observations and skips fresh sets',async()=>{
+ const sqlite=new DatabaseSync(':memory:');sqlite.exec(sql);
+ const stmt=(query,values=[])=>({bind(...v){return stmt(query,v)},all:async()=>({results:sqlite.prepare(query).all(...values)}),first:async()=>sqlite.prepare(query).get(...values)||null,run:async()=>sqlite.prepare(query).run(...values)});
+ const DB={prepare:stmt,batch:async items=>{sqlite.exec('BEGIN');try{const out=[];for(const s of items)out.push(await s.run());sqlite.exec('COMMIT');return out;}catch(e){sqlite.exec('ROLLBACK');throw e;}}};
+ const set=sets.find(s=>s.id==='xy5'),scope=cards.filter(c=>c.setId==='xy5'&&c.eligible&&c.source),half=Math.ceil(scope.length/2);
+ const price=i=>[10+i,100+i,1000+i];
+ const page1=listing(scope.slice(0,half).map((c,i)=>listingRow(c,i,price(i))),'150'),page2=listing(scope.slice(half).map((c,i)=>listingRow(c,half+i,price(half+i))));
+ const fetched=[];
+ const env={DB,BACKGROUND_JOBS:true,FUTURESIGHT_UPDATE_RATE:'10',fetch:async url=>{fetched.push(url);return url===set.marketSource?new Response(page1):url===set.marketSource+'?cursor=150'?new Response(page2):new Response('missing',{status:404});}};
+ assert.equal((await api(req('/api/sweep','POST',{scopes:['nowhere']}),env)).status,400);
+ assert.deepEqual((await(await api(req('/api/sweep','POST',{scopes:['xy5']}),{DB})).json()).unavailable,true,'no background jobs where requests cannot outlive their response');
+ const started=await(await api(req('/api/sweep','POST',{scopes:['xy5'],langs:['en']}),env)).json();
+ assert.equal(started.job.total,1);assert.equal(started.mine,true);
+ let status;
+ for(let i=0;i<100;i++){status=await(await api(req('/api/sweep?since=0'),env)).json();if(status.job.state!=='running')break;await new Promise(r=>setTimeout(r,20));}
+ assert.equal(status.job.state,'done');assert.deepEqual(status.job.changed,['xy5']);assert.equal(fetched.length,2,'both pages, nothing else');
+ const last=scope.at(-1),i=scope.length-1;
+ const g=status.job.markets[last.id].guide;assert.deepEqual([g.raw,g.grade9,g.psa10],[10+i,100+i,1000+i],'the page gets light records for the swept set');
+ const saved=JSON.parse(sqlite.prepare('SELECT payload FROM market_cache WHERE card_id = ?').get(last.id).payload);assert.equal(saved.guide.psa10,1000+i);
+ assert.equal(sqlite.prepare("SELECT count(*) AS n FROM guide_observations WHERE period='current' AND card_id = ?").get(last.id).n,3);
+ assert.deepEqual({...sqlite.prepare("SELECT pages,priced,wanted FROM set_sweeps WHERE set_id='xy5'").get()},{pages:2,priced:scope.length,wanted:scope.length});
+ assert.equal(status.summary.sets,1);
+ // Swept just now: nothing to do unless forced.
+ const fresh=await(await api(req('/api/sweep','POST',{scopes:['xy5'],langs:['en']}),env)).json();assert.equal(fresh.job,null);assert.equal(fresh.grand,1);
+ const forced=await(await api(req('/api/sweep','POST',{scopes:['xy5'],langs:['en'],force:true}),env)).json();assert.equal(forced.job.total,1);
+ for(let i=0;i<100;i++){status=await(await api(req('/api/sweep'),env)).json();if(status.job.state!=='running')break;await new Promise(r=>setTimeout(r,20));}
+ assert.equal(status.job.state,'done');assert.equal(fetched.length,4);
 });
