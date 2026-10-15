@@ -93,9 +93,16 @@ The first two items are also the answer to faster price updates (see Phase 0's m
   (`light`, `light_key`, cleared by a trigger when the record is rewritten without it). `/api/catalog`:
   2.5 s → 0.9 s. Alerts, set refreshes and Japanese matching read only the cards they need.
 - [ ] **Set print status** (in print / out of print). Release dates and eras are in the catalog. Print
-  status needs a source.
-- [ ] **Consider PriceCharting's paid API / price-guide download.** One daily file would cover every guide
-  price, through an approved channel. Check plans and terms before relying on scraping at higher rates.
+  status needs a source; none was found that publishes it per set. Blocked on the owner choosing a source
+  (or keeping a hand-maintained list); an age-based guess was not added because the out-of-print analysis
+  would then measure the guess.
+- [ ] **Consider PriceCharting's paid API / price-guide download.** Checked Oct 14, 2026
+  (pricecharting.com/api-documentation): API and downloads need a paid subscription (40-character token);
+  the full-data CSV is for the top ("Legendary") tier, regenerated every 24 h, at most one request per
+  10 minutes; the API allows one call a second. Data is licensed for internal use: serving it to other
+  people in an app needs a commercial license and written permission, and data must be deleted when the
+  subscription ends. Prices are not on that page. Owner decision: the beta serves other accounts, so the
+  license question matters before switching.
 - [x] The rebuild gives way to other requests between pages and batches (longest pause 0.4 s, measured).
 
 ## Phase 2 — Card page (like a stock's quote page)

@@ -1,3 +1,43 @@
+# FutureSight — October 14, 2026 (night): roadmap Phases 2–6 (dev)
+
+Owner asked to work through the remaining roadmap phases. `roadmap.md` has every checkbox; this is the summary.
+Commits on `dev` (local, **not pushed**): `1a7a06c`, `e2596f4`, `69a135c`, `fbcd77e`, `fc9d9d1`, plus this handoff.
+
+- **Card page (Phase 2):** Price chart (`cardChartSection`, `/api/card-history`) with grade, 3M–All, daily reads
+  over the monthly guide, monthly sales bars, set-release and PSA-population-jump markers, optional era index
+  overlay; Spreads and Population views. Beta/correlation to the era index (`card_metrics.beta`, `correl`).
+  **Check live listings** (`/api/listings`, one eBay/SerpApi search, cached 30 min) with a fair-value deal
+  check. eBay and TCGplayer fee presets (`MARKET_PRESETS`) for selling proceeds and Price check.
+- **Pokémon (Phase 3):** Pokémon tab sub-views: Money flow (`index_flows`, `/api/flows`), Undervalued
+  (`/api/undervalued`), English vs Japanese demand. Pokémon/artist pages: premium by era/set/tier and an
+  entry-point card.
+- **Sets (Phase 4):** Grading 90D (`index_metrics.pop_growth_90d`, blank until population readings are 90 days
+  old); a side-by-side table of the sets picked on the lifecycle chart.
+- **Overview (Phase 5):** heatmap by sets / Pokémon / rarity; Biggest moves (sets, Pokémon, tiers, cards via
+  `/api/card-movers`, cards only when sales back the guide move); Sales tape (`/api/tape` from
+  `sales_observations`).
+- **Phase 6:** Market → **Screener** (`lib/screener.mjs`, `/api/screen`, saved screens in `screens`, CSV export).
+  Dex: entries can be marked **sold** (`collection.sold_price`/`sold_date`) for realized P/L; **Portfolio
+  analytics** (allocation, risk/concentration, vs market index, what-if; `/api/portfolio`). **Market alerts**
+  (`lib/signals.mjs`, `/api/signals`, tables `metric_alerts`, `metric_events`): price level, % move, population
+  jump, volume, spread widening, 52-week high/low, index move, demand rank; checked after each metrics rebuild
+  and sent to ntfy/Discord. Live listing alerts can optionally use a discount to fair value (guide).
+- **Schema:** all new tables/columns are created on first use (`ensureColumns`, `ensureMetricTables`,
+  `ensureSignalTables`); nothing to migrate by hand. New metric columns fill on the next rebuild.
+- **Tests:** 246/246 (`npm test`, Node 24.9). New files `tests/screener.test.mjs`, `tests/signals.test.mjs`.
+  `node build.mjs` passes. The Japanese movers API test now pins the clock (it failed once the date rolled past
+  the bundled data). UI checked in headless Chromium on a copy of the local-test DB (desktop and phone width).
+- **Data notes:** ~4,000 of ~9,400 English PSA 10 30-day guide moves have no sales behind them (one odd sale can
+  move a thin card's guide 40×), so card movers require backing. Money flow is reliable only for recent months
+  until nightly reads accumulate sales beyond the ~30 each page lists. Population history is one reading per
+  card on the local-test data, so population charts, Grading 90D and population alerts fill over time.
+- **Blocked / owner decisions:** set print status (no source found; out-of-print effect depends on it);
+  PriceCharting paid API — terms checked (internal-use license; serving other accounts needs a commercial
+  license), see roadmap Phase 1. "Later" items still need new data sources.
+- **Owner, to try it:** restart the dev server (new routes), run a sweep or wait for the nightly rebuild, then
+  open Market (Screener, Pokémon views), a card's reading view (Price chart, Market alerts) and the Dex.
+  Market alerts and live listings use the ntfy/Discord and eBay/SerpApi settings on the Alerts page.
+
 # FutureSight — October 14, 2026 (evening): investing roadmap, Phase 1 data foundation, Market view (dev)
 
 Owner asked to trim the roadmap to features that inform buying, selling and investing, add character demand and
