@@ -19,6 +19,7 @@ import {investmentTable,investmentView,scoreMode,modelVersion,archiveScores,rese
 import {DEFAULT_COSTS,maxBuyPrice,netReturn,COST_PROFILE_VERSION} from './investment-costs.mjs';
 import {parseJapaneseListing,matchJapaneseListing,listingGuide,numberOnlyAllowed,JA_MAP_VERSION} from './japanese.mjs';
 import {METRIC_GRADES,indexKeysOf,dayNum,dayStr,tierOf,charactersOfCard,TIER_LABEL} from './metrics.mjs';
+import {SCREEN_FIELDS,SCREEN_LIMITS,normalizeScreen,screenRows,runScreen} from './screener.mjs';
 import {ensureMetricTables,cardHistory,indexLevels,indexFlows,cardMovers,rebuildMetrics,rebuildState,lastRun,cardMetrics,indexList,indexDetail,indexName,cardMetricsFor,indexSparks,marketBreadth,setHistories,indexRowsFor} from './metrics-store.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const cardById=new Map(cards.map(c=>[c.id,c]));
@@ -169,6 +170,7 @@ function ensureColumns(db){
   await db.prepare('CREATE TABLE IF NOT EXISTS nightly_runs (day TEXT PRIMARY KEY NOT NULL, started_at TEXT NOT NULL, finished_at TEXT, summary TEXT)').run();
   await ensureMetricTables(db);
   await db.prepare('CREATE INDEX IF NOT EXISTS sales_observations_tape ON sales_observations (language, grade, event_at)').run();
+  await db.prepare('CREATE TABLE IF NOT EXISTS screens (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, name TEXT NOT NULL, spec TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, UNIQUE (user_id, name))').run();
   await db.prepare('CREATE TRIGGER IF NOT EXISTS market_cache_light AFTER UPDATE OF payload ON market_cache WHEN NEW.light_key IS OLD.light_key BEGIN UPDATE market_cache SET light = NULL, light_key = NULL WHERE card_id = NEW.card_id; END').run();
  })().catch(e=>{columnsReady.delete(db);throw e;}));
  return columnsReady.get(db);
@@ -416,6 +418,19 @@ function lifecycle(histories,lang,era){
  return {curves,typical};
 }
 // Cards in an index: from the catalog, except Top 100 which is today's most valuable cards.
+// Screener rows for one language and grade, kept until the next metrics rebuild.
+const screenMemo=new Map();
+async function screenData(db,lang,grade){
+ const run=await lastRun(db),key=[lang,grade,run?.finished_at||''].join('|');
+ if(!screenMemo.has(key)){
+  for(const k of screenMemo.keys())if(k.startsWith(lang+'|'+grade+'|'))screenMemo.delete(k);
+  const metrics=(await db.prepare('SELECT * FROM card_metrics WHERE lang = ? AND grade = ?').bind(lang,grade).all()).results||[];
+  const [chars,setRows]=await Promise.all([indexList(db,{lang,kind:'char',grade}),indexList(db,{lang,kind:'set',grade})]);
+  screenMemo.set(key,screenRows(null,{cards,sets,metrics:metrics.map(({built:_,...r})=>r),chars,setRows}));
+ }
+ return {rows:screenMemo.get(key),run};
+}
+const readScreens=async(db,user)=>((await db.prepare('SELECT id,name,spec,updated_at FROM screens WHERE user_id = ? ORDER BY name').bind(user).all()).results||[]).map(r=>({id:r.id,name:r.name,updated_at:r.updated_at,screen:JSON.parse(r.spec)}));
 // Every index's member cards, worked out once from the catalog.
 let memberMap=null;
 function membersOf(id){
@@ -689,6 +704,30 @@ export async function api(request,env,ctx){
    const size=rows=>rows.filter(r=>recent.includes(r[0])).reduce((n,r)=>n+r[2],0);
    const top=Object.entries(indices).map(([id,rows])=>({id,name:indexName(id,{sets,series}),recent:size(rows),rows})).filter(r=>r.recent>0).sort((a,b)=>b.recent-a.recent).slice(0,40);
    return json({lang,kind,grade,market,indices:top,run:await lastRun(db)});
+  }
+  if(path==='/api/screen'&&request.method==='POST'){
+   let body;try{body=await input(request);}catch{return json({error:'The screen was invalid.'},400);}
+   const {screen,errors}=normalizeScreen(body.screen,{eraIds:series.map(s=>s.id)});if(errors.length)return json({error:errors[0],errors},400);
+   const {rows,run}=await screenData(db,screen.lang,screen.grade),hit=runScreen(screen,rows,{cards});
+   const limit=body.export?SCREEN_LIMITS.export:Math.min(SCREEN_LIMITS.rows,Math.max(1,Number(body.limit)||100));
+   return json({screen,total:hit.length,rows:hit.slice(0,limit),fields:SCREEN_FIELDS,run});
+  }
+  if(path==='/api/screens'){
+   // Saved screens, per account and by name (saving a name again replaces it).
+   if(!user)return json({error:'Sign in to save screens.'},401);
+   if(request.method==='POST'){
+    let body;try{body=await input(request);}catch{return json({error:'The screen was invalid.'},400);}
+    const name=typeof body.name==='string'?body.name.trim().slice(0,SCREEN_LIMITS.name):'';if(!name)return json({error:'Name the screen.'},400);
+    const {screen,errors}=normalizeScreen(body.screen,{eraIds:series.map(s=>s.id)});if(errors.length)return json({error:errors[0],errors},400);
+    const count=(await db.prepare('SELECT COUNT(*) AS n FROM screens WHERE user_id = ? AND name != ?').bind(user,name).first())?.n||0;
+    if(count>=SCREEN_LIMITS.saved)return json({error:'You can save up to '+SCREEN_LIMITS.saved+' screens. Delete one first.'},400);
+    const now=new Date().toISOString();
+    await db.prepare('INSERT INTO screens (user_id,name,spec,created_at,updated_at) VALUES (?,?,?,?,?) ON CONFLICT(user_id,name) DO UPDATE SET spec=excluded.spec,updated_at=excluded.updated_at').bind(user,name,JSON.stringify(screen),now,now).run();
+   }else if(request.method==='DELETE'){
+    let body;try{body=await input(request);}catch{return json({error:'The request was invalid.'},400);}
+    await db.prepare('DELETE FROM screens WHERE id = ? AND user_id = ?').bind(Number(body.id),user).run();
+   }else if(request.method!=='GET')return json({error:'Method not allowed.'},405);
+   return json({screens:await readScreens(db,user)});
   }
   if(path==='/api/card-movers'&&request.method==='GET'){
    const lang=insightLanguage(url),grade=url.searchParams.get('grade')||'psa10',period=url.searchParams.get('period')||'30d';

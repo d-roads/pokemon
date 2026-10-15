@@ -573,3 +573,18 @@ test('Overview: heatmap by Pokémon, biggest moves across groups and cards, sale
  ui.run("state.market.tab='set';renderMarket()");await ui.run("loadMarket('set')");for(let i=0;i<4;i++)await new Promise(r=>setImmediate(r));
  html=ui.e('#market-view').innerHTML;assert.match(html,/set-compare/);assert.match(html,/vs era median/);assert.match(html,/Grading 90D/);assert.match(html,/\+5\.0%/);
 });
+test('Market screener: presets, filters in percent, sorting, saved screens and CSV export',async()=>{
+ const ui=workspace();await ui.run('init()');
+ const fields=[['price','Price','money'],['ret_30d','30D','ret'],['ret_1y','1Y','ret'],['premium','vs peers','x'],['char_premium','Pokémon demand','x'],['sales_90d','Sales 90D','int'],['gem_rate','Gem rate','pct'],['set_age','Set age (months)','int'],['from_high','From 52-week high','ret']];
+ const sent=[];ui.responses['/api/screen']=()=>({run:{as_of:'2026-10-14'},total:1,fields,rows:[{card_id:'base1-4',lang:'en',grade:'psa10',char:'Charizard',price:9000,ret_30d:.1,premium:4,char_premium:5,sales_90d:3,gem_rate:.25,set_age:333,from_high:-.3}]});
+ ui.responses['/api/screens']={screens:[{id:7,name:'Mine',screen:{lang:'en',grade:'psa9',filters:{premium:[null,.8]},eras:[],tiers:[],query:'',sort:{field:'premium',dir:1}}}]};
+ ui.run("state.view='market';state.market.tab='screen';renderMarket()");for(let i=0;i<4;i++)await new Promise(r=>setImmediate(r));
+ let html=ui.e('#market-view').innerHTML;
+ assert.match(html,/Screener/);assert.match(html,/1 cards match/);assert.match(html,/data-card="base1-4"/);assert.match(html,/Charizard/);
+ assert.match(html,/25%/,'gem rate as a share');assert.match(html,/\+10\.0%/,'30D as a change');assert.match(html,/Mine/,'saved screens listed');
+ ui.run("state.market.screen.filters={...SCREEN_PRESETS[2][1]};state.market.screen.sort={...SCREEN_PRESETS[2][2]};renderMarket()");for(let i=0;i<3;i++)await new Promise(r=>setImmediate(r));
+ html=ui.e('#market-view').innerHTML;assert.match(html,/data-sf-max="from_high" value="-25"/,'entered in percent');assert.match(html,/From 52-week high ↑/);
+ const calls=ui.calls.filter(u=>u==='/api/screen');assert.ok(calls.length>=2);
+ assert.equal(ui.run("fromInput('ret','-25')"),-.25);assert.equal(ui.run("toInput('x',4)"),4);
+ await ui.run('exportScreen()');assert.equal(ui.calls.filter(u=>u==='/api/screen').length,calls.length+1);
+});

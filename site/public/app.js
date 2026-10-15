@@ -272,8 +272,8 @@ const userCosts=()=>normalizeCosts(state.costs).costs;
 // Marketplace fee presets: choosing one keeps your shipping, tax and return settings; editing a fee field
 // switches back to a flat custom rate.
 const FEE_FIELDS=['saleFeeRate','saleFixedFee'];
-function presetPicker(){const on=state.costs?.preset||'';return `<div class="segmented preset-pick" role="group" aria-label="Selling fees">${[['','Research default'],...Object.entries(MARKET_PRESETS).map(([k,p])=>[k,p.name])].map(([k,l])=>`<button data-preset="${k}" class="${on===k?'active':''}" aria-pressed="${on===k}">${esc(l)}</button>`).join('')}</div>`;}
-function wirePresets(root){root.querySelectorAll?.('[data-preset]').forEach(b=>b.onclick=()=>{const {preset:_,...rest}=state.costs||{};for(const f of FEE_FIELDS)delete rest[f];storeCosts(b.dataset.preset?{...rest,preset:b.dataset.preset}:rest);renderDetail();});}
+function presetPicker(){const on=state.costs?.preset||'';return `<div class="segmented preset-pick" role="group" aria-label="Selling fees">${[['','Research default'],...Object.entries(MARKET_PRESETS).map(([k,p])=>[k,p.name])].map(([k,l])=>`<button data-fee-preset="${k}" class="${on===k?'active':''}" aria-pressed="${on===k}">${esc(l)}</button>`).join('')}</div>`;}
+function wirePresets(root){root.querySelectorAll?.('[data-fee-preset]').forEach(b=>b.onclick=()=>{const {preset:_,...rest}=state.costs||{};for(const f of FEE_FIELDS)delete rest[f];storeCosts(b.dataset.feePreset?{...rest,preset:b.dataset.feePreset}:rest);renderDetail();});}
 const EVIDENCE={supported:'Supported',limited:'Limited evidence',insufficient:'Insufficient evidence',unsupported:'Not supported'};
 const EVIDENCE_FROM={S:'supported',L:'limited',I:'insufficient',U:'unsupported'};
 const RANK_INDEX={psa10:0,psa9:1,raw:2};
@@ -1047,7 +1047,7 @@ function renderTicker(){
 // Everything here reads the precomputed metrics (/api/market-overview, /api/indices, /api/index,
 // /api/lifecycle), rebuilt on the server after each update and nightly. Index levels come from guide
 // prices; "Typical card" is the equal-weighted index, "By value" weights cards by price.
-const MARKET_TABS=[['overview','Overview'],['char','Pokémon'],['set','Sets'],['tier','Rarity'],['artist','Artists']];
+const MARKET_TABS=[['overview','Overview'],['char','Pokémon'],['set','Sets'],['tier','Rarity'],['artist','Artists'],['screen','Screener']];
 const RET_KEYS=[['ret_1d','1D'],['ret_7d','7D'],['ret_30d','30D'],['ret_90d','90D'],['ret_1y','1Y']];
 // The equal-weighted ("typical card") version of a return, where one exists.
 const retOf=(r,k)=>state.market.weight==='eq'&&r?.['eq_'+k]!==undefined?r['eq_'+k]:r?.[k];
@@ -1065,6 +1065,7 @@ function sparkSvg(points,{w=84,h=24}={}){
  return `<svg class="spark ${vals.at(-1)>=vals[0]?'up':'down'}" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><polyline points="${vals.map((v,i)=>X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ')}"/></svg>`;
 }
 async function loadMarket(kind,force=false){
+ if(kind==='screen'){if(state.view==='market')renderMarket();return;}
  const key=marketKey(kind),have=state.market.data[key];
  if(have&&!force&&Date.now()-have._at<FRESH_MS)return;
  try{
@@ -1136,6 +1137,7 @@ function renderMarket(){
  const view=$('#market-view'),m=state.market;
  if(m.index){renderIndexPage(view);return;}
  const kind=m.tab,d=m.data[marketKey(kind)];
+ if(kind==='screen'){view.innerHTML=marketHead()+screenerView();wireMarket(view);wireScreen(view);return;}
  let body;
  if(!d)body=m.error?`<div class="panel empty-state"><strong>The market couldn't be loaded.</strong><p>${esc(m.error)}</p><button class="button" id="m-retry">Try again</button></div>`:'<div class="loading"><span class="spinner"></span>Loading the market…</div>';
  else if(!d.run?.as_of)body=noMetrics();
@@ -1177,6 +1179,89 @@ function overviewView(d){
  const tiers=idx.filter(i=>i.kind==='tier'),best=sortRows(tiers,{key:r=>retOf(r,'ret_1y'),dir:-1});
  const tierPanel=`<section class="panel"><div class="panel-head"><div><h2>Rarity tiers · 1 year</h2><p>Which kinds of card have done best.</p></div></div><ol class="tier-list">${best.map(i=>`<li><button data-index="${esc(i.index_id)}"><span>${esc(i.name)}</span><small>${i.priced.toLocaleString()} cards</small>${sparkSvg(i.spark)}${retCell(retOf(i,'ret_1y'))}</button></li>`).join('')}</ol></section>`;
  return `<div class="index-cards">${cards}</div><div class="market-grid">${breadth}${tierPanel}</div>${heat}${moversPanel(d,period)}${tapePanel()}<p class="sales-note">Guide prices are PriceCharting's (ungraded is mixed condition; Grade 9 includes other graders). Indices are chain-linked, so cards joining or leaving never move them. Past changes are not a forecast.</p>`;
+}
+// ---------- Screener ----------
+// Filters and sorts every card of the Market's language and grade on its metrics (/api/screen). The screen
+// is remembered in this browser; named screens are saved to the account (/api/screens).
+const jsonClone=v=>JSON.parse(JSON.stringify(v));
+const SCREEN_KEY='futuresight-screen',SCREEN_DEFAULT={filters:{},eras:[],tiers:[],query:'',sort:{field:'price',dir:-1}};
+const SCREEN_COLUMNS=['price','ret_30d','ret_1y','premium','char_premium','sales_90d','gem_rate','set_age'];
+const SCREEN_PRESETS=[
+ ['Cheap vs peers, still selling',{premium:[null,.8],sales_90d:[2,null]},{field:'premium',dir:1}],
+ ['Momentum with volume',{ret_30d:[.1,null],sales_90d:[3,null]},{field:'ret_30d',dir:-1}],
+ ['Pullbacks in popular Pokémon',{char_premium:[2,null],from_high:[null,-.25]},{field:'from_high',dir:1}],
+ ['Wide PSA 10 spreads, high gem rate',{spread_10_9:[4,null],gem_rate:[.4,null]},{field:'spread_10_9',dir:-1}],
+];
+function savedScreen(){try{const v=JSON.parse(localStorage.getItem(SCREEN_KEY)||'null');if(v&&typeof v==='object'&&v.filters&&typeof v.filters==='object')return {...SCREEN_DEFAULT,...v};}catch{}return jsonClone(SCREEN_DEFAULT);}
+function storeScreen(){try{localStorage.setItem(SCREEN_KEY,JSON.stringify(state.market.screen));}catch{}}
+const screenSpec=()=>{const sc=state.market.screen;return {lang:state.marketLang,grade:state.market.grade,filters:sc.filters,eras:sc.eras,tiers:sc.tiers,query:sc.query,sort:sc.sort};};
+// Shown and entered in percent for pct fields; sent as fractions.
+const PCT_KINDS=new Set(['ret','pct']);
+const toInput=(kind,v)=>v==null?'':PCT_KINDS.has(kind)?+(v*100).toFixed(2):v,fromInput=(kind,v)=>v===''||v==null?null:PCT_KINDS.has(kind)?Number(v)/100:Number(v);
+function fieldText(kind,v){if(v==null)return '—';return kind==='money'?money(v):kind==='ret'?retCell(v):kind==='pct'?share(v):kind==='x'?times(v):kind==='int'?Math.round(v).toLocaleString():v.toFixed(2);}
+async function runScreenNow(){
+ const m=state.market,spec=screenSpec(),key=JSON.stringify(spec);if(m.screenData?.key===key&&!m.screenData.error)return;
+ m.screenData={key,loading:true,prev:m.screenData?.rows?m.screenData:null};
+ try{const r=await send('/api/screen','POST',{screen:spec,limit:m.screenLimit||100});m.fields=r.fields;if(m.screenData.key===key)m.screenData={key,...r};}
+ catch(e){if(m.screenData.key===key)m.screenData={key,error:e.message};}
+ if(state.view==='market'&&m.tab==='screen')renderMarket();
+}
+async function loadScreens(){try{state.market.screens=(await request('/api/screens')).screens;}catch{state.market.screens=[];}if(state.view==='market'&&state.market.tab==='screen')renderMarket();}
+function screenerView(){
+ const m=state.market,sc=m.screen??=savedScreen();
+ if(!m.screens){m.screens=[];loadScreens();}
+ const key=JSON.stringify(screenSpec());if(m.screenData?.key!==key)runScreenNow();
+ const d=m.screenData?.loading?m.screenData.prev:m.screenData,fields=m.fields||d?.fields||[],F=new Map(fields.map(f=>[f[0],f]));
+ const filterRows=Object.entries(sc.filters).map(([k,[lo,hi]])=>{const f=F.get(k)||[k,k,'num'],unit=PCT_KINDS.has(f[2])?'%':f[2]==='money'?'$':f[2]==='x'?'×':'';return `<div class="screen-filter"><span>${esc(f[1])}</span><label>Min<input type="number" step="any" data-sf-min="${k}" value="${toInput(f[2],lo)}" aria-label="${esc(f[1])} minimum"></label><label>Max<input type="number" step="any" data-sf-max="${k}" value="${toInput(f[2],hi)}" aria-label="${esc(f[1])} maximum"></label><small>${unit}</small><button class="icon-button" data-sf-remove="${k}" aria-label="Remove ${esc(f[1])} filter">×</button></div>`;}).join('');
+ const add=`<select id="sf-add" aria-label="Add a filter"><option value="">Add a filter…</option>${fields.filter(f=>!(f[0] in sc.filters)).map(f=>`<option value="${f[0]}">${esc(f[1])}</option>`).join('')}</select>`;
+ const eras=`<div class="segmented era-pick" role="group" aria-label="Eras">${state.series.map(x=>`<button data-sf-era="${x.id}" class="${sc.eras.includes(x.id)?'active':''}" aria-pressed="${sc.eras.includes(x.id)}">${marketSeriesLabel(x.id)}</button>`).join('')}</div>`;
+ const saved=`<div class="screen-saved"><select id="sf-saved" aria-label="Saved screens"><option value="">Saved screens${m.screens.length?' ('+m.screens.length+')':''}</option>${m.screens.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select><input id="sf-name" type="text" maxlength="60" placeholder="Name this screen" aria-label="Screen name"><button class="button" id="sf-save">Save</button>${m.screens.length?`<button class="link-button" id="sf-delete">Delete selected</button>`:''}</div>`;
+ const presets=`<div class="screen-presets"><span class="muted">Start from</span>${SCREEN_PRESETS.map(([l],i)=>`<button class="chip" data-sf-preset="${i}">${esc(l)}</button>`).join('')}<button class="link-button" id="sf-reset">Clear</button></div>`;
+ const cols=[...new Set([...SCREEN_COLUMNS,...Object.keys(sc.filters),sc.sort.field])].filter(k=>F.has(k));
+ let table;
+ if(!d)table=m.screenData?.error?`<div class="panel empty-state"><strong>The screen couldn't run.</strong><p>${esc(m.screenData.error)}</p></div>`:loadingBox('Running the screen…');
+ else if(!d.run?.as_of)table=noMetrics();
+ else{
+  const head=cols.map(k=>{const f=F.get(k),on=sc.sort.field===k;return `<th class="num"><button data-sf-sort="${k}" class="${on?'on':''}">${esc(f[1])}${on?(sc.sort.dir<0?' ↓':' ↑'):''}</button></th>`;}).join('');
+  const body=d.rows.map(r=>{const c=cardById(r.card_id);return `<tr data-card="${esc(r.card_id)}" tabindex="0"><td>${c?`<span class="member-card"><img src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><b>${esc(c.name)}</b><small>${esc(c.setName)} · ${numberCaption(c)}</small></span></span>`:esc(r.card_id)}</td><td>${esc(r.char||'—')}</td>${cols.map(k=>`<td class="num">${fieldText(F.get(k)[2],r[k])}</td>`).join('')}</tr>`;}).join('');
+  table=`<div class="table-tools"><span class="muted">${d.total.toLocaleString()} cards match${d.total>d.rows.length?' · showing '+d.rows.length:''}${m.screenData?.loading?' · updating…':''}</span><button class="button" id="sf-csv">${icon('download')} Export CSV</button></div><div class="table-wrap"><table class="market-table" id="sf-table"><thead><tr><th>Card</th><th>Pokémon</th>${head}</tr></thead><tbody>${body}</tbody></table></div>${d.total>d.rows.length&&d.rows.length<500?'<button class="button show-more" id="sf-more">Show more</button>':''}`;
+ }
+ return `<section class="panel screener-panel"><div class="panel-head"><div><h2>Screener</h2><p>Every ${state.marketLang==='ja'?'Japanese':'English'} ${shortGrade(m.grade)} card, filtered and sorted on its market metrics, its Pokémon's demand and its set. Percentages are entered as percent (10 = 10%). Cards without a value for a filtered field are left out.</p></div></div>
+  <div class="screen-controls">${presets}<div class="screen-filters">${filterRows}${add}</div><div class="screen-row"><input type="search" id="sf-query" placeholder="Name, set or number" value="${esc(sc.query)}" aria-label="Search">${eras}</div>${saved}</div>${table}</section>`;
+}
+let screenTimer;
+function screenChanged(now=false){storeScreen();clearTimeout(screenTimer);if(now)renderMarket();else screenTimer=setTimeout(renderMarket,400);}
+function wireScreen(view){
+ const m=state.market,sc=m.screen,F=new Map((m.fields||[]).map(f=>[f[0],f]));
+ view.querySelectorAll('[data-sf-min],[data-sf-max]').forEach(input=>input.oninput=()=>{const k=input.dataset.sfMin||input.dataset.sfMax,kind=F.get(k)?.[2],v=fromInput(kind,input.value);if(v!=null&&!Number.isFinite(v))return;sc.filters[k][input.dataset.sfMin?0:1]=v;screenChanged();});
+ view.querySelectorAll('[data-sf-remove]').forEach(b=>b.onclick=()=>{delete sc.filters[b.dataset.sfRemove];screenChanged(true);});
+ const add=view.querySelector('#sf-add');if(add)add.onchange=()=>{if(add.value){sc.filters[add.value]=[null,null];screenChanged(true);}};
+ view.querySelectorAll('[data-sf-era]').forEach(b=>b.onclick=()=>{const e=b.dataset.sfEra;sc.eras=sc.eras.includes(e)?sc.eras.filter(x=>x!==e):[...sc.eras,e];screenChanged(true);});
+ view.querySelectorAll('[data-sf-sort]').forEach(b=>b.onclick=()=>{const k=b.dataset.sfSort;sc.sort=sc.sort.field===k?{field:k,dir:-sc.sort.dir}:{field:k,dir:-1};screenChanged(true);});
+ view.querySelectorAll('[data-sf-preset]').forEach(b=>b.onclick=()=>{const [,filters,sort]=SCREEN_PRESETS[Number(b.dataset.sfPreset)];sc.filters=jsonClone(filters);sc.sort={...sort};screenChanged(true);});
+ const reset=view.querySelector('#sf-reset');if(reset)reset.onclick=()=>{m.screen=jsonClone(SCREEN_DEFAULT);screenChanged(true);};
+ const q=view.querySelector('#sf-query');if(q)q.oninput=()=>{sc.query=q.value;screenChanged();};
+ const more=view.querySelector('#sf-more');if(more)more.onclick=()=>{m.screenLimit=Math.min(500,(m.screenLimit||100)+100);m.screenData=null;renderMarket();};
+ view.querySelectorAll('#sf-table tbody tr').forEach(tr=>{tr.onclick=()=>openCard(tr.dataset.card,m.grade);tr.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();openCard(tr.dataset.card,m.grade);}};});
+ const pick=view.querySelector('#sf-saved');if(pick)pick.onchange=()=>{const x=m.screens.find(s=>String(s.id)===pick.value);if(!x)return;const {lang,grade,...rest}=x.screen;state.marketLang=lang;m.grade=grade;m.screen={...SCREEN_DEFAULT,...rest};m.screenName=x.name;screenChanged(true);};
+ const save=view.querySelector('#sf-save');if(save)save.onclick=async()=>{const name=view.querySelector('#sf-name').value.trim()||m.screenName;if(!name){toast('Name the screen first.');return;}try{m.screens=(await send('/api/screens','POST',{name,screen:screenSpec()})).screens;m.screenName=name;toast('Screen saved.');renderMarket();}catch(e){error(e.message);}};
+ const del=view.querySelector('#sf-delete');if(del)del.onclick=async()=>{const id=view.querySelector('#sf-saved').value;if(!id){toast('Choose a saved screen to delete.');return;}try{m.screens=(await send('/api/screens','DELETE',{id:Number(id)})).screens;toast('Screen deleted.');renderMarket();}catch(e){error(e.message);}};
+ const csv=view.querySelector('#sf-csv');if(csv)csv.onclick=exportScreen;
+}
+// Every matching card (up to 20,000) with every field, as a CSV file.
+async function exportScreen(){
+ try{
+  const r=await send('/api/screen','POST',{screen:screenSpec(),export:true}),fields=r.fields;
+  const cell=v=>v==null?'':typeof v==='number'?String(v):/[",\n]/.test(v)?'"'+String(v).replaceAll('"','""')+'"':String(v);
+  const lines=[['card_id','name','set','number','language','grade','pokemon',...fields.map(f=>f[0])].join(',')];
+  for(const x of r.rows){const c=cardById(x.card_id);lines.push([x.card_id,c?.name,c?.setName,c?.numberLabel,x.lang,x.grade,x.char,...fields.map(f=>x[f[0]])].map(cell).join(','));}
+  downloadText('futuresight-screen-'+state.marketLang+'-'+state.market.grade+'.csv',lines.join('\n'),'text/csv');
+  toast(r.rows.length.toLocaleString()+' cards exported.');
+ }catch(e){error(e.message);}
+}
+function downloadText(name,text,type){
+ if(typeof document.createElement!=='function'||typeof URL?.createObjectURL!=='function')return;
+ const url=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 // Biggest moves over the heatmap's period: sets, Pokémon (5+ priced cards) and single cards ($20+), up and down.
 function moversPanel(d,period){

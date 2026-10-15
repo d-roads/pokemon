@@ -189,8 +189,11 @@ The **Market → Overview** tab.
 
 ## Phase 6 — Screener, portfolio, alerts
 
-- Screener v2: filter and sort on any `card_metrics` column, including character premium, character
-  index return and set age; save screens, export CSV.
+- [x] Screener v2 (Market → Screener, `lib/screener.mjs`, `/api/screen`): filter and sort every card of a
+  language and grade on any `card_metrics` column plus distance from the 52-week high, its lead Pokémon's
+  demand, demand change and index return, and its set's age and index return; eras and text search; four
+  starting screens; the current screen is remembered in the browser; named screens are saved per account
+  (`screens` table, `/api/screens`, up to 50); Export CSV writes every match (up to 20,000) with every field.
 - Portfolio analytics (Dex):
   - Realized and unrealized profit and loss
   - Allocation by era, grade, set and Pokémon
