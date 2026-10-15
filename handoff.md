@@ -1,3 +1,19 @@
+# FutureSight — October 14, 2026 (8 PM Pacific): beta updated to v1.2.0
+
+Owner asked to push dev to the beta and keep the admin account's Dex.
+- **Branches:** `dev`, `main` and `beta` all point at the v1.2.0 release (`eb47bdf`, version bump only) and are pushed.
+  The beta folder (`...\primal-watch\site`) now matches `beta` exactly; `.env`, `.tools` and the database were kept.
+- **Backup:** `...\primal-watch\backup-before-1.2.0-20261014` has the old code (`old-code.tar`), `.env` and the
+  v1.1.0 database files (copied with the app stopped).
+- **Dex:** the beta's `admin` (`acct-1`) had no Dex entries; the 11 entries the owner added on the local test copy
+  this evening were copied into the beta DB (same account key, one transaction). Watchlists were not touched
+  (beta admin 3, local test admin 4).
+- **Restart:** only the node app on 5173 was restarted (same command as `Start-Beta.ps1`); the Cloudflare tunnel
+  kept running, so testers' link did not change. `/api/version` answers `Beta · v1.2.0` locally and through the tunnel.
+- New tables (metrics, screener, alerts) are created on first use. Market view stays empty on the beta until a
+  sweep/Update sales or the nightly rebuild runs; `FUTURESIGHT_UPDATE_HOUR` is not set in the beta `.env`.
+- Tests 246/246 (`npm test`, Node 24.9) and `node build.mjs` passed before the release.
+
 # FutureSight — October 14, 2026 (night): roadmap Phases 2–6 (dev)
 
 Owner asked to work through the remaining roadmap phases. `roadmap.md` has every checkbox; this is the summary.
