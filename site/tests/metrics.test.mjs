@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
-import {buildSeries,priceAt,seriesReturn,tierOf,cardFacts,buildMetrics,indexDates,indexKeysOf,dayNum,dayStr,METRIC_RULES} from '../lib/metrics.mjs';
+import {buildSeries,priceAt,seriesReturn,tierOf,cardFacts,buildMetrics,indexDates,indexKeysOf,dayNum,dayStr,metTracking,flowMonths,METRIC_RULES} from '../lib/metrics.mjs';
 import {newPoint,rebuildMetrics} from '../lib/metrics-store.mjs';
 import {api} from '../lib/api.mjs';
 import {cards} from '../data/catalog.mjs';
@@ -38,6 +38,30 @@ test('Daily prices are saved when they change, or again after the heartbeat',()=
  assert.deepEqual(newPoint([[10,5]],10,7),[10,7],'a second read the same day replaces it');
  assert.equal(newPoint([[10,5]],9,7),null,'older reads are ignored');
  assert.equal(newPoint([[10,5]],12,0),null);
+});
+
+test('Beta and correlation compare monthly changes with the era index, and need enough moving months',()=>{
+ const index=[100,104,101,108,110,107,115,118,116,122,125];
+ const double=index.map((v,i)=>i?50*Math.pow(v/index[0],2):50);
+ const t=metTracking(double,index);assert.ok(Math.abs(t.beta-2)<1e-3,'twice the index\'s log changes');assert.ok(Math.abs(t.correl-1)<1e-3);
+ assert.deepEqual(metTracking(index.map(()=>40),index),{beta:null,correl:null},'a guide that never moved');
+ assert.deepEqual(metTracking(double.slice(0,5),index.slice(0,5)),{beta:null,correl:null},'too few months');
+});
+
+test('Money flow counts sales per month, and a full sales list only from the month after its oldest sale',async()=>{
+ const base={series:'X',category:'Holo rare',rarity:'Rare Holo',eligible:true,setId:'s1',setName:'Set'};
+ const catalog=[{...base,id:'a',name:'Pikachu'},{...base,id:'b',name:'Pikachu'},{...base,id:'c',name:'Mew'}];
+ const sale=(date,price,i)=>({id:date+i,grade:'psa10',date,price});
+ // a: 30 sales, the oldest in August, so only September on counts; b: two sales, a short (complete) list.
+ const a=[...Array(30)].map((_,i)=>sale(i<2?'2026-08-20':'2026-09-1'+(i%10),100,i)),b=[sale('2026-05-03',50,1),sale('2026-09-02',70,2)];
+ const markets={a:{sales:a,history:{psa10:history(100,0,3)}},b:{sales:b,history:{psa10:history(60,0,3)}},c:{sales:[],history:{psa10:history(10,0,3)}}};
+ const facts=new Map(catalog.map(c=>[c.id,cardFacts(c,{...markets[c.id],research:{checkedAt:'2026-10-14T00:00:00Z',status:'full'}},null,null,today)]));
+ const {flowRows}=await buildMetrics(catalog,facts,today);
+ const row=(id,ym)=>flowRows.find(r=>r[0]===id&&r[1]==='psa10'&&r[2]===ym);
+ assert.equal(flowMonths(today).length,13);assert.equal(flowMonths(today).at(-1),'2026-10');
+ assert.deepEqual(row('en:set:s1','2026-09').slice(3),[29,2870,2],'a\'s 28 September sales and b\'s one; c has no sales and covers nothing');
+ assert.deepEqual(row('en:set:s1','2026-08').slice(3),[0,0,1],'a does not cover August: its list may be missing sales there');
+ assert.deepEqual(row('en:set:s1','2026-05').slice(3),[1,50,1]);
 });
 
 test('Rarity tiers group comparable cards across eras and languages',()=>{
@@ -122,4 +146,16 @@ test('A rebuild saves daily prices, card and index metrics, and the routes serve
  const life=await(await api(req('/api/lifecycle?grade=psa10&era=WOTC'),env)).json();assert.ok(Array.isArray(life.curves)&&Array.isArray(life.typical));
  assert.equal((await api(req('/api/lifecycle?era=NOPE'),env)).status,400);
  const sparks=await(await api(req('/api/indices?kind=set&grade=psa10&spark=1'),env)).json();assert.ok(sparks.rows.every(r=>Array.isArray(r.spark)));
+ sqlite.prepare("INSERT INTO population_observations (card_id,grader,counts,captured_at,parser_version,content_hash,recorded_at) VALUES ('base1-4','PSA',?,?,'t',?,?)").run(JSON.stringify([0,0,0,0,0,0,0,0,40,10]),'2026-09-01T00:00:00Z','a','2026-09-01');
+ sqlite.prepare("INSERT INTO population_observations (card_id,grader,counts,captured_at,parser_version,content_hash,recorded_at) VALUES ('base1-4','PSA',?,?,'t',?,?)").run(JSON.stringify([0,0,0,0,0,0,0,0,45,12]),'2026-10-01T00:00:00Z','b','2026-10-01');
+ const ch=await(await api(req('/api/card-history?id=base1-4'),env)).json();
+ assert.deepEqual(ch.points.psa10.at(-1)[1],2001);assert.deepEqual(ch.pop,[['2026-09-01',50,10,40],['2026-10-01',57,12,45]]);
+ assert.equal(ch.release,'1999-01-09');assert.equal(ch.era.id,'en:era:WOTC');assert.ok(ch.era.levels.psa10.length>0);
+ assert.equal((await api(req('/api/card-history?id=nope'),env)).status,404);
+ const flows=await(await api(req('/api/flows?kind=set&grade=psa10'),env)).json();
+ assert.ok(Array.isArray(flows.market)&&Array.isArray(flows.indices));assert.ok(flows.indices.every(i=>i.rows.every(r=>r[3]==null||r[3]<=1)),'shares of the market');
+ assert.equal((await api(req('/api/flows?kind=nope'),env)).status,400);
+ const cheap=await(await api(req('/api/undervalued?grade=psa10'),env)).json();assert.ok(Array.isArray(cheap.rows));assert.equal(cheap.rules.maxShare,.5);
+ assert.ok(cheap.rows.every(r=>r.ratio<=.5&&r.demand>=1.5));
+ assert.equal(detail.tiers.holo,'Holo rare');assert.ok(detail.members.every(m=>typeof m.tier==='string'));
 });

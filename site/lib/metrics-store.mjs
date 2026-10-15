@@ -14,14 +14,25 @@ import {mergeMarket} from './sales.mjs';
 
 export const METRIC_TABLES=[
  'CREATE TABLE IF NOT EXISTS price_points (card_id TEXT NOT NULL, grade TEXT NOT NULL, day TEXT NOT NULL, price REAL NOT NULL, PRIMARY KEY (card_id, grade, day)) WITHOUT ROWID',
- 'CREATE TABLE IF NOT EXISTS card_metrics (card_id TEXT NOT NULL, grade TEXT NOT NULL, lang TEXT NOT NULL, as_of TEXT NOT NULL, price REAL, sold REAL, ret_1d REAL, ret_7d REAL, ret_30d REAL, ret_90d REAL, ret_1y REAL, high_52w REAL, low_52w REAL, drawdown REAL, volatility REAL, sales_30d INTEGER, sales_90d INTEGER, value_90d REAL, days_since_sale INTEGER, spread_10_9 REAL, spread_10_raw REAL, pop_total INTEGER, pop_10 INTEGER, gem_rate REAL, pop_growth_90d REAL, lang_gap REAL, premium REAL, built TEXT, PRIMARY KEY (card_id, grade)) WITHOUT ROWID',
+ 'CREATE TABLE IF NOT EXISTS card_metrics (card_id TEXT NOT NULL, grade TEXT NOT NULL, lang TEXT NOT NULL, as_of TEXT NOT NULL, price REAL, sold REAL, ret_1d REAL, ret_7d REAL, ret_30d REAL, ret_90d REAL, ret_1y REAL, high_52w REAL, low_52w REAL, drawdown REAL, volatility REAL, sales_30d INTEGER, sales_90d INTEGER, value_90d REAL, days_since_sale INTEGER, spread_10_9 REAL, spread_10_raw REAL, pop_total INTEGER, pop_10 INTEGER, gem_rate REAL, pop_growth_90d REAL, lang_gap REAL, premium REAL, beta REAL, correl REAL, built TEXT, PRIMARY KEY (card_id, grade)) WITHOUT ROWID',
  'CREATE TABLE IF NOT EXISTS index_metrics (index_id TEXT NOT NULL, grade TEXT NOT NULL, lang TEXT NOT NULL, kind TEXT NOT NULL, key TEXT NOT NULL, as_of TEXT NOT NULL, level REAL, ret_1d REAL, ret_7d REAL, ret_30d REAL, ret_90d REAL, ret_1y REAL, eq_ret_30d REAL, eq_ret_90d REAL, eq_ret_1y REAL, high_52w REAL, low_52w REAL, drawdown REAL, volatility REAL, members INTEGER, priced INTEGER, value REAL, top5_share REAL, up_30d INTEGER, down_30d INTEGER, breadth_30d REAL, sales_30d INTEGER, sales_90d INTEGER, value_90d REAL, premium REAL, premium_90d REAL, premium_1y REAL, gem_rate REAL, built TEXT, PRIMARY KEY (index_id, grade)) WITHOUT ROWID',
  'CREATE INDEX IF NOT EXISTS index_metrics_kind ON index_metrics (lang, kind, grade)',
  'CREATE TABLE IF NOT EXISTS market_index (index_id TEXT NOT NULL, grade TEXT NOT NULL, day TEXT NOT NULL, level REAL, level_eq REAL, members INTEGER, value REAL, premium REAL, built TEXT, PRIMARY KEY (index_id, grade, day)) WITHOUT ROWID',
+ 'CREATE TABLE IF NOT EXISTS index_flows (index_id TEXT NOT NULL, grade TEXT NOT NULL, month TEXT NOT NULL, sales INTEGER, value REAL, covered INTEGER, built TEXT, PRIMARY KEY (index_id, grade, month)) WITHOUT ROWID',
  'CREATE TABLE IF NOT EXISTS metrics_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, started_at TEXT NOT NULL, finished_at TEXT, as_of TEXT, cards INTEGER, indices INTEGER, ms INTEGER, error TEXT)',
 ];
-export const CARD_COLUMNS=['card_id','grade','lang','as_of','price','sold','ret_1d','ret_7d','ret_30d','ret_90d','ret_1y','high_52w','low_52w','drawdown','volatility','sales_30d','sales_90d','value_90d','days_since_sale','spread_10_9','spread_10_raw','pop_total','pop_10','gem_rate','pop_growth_90d','lang_gap','premium'];
+export const CARD_COLUMNS=['card_id','grade','lang','as_of','price','sold','ret_1d','ret_7d','ret_30d','ret_90d','ret_1y','high_52w','low_52w','drawdown','volatility','sales_30d','sales_90d','value_90d','days_since_sale','spread_10_9','spread_10_raw','pop_total','pop_10','gem_rate','pop_growth_90d','lang_gap','premium','beta','correl'];
 export const INDEX_COLUMNS=['index_id','grade','lang','kind','key','as_of','level','ret_1d','ret_7d','ret_30d','ret_90d','ret_1y','eq_ret_30d','eq_ret_90d','eq_ret_1y','high_52w','low_52w','drawdown','volatility','members','priced','value','top5_share','up_30d','down_30d','breadth_30d','sales_30d','sales_90d','value_90d','premium','premium_90d','premium_1y','gem_rate'];
+// Columns added after a table was first made. Metric tables are rebuilt in full, so a new column only
+// needs to exist; it fills on the next rebuild.
+const MET_ADDED={card_metrics:{beta:'REAL',correl:'REAL'}};
+export async function ensureMetricTables(db){
+ for(const sql of METRIC_TABLES)await db.prepare(sql).run();
+ for(const [table,cols] of Object.entries(MET_ADDED)){
+  const have=new Set(((await db.prepare(`PRAGMA table_info(${table})`).all()).results||[]).map(r=>r.name));
+  for(const [name,type] of Object.entries(cols))if(!have.has(name))await db.prepare(`ALTER TABLE ${table} ADD COLUMN ${name} ${type}`).run();
+ }
+}
 const MET_HISTORY_COLUMNS=['index_id','grade','day','level','level_eq','members','value','premium'];
 
 // The database calls here finish without letting other requests run (node:sqlite is synchronous), so a
@@ -98,7 +109,8 @@ export function rebuildMetrics(db,{cards,snapshots,today=dayNum(new Date().toISO
    await metWriteRows(db,'card_metrics',CARD_COLUMNS,built.cardRows,{extra});
    await metWriteRows(db,'index_metrics',INDEX_COLUMNS,built.indexRows,{extra});
    await metWriteRows(db,'market_index',MET_HISTORY_COLUMNS,built.historyRows,{extra});
-   await db.batch(['card_metrics','index_metrics','market_index'].map(t=>db.prepare(`DELETE FROM ${t} WHERE built IS NOT ?`).bind(stamp)));
+   await metWriteRows(db,'index_flows',['index_id','grade','month','sales','value','covered'],built.flowRows,{extra});
+   await db.batch(['card_metrics','index_metrics','market_index','index_flows'].map(t=>db.prepare(`DELETE FROM ${t} WHERE built IS NOT ?`).bind(stamp)));
    log(`Metrics: saved in ${Date.now()-t2} ms.`);
    const summary={as_of:dayStr(today),cards:facts.size,indices:new Set(built.indexRows.map(r=>r.index_id)).size,ms:Date.now()-t0,points:points.length};
    await db.prepare('UPDATE metrics_runs SET finished_at = ?, as_of = ?, cards = ?, indices = ?, ms = ? WHERE started_at = ?').bind(new Date().toISOString(),summary.as_of,summary.cards,summary.indices,summary.ms,startedAt).run();
@@ -174,4 +186,34 @@ export async function indexRowsFor(db,ids){
  const out=[];
  for(let i=0;i<ids.length;i+=99){const part=ids.slice(i,i+99);out.push(...(((await db.prepare(`SELECT * FROM index_metrics WHERE index_id IN (${part.map(()=>'?').join(',')})`).bind(...part).all()).results)||[]).map(metPlain));}
  return out;
+}
+
+// One card's saved history: daily guide prices per grade and PSA population over time
+// ([day, total, PSA 10, PSA 9], one row per day on which the counts changed).
+export async function cardHistory(db,id){
+ const points={raw:[],psa9:[],psa10:[]};
+ for(const r of (await db.prepare('SELECT grade,day,price FROM price_points WHERE card_id = ? ORDER BY day').bind(id).all()).results||[])points[r.grade]?.push([r.day,r.price]);
+ const pop=[];
+ for(const r of (await db.prepare("SELECT counts,captured_at FROM population_observations WHERE card_id = ? AND grader = 'PSA' ORDER BY captured_at").bind(id).all()).results||[]){
+  let c;try{c=JSON.parse(r.counts);}catch{continue;}if(!Array.isArray(c))continue;
+  const row=[r.captured_at.slice(0,10),c.reduce((a,b)=>a+(b||0),0),c[9]||0,c[8]||0];
+  if(pop.at(-1)?.[0]===row[0])pop[pop.length-1]=row;else if(!pop.length||pop.at(-1)[1]!==row[1]||pop.at(-1)[2]!==row[2])pop.push(row);
+ }
+ return {points,pop};
+}
+// An index's typical-card level over time, every grade.
+export async function indexLevels(db,id){
+ const out={};
+ for(const r of (await db.prepare('SELECT grade,day,level_eq FROM market_index WHERE index_id = ? ORDER BY day').bind(id).all()).results||[])(out[r.grade]||=[]).push([r.day,r.level_eq]);
+ return out;
+}
+
+// Money flow for every index of one kind: sales value per month and its share of the language's whole market
+// (both counted over the same covered cards' pages).
+export async function indexFlows(db,{lang,kind,grade}){
+ const rows=(await db.prepare('SELECT index_id,month,sales,value,covered FROM index_flows WHERE index_id >= ? AND index_id < ? AND grade = ? ORDER BY month').bind(`${lang}:${kind}:`,`${lang}:${kind};`,grade).all()).results||[];
+ const all=new Map((((await db.prepare('SELECT month,sales,value,covered FROM index_flows WHERE index_id = ? AND grade = ?').bind(`${lang}:all:all`,grade).all()).results)||[]).map(r=>[r.month,r]));
+ const out={};
+ for(const r of rows){const t=all.get(r.month);(out[r.index_id]||=[]).push([r.month,r.sales,r.value,t?.value>0?r.value/t.value:null]);}
+ return {indices:out,market:[...all.values()].sort((a,b)=>a.month.localeCompare(b.month)).map(r=>[r.month,r.sales,r.value,r.covered])};
 }

@@ -1,7 +1,7 @@
 import {manualSearchQuery,manualSearchUrl} from '/ebay-links.mjs';
 import {analyze as computeAnalysis,gradeNames,trendProjection} from '/analysis.mjs';
 import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE} from '/portfolio.mjs';
-import {normalizeCosts,costSummary,netReturn,maxBuyPrice,netProceeds,saleFee,DEFAULT_COSTS} from '/investment-costs.mjs';
+import {normalizeCosts,costSummary,netReturn,maxBuyPrice,netProceeds,saleFee,DEFAULT_COSTS,MARKET_PRESETS} from '/investment-costs.mjs';
 const analysisCache=new WeakMap();
 const analyze=(market,grade)=>{if(!market)return computeAnalysis(market,grade);const day=Math.floor(Date.now()/86400000);let cache=analysisCache.get(market);if(!cache||cache.day!==day){cache={day,grades:{}};analysisCache.set(market,cache);}return cache.grades[grade]??=(computeAnalysis(market,grade));};
 const $=s=>document.querySelector(s);
@@ -24,7 +24,7 @@ const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
 const JA_TEXT_KEY='futuresight-japanese-text';
 function savedJapaneseText(){try{return localStorage.getItem(JA_TEXT_KEY)==='on';}catch{return false;}}
 const state={showJapanese:savedJapaneseText(),sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],langs:['en','ja'],detailLang:null,detailAlt:null,detailGrade:null,marketLang:'en',filters:{min:null,max:null,activity:0,invest:0,research:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
- dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},cardMetrics:{},grading:null,market:{tab:'overview',grade:'psa10',weight:'eq',data:{},error:null,index:null,period:'ret_30d',sorts:{},query:'',minCards:5,limit:100,memberLimit:100,memberSort:{key:'price',dir:-1},range:'1y',era:null,lifeSets:{}},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
+ dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},cardMetrics:{},cardHistory:{},cardChart:{view:'price',grade:null,range:'1y',era:false},listings:{},grading:null,market:{tab:'overview',grade:'psa10',weight:'eq',data:{},error:null,index:null,period:'ret_30d',sorts:{},query:'',minCards:5,limit:100,memberLimit:100,memberSort:{key:'price',dir:-1},range:'1y',era:null,lifeSets:{},charView:'board'},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
 // Crashes in the page are sent to the server, which forwards them to Sentry only when SENTRY_DSN is set. At most 5 per page load.
 let crashReports=0;
@@ -152,7 +152,7 @@ function lineChart({series,height=170,width=560,label,format=money,tick=compact,
  return `${legend}<div class="line-chart" data-chart="${id}"><svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}">${grid}${xt}${ref}${paths}${marks}<line class="crosshair" x1="0" x2="0" y1="${top}" y2="${h-bottom}" visibility="hidden"/><g class="hover-dots"></g><rect class="hit" x="${left}" y="0" width="${w-left-right}" height="${h}" fill="transparent"/></svg><div class="chart-tip" hidden></div></div>`;
 }
 function wireCharts(root=document){
- root.querySelectorAll('[data-chart]').forEach(el=>{const m=charts.get(el.dataset.chart);if(!m)return;const svg=el.querySelector('svg'),tip=el.querySelector('.chart-tip'),cross=svg.querySelector('.crosshair'),dots=svg.querySelector('.hover-dots');
+ root.querySelectorAll('[data-chart]').forEach(el=>{const m=charts.get(el.dataset.chart);if(!m)return;if(m.time){wireTimeChart(el,m);return;}const svg=el.querySelector('svg'),tip=el.querySelector('.chart-tip'),cross=svg.querySelector('.crosshair'),dots=svg.querySelector('.hover-dots');
   const show=evt=>{const r=svg.getBoundingClientRect(),sx=(evt.clientX-r.left)*m.w/r.width;let i=Math.round((sx-m.left)/((m.w-m.left-m.right)/(m.n-1)));i=Math.max(0,Math.min(m.n-1,i));const x=m.X(i);
    cross.setAttribute('x1',x);cross.setAttribute('x2',x);cross.setAttribute('visibility','visible');
    dots.innerHTML=m.series.map(s=>s.points[i]?.[1]==null?'':`<circle cx="${x}" cy="${m.Y(s.points[i][1])}" r="4" style="fill:${s.color}" class="ring" stroke-width="2"/>`).join('');
@@ -162,10 +162,100 @@ function wireCharts(root=document){
   svg.onpointermove=show;svg.onpointerdown=show;svg.onpointerleave=hide;});
 }
 
-function historyChart(m,grade,wide=false){
- const h=priceHistory(m,grade).slice(-36);if(h.length<2)return '';
- return `<div class="detail-section history"><div class="section-heading"><h3>Price history</h3><small>Monthly guide · ${h.length} months</small></div>${lineChart({series:[{label:gradeNames[grade],color:C.accent,area:true,points:h.map(([ym,v])=>[ym,v,monthLabel(ym)])}],height:wide?230:170,width:wide?720:340,label:gradeNames[grade]+' monthly guide price'})}<p class="sales-note">PriceCharting's monthly guide${grade==='psa9'?' for Grade 9, which includes other graders':''}. Sold medians above use matching sales only.</p></div>`;
+// Charts on a time axis: lines of [t (ms), value] points, optional monthly bars along the bottom on their
+// own scale, and dated markers. Hover shows each line's latest value at that date.
+function timeChart({series,bars=null,markers=[],height=230,width=720,label,format=money,tick=compact,barLabel='Sales'}){
+ const pts=series.flatMap(s=>s.points).filter(p=>p[1]!=null);
+ if(pts.length<2)return '<div class="chart-empty">Not enough history to chart yet.</div>';
+ const narrow=typeof window!=='undefined'&&window.innerWidth<640,id='chart'+(++chartSeq),w=narrow?Math.max(300,Math.min(width,window.innerWidth-40)):width,h=narrow?Math.round(height*.9):height;
+ const left=46,right=series.length>1?64:16,top=16,bottom=24,barH=bars?.some(b=>b[1]>0)?Math.round((h-top-bottom)*.2):0,plotB=h-bottom-(barH?barH+6:0);
+ const stamps=[...pts.map(p=>p[0]),...(bars||[]).map(b=>b[0])],t0=Math.min(...stamps),t1=Math.max(...stamps);
+ let lo=Math.min(...pts.map(p=>p[1])),hi=Math.max(...pts.map(p=>p[1]));if(lo===hi){lo*=.9;hi*=1.1;}const padY=(hi-lo)*.1;lo=Math.max(0,lo-padY);hi+=padY;
+ const X=t=>left+(t-t0)/(t1-t0||1)*(w-left-right),Y=v=>top+(hi-v)/(hi-lo||1)*(plotB-top);
+ const grid=[0,.5,1].map(f=>{const v=lo+(hi-lo)*f;return `<line x1="${left}" x2="${w-right}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" class="grid"/><text x="${left-8}" y="${(Y(v)+3).toFixed(1)}" text-anchor="end" class="tick">${tick(v)}</text>`;}).join('');
+ const day=t=>new Date(t).toISOString().slice(0,10),xt=[t0,(t0+t1)/2,t1].map((t,i)=>`<text x="${X(t).toFixed(1)}" y="${h-6}" text-anchor="${['start','middle','end'][i]}" class="tick">${date(day(t))}</text>`).join('');
+ const maxBar=barH?Math.max(...bars.map(b=>b[1])):0,bw=Math.max(2,(w-left-right)*26*86400000/(t1-t0||1));
+ const barSvg=barH?bars.filter(b=>b[1]>0).map(b=>{const bh=Math.max(1.5,b[1]/maxBar*barH);return `<rect class="vol-bar" x="${(X(b[0])-bw/2).toFixed(1)}" y="${(h-bottom-bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}"><title>${esc(barLabel)} ${monthLabel(day(b[0]).slice(0,7))}: ${b[1]}</title></rect>`;}).join(''):'';
+ const shown=markers.filter(k=>k.t>=t0&&k.t<=t1),markSvg=shown.map((k,i)=>`<line class="marker ${k.kind||''}" x1="${X(k.t).toFixed(1)}" x2="${X(k.t).toFixed(1)}" y1="${top-4}" y2="${plotB}"/><text class="marker-label" x="${(X(k.t)+3).toFixed(1)}" y="${top+6+(i%3)*11}">${esc(k.label)}</text>`).join('');
+ const paths=series.map(s=>{const p=s.points.filter(x=>x[1]!=null);if(!p.length)return '';const d='M'+p.map(x=>X(x[0]).toFixed(1)+','+Y(x[1]).toFixed(1)).join('L');
+  const area=s.area&&p.length>1?`<path d="${d}L${X(p.at(-1)[0]).toFixed(1)},${plotB}L${X(p[0][0]).toFixed(1)},${plotB}Z" style="fill:${s.color}" opacity=".12"/>`:'';
+  const end=p.at(-1),direct=series.length>1?`<text x="${(X(end[0])+6).toFixed(1)}" y="${(Y(end[1])+4).toFixed(1)}" class="direct" fill="currentColor">${esc(s.short||s.label)}</text>`:'';
+  return area+`<path d="${d}" fill="none" style="stroke:${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" ${s.dash?'stroke-dasharray="5 4"':''}/>`+direct;}).join('');
+ if(charts.size>40)charts.delete(charts.keys().next().value);charts.set(id,{time:true,series,bars,X,Y,t0,t1,format,left,right,w,h,top,bottom:h-plotB,barLabel});
+ const legend=series.length>1||barH?`<div class="chart-legend">${series.map(s=>`<span><i style="background:${s.color}" class="${s.dash?'dashed':''}"></i>${esc(s.label)}</span>`).join('')}${barH?`<span><i class="bar-key"></i>${esc(barLabel)} a month</span>`:''}</div>`:'';
+ return `${legend}<div class="line-chart" data-chart="${id}"><svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}">${grid}${xt}${barSvg}${markSvg}${paths}<line class="crosshair" x1="0" x2="0" y1="${top}" y2="${plotB}" visibility="hidden"/><g class="hover-dots"></g><rect class="hit" x="${left}" y="0" width="${w-left-right}" height="${h}" fill="transparent"/></svg><div class="chart-tip" hidden></div></div>`;
 }
+// The newest point at or before t (points sorted by time).
+function pointAt(points,t){let lo=0,hi=points.length-1,at=-1;while(lo<=hi){const mid=(lo+hi)>>1;if(points[mid][0]<=t){at=mid;lo=mid+1;}else hi=mid-1;}return at<0?null:points[at];}
+function wireTimeChart(el,m){
+ const svg=el.querySelector('svg'),tip=el.querySelector('.chart-tip'),cross=svg.querySelector('.crosshair'),dots=svg.querySelector('.hover-dots');
+ const all=[...new Set(m.series.flatMap(s=>s.points.filter(p=>p[1]!=null).map(p=>p[0])))].sort((a,b)=>a-b);
+ const show=evt=>{const r=svg.getBoundingClientRect(),sx=(evt.clientX-r.left)*m.w/r.width,t=m.t0+(sx-m.left)/(m.w-m.left-m.right)*(m.t1-m.t0);
+  let best=all[0];for(const x of all)if(Math.abs(x-t)<Math.abs(best-t))best=x;const x=m.X(best);
+  cross.setAttribute('x1',x);cross.setAttribute('x2',x);cross.setAttribute('visibility','visible');
+  const vals=m.series.map(s=>[s,pointAt(s.points.filter(p=>p[1]!=null),best)]).filter(([,p])=>p);
+  dots.innerHTML=vals.map(([s,p])=>`<circle cx="${m.X(p[0])}" cy="${m.Y(p[1])}" r="4" style="fill:${s.color}" class="ring" stroke-width="2"/>`).join('');
+  const ym=new Date(best).toISOString().slice(0,7),bar=m.bars?.find(b=>new Date(b[0]).toISOString().slice(0,7)===ym);
+  tip.innerHTML=`<strong>${date(new Date(best).toISOString().slice(0,10))}</strong>`+vals.map(([s,p])=>`<span><i style="background:${s.color}"></i>${esc(s.label)} <b>${m.format(p[1])}</b></span>`).join('')+(bar?`<span>${esc(m.barLabel)} in ${monthLabel(ym)} <b>${bar[1]}</b></span>`:'');
+  tip.hidden=false;const px=x/m.w*r.width;tip.style.left=Math.min(Math.max(px,70),r.width-70)+'px';};
+ const hide=()=>{cross.setAttribute('visibility','hidden');dots.innerHTML='';tip.hidden=true;};
+ svg.onpointermove=show;svg.onpointerdown=show;svg.onpointerleave=hide;
+}
+async function loadCardHistory(id){
+ if(state.cardHistory[id]||metricsPending.has('h:'+id))return;metricsPending.add('h:'+id);
+ try{state.cardHistory[id]=await request('/api/card-history?id='+encodeURIComponent(id));}catch{state.cardHistory[id]={error:true,points:{},pop:[],era:null};}
+ finally{metricsPending.delete('h:'+id);}
+ if(shownCard()?.id===id)renderDetail();
+}
+const DAY_MS=86400000,dayMs=d=>Date.parse(d.slice(0,10)+'T00:00:00Z');
+// A grade's guide over time: the monthly history (dated at each month's end, or the day the page was read
+// for the month in progress) and each day the guide was read.
+function guideSeries(m,grade,daily){
+ const read=Date.parse(m?.research?.checkedAt||'')||Date.now(),out=new Map();
+ for(const [ym,v] of priceHistory(m,grade)){const [y,mo]=ym.split('-').map(Number);out.set(Math.min(Date.UTC(y,mo,0),read),v);}
+ for(const [d,p] of daily||[])if(p>0)out.set(dayMs(d),p);
+ return [...out].sort((a,b)=>a[0]-b[0]);
+}
+const CHART_RANGES=[['3m','3M',92],['6m','6M',183],['1y','1Y',366],['3y','3Y',1096],['all','All',null]];
+// Price chart, grade spreads and PSA population over time.
+function cardChartSection(c,m){
+ const h=state.cardHistory[c.id];if(!h){loadCardHistory(c.id);return `<div class="detail-section history"><div class="section-heading"><h3>Price chart</h3><small>Loading…</small></div></div>`;}
+ const o=state.cardChart,g=o.grade||viewGrade(),days=CHART_RANGES.find(r=>r[0]===o.range)?.[2],since=days?Date.now()-days*DAY_MS:-Infinity;
+ const seg=(name,list,on)=>`<div class="segmented" role="group" aria-label="${name}">${list.map(([k,l])=>`<button data-cc-${name.toLowerCase()}="${k}" class="${on===k?'active':''}" aria-pressed="${on===k}">${l}</button>`).join('')}</div>`;
+ const guides=Object.fromEntries(['raw','psa9','psa10'].map(k=>[k,guideSeries(m,k,h.points?.[k])]));
+ const inRange=p=>p.filter(x=>x[0]>=since);
+ const markers=[];
+ if(h.release)markers.push({t:dayMs(h.release),label:'Set release',kind:'release'});
+ for(let i=1;i<(h.pop||[]).length;i++){const [d,n]=h.pop[i],prev=h.pop[i-1][1];if(prev>0&&n-prev>=10&&n/prev-1>=.1)markers.push({t:dayMs(d),label:'PSA pop +'+Math.round((n/prev-1)*100)+'%',kind:'pop'});}
+ let body='',note='';
+ if(o.view==='price'){
+  const line=inRange(guides[g]),counts=new Map();
+  for(const s of analyze(m,g).all){const ym=s.date.slice(0,7);counts.set(ym,(counts.get(ym)||0)+1);}
+  const bars=[...counts].map(([ym,n])=>[Date.UTC(+ym.slice(0,4),+ym.slice(5,7)-1,15),n]).filter(b=>b[0]>=since&&line.length&&b[0]>=line[0][0]-31*DAY_MS);
+  const series=[{label:gradeNames[g]+' guide',short:shortGrade(g),color:C.accent,area:true,points:line}];
+  const era=h.era?.levels?.[g]||[];
+  if(o.era&&line.length&&era.length){const e=era.map(([d,v])=>[dayMs(d),v]).filter(p=>p[1]>0),start=pointAt(e,line[0][0])||e.find(p=>p[0]>=line[0][0]);if(start)series.push({label:h.era.name+' (typical card, scaled)',short:'Era',color:'var(--info)',dash:true,points:e.filter(p=>p[0]>=line[0][0]).map(([t,v])=>[t,v/start[1]*line[0][1]])});}
+  body=timeChart({series,bars,markers,label:gradeNames[g]+' guide price over time',barLabel:'Matching sales'});
+  note=`PriceCharting's guide${g==='psa9'?' for Grade 9 (all graders)':''}: monthly history, plus each day it was read. Bars count the matching sales on the card's page, which lists only recent sales.${o.era?' The era line is its typical-card index, scaled to the card\'s price at the start.':''}`;
+ }else if(o.view==='spread'){
+  const ratio=(a,b)=>a.map(([t,v])=>{const p=pointAt(b,t);return p&&t-p[0]<=45*DAY_MS&&p[1]>0?[t,v/p[1]]:null;}).filter(Boolean);
+  body=timeChart({series:[{label:'PSA 10 / PSA 9',short:'10 / 9',color:C.accent,points:inRange(ratio(guides.psa10,guides.psa9))},{label:'PSA 10 / raw',short:'10 / raw',color:'var(--warn)',points:inRange(ratio(guides.psa10,guides.raw))}],markers,label:'Grade spreads over time',format:times,tick:v=>v.toFixed(v>=10?0:1)+'×'});
+  note='How many times the PSA 10 guide is the Grade 9 and ungraded guides. A widening spread means buyers pay more for the top grade.';
+ }else{
+  const pop=inRange((h.pop||[]).map(([d,n,p10])=>[dayMs(d),n,p10]));
+  body=pop.length>=2?timeChart({series:[{label:'PSA graded',short:'All',color:C.accent,points:pop.map(p=>[p[0],p[1]])},{label:'PSA 10',short:'PSA 10',color:'var(--warn)',points:pop.map(p=>[p[0],p[2]])}],label:'PSA population over time',format:v=>Math.round(v).toLocaleString(),tick:v=>compactCount(v)}):`<div class="chart-empty">${(h.pop||[]).length?'One population reading so far ('+date(h.pop[0][0])+'). ':''}Population history builds up each time the card's page is read.</div>`;
+  note='PSA population from the card\'s page, recorded each time it changes. A jump in graded copies adds supply.';
+ }
+ return `<div class="detail-section history card-chart"><div class="section-heading"><h3>${o.view==='price'?'Price chart':o.view==='spread'?'Grade spreads':'PSA population'}</h3>${seg('View',[['price','Price'],['spread','Spreads'],['pop','Population']],o.view)}</div><div class="chart-tools">${o.view==='price'?seg('Grade',['raw','psa9','psa10'].map(k=>[k,shortGrade(k)]),g):''}${seg('Range',CHART_RANGES.map(r=>[r[0],r[1]]),o.range)}${o.view==='price'?`<label class="check-inline"><input type="checkbox" id="cc-era" ${o.era?'checked':''}> vs era index</label>`:''}</div>${body}<p class="sales-note">${note}</p></div>`;
+}
+function wireCardChart(){
+ const box=$('#detail');if(!box?.querySelectorAll)return;const o=state.cardChart;
+ box.querySelectorAll('[data-cc-view]').forEach(b=>b.onclick=()=>{o.view=b.dataset.ccView;renderDetail();});
+ box.querySelectorAll('[data-cc-grade]').forEach(b=>b.onclick=()=>{o.grade=b.dataset.ccGrade;renderDetail();});
+ box.querySelectorAll('[data-cc-range]').forEach(b=>b.onclick=()=>{o.range=b.dataset.ccRange;renderDetail();});
+ const era=box.querySelector('#cc-era');if(era)era.onchange=()=>{o.era=era.checked;renderDetail();};
+}
+const compactCount=v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e4?Math.round(v/1e3)+'k':v>=1e3?(v/1e3).toFixed(1)+'k':String(Math.round(v));
 function popLine(m){const p=m?.pop?.psa;if(!Array.isArray(p)||p.length<10)return '';const total=p.reduce((a,b)=>a+b,0);return `<p>PSA population: <b>${p[8].toLocaleString()}</b> PSA 9 · <b>${p[9].toLocaleString()}</b> PSA 10 · ${total.toLocaleString()} graded.${total?' '+Math.round(p[9]/total*100)+'% gem rate.':''}</p>`;}
 // The page files are read fresh on every request, but the API code is loaded once when the server
 // starts. After an update, a server that was left running answers new routes with 404.
@@ -179,6 +269,11 @@ const COST_KEY='futuresight-costs';
 function savedCosts(){try{const v=typeof localStorage==='undefined'?null:JSON.parse(localStorage.getItem(COST_KEY)||'null');return v&&typeof v==='object'&&!Array.isArray(v)?v:{};}catch{return {};}}
 function storeCosts(v){state.costs=v;try{localStorage.setItem(COST_KEY,JSON.stringify(v));}catch{}}
 const userCosts=()=>normalizeCosts(state.costs).costs;
+// Marketplace fee presets: choosing one keeps your shipping, tax and return settings; editing a fee field
+// switches back to a flat custom rate.
+const FEE_FIELDS=['saleFeeRate','saleFixedFee'];
+function presetPicker(){const on=state.costs?.preset||'';return `<div class="segmented preset-pick" role="group" aria-label="Selling fees">${[['','Research default'],...Object.entries(MARKET_PRESETS).map(([k,p])=>[k,p.name])].map(([k,l])=>`<button data-preset="${k}" class="${on===k?'active':''}" aria-pressed="${on===k}">${esc(l)}</button>`).join('')}</div>`;}
+function wirePresets(root){root.querySelectorAll?.('[data-preset]').forEach(b=>b.onclick=()=>{const {preset:_,...rest}=state.costs||{};for(const f of FEE_FIELDS)delete rest[f];storeCosts(b.dataset.preset?{...rest,preset:b.dataset.preset}:rest);renderDetail();});}
 const EVIDENCE={supported:'Supported',limited:'Limited evidence',insufficient:'Insufficient evidence',unsupported:'Not supported'};
 const EVIDENCE_FROM={S:'supported',L:'limited',I:'insufficient',U:'unsupported'};
 const RANK_INDEX={psa10:0,psa9:1,raw:2};
@@ -221,7 +316,7 @@ function researchBox(c){
  const reasons=inv.reasons.length?`<ul class="evidence-reasons">${inv.reasons.map(r=>`<li>${esc(r.text)}</li>`).join('')}</ul>`:'';
  const costs=userCosts(),fields=COST_FIELDS.map(([k,label,unit,scale])=>`<label>${label}<span class="unit-input">${unit==='$'?'<i>$</i>':''}<input type="number" step="any" min="0" data-cost="${k}" value="${+(costs[k]*scale).toFixed(4)}">${unit==='%'?'<i>%</i>':''}</span></label>`).join('');
  const calc=`<div class="cost-calc"><h4>Price check</h4><label class="ask-label">Asking price (USD)<input id="ask-price" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="e.g. ${inv.priceReference?.price?Math.round(inv.priceReference.price):'100'}" value="${state.asks[c.id+'|'+viewGrade()]??''}"></label><div class="cost-out" id="cost-out">${costOutput(inv,c)}</div>
-  <details class="cost-assumptions"><summary>Cost assumptions${state.costs&&Object.keys(state.costs).length?' · custom':''}</summary><div class="cost-fields">${fields}</div><p class="score-note">${esc(normalizeCosts(state.costs).costs.label)}. Fees vary by marketplace and account and may apply to shipping and tax too. <button class="link-button" id="cost-reset">Use defaults</button></p></details></div>`;
+  <details class="cost-assumptions"><summary>Cost assumptions${state.costs?.preset?' · '+esc(MARKET_PRESETS[state.costs.preset]?.name||''):state.costs&&Object.keys(state.costs).length?' · custom':''}</summary>${presetPicker()}<div class="cost-fields">${fields}</div><p class="score-note">${esc(normalizeCosts(state.costs).costs.label)}. Fees vary by marketplace and account and may apply to shipping and tax too. <button class="link-button" id="cost-reset">Use defaults</button></p></details></div>`;
  const forecast=`<p class="forecast-note">${inv.forecast?'12-month forecast shown above (validated model).':esc(inv.forecastWithheld||'')}</p>`;
  return `<div class="research-box ${status||''}">${head}${main}${what}${reasons}${calc}${forecast}</div>`;
 }
@@ -229,7 +324,7 @@ function wireResearch(c){
  const ask=$('#ask-price');if(!ask)return;
  const update=()=>{const out=$('#cost-out');if(out)out.innerHTML=costOutput(state.investDetail[c.id]?.[viewGrade()],c);};
  ask.oninput=()=>{const v=Number(ask.value);state.asks[c.id+'|'+viewGrade()]=ask.value&&v>0?v:null;update();};
- $('#detail').querySelectorAll('[data-cost]').forEach(input=>input.oninput=()=>{const field=COST_FIELDS.find(f=>f[0]===input.dataset.cost),v=Number(input.value);if(input.value===''||!Number.isFinite(v))return;const next={...state.costs,[field[0]]:v/field[3]};if(normalizeCosts(next).errors.length)return;storeCosts(next);update();});
+ $('#detail').querySelectorAll('[data-cost]').forEach(input=>input.oninput=()=>{const field=COST_FIELDS.find(f=>f[0]===input.dataset.cost),v=Number(input.value);if(input.value===''||!Number.isFinite(v))return;const next={...state.costs,[field[0]]:v/field[3]};if(FEE_FIELDS.includes(field[0])&&next.preset){const p=MARKET_PRESETS[next.preset].costs;delete next.preset;for(const f of FEE_FIELDS)next[f]??=p[f];}if(normalizeCosts(next).errors.length)return;storeCosts(next);update();});
  if($('#cost-reset'))$('#cost-reset').onclick=()=>{storeCosts({});renderDetail();};
 }
 function scoreBox(c){
@@ -247,8 +342,8 @@ function scoreBox(c){
 // of the selected card. These only change what the info screen shows: the list's grade and filters stay put,
 // and they reset when another card is picked.
 const viewGrade=()=>state.detailGrade||state.grade;
-function resetDetailVersion(){state.detailLang=null;state.detailAlt=null;state.detailGrade=null;}
-function showGrade(g){state.detailGrade=g===state.grade?null:g;renderDetail();}
+function resetDetailVersion(){state.detailLang=null;state.detailAlt=null;state.detailGrade=null;state.cardChart.grade=null;}
+function showGrade(g){state.detailGrade=g===state.grade?null:g;state.cardChart.grade=null;renderDetail();}
 const numberCaption=c=>(c.numbering?'':'#')+esc(c.numberLabel);
 function counterpart(c,lang){if(!c)return null;if(langOf(c)===lang)return c;if(!c.languagePairVerified)return null;
  const ids=lang==='ja'?c.japaneseIds:(c.englishId?[c.englishId]:[]);
@@ -309,18 +404,39 @@ function marketSection(c,m){
  const pos=x.high_52w>x.low_52w?Math.min(100,Math.max(0,(x.price-x.low_52w)/(x.high_52w-x.low_52w)*100)):null;
  const range=x.low_52w!=null?`<div class="range52"><div class="range-head"><small>52-week range</small><span>${money(x.low_52w)} – ${money(x.high_52w)}</span></div><div class="range-bar">${pos!=null?`<i style="left:${pos.toFixed(1)}%"></i>`:''}</div></div>`:'';
  const gap=x.lang_gap==null?'—':(x.lang_gap>=0?'+':'−')+Math.abs(Math.round(x.lang_gap*100))+'%';
- const stats=`<div class="metric-grid">${cell('Guide',money(x.price),'PriceCharting guide for this grade, read '+date(x.as_of))}${cell('From peak',retCell(x.drawdown),'Below the highest guide price on record')}${cell('Volatility',x.volatility==null?'—':Math.round(x.volatility*100)+'%','Annualised, from month-end guide prices')}${cell('Sales 30D / 90D',x.sales_30d==null?'—':x.sales_30d+' / '+x.sales_90d,'Matching sales in the 30 and 90 days before the card was last read')}${cell('Last sale',x.days_since_sale==null?'—':x.days_since_sale+' d ago')}${cell('vs peers',times(x.premium),'Guide price over the median of same-era, same-rarity cards')}${cell('PSA 10 / PSA 9',times(x.spread_10_9))}${cell('PSA 10 / raw',times(x.spread_10_raw))}${cell('PSA graded',x.pop_total==null?'—':x.pop_total.toLocaleString()+(x.pop_growth_90d!=null?` <small>${pct(x.pop_growth_90d)} 90D</small>`:''),'All PSA-graded copies; growth over 90 days when known')}${cell('Gem rate',share(x.gem_rate),'PSA 10s as a share of PSA-graded copies')}${cell(langOf(c)==='en'?'Japanese copy':'English copy',gap,'Price of the verified '+(langOf(c)==='en'?'Japanese':'English')+' printing against this one, same grade')}</div>`;
+ const stats=`<div class="metric-grid">${cell('Guide',money(x.price),'PriceCharting guide for this grade, read '+date(x.as_of))}${cell('From peak',retCell(x.drawdown),'Below the highest guide price on record')}${cell('Volatility',x.volatility==null?'—':Math.round(x.volatility*100)+'%','Annualised, from month-end guide prices')}${cell('Sales 30D / 90D',x.sales_30d==null?'—':x.sales_30d+' / '+x.sales_90d,'Matching sales in the 30 and 90 days before the card was last read')}${cell('Last sale',x.days_since_sale==null?'—':x.days_since_sale+' d ago')}${cell('vs peers',times(x.premium),'Guide price over the median of same-era, same-rarity cards')}${cell('PSA 10 / PSA 9',times(x.spread_10_9))}${cell('PSA 10 / raw',times(x.spread_10_raw))}${cell('PSA graded',x.pop_total==null?'—':x.pop_total.toLocaleString()+(x.pop_growth_90d!=null?` <small>${pct(x.pop_growth_90d)} 90D</small>`:''),'All PSA-graded copies; growth over 90 days when known')}${cell('Gem rate',share(x.gem_rate),'PSA 10s as a share of PSA-graded copies')}${cell('Beta to era',x.beta==null?'—':x.beta.toFixed(2),'How much the card\'s guide moved for each 1% move in its era\'s typical card, month to month over 2 years')}${cell('Correlation',x.correl==null?'—':x.correl.toFixed(2),'How closely its monthly changes follow its era index: 1 moves together, 0 unrelated')}${cell(langOf(c)==='en'?'Japanese copy':'English copy',gap,'Price of the verified '+(langOf(c)==='en'?'Japanese':'English')+' printing against this one, same grade')}</div>`;
  const rets=`<div class="ret-strip">${RET_KEYS.map(([k,l])=>`<div><small>${l}</small>${retCell(x[k])}</div>`).join('')}</div>`;
  const order=['set','char','tier','artist','era'],idx=[...(d.indices||[])].filter(i=>i.grades?.[g]).sort((a,b)=>order.indexOf(a.kind)-order.indexOf(b.kind));
  const context=idx.length?`<div class="index-context"><h4>Its indices · ${shortGrade(g)}</h4>${idx.map(i=>{const r=i.grades[g];return `<button data-open-market="${esc(i.id)}"><span><small>${esc(KIND_LABEL[i.kind]||i.kind)}</small>${esc(i.name)}</span>${i.kind==='char'&&r.premium!=null?`<span class="ctx-demand" title="Demand premium">${times(r.premium)}</span>`:'<span class="ctx-demand"></span>'}<span>${retCell(retOf(r,'ret_30d'))}<small>30D</small></span><span>${retCell(retOf(r,'ret_1y'))}<small>1Y</small></span></button>`;}).join('')}</div>`:'';
  // Selling today: the sold median (or guide) less the fees and shipping set in Price check's cost assumptions.
  const sale=analyze(m,g).fair??x.price,costs=userCosts(),net=netProceeds(sale,costs);
- const sell=sale>0?`<div class="sell-side"><h4>If you sold today</h4><p><span>${money(sale)} ${analyze(m,g).fair?'sold median':'guide'}</span><span>− ${money(saleFee(sale,costs)+(costs.shippingOut||0)+(costs.holdingCost||0))} fees &amp; shipping</span><b>= ${money(net)} to you</b></p><p class="score-note">${esc(costs.label)}. Change these under Price check's cost assumptions.</p></div>`:'';
+ const sell=sale>0?`<div class="sell-side"><h4>If you sold today</h4><p><span>${money(sale)} ${analyze(m,g).fair?'sold median':'guide'}</span><span>− ${money(saleFee(sale,costs)+(costs.shippingOut||0)+(costs.holdingCost||0))} fees &amp; shipping</span><b>= ${money(net)} to you</b></p>${presetPicker()}<p class="score-note">${esc(costs.label)}${costs.preset?'':'. Fees vary by marketplace'}. Shipping and other costs are under Price check's cost assumptions.</p></div>`:'';
  return `<div class="detail-section card-metrics"><div class="section-heading"><h3>Market metrics</h3><small>${shortGrade(g)} · guide prices · ${date(x.as_of)}</small></div>${rets}${range}${stats}${context}${sell}${g==='raw'?gradingView(c,m,d.grades):''}</div>`;
+}
+// Live listings: how many copies are for sale now and the cheapest against fair value (sold median, or the
+// guide). Checked on request because each check is one eBay or SerpApi call.
+function listingsSection(c){
+ const g=viewGrade(),key=c.id+'|'+g,l=state.listings[key];
+ const head=`<div class="section-heading"><h3>Live listings</h3><small>${shortGrade(g)}${l?.data?' · checked '+new Date(l.data.checked_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):''}</small></div>`;
+ const button=`<button class="button" id="check-listings" ${l?.loading?'disabled':''}>${icon('refresh')} ${l?.loading?'Checking…':l?.data?'Check again':'Check live listings'}</button>`;
+ if(!l||l.loading)return `<div class="detail-section live-listings">${head}<p class="sales-note">Active copies on eBay and the cheapest against fair value. Uses one search from your eBay or SerpApi key (set under Alerts).</p>${button}</div>`;
+ if(l.error)return `<div class="detail-section live-listings">${head}<p class="sales-note">${esc(l.error)}${l.setup?' <button class="link-button" id="listings-setup">Alert settings</button>':''}</p>${button}</div>`;
+ const d=l.data,f=d.fair,tag=v=>v==null?'':`<span class="deal-tag ${v<=-.1?'good':v<0?'ok':'over'}">${v<0?Math.round(-v*100)+'% below':Math.round(v*100)+'% above'} fair</span>`;
+ const rows=d.listings.slice(0,6).map(x=>`<a class="listing-row" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer"><span class="listing-title">${esc(x.title)}</span><small>${esc(x.buying_option)}${x.shipping?' · '+money(x.shipping)+' shipping':' · free shipping'}</small><b>${money(x.total)}</b>${tag(x.vs_fair)}</a>`).join('');
+ return `<div class="detail-section live-listings">${head}<div class="metric-grid"><div><small>Matching listings</small><b>${d.count}${d.count>=50?'+':''}</b></div><div><small>Cheapest</small><b>${d.lowest==null?'—':money(d.lowest)}</b></div><div title="${esc(f?.label||'')}"><small>Fair value</small><b>${f?money(f.value):'—'}</b><small>${f?esc(f.source):''}</small></div></div>${rows||'<p class="sales-note">No listing matched this exact card and grade.</p>'}<p class="sales-note">Totals include shipping. Titles are matched strictly to this card, number and grade; check each listing before buying.</p>${button}</div>`;
+}
+async function checkListings(c,force=false){
+ const g=viewGrade(),key=c.id+'|'+g;state.listings[key]={loading:true};renderDetail();
+ try{state.listings[key]={data:await send('/api/listings','POST',{card_id:c.id,grade:g,force})};}
+ catch(e){state.listings[key]={error:e.message,setup:/under Alerts/.test(e.message)};}
+ if(shownCard()?.id===c.id)renderDetail();
 }
 function wireCardMetrics(){
  const box=$('#detail');if(!box?.querySelectorAll)return;
  box.querySelectorAll('[data-open-market]').forEach(b=>b.onclick=()=>{const id=b.dataset.openMarket;state.view='market';state.market.tab=({char:'char',set:'set',tier:'tier',artist:'artist'})[id.split(':')[1]]||'overview';state.market.grade=viewGrade();state.marketLang=id.split(':')[0];state.market.index=id;updateView();openIndex(id);});
+ wirePresets(box);
+ const c=shownCard(),chk=box.querySelector('#check-listings');if(chk&&c)chk.onclick=()=>checkListings(c,!!state.listings[c.id+'|'+viewGrade()]?.data);
+ const setup=box.querySelector('#listings-setup');if(setup)setup.onclick=()=>{state.view='alerts';updateView();};
  box.querySelectorAll('[data-grading]').forEach(input=>input.onchange=()=>{const v=Number(input.value);if(!(v>=0&&v<=10000))return;state.grading={...(state.grading||savedGrading()),[input.dataset.grading]:v};try{localStorage.setItem(GRADING_KEY,JSON.stringify(state.grading));}catch{}renderDetail();});
 }
 function renderDetail(){
@@ -339,12 +455,12 @@ function renderDetail(){
  const top=`<div class="detail-top"><div class="detail-eyebrow"><span>CARD INSIGHT</span><span class="eyebrow-end"><span>${gradeNames[viewGrade()]}</span><button class="icon-button expand-button" id="detail-focus" aria-label="Expand card details" title="Expand (reading view)">${icon('expand')}</button></span></div><div class="detail-identity"><div class="detail-image-wrap"><img class="detail-image" src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="${esc(c.name)} ${c.numberLabel}"></div><div><h2>${esc(c.name)}</h2><p>${esc(c.setName)} · ${numberCaption(c)}<br>${esc(c.category)}</p><span class="type-pill">${esc(c.type)}</span>${mine.length?`<span class="type-pill owned-pill">In your Dex · ${mine.reduce((n,e)=>n+(e.quantity||1),0)}</span>`:''}</div></div></div>`;
  const buy=`<div class="buy-box ${target==null?'insufficient':''}"><div class="eyebrow">${w?.target!=null?'YOUR BUY TARGET':'SUGGESTED MAXIMUM PRICE'}</div><div class="buy-amount"><strong>${target==null?'Waiting for evidence':money(target)}</strong>${a.target!=null && w?.target==null?'<span class="discount-tag">15% below median</span>':''}</div><p>${w?.target!=null?'Your saved limit, before shipping and tax.':esc(a.reason)}</p></div>`;
  const metrics=`<div class="detail-metrics"><div><span class="metric-label">Current reference</span><strong>${money(a.current)}</strong><small>${esc(a.priceLabel)}</small>${viewGrade()==='psa9'&&a.guidePrice?`<small>Mixed Grade 9 guide: ${money(a.guidePrice)}</small>`:''}${a.sampleCount?`<span class="sample-badge">${a.sampleCount} matching sales</span>`:''}</div><div><span class="metric-label">Activity score</span><div class="demand-wrap"><strong>${a.score??'—'}</strong><em>/ 100</em></div><div class="demand-bar"><span style="width:${a.score??0}%"></span></div><small>Sales activity · ${conf.toLowerCase()}</small></div></div>`;
- const scoreHtml=`${scoreBox(c)}${researchBox(c)}`,marketHtml=marketSection(c,m);
+ const scoreHtml=`${scoreBox(c)}${researchBox(c)}`,marketHtml=marketSection(c,m)+listingsSection(c);
  const chartSec=`<div class="detail-chart"><div class="section-heading"><h3>Reported sales</h3><small>${gradeNames[viewGrade()]}</small></div><div class="trend-layout"><div>${chart(a,f,history)}</div><aside class="trend-projection" aria-label="Simple trend projection"><span>Simple trend projection</span>${projection.available?['1Y','2Y','3Y'].map((label,i)=>`<div><b>${label}</b><strong>${money(projection.values[i])}</strong></div>`).join(''):`<p>${esc(projection.historyReason&&/held-out/.test(projection.historyReason)?'No reliable trend: neither recent sales nor the monthly price history beat an unchanged price in a held-out test.':projection.historyReason&&/Needs 8 months/.test(projection.historyReason)&&/Needs 8 sale days/.test(projection.reason)?'Not enough history yet: needs 6+ months of sales or monthly source prices.':projection.reason)}</p>`}${pastChange(history)}</aside></div><p class="chart-caption">${a.usable.length} matching sales · ${a.windowDays} days · ${conf}${projection.available?` · ${signed(projection.annualIncrease)} / year trend`:''}</p><p class="sales-note">${projection.available&&projection.basis==='history'?`Projection applies the source's monthly ${viewGrade()==='psa9'?'Grade 9 (all graders) ':''}price trend over ${projection.months} months (${projection.annualRate>=0?'+':'−'}${Math.abs(Math.round(projection.annualRate*100))}% a year) to the sold median, because the source lists only recent sales. Held-out test: last ${projection.validation.months} months, ${Math.round(projection.validation.mape*100)}% average error (${Math.round(projection.validation.baselineMape*100)}% for unchanged prices). `:`Projection uses daily sold medians from the past year${projection.historyReason?'; the monthly source history was also checked':''}. ${projection.available?`Held-out test: ${Math.round(projection.validation.spanDays)} days, ${Math.round(projection.validation.mape*100)}% average error (${Math.round(projection.validation.baselineMape*100)}% for unchanged prices). `:''}`}The 1–3 year extrapolation is illustrative; its future accuracy is unverified. This is not investment advice.</p></div>`;
  const actions=`<div class="detail-actions"><button class="button primary" id="detail-watch">${w?icon('star-fill')+' Watching':icon('star')+' Add to watchlist'}</button><button class="button" id="detail-dex" aria-label="Add ${esc(c.name)} to your Dex">${icon('plus')} Dex</button><button class="button" id="refresh-card" aria-label="Refresh this card">${icon('refresh')}</button></div>`;
  const limitSec=`${w?`<div class="detail-section"><h3>Your buy limit</h3><form id="target-form" class="target-form"><label for="custom-target">Maximum price (USD)<input id="custom-target" type="number" min="0.01" max="1000000" step="0.01" value="${w.target??a.target??''}" placeholder="Set a price" required></label><button class="button" type="submit">Save</button></form><button id="reset-target" class="remove-watch">Use suggested target</button><p class="sales-note">Alerts fire when this card is listed at or under ${target!=null?money(target):'your limit'} including shipping. <button class="link-button" id="open-alerts">Alert settings</button></p></div>`:''}`;
  const salesSec=`<div class="detail-section sales"><div class="section-heading"><h3>Recent sales</h3><small>${loading?'Loading…':a.all.length+' observed'}</small></div>${a.all.length?a.all.slice(0,f?24:8).map(s=>`<div class="sale-row"><span>${date(s.date)}</span><a href="${esc(s.source||c.source)}" target="_blank" rel="noopener noreferrer">${esc(s.marketplace||'Source')}${viewGrade()==='raw'?' · '+esc(s.condition):''}</a><strong>${money(s.price)}</strong>${s.title?`<span class="sale-title">${esc(s.title)}</span>`:''}</div>`).join(''):'<p class="sales-note">No matching sales loaded for this grade. Refresh or check the source.</p>'}<p class="sales-note">${viewGrade()==='raw'?'Raw conditions are shown as reported; only NM enters targets. ':'PSA sales are kept separate from other graders. '}${a.all.length?'Reported by PriceCharting.':'Targets use reported matching sales.'}${a.excluded?' '+a.excluded+' outliers excluded from targets.':''}</p></div>`;
- const historySec=`${loading?'':historyChart(m,viewGrade(),f)}`;
+ const historySec=`${loading?'':cardChartSection(c,m)}`;
  const researchSec=`<div class="detail-section research"><h3>Sales coverage</h3>${c.printing?`<p>English · ${esc(c.printing)}. Sales must match this printing; other variants have separate values.</p>`:''}${c.modern&&!c.sourceVerified?'<p>Exact product source not verified; prices and scores are withheld.</p>':''}${c.japanese?`<p>Japanese printing${c.pcName?' · price-guide product “'+esc(c.pcName)+'”':''}. Only Japanese listings count, and it is scored and ranked against Japanese cards only.</p>`:''}<p>${['raw','psa9','psa10'].map(g=>gradeNames[g]+': '+analyze(m,g).comparable.length+' matching sales').join(' · ')}</p>${popLine(m)}<p>${m?.research?.status==='full'?'Read from the full source page'+(m.research.checkedAt?' on '+new Date(m.research.checkedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'')+'. Listings with other graders, wrong numbers or variants are left out. This is a source-page snapshot, not complete eBay sales history.':m?.research?.status==='unavailable'?'The public source could not be retrieved. Saved guides keep their original date.':'Coverage reflects the public sales retrieved, and can be incomplete. Targets use only matching recent sales.'}</p></div>`;
  const scenarioSec=`<div class="detail-section scenarios"><h3>Five-year scenarios <span class="muted">· 2031</span></h3><div class="scenario-grid">${['Bear','Steady','Strong'].map((label,i)=>`<div><span>${label}</span><strong>${forecasts[i]}</strong><small>${['−7%','+5%','+12%'][i]} / year</small></div>`).join('')}</div><p class="sales-note">Illustrative scenarios, using the ${comparison} comparable median. Not a backtested forecast.</p></div>`;
  const footer=`<button class="mobile-expand" id="expand-details">${state.expanded?'Show fewer details':'See sales & five-year scenarios'}</button><div class="source-line"><span>${(referenceSource?.observedAt||m?.observedAt)?'Checked '+new Date(referenceSource?.observedAt||m.observedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'Price data not yet loaded'}</span><a href="${esc(referenceSource?.url||m?.sourceUrl||c.source)}" target="_blank" rel="noopener noreferrer">${referenceSource?.name?esc(referenceSource.name)+' · ':m?.source?esc(m.source)+' · ':''}View source</a></div>`;
@@ -375,7 +491,7 @@ function renderDetail(){
  if($('#score-method'))$('#score-method').onclick=()=>$('#method-dialog').showModal();
  if($('#score-retry'))$('#score-retry').onclick=()=>{state.scoreError=null;renderDetail();loadScores();};
  if(w){$('#target-form').onsubmit=e=>{e.preventDefault();saveTarget(c.id,Number($('#custom-target').value));};$('#reset-target').onclick=()=>saveTarget(c.id,null);$('#open-alerts').onclick=()=>{state.view='alerts';updateView();};}
- wireResearch(c);wireCardMetrics();wireImages();wireCharts($('#detail'));
+ wireResearch(c);wireCardMetrics();wireCardChart();wireImages();wireCharts($('#detail'));
  if(f){const again=keep&&document.getElementById?.(keep);(again||$('#focus-close'))?.focus?.();}
 }
 // Reading view: the card panel expanded over the page, with grade tabs and previous/next.
@@ -969,6 +1085,13 @@ async function loadLifecycle(era){
  try{const r=await request('/api/lifecycle?lang='+state.marketLang+'&grade='+state.market.grade+'&era='+era);r._at=Date.now();state.market.data[key]=r;}catch(e){state.market.data[key]={_at:Date.now(),curves:[],typical:[],error:e.message};}
  if(state.view==='market'&&state.market.tab==='set')renderMarket();
 }
+// Extra Pokémon views, each loaded once per language and grade: money flow, undervalued cards, and the
+// other language's character indices for English vs Japanese demand.
+async function loadMarketExtra(name,path){
+ const key=marketKey(name);if(state.market.data[key])return;state.market.data[key]={loading:true};
+ try{const r=await request(path);r._at=Date.now();state.market.data[key]=r;}catch(e){state.market.data[key]={error:e.message,_at:Date.now()};}
+ if(state.view==='market')renderMarket();
+}
 function openIndex(id){state.market.index=id;state.market.memberSort={key:'price',dir:-1};renderMarket();loadIndex(id);$("#market-view").scrollTop=0;globalThis.scrollTo?.(0,0);}
 const KIND_LABEL={all:'Market',top100:'Top 100',era:'Era',set:'Set',char:'Pokémon',tier:'Rarity tier',artist:'Artist'};
 // Sortable tables: columns are [key, label, render(row), {num, title}].
@@ -1065,10 +1188,58 @@ function indexTableView(kind,d){
   const big=rows.filter(r=>r.priced>=8&&r.demand_change!=null),up=sortRows(big,{key:'demand_change',dir:-1}).slice(0,5),down=sortRows(big,{key:'demand_change',dir:1}).slice(0,5);
   const list=(title,items)=>`<section class="panel demand-panel"><div class="panel-head"><div><h2>${title}</h2><p>Pokémon with 8+ priced cards, by change in demand premium over a year.</p></div></div><ol class="tier-list">${items.map(i=>`<li><button data-index="${esc(i.index_id)}"><span>${esc(i.name)}</span><small>${times(i.premium_1y)} → ${times(i.premium)}</small>${sparkSvg(i.spark)}${retCell(i.demand_change)}</button></li>`).join('')||'<li class="sales-note">Not enough history yet.</li>'}</ol></section>`;
   extra=`<div class="market-grid">${list('Rising demand',up)}${list('Fading demand',down)}</div>`;
+  const views=[['board','Leaderboard'],['flow','Money flow'],['cheap','Undervalued'],['lang','English vs Japanese']];
+  const pick=`<nav class="market-tabs sub-tabs" aria-label="Pokémon views">${views.map(([k,l])=>`<button data-char-view="${k}" class="${m.charView===k?'active':''}" aria-pressed="${m.charView===k}">${l}</button>`).join('')}</nav>`;
+  if(m.charView==='flow')return pick+flowView();
+  if(m.charView==='cheap')return pick+undervaluedView();
+  if(m.charView==='lang')return pick+langDemandView(d);
+  extra=pick+extra;
  }
  if(kind==='set')extra=lifecycleView();
  const filters=`<div class="table-tools"><input type="search" id="m-query" placeholder="Search ${kind==='char'?'Pokémon':kind==='set'?'sets':kind==='tier'?'tiers':'artists'}" value="${esc(m.query)}" aria-label="Search">${kind==='char'||kind==='artist'?`<label>At least <select id="m-min">${[3,5,8,15,30].map(n=>`<option value="${n}" ${m.minCards===n?'selected':''}>${n} cards</option>`).join('')}</select></label>`:''}<span class="muted">${sorted.length.toLocaleString()} shown</span></div>`;
  return `${extra}<section class="panel"><div class="panel-head"><div><h2>${esc(MARKET_TABS.find(t=>t[0]===kind)[1])}</h2><p>${esc(intro)}</p></div></div>${filters}${marketTable(sorted.slice(0,m.limit),indexColumns(kind),sort,{id:'m-table',rowAttr:r=>`data-open-index="${esc(r.index_id)}"`})}${sorted.length>m.limit?`<button class="button show-more" id="m-more">Show more</button>`:''}</section>`;
+}
+const loadingBox=t=>`<div class="loading"><span class="spinner"></span>${t}</div>`;
+// Money flow: each Pokémon's share of the market's matching sales value per month.
+function flowView(){
+ const m=state.market,d=m.data[marketKey('flow')];
+ if(!d)loadMarketExtra('flow','/api/flows?kind=char&lang='+state.marketLang+'&grade='+m.grade);
+ if(!d||d.loading)return loadingBox('Loading money flow…');
+ if(d.error)return `<div class="panel empty-state"><strong>Money flow couldn't be loaded.</strong><p>${esc(d.error)}</p></div>`;
+ const months=d.market.map(r=>r[0]),last=months.slice(-4,-1),prior=months.slice(-7,-4);
+ const shareOver=(rows,list)=>{const v=rows.filter(r=>list.includes(r[0])).reduce((n,r)=>n+r[2],0),t=d.market.filter(r=>list.includes(r[0])).reduce((n,r)=>n+r[2],0);return t>0?v/t:null;};
+ const rows=d.indices.map(i=>({...i,index_id:i.id,share:shareOver(i.rows,last),before:shareOver(i.rows,prior),sales:i.rows.filter(r=>last.includes(r[0])).reduce((n,r)=>n+r[1],0)})).map(r=>({...r,change:r.share!=null&&r.before>0?r.share/r.before-1:null}));
+ const palette=[C.accent,'var(--info)','var(--warn)','#c07cff','#ff8fb8','#7dd3fc'];
+ const top=rows.slice(0,6),series=top.map((r,i)=>({label:r.name,color:palette[i],points:months.slice(0,-1).map(ym=>{const x=r.rows.find(q=>q[0]===ym);return [ym,x?.[3]!=null?x[3]*100:0,monthLabel(ym)];})}));
+ const chart=months.length>2?lineChart({series,height:230,width:820,label:'Share of sales value by Pokémon',format:v=>v.toFixed(1)+'%',tick:v=>v.toFixed(0)+'%'}):'<div class="chart-empty">Not enough months yet.</div>';
+ const thin=d.market.filter(r=>r[3]<d.market.at(-1)[3]*.5).map(r=>r[0]);
+ const sort=m.sorts.flow||(m.sorts.flow={key:'share',dir:-1});
+ const cols=[['name','Pokémon',r=>`<b>${esc(r.name)}</b>`],['share','Share, last 3 mo',r=>share(r.share),{num:true,title:'Share of the market\'s matching sales value in the last three whole months'}],['before','3 months before',r=>share(r.before),{num:true}],['change','Change',r=>retCell(r.change),{num:true}],['recent','Sales value',r=>bigMoney(r.recent),{num:true}],['sales','Sales',r=>r.sales.toLocaleString(),{num:true}]];
+ return `<section class="panel"><div class="panel-head"><div><h2>Money flow</h2><p>Each Pokémon's share of all matching ${shortGrade(m.grade)} sales value per month: where collectors are spending. The current month is left out until it ends.</p></div></div><div class="panel-sub">${chart}</div>${marketTable(sortRows(rows,sort),cols,sort,{id:'m-flow',rowAttr:r=>`data-open-index="${esc(r.index_id)}"`})}<p class="sales-note">Counted from each card's page, which lists only its ~30 most recent sales, so a busy card counts only from the first whole month after its oldest listed sale${thin.length?`; ${thin.map(monthLabel).join(', ')} rest on fewer than half the cards and are less reliable`:''}. Sales are matched to the exact card and grade.</p></section>`;
+}
+// Cards of in-demand Pokémon that sell well under their Pokémon's usual premium.
+function undervaluedView(){
+ const m=state.market,d=m.data[marketKey('cheap')];
+ if(!d)loadMarketExtra('cheap','/api/undervalued?lang='+state.marketLang+'&grade='+m.grade);
+ if(!d||d.loading)return loadingBox('Finding undervalued cards…');
+ if(d.error)return `<div class="panel empty-state"><strong>The list couldn't be loaded.</strong><p>${esc(d.error)}</p></div>`;
+ const sort=m.sorts.cheap||(m.sorts.cheap={key:'ratio',dir:1}),r0=d.rules;
+ const cols=[['name','Card',r=>{const c=cardById(r.card_id);return c?`<span class="member-card"><img src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><b>${esc(c.name)}</b><small>${esc(c.setName)} · ${numberCaption(c)}</small></span></span>`:esc(r.card_id);}],['character','Pokémon',r=>esc(r.character)],['demand','Its demand',r=>times(r.demand),{num:true,title:'How many times more this Pokémon\'s cards sell for than same-era, same-rarity cards'}],['premium','This card',r=>times(r.premium),{num:true,title:'This card\'s price over same-era, same-rarity cards'}],['ratio','Share of demand',r=>share(r.ratio),{num:true,title:'This card\'s premium as a share of its Pokémon\'s'}],['price','Price',r=>money(r.price),{num:true}],['ret_1y','1Y',r=>retCell(r.ret_1y),{num:true}],['sales_90d','Sales 90D',r=>r.sales_90d??'—',{num:true}]];
+ const rows=sortRows(d.rows.map(r=>({...r,name:cardById(r.card_id)?.name||r.card_id})),sort);
+ return `<section class="panel"><div class="panel-head"><div><h2>Undervalued cards of in-demand Pokémon</h2><p>Pokémon whose cards sell at ${r0.minDemand}× or more over same-era, same-rarity cards (${r0.minCards}+ priced), and their cards priced at ${Math.round(r0.maxShare*100)}% or less of that premium, from $${r0.minPrice}. A card can be cheap for a reason (weaker art, a big print run), so look into each one.</p></div></div>${rows.length?marketTable(rows.slice(0,m.limit),cols,sort,{id:'m-cheap',rowAttr:r=>`data-card="${esc(r.card_id)}"`}):'<p class="sales-note">No card qualifies for this language and grade.</p>'}</section>`;
+}
+// Demand for each Pokémon in English and Japanese cards side by side.
+function langDemandView(d){
+ const m=state.market,other=state.marketLang==='en'?'ja':'en',key=[other,m.grade,'char'].join('|'),o=m.data[key];
+ if(!o){m.data[key]={loading:true};request('/api/indices?kind=char&lang='+other+'&grade='+m.grade).then(r=>{r._at=Date.now();m.data[key]=r;},e=>{m.data[key]={error:e.message};}).finally(()=>{if(state.view==='market')renderMarket();});}
+ if(!o||o.loading)return loadingBox('Loading the other language…');
+ if(o.error)return `<div class="panel empty-state"><strong>Couldn't load ${other==='ja'?'Japanese':'English'} demand.</strong><p>${esc(o.error)}</p></div>`;
+ const here=new Map(d.rows.filter(r=>r.priced>=m.minCards).map(r=>[r.key,r])),there=new Map(o.rows.filter(r=>r.priced>=m.minCards).map(r=>[r.key,r]));
+ const en=state.marketLang==='en'?here:there,ja=state.marketLang==='en'?there:here;
+ const rows=[...en.keys()].filter(k=>ja.has(k)).map(k=>({key:k,name:k,index_id:state.marketLang+':char:'+k,en:en.get(k).premium,ja:ja.get(k).premium,en_cards:en.get(k).priced,ja_cards:ja.get(k).priced,en_1y:en.get(k).premium_1y,ja_1y:ja.get(k).premium_1y})).map(r=>({...r,gap:r.en>0&&r.ja>0?r.ja/r.en:null}));
+ const sort=m.sorts.lang||(m.sorts.lang={key:'gap',dir:-1});
+ const cols=[['name','Pokémon',r=>`<b>${esc(r.name)}</b>`],['en','English demand',r=>times(r.en),{num:true}],['ja','Japanese demand',r=>times(r.ja),{num:true}],['gap','Japanese ÷ English',r=>times(r.gap),{num:true,title:'Above 1×: Japanese collectors pay relatively more for this Pokémon'}],['en_cards','EN cards',r=>r.en_cards,{num:true}],['ja_cards','JA cards',r=>r.ja_cards,{num:true}]];
+ return `<section class="panel"><div class="panel-head"><div><h2>English vs Japanese demand</h2><p>Each Pokémon's demand premium among English cards and among Japanese cards (${m.minCards}+ priced in each). Each language is measured against its own peers, so the two are comparable as multiples. A Pokémon in much higher demand in one language can be a signal for the other.</p></div><label>At least <select id="m-min">${[3,5,8,15,30].map(n=>`<option value="${n}" ${m.minCards===n?'selected':''}>${n} cards</option>`).join('')}</select></label></div>${rows.length?marketTable(sortRows(rows,sort).slice(0,m.limit),cols,sort,{id:'m-lang',rowAttr:r=>`data-open-index="${esc(r.index_id)}"`}):'<p class="sales-note">No Pokémon has enough priced cards in both languages.</p>'}</section>`;
 }
 // Sets of one era on the same clock: each set's index by months since release, against the era's median path.
 function lifecycleView(){
@@ -1092,6 +1263,10 @@ function lifecycleView(){
 function wireIndexTable(view,kind){
  const m=state.market;
  wireTable(view,'m-table',m.sorts[kind],renderMarket,tr=>openIndex(tr.dataset.openIndex));
+ view.querySelectorAll('[data-char-view]').forEach(b=>b.onclick=()=>{m.charView=b.dataset.charView;renderMarket();});
+ wireTable(view,'m-flow',m.sorts.flow,renderMarket,tr=>openIndex(tr.dataset.openIndex));
+ wireTable(view,'m-lang',m.sorts.lang,renderMarket,tr=>openIndex(tr.dataset.openIndex));
+ wireTable(view,'m-cheap',m.sorts.cheap,renderMarket,tr=>openCard(tr.dataset.card,m.grade));
  const q=view.querySelector('#m-query');if(q)q.oninput=()=>{m.query=q.value;const pos=q.selectionStart;renderMarket();const again=$('#m-query');again.focus();again.setSelectionRange?.(pos,pos);};
  const min=view.querySelector('#m-min');if(min)min.onchange=()=>{m.minCards=Number(min.value);renderMarket();};
  const more=view.querySelector('#m-more');if(more)more.onclick=()=>{m.limit+=100;renderMarket();};
@@ -1117,12 +1292,26 @@ function renderIndexPage(view){
  const ranges=`<div class="segmented" role="group" aria-label="Range">${[['6m','6M'],['1y','1Y'],['3y','3Y'],['all','All']].map(([k,l])=>`<button data-m-range="${k}" class="${range===k?'active':''}" aria-pressed="${range===k}">${l}</button>`).join('')}</div>`;
  const sort=m.memberSort,cols=[['name','Card',r=>{const c=cardById(r.card_id);return c?`<span class="member-card"><img src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><b>${esc(c.name)}</b><small>${esc(c.setName)} · ${numberCaption(c)}</small></span></span>`:esc(r.card_id);}],['price','Price',r=>money(r.price),{num:true}],['ret_30d','30D',r=>retCell(r.ret_30d),{num:true}],['ret_1y','1Y',r=>retCell(r.ret_1y),{num:true}],['premium','vs peers',r=>times(r.premium),{num:true,title:'Price over the median of same-era, same-rarity cards'}],['sales_90d','Sales 90D',r=>r.sales_90d??'—',{num:true}],['days_since_sale','Last sale',r=>r.days_since_sale==null?'—':r.days_since_sale+' d',{num:true}]];
  const members=sortRows(d.members.map(r=>({...r,name:cardById(r.card_id)?.name||r.card_id})),sort);
- view.innerHTML=marketHead()+back+`<section class="panel index-page"><div class="panel-head"><div><span class="index-kind">${esc(KIND_LABEL[kind]||kind)} · ${shortGrade(m.grade)}</span><h2>${esc(d.name)}</h2><p>Level ${x.level.toFixed(1)} (value-weighted, from 100 at its start) · as of ${date(x.as_of)}</p></div>${ranges}</div>${stats}<div class="panel-sub index-chart">${chart}</div>${premChart}</section>
+ const carry=kind==='char'||kind==='artist'?premiumSources(d):'';
+ view.innerHTML=marketHead()+back+`<section class="panel index-page"><div class="panel-head"><div><span class="index-kind">${esc(KIND_LABEL[kind]||kind)} · ${shortGrade(m.grade)}</span><h2>${esc(d.name)}</h2><p>Level ${x.level.toFixed(1)} (value-weighted, from 100 at its start) · as of ${date(x.as_of)}</p></div>${ranges}</div>${stats}<div class="panel-sub index-chart">${chart}</div>${premChart}</section>${carry}
   <section class="panel"><div class="panel-head"><div><h2>Cards</h2><p>${members.length.toLocaleString()} cards · select one to open it.</p></div></div>${marketTable(members.slice(0,m.memberLimit),cols,sort,{id:'m-members',rowAttr:r=>`data-card="${esc(r.card_id)}"`})}${members.length>m.memberLimit?`<button class="button show-more" id="m-more-members">Show more</button>`:''}</section>`;
  wireMarket(view);
  view.querySelectorAll('[data-m-range]').forEach(b=>b.onclick=()=>{m.range=b.dataset.mRange;renderMarket();});
  wireTable(view,'m-members',sort,renderMarket,tr=>openCard(tr.dataset.card,m.grade));
+ view.querySelectorAll('.entry-card').forEach(b=>b.onclick=()=>openCard(b.dataset.card,m.grade));
  const more=view.querySelector('#m-more-members');if(more)more.onclick=()=>{m.memberLimit+=100;renderMarket();};
+}
+// For a Pokémon (or artist): which eras, sets and rarity tiers carry its premium, and the cheapest way in.
+function premiumSources(d){
+ const priced=d.members.filter(r=>r.price>0),med=xs=>{const v=xs.filter(x=>x!=null).sort((a,b)=>a-b);return v.length?v[Math.floor(v.length/2)]:null;};
+ if(priced.length<3)return '';
+ const group=(label,keyOf,nameOf,limit)=>{const g=new Map();for(const r of priced){const k=keyOf(r);if(k==null)continue;(g.get(k)||g.set(k,[]).get(k)).push(r);}
+  const rows=[...g].map(([k,list])=>({name:nameOf(k),n:list.length,prem:med(list.map(r=>r.premium)),price:med(list.map(r=>r.price)),value:list.reduce((n,r)=>n+r.price,0)})).filter(r=>r.prem!=null).sort((a,b)=>b.prem-a.prem).slice(0,limit);
+  return rows.length?`<div class="carry-group"><h3>${label}</h3><table class="market-table compact"><thead><tr><th></th><th class="num">Cards</th><th class="num" title="Median price over same-era, same-rarity cards">vs peers</th><th class="num">Median</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.name)}</td><td class="num">${r.n}</td><td class="num">${times(r.prem)}</td><td class="num">${money(r.price)}</td></tr>`).join('')}</tbody></table></div>`:'';};
+ const era=group('By era',r=>cardById(r.card_id)?.series,k=>state.series.find(x=>x.id===k)?.name||k,9),set=group('By set',r=>cardById(r.card_id)?.setId,k=>state.sets.find(x=>x.id===k)?.name||k,8),tier=group('By rarity tier',r=>r.tier,k=>d.tiers?.[k]||k,8);
+ const liquid=priced.filter(r=>r.sales_90d>0).sort((a,b)=>a.price-b.price)[0],cheapest=[...priced].sort((a,b)=>a.price-b.price)[0],entry=liquid||cheapest,c=entry&&cardById(entry.card_id);
+ const entryHtml=c?`<button class="entry-card" data-card="${esc(entry.card_id)}"><img src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><small>Entry point${liquid?' · cheapest with sales in 90 days':' · cheapest priced'}</small><b>${esc(c.name)}</b><small>${esc(c.setName)} · ${numberCaption(c)}</small></span><strong>${money(entry.price)}</strong></button>`:'';
+ return `<section class="panel"><div class="panel-head"><div><h2>Where the premium comes from</h2><p>Median premium over same-era, same-rarity cards by era, set and rarity tier, among ${priced.length} priced ${shortGrade(state.market.grade)} cards.</p></div></div>${entryHtml}<div class="carry-grid">${era}${tier}${set}</div></section>`;
 }
 // Starts a guide sweep (every set listing) and follows it; metrics are rebuilt when it ends.
 async function startSweep(){

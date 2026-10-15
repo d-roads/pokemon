@@ -28,6 +28,9 @@ export const METRIC_RULES={
  months:120,
  volMonths:12,minVolMonths:6,
  salesMaxAge:45,     // sales windows need a full page read this recently
+ flowMonths:12,      // money flow: sales value per month for this many months before the current one
+ listCap:25,         // a card page lists about 30 recent sales; a list this long may be missing older months
+ trackMonths:24,minTrackMonths:8, // beta and correlation with the era index: monthly changes over 2 years
 };
 export const RETURN_DAYS=[1,7,30,90,365];
 const MET_DAY=86400000;
@@ -135,9 +138,23 @@ export function cardFacts(card,market,daily,pops,today,rules=METRIC_RULES){
    sold:a?.fair??null,soldSales:a?.sampleCount??0,
    sales30:fresh?inWindow(30).length:null,sales90:fresh?inWindow(90).length:null,value90:fresh?inWindow(90).reduce((n,s)=>n+s.price,0):null,
    daysSinceSale:sales.length?today-dayNum(sales[0].date):null,
+   flows:metFlows(sales,today,rules),
   };
  }
  return {grades:out,popTotal,pop10:Array.isArray(psa)?psa[9]||0:null,gemRate:popTotal?(psa[9]||0)/popTotal:null,popGrowth};
+}
+
+// Sales count and value per month for money flow. A card page lists only its most recent sales, so a long
+// list counts only from the first whole month after its oldest sale; `from` is that month.
+const metYm=t=>dayStr(t).slice(0,7);
+export function flowMonths(today,rules=METRIC_RULES){const d=new Date(today*MET_DAY),out=[];for(let k=rules.flowMonths;k>=0;k--)out.push(new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()-k,1)).toISOString().slice(0,7));return out;}
+function metFlows(sales,today,rules){
+ if(!sales.length)return {from:'',months:null};
+ let from='';
+ if(sales.length>=rules.listCap){const oldest=sales.at(-1).date,[y,m]=oldest.split('-').map(Number);from=new Date(Date.UTC(y,m,1)).toISOString().slice(0,7);}
+ const first=flowMonths(today,rules)[0],months=new Map();
+ for(const x of sales){const ym=x.date.slice(0,7);if(ym<first||ym<from||x.date>dayStr(today))continue;const v=months.get(ym)||[0,0];v[0]++;v[1]+=x.price;months.set(ym,v);}
+ return {from,months};
 }
 
 // ---------- Dates ----------
@@ -159,7 +176,7 @@ export async function buildMetrics(catalog,facts,today,rules=METRIC_RULES,{pause
  const tick=metTicker(pause);
  const byId=new Map(catalog.map(c=>[c.id,c])),dates=indexDates(today,rules),D=dates.length,at=new Map(dates.map((d,i)=>[d,i])),days=dates.map(dayStr);
  const members=[...facts.keys()].map(id=>byId.get(id)).filter(c=>c?.eligible);
- const cardRows=[],indexRows=[],historyRows=[];
+ const cardRows=[],indexRows=[],historyRows=[],flowRows=[],fMonths=flowMonths(today,rules);
  for(const g of METRIC_GRADES){
   // Marks on every index date.
   const marks=new Map();
@@ -196,7 +213,7 @@ export async function buildMetrics(catalog,facts,today,rules=METRIC_RULES,{pause
   for(const c of members)for(const id of indexKeysOf(c,byId))(byIndex.get(id)||byIndex.set(id,[]).get(id)).push(c);
   // Top 100: today's most valuable cards per language (membership is today's, so its history flatters).
   for(const lang of ['en','ja']){const top=members.filter(c=>metLang(c)===lang&&marks.get(c.id)?.[last]>0).sort((a,b)=>marks.get(b.id)[last]-marks.get(a.id)[last]).slice(0,100);if(top.length)byIndex.set(lang+':top100:top100',top);}
-  const cardRet=new Map(cardRows.filter(r=>r.grade===g).map(r=>[r.card_id,r]));
+  const cardRet=new Map(cardRows.filter(r=>r.grade===g).map(r=>[r.card_id,r])),eraLevels=new Map();
   for(const [id,list] of byIndex){
    await tick();
    const rowsOf=list.map(c=>marks.get(c.id)).filter(Boolean);if(!rowsOf.length)continue;
@@ -213,6 +230,9 @@ export async function buildMetrics(catalog,facts,today,rules=METRIC_RULES,{pause
    const premRows=list.map(c=>logPremium.get(c.id)).filter(Boolean);
    for(let i=0;i<D;i++){let s=0,n=0;for(const r of premRows)if(Number.isFinite(r[i])){s+=r[i];n++;}if(n)prem[i]=Math.exp(s/(n+rules.shrink));}
    for(let i=0;i<D;i++)if(level[i]>0)historyRows.push([id,g,days[i],metRound(level[i]),metRound(levelEq[i]),count[i],metRound(value[i]),metFin(prem[i])]);
+   // Money flow: matching sales per month across members whose page covers that month.
+   for(const ym of fMonths){let n=0,v=0,covered=0;for(const c of list){const f=facts.get(c.id).grades[g].flows;if(!f.months||ym<f.from)continue;covered++;const x=f.months.get(ym);if(x){n+=x[0];v+=x[1];}}if(covered)flowRows.push([id,g,ym,n,metRound(v),covered]);}
+   if(id.split(':')[1]==='era')eraLevels.set(id,levelEq);
    if(!(level[last]>0))continue;
    const lv=t=>{const i=at.get(t);return i!=null&&level[i]>0?level[i]:null;},eq=t=>{const i=at.get(t);return i!=null&&levelEq[i]>0?levelEq[i]:null;};
    const ret=(f,n)=>{const a=f(today),b=f(today-n);return a&&b?a/b-1:null;};
@@ -238,9 +258,25 @@ export async function buildMetrics(catalog,facts,today,rules=METRIC_RULES,{pause
     premium:metFin(prem[last]),premium_90d:metFin(prem[at.get(today-90)]),premium_1y:metFin(prem[at.get(today-365)]),
     gem_rate:popTotal?pops.reduce((a,f)=>a+(f.pop10||0),0)/popTotal:null});
   }
+  // How closely each card follows its era's typical card: beta and correlation of monthly changes.
+  const ends=metMonthEnds(today,rules.trackMonths).reverse().map(t=>at.get(t)).filter(i=>i!=null);
+  for(const c of members){
+   const row=marks.get(c.id),era=eraLevels.get(metLang(c)+':era:'+c.series),r=cardRet.get(c.id);if(!row||!era||!r)continue;
+   const t=metTracking(ends.map(i=>row[i]),ends.map(i=>era[i]),rules);r.beta=t.beta;r.correl=t.correl;
+  }
  }
- return {cardRows,indexRows,historyRows,dates:days};
+ return {cardRows,indexRows,historyRows,flowRows,dates:days};
 }
 const metRatio=(a,b)=>a>0&&b>0?a/b:null;
+// Beta and correlation of a card's month-to-month log changes against its index, over months where both
+// have a price at both ends. A card whose guide did not change for most months has no meaningful beta.
+export function metTracking(card,index,rules=METRIC_RULES){
+ const x=[],y=[];
+ for(let k=1;k<card.length;k++)if(card[k-1]>0&&card[k]>0&&index[k-1]>0&&index[k]>0){y.push(Math.log(card[k]/card[k-1]));x.push(Math.log(index[k]/index[k-1]));}
+ if(x.length<rules.minTrackMonths||y.filter(v=>v!==0).length<rules.minTrackMonths/2)return {beta:null,correl:null};
+ const mx=x.reduce((a,b)=>a+b,0)/x.length,my=y.reduce((a,b)=>a+b,0)/y.length;let sxy=0,sxx=0,syy=0;
+ for(let k=0;k<x.length;k++){sxy+=(x[k]-mx)*(y[k]-my);sxx+=(x[k]-mx)**2;syy+=(y[k]-my)**2;}
+ return {beta:sxx>0?metRound(sxy/sxx):null,correl:sxx>0&&syy>0?metRound(sxy/Math.sqrt(sxx*syy)):null};
+}
 const metRound=v=>Number.isFinite(v)?Math.round(v*10000)/10000:null;
 const metFin=v=>Number.isFinite(v)?v:null;

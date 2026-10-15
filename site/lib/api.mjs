@@ -9,7 +9,7 @@ import {topMovers,PERIODS} from './movers.mjs';
 import {potentialInvestments} from './invest.mjs';
 import {investmentScores} from './score.mjs';
 import {validateEntry} from './portfolio.mjs';
-import {DEFAULT_SETTINGS,normalizeSettings,updateSettings,publicSettings,hasListingAccess,runScan,sendNotifications,ebaySearchUrl,alertLimit} from './alerts.mjs';
+import {DEFAULT_SETTINGS,normalizeSettings,updateSettings,publicSettings,hasListingAccess,runScan,sendNotifications,ebaySearchUrl,alertLimit,liveListings} from './alerts.mjs';
 import {isPlainObject,oneOf,optionalPrice,boundedText,optionalText,shapeError} from './schema.mjs';
 import {reportError} from './report.mjs';
 import {analyze} from './analysis.mjs';
@@ -18,8 +18,8 @@ import {pacer,startJob,cancelJob,jobStatus} from './updater.mjs';
 import {investmentTable,investmentView,scoreMode,modelVersion,archiveScores,researchLanguages,mergeInvestmentTables} from './investment.mjs';
 import {DEFAULT_COSTS,maxBuyPrice,netReturn,COST_PROFILE_VERSION} from './investment-costs.mjs';
 import {parseJapaneseListing,matchJapaneseListing,listingGuide,numberOnlyAllowed,JA_MAP_VERSION} from './japanese.mjs';
-import {METRIC_GRADES,indexKeysOf,dayNum,dayStr} from './metrics.mjs';
-import {METRIC_TABLES,rebuildMetrics,rebuildState,lastRun,cardMetrics,indexList,indexDetail,indexName,cardMetricsFor,indexSparks,marketBreadth,setHistories,indexRowsFor} from './metrics-store.mjs';
+import {METRIC_GRADES,indexKeysOf,dayNum,dayStr,tierOf,charactersOfCard,TIER_LABEL} from './metrics.mjs';
+import {ensureMetricTables,cardHistory,indexLevels,indexFlows,rebuildMetrics,rebuildState,lastRun,cardMetrics,indexList,indexDetail,indexName,cardMetricsFor,indexSparks,marketBreadth,setHistories,indexRowsFor} from './metrics-store.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const cardById=new Map(cards.map(c=>[c.id,c]));
 const seriesIds=series.map(item=>item.id);
@@ -167,7 +167,7 @@ function ensureColumns(db){
   catch{for(const name of ['light','light_key'])await db.prepare(`ALTER TABLE market_cache ADD COLUMN ${name} TEXT`).run().catch(()=>{});}
   await db.prepare('CREATE TABLE IF NOT EXISTS set_sweeps (set_id TEXT PRIMARY KEY NOT NULL, swept_at TEXT NOT NULL, pages INTEGER, priced INTEGER, wanted INTEGER)').run();
   await db.prepare('CREATE TABLE IF NOT EXISTS nightly_runs (day TEXT PRIMARY KEY NOT NULL, started_at TEXT NOT NULL, finished_at TEXT, summary TEXT)').run();
-  for(const sql of METRIC_TABLES)await db.prepare(sql).run();
+  await ensureMetricTables(db);
   await db.prepare('CREATE TRIGGER IF NOT EXISTS market_cache_light AFTER UPDATE OF payload ON market_cache WHEN NEW.light_key IS OLD.light_key BEGIN UPDATE market_cache SET light = NULL, light_key = NULL WHERE card_id = NEW.card_id; END').run();
  })().catch(e=>{columnsReady.delete(db);throw e;}));
  return columnsReady.get(db);
@@ -415,10 +415,32 @@ function lifecycle(histories,lang,era){
  return {curves,typical};
 }
 // Cards in an index: from the catalog, except Top 100 which is today's most valuable cards.
+// Every index's member cards, worked out once from the catalog.
+let memberMap=null;
+function membersOf(id){
+ if(!memberMap){memberMap=new Map();for(const c of cards)if(c.eligible)for(const k of indexKeysOf(c,cardById))(memberMap.get(k)||memberMap.set(k,[]).get(k)).push(c.id);}
+ return memberMap.get(id)||[];
+}
 async function indexMembers(db,id,grade){
  const [lang,kind]=id.split(':');
  if(kind==='top100')return ((await db.prepare('SELECT card_id FROM card_metrics WHERE lang = ? AND grade = ? AND price > 0 ORDER BY price DESC LIMIT 100').bind(lang,grade).all()).results||[]).map(r=>r.card_id);
- return cards.filter(c=>c.eligible&&indexKeysOf(c,cardById).includes(id)).map(c=>c.id);
+ return membersOf(id);
+}
+// Cards of in-demand Pokémon that sell at well under their Pokémon's usual premium over peers: a Pokémon
+// whose cards sell at 3× peers, and one of its cards at 1.2×. Cheap for a reason is possible (weaker art,
+// a common reprint), so this is a list to look into, not a buy signal.
+export const UNDERVALUED_RULES={minDemand:1.5,minCards:5,maxShare:.5,minPrice:10};
+async function undervalued(db,{lang,grade}){
+ const R=UNDERVALUED_RULES,chars=new Map((await indexList(db,{lang,kind:'char',grade})).filter(r=>r.premium>=R.minDemand&&r.priced>=R.minCards).map(r=>[r.key,r]));
+ const rows=(await db.prepare('SELECT card_id,price,premium,ret_30d,ret_1y,sales_90d,days_since_sale FROM card_metrics WHERE lang = ? AND grade = ? AND price >= ? AND premium IS NOT NULL').bind(lang,grade,R.minPrice).all()).results||[];
+ const out=[];
+ for(const r of rows){
+  const card=cardById.get(r.card_id);if(!card)continue;
+  let best=null;for(const name of charactersOfCard(card)){const c=chars.get(name);if(c&&(!best||c.premium>best.premium))best=c;}
+  if(!best)continue;const ratio=r.premium/best.premium;
+  if(ratio<=R.maxShare)out.push({...r,character:best.key,index_id:best.index_id,demand:best.premium,demand_1y:best.premium_1y,ratio});
+ }
+ return out.sort((a,b)=>a.ratio-b.ratio).slice(0,150);
 }
 // ---------- Nightly ----------
 // Card pages (sales history and PSA population) are read on a schedule by tier; guide prices for every
@@ -463,6 +485,7 @@ export async function runNightly(env,{force=false}={}){
  await db.prepare('UPDATE nightly_runs SET finished_at = ?, summary = ? WHERE day = ?').bind(new Date().toISOString(),JSON.stringify(summary),day).run();
  return summary;
 }
+const listingCache=new Map();
 export async function fullMarket(db,id){return mergeMarket(snapshots[id],await cachedMarket(db,id))||null;}
 async function alertState(db,user){
  const settings=await readSettings(db,user);
@@ -547,6 +570,19 @@ export async function api(request,env,ctx){
    }else if(request.method!=='GET')return json({error:'Method not allowed.'},405);
    return json({settings:publicSettings(await readSettings(db,user))});
   }
+  if(path==='/api/listings'&&request.method==='POST'){
+   // Live listings for one card (active supply and a deal check against fair value). Each check is one
+   // provider call, so results are kept for 30 minutes per account.
+   let body;try{body=await input(request);}catch{return json({error:'The listings request was invalid.'},400);}
+   const card=cardById.get(body.card_id);if(!card||!['raw','psa9','psa10'].includes(body.grade))return json({error:'Choose a card and a supported grade.'},400);
+   const settings=await readSettings(db,user);
+   if(!hasListingAccess(settings))return json({error:'Add an eBay or SerpApi key under Alerts to check live listings.',setup:true},400);
+   if(env.NETWORK_DISABLED)return json({error:'Live listings are unavailable in this workspace.'},503);
+   const key=[user,card.id,body.grade,settings.provider].join('|'),hit=listingCache.get(key);
+   if(hit&&Date.now()-hit.at<1800000&&!body.force)return json({...hit.value,cached:true});
+   try{const value=await liveListings(card,body.grade,await fullMarket(db,card.id),settings,{fetchImpl:env.fetch||fetch});listingCache.set(key,{at:Date.now(),value});if(listingCache.size>500)listingCache.delete(listingCache.keys().next().value);return json(value);}
+   catch(e){return json({error:e.message},502);}
+  }
   if(path==='/api/alerts/scan'&&request.method==='POST'){
    const result=await scanForUser(env,user);
    return json({checked:result.checked,found:result.found.length,skipped:result.skipped,error:result.error,...await alertState(db,user)});
@@ -620,6 +656,12 @@ export async function api(request,env,ctx){
    const ids=indexKeysOf(card,cardById),rows=await indexRowsFor(db,ids);
    return json({card_id:card.id,grades:await cardMetrics(db,card.id),indices:ids.map(id=>({id,name:indexName(id,{sets,series}),kind:id.split(':')[1],grades:Object.fromEntries(rows.filter(r=>r.index_id===id).map(r=>[r.grade,r]))})),run:await lastRun(db)});
   }
+  if(path==='/api/card-history'&&request.method==='GET'){
+   // Daily guide prices, PSA population over time and the card's era index, for the card page's charts.
+   const card=cardById.get(url.searchParams.get('id'));if(!card)return json({error:'That card is not in the catalog.'},404);
+   const era=(card.lang||'en')+':era:'+card.series,set=sets.find(s=>s.id===card.setId);
+   return json({card_id:card.id,release:set?.release||null,...await cardHistory(db,card.id),era:{id:era,name:indexName(era,{sets,series}),levels:await indexLevels(db,era)}});
+  }
   if(path==='/api/indices'&&request.method==='GET'){
    const lang=insightLanguage(url),kind=url.searchParams.get('kind')||'set',grade=url.searchParams.get('grade')||'psa10';
    if(!lang||!INDEX_KINDS.includes(kind)||!METRIC_GRADES.includes(grade))return json({error:'Choose a language, index kind and grade.'},400);
@@ -637,6 +679,21 @@ export async function api(request,env,ctx){
    const setRows=(await indexList(db,{lang,kind:'set',grade})).map(r=>{const set=sets.find(s=>s.id===r.key);return {...named(r),series:set?.series,release:set?.release};});
    return json({lang,grade,run,indices:lists.flat().map(r=>({...named(r),spark:sparks[r.index_id]||[]})),sets:setRows,breadth:await marketBreadth(db,{lang,grade})});
   }
+  if(path==='/api/flows'&&request.method==='GET'){
+   // Money flow: each index's matching sales value per month and its share of its market, the 40 largest
+   // over the last three whole months.
+   const lang=insightLanguage(url),kind=url.searchParams.get('kind')||'char',grade=url.searchParams.get('grade')||'psa10';
+   if(!lang||!INDEX_KINDS.includes(kind)||!METRIC_GRADES.includes(grade))return json({error:'Choose a language, index kind and grade.'},400);
+   const {indices,market}=await indexFlows(db,{lang,kind,grade}),recent=market.slice(-4,-1).map(r=>r[0]);
+   const size=rows=>rows.filter(r=>recent.includes(r[0])).reduce((n,r)=>n+r[2],0);
+   const top=Object.entries(indices).map(([id,rows])=>({id,name:indexName(id,{sets,series}),recent:size(rows),rows})).filter(r=>r.recent>0).sort((a,b)=>b.recent-a.recent).slice(0,40);
+   return json({lang,kind,grade,market,indices:top,run:await lastRun(db)});
+  }
+  if(path==='/api/undervalued'&&request.method==='GET'){
+   const lang=insightLanguage(url),grade=url.searchParams.get('grade')||'psa10';
+   if(!lang||!METRIC_GRADES.includes(grade))return json({error:'Choose a language and grade.'},400);
+   return json({lang,grade,rules:UNDERVALUED_RULES,rows:await undervalued(db,{lang,grade}),run:await lastRun(db)});
+  }
   if(path==='/api/lifecycle'&&request.method==='GET'){
    const lang=insightLanguage(url),grade=url.searchParams.get('grade')||'psa10',era=url.searchParams.get('era')||null;
    if(!lang||!METRIC_GRADES.includes(grade)||(era&&!series.some(s=>s.id===era)))return json({error:'Choose a language, grade and era.'},400);
@@ -647,8 +704,8 @@ export async function api(request,env,ctx){
    if(!METRIC_GRADES.includes(grade)||!/^(?:en|ja):[a-z0-9]+:.{1,120}$/i.test(id))return json({error:'Choose an index and grade.'},400);
    const detail=await indexDetail(db,id,grade);if(!detail)return json({error:'That index has no data yet.'},404);
    const ids=await indexMembers(db,id,grade),metrics=await cardMetricsFor(db,ids,grade);
-   const members=ids.map(card_id=>({card_id,...metrics[card_id]})).sort((a,b)=>(b.price||0)-(a.price||0));
-   return json({id,name:indexName(id,{sets,series}),grade,...detail,members});
+   const members=ids.map(card_id=>({card_id,tier:tierOf(cardById.get(card_id)||{}),...metrics[card_id]})).sort((a,b)=>(b.price||0)-(a.price||0));
+   return json({id,name:indexName(id,{sets,series}),grade,...detail,members,tiers:TIER_LABEL});
   }
   if(path==='/api/metrics/rebuild'){
    if(request.method==='POST'){if(!env.BACKGROUND_JOBS)return json({unavailable:true});queueRebuild(env);}

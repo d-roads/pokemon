@@ -201,7 +201,10 @@ test('An unmatched Japanese card stays unpriced but a manual limit enables Japan
  }finally{forgetSourceMap();}
 });
 
-test('With no Japanese prices loaded, movers, investments and scores contain no Japanese cards',async()=>{
+test('With no Japanese prices loaded, movers, investments and scores contain no Japanese cards',async t=>{
+ // Movers are measured back from today, so the clock is pinned to the bundled data's date.
+ const {snapshots}=await import('../data/market.mjs');
+ t.mock.timers.enable({apis:['Date'],now:Date.parse(Object.values(snapshots).map(m=>m?.research?.checkedAt||m?.observedAt).filter(Boolean).sort().at(-1))});
  const env={DB,NETWORK_DISABLED:true};
  const scores=await(await api(req('/api/scores'),env)).json();
  assert.ok(Object.keys(scores.scores||{}).every(id=>!id.startsWith('ja-')));

@@ -102,24 +102,34 @@ The first two items are also the answer to faster price updates (see Phase 0's m
 
 Done items are in the card panel's **Market metrics** section (`marketSection` in `public/app.js`).
 
-- [ ] Price chart: raw / PSA 9 / PSA 10 toggle, 3 months to all time, monthly sales-count bars, and markers
-  for set release and population jumps. (The existing sales chart and monthly guide chart remain.)
-- [x] Grade spreads today (PSA 10 / PSA 9, PSA 10 / raw). [ ] The same over time.
+- [x] Price chart (`cardChartSection`, `/api/card-history`): raw / PSA 9 / PSA 10, 3 months to all time, the
+  monthly guide plus every daily read, monthly matching-sales bars, markers for set release and PSA population
+  jumps (+10% and 10+ copies), and its era's typical-card index scaled to the card's price. Replaces the old
+  monthly guide chart; the reported-sales chart remains.
+- [x] Grade spreads today (PSA 10 / PSA 9, PSA 10 / raw). [x] The same over time (Spreads view).
 - [x] Grading calculator (raw copies): raw sold median + editable grading fee and shipping, against the
   expected value at the card's PSA population odds (PSA 8 and 7 at their guides, 6 and below at the
   ungraded guide), with the break-even PSA 10 rate. Notes that submitted copies are better than average.
 - [x] Population today: PSA graded, gem rate, 90-day growth once population history exists.
-  [ ] Population over time chart.
-- [x] Liquidity: sales in 30 / 90 days, days since last sale. [ ] Active listings (SerpApi/eBay).
-- [x] Risk: volatility, drawdown from peak, 52-week range. [ ] How closely it follows its era index.
+  [x] Population over time chart (Population view; fills as card pages are read — the local-test data has
+  only one reading per card so far).
+- [x] Liquidity: sales in 30 / 90 days, days since last sale. [x] Active listings: **Check live listings**
+  (`/api/listings`) counts matching eBay listings through the account's eBay or SerpApi key, one search per
+  check, kept 30 minutes.
+- [x] Risk: volatility, drawdown from peak, 52-week range. [x] Beta and correlation to its era's typical card
+  (monthly changes over 2 years, 8+ months, `card_metrics.beta`/`correl`). Guides are noisy month to month,
+  so correlations are modest (average ~0.2 on the local-test data).
 - [x] English vs Japanese price gap (verified printings, same grade).
 - [~] Comparables: the card's set, Pokémon, tier and artist indices are listed and open their pages,
   whose member tables compare the cards side by side.
 - [x] Character context: the Pokémon's demand premium and index returns next to the card, and the card's
   own premium over peers.
-- [ ] Fair value and deal check against live listings.
+- [x] Fair value (sold median, else the guide; `fairValue` in `lib/alerts.mjs`) and a deal check: each live
+  listing shows how far below or above fair value it is.
 - [x] Sell-side: what selling today nets at the sold median (or guide) after the Price check cost
-  assumptions. [ ] Marketplace presets (eBay, TCGplayer).
+  assumptions. [x] Marketplace presets (`MARKET_PRESETS`): eBay without a Store (13.25% to $7,500, 2.35%
+  above, $0.40 an order) and TCGplayer Level 1–4 (10.75% capped at $75, plus 2.5% + $0.30), as published
+  October 2026.
 
 ## Phase 3 — Character demand
 
@@ -129,10 +139,17 @@ The **Market → Pokémon** tab and each Pokémon's index page.
   index returns (typical card or by value), breadth, cards, sales and value; Rising and Fading demand lists.
 - [x] Character pages: index chart (typical card and by value, 6M–all), demand premium over time,
   every card with price, returns, premium over peers, sales and last sale.
-  [ ] Which eras, sets and tiers carry the premium; the entry-point card.
-- [ ] Money flow: each character's share of total sales value over time.
-- [ ] Undervalued cards of in-demand characters as a list.
-- [ ] English vs Japanese demand.
+  [x] Which eras, sets and tiers carry the premium (median premium by era, set and tier on Pokémon and artist
+  pages) and the entry-point card (cheapest with sales in 90 days, else cheapest priced).
+- [x] Money flow (Pokémon → Money flow, `/api/flows`, `index_flows`): each Pokémon's share of the market's
+  matching sales value per month for 12 months, last 3 months against the 3 before. Card pages list only
+  ~30 recent sales, so a card with a full list counts only from the first whole month after its oldest
+  listed sale; months resting on under half the cards are flagged. Accuracy improves as nightly reads keep
+  every sale.
+- [x] Undervalued cards of in-demand characters (Pokémon → Undervalued, `/api/undervalued`): Pokémon at 1.5×+
+  demand with 5+ priced cards, and their cards at half or less of that premium, from $10.
+- [x] English vs Japanese demand (Pokémon → English vs Japanese): both premiums and their ratio, per Pokémon
+  with enough priced cards in both languages.
 - Note: the catalog cannot tell items from trainer characters, so a few items (Energy Switch, Rare Candy)
   appear as "Pokémon". Energy cards are left out.
 

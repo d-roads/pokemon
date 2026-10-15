@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
 import {cards} from '../data/catalog.mjs';
-import {listingMatches,searchQuery,candidates,listingPrice,runScan,updateSettings,publicSettings,ntfyUrl,ebaySearchUrl,alertLimit,resetTokenCache,serpapiItems,serpapiListings,hasListingAccess} from '../lib/alerts.mjs';
+import {listingMatches,searchQuery,candidates,listingPrice,runScan,updateSettings,publicSettings,ntfyUrl,ebaySearchUrl,alertLimit,resetTokenCache,serpapiItems,serpapiListings,hasListingAccess,liveListings,fairValue} from '../lib/alerts.mjs';
 const card=id=>cards.find(c=>c.id===id);
 const groudon=card('xy5-151'),umbreon=card('xy10-119'),mrayquaza=card('xy6-105'),promo=card('xyp-XY121'),rc=card('bw11-RC24'),shiny=card('sm115-SV49'),tag=card('sm9-170');
 const serpResult=(extra={})=>({product_id:'123456789012',title:'Primal Groudon EX 151/160 PSA 9',link:'https://www.ebay.com/itm/123456789012',price:{raw:'$100.00',extracted:100},shipping:'+$4.00 delivery',buying_format:'buy_it_now',...extra});
@@ -120,4 +120,18 @@ test('A rejected eBay key is reported without storing alerts',async()=>{
  sqlite.prepare('INSERT INTO watchlist (user_id,card_id,grade,target,created_at) VALUES (?,?,?,?,?)').run('me','xy5-151','psa9',1600,'2026-10-01T00:00:00Z');
  const r=await runScan({db,user:'me',cards,marketFor:()=>null,settings:{ebay:{clientId:'bad',clientSecret:'bad'}},fetchImpl:async()=>new Response('{}',{status:401}),notify:async()=>{}});
  assert.match(r.error,/did not accept/);assert.equal(sqlite.prepare('SELECT count(*) AS n FROM alerts').get().n,0);
+});
+
+test('Live listings for one card: every matching copy, cheapest first, against fair value',async()=>{
+ const results=[serpResult({product_id:'111111111111',link:'https://www.ebay.com/itm/111111111111',price:{raw:'$150.00',extracted:150}}),serpResult(),serpResult({product_id:'222222222222',link:'https://www.ebay.com/itm/222222222222',title:'Primal Groudon EX 151/160 PSA 10'})];
+ let asked='';const fetchImpl=async url=>{asked=url;return new Response(JSON.stringify({search_metadata:{status:'Success'},organic_results:results}),{status:200});};
+ const day=n=>new Date(Date.now()-n*86400000).toISOString().slice(0,10);
+ const market={guide:{grade9:130},sales:[1,2,3,4].map(i=>({id:'s'+i,grade:'psa9',date:day(i*5),price:120}))};
+ const r=await liveListings(groudon,'psa9',market,{provider:'serpapi',serpapi:{apiKey:'k'}},{fetchImpl});
+ assert.match(asked,/_udhi=1000000/,'no price limit');
+ assert.equal(r.count,2,'the PSA 10 copy is not a PSA 9 listing');assert.deepEqual(r.listings.map(l=>l.total),[104,154]);
+ assert.deepEqual(r.fair,{value:120,source:'sold median',label:'30-day sold median'});assert.equal(r.lowest,104);
+ assert.equal(r.listings[0].vs_fair,-.133);
+ assert.deepEqual(fairValue({guide:{grade9:130}},'psa9'),{value:130,source:'guide',label:'Grade 9 guide (all graders)'},'too few sales: the guide');
+ assert.equal(fairValue({},'psa9'),null);
 });

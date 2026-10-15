@@ -1175,3 +1175,38 @@ html.intro-pending .brand-mark,html.intro-playing .brand-mark{visibility:hidden}
 .grading-out{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px;margin:0 0 8px}
 .grading-out b{font:650 14px var(--mono)}
 @media(max-width:790px){.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.index-context button{grid-template-columns:minmax(0,1fr) 58px 58px}.ctx-demand{display:none}}
+/* Card page: price chart, spreads and population over time */
+.card-chart .section-heading{flex-wrap:wrap;gap:8px}
+.card-chart .segmented button,.chart-tools .segmented button{padding:4px 10px;font-size:12px}
+.chart-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 8px}
+.check-inline{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.line-chart .vol-bar{fill:var(--muted);opacity:.35}
+.line-chart .marker{stroke:var(--muted);stroke-width:1;stroke-dasharray:2 3}
+.line-chart .marker.release{stroke:var(--info)}
+.line-chart .marker.pop{stroke:var(--warn)}
+.line-chart .marker-label{font-size:9px;fill:var(--muted)}
+.chart-legend i.bar-key{height:8px;width:8px;background:var(--muted);opacity:.5}
+/* Live listings and fee presets */
+.live-listings .metric-grid{margin-bottom:8px}
+.live-listings .button{margin-top:6px}
+.listing-row{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 0;border-top:1px solid var(--line);color:inherit;text-decoration:none}
+.listing-row:hover .listing-title{text-decoration:underline}
+.listing-title{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.listing-row small{color:var(--muted);font-size:11px}
+.listing-row b{grid-row:1;grid-column:2;text-align:right}
+.deal-tag{grid-column:2;font-size:11px;text-align:right;color:var(--muted)}
+.deal-tag.good{color:var(--up)}.deal-tag.over{color:var(--down)}
+.preset-pick{margin:6px 0;flex-wrap:wrap}
+.preset-pick button{padding:4px 10px;font-size:12px}
+/* Pokémon views: sub-tabs, premium sources, entry point */
+.market-tabs.sub-tabs{margin-top:-4px}
+.market-tabs.sub-tabs button{font-size:12px}
+.carry-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;padding:0 18px 16px}
+.carry-group{min-width:0;overflow-x:auto}
+.carry-group .market-table{width:100%}
+.carry-group h3{font-size:13px;margin:0 0 6px;color:var(--muted);font-weight:600}
+.market-table.compact td,.market-table.compact th{padding:5px 8px;font-size:12px}
+.entry-card{display:flex;align-items:center;gap:12px;margin:0 18px 14px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);color:inherit;text-align:left;width:calc(100% - 36px)}
+.entry-card img{width:40px;height:56px;object-fit:cover;border-radius:4px}
+.entry-card span{display:flex;flex-direction:column;flex:1;min-width:0}
+.entry-card small{color:var(--muted);font-size:11px}

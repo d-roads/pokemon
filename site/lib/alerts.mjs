@@ -175,6 +175,23 @@ export function candidates(items,card,grade,limit,settings){
 
 const changes=r=>Number(r?.changes??r?.meta?.changes??0);
 
+// What a copy is worth today: the sold median of recent matching sales, or the guide when there are too few.
+export function fairValue(market,grade,now=Date.now()){
+ const a=analyze(market,grade,15,now);
+ if(a.fair>0)return {value:a.fair,source:'sold median',label:a.priceLabel};
+ return a.guidePrice>0?{value:a.guidePrice,source:'guide',label:grade==='psa9'?'Grade 9 guide (all graders)':'price guide'}:null;
+}
+// Every live listing matching one card and grade (no price limit), cheapest first, each against fair value.
+// One search, so it costs one SerpApi credit or one eBay call.
+export async function liveListings(card,grade,market,settings,{fetchImpl=fetch,now=Date.now()}={}){
+ const s=normalizeSettings(settings),cap=1000000;
+ const items=s.provider==='serpapi'?await serpapiListings(card,grade,cap,s,{fetchImpl}):await searchListings(card,grade,cap,s,{fetchImpl,token:await ebayToken(s,fetchImpl,now)});
+ const fair=fairValue(market,grade,now),seen=new Set();
+ const listings=candidates(items,card,grade,cap,s).filter(c=>!seen.has(c.listing_id)&&seen.add(c.listing_id)).sort((a,b)=>a.total-b.total)
+  .map(c=>({...c,vs_fair:fair?Math.round((c.total/fair.value-1)*1000)/1000:null}));
+ return {provider:s.provider,checked_at:new Date(now).toISOString(),fair,count:listings.length,lowest:listings[0]?.total??null,listings:listings.slice(0,20)};
+}
+
 export async function runScan({db,user,cards,marketFor,settings,fetchImpl=fetch,now=Date.now(),notify=sendNotifications}){
  const s=normalizeSettings(settings);
  const started=new Date(now).toISOString();

@@ -16,11 +16,24 @@ export const DEFAULT_COSTS=Object.freeze({
  taxRate:0,shippingIn:5,saleFeeRate:.15,saleFixedFee:0,feeTiers:null,shippingOut:5,holdingCost:0,hurdle:0,
  label:'Research scenario: 15% of the sale price in fees, $5 to buy in, $5 to ship out, no tax',
 });
+// Marketplace fee presets for a single card sold in the US, as published in October 2026. Fees change, and
+// depend on the account; each preset's label says what it assumes.
+//   eBay, no Store, trading cards: 13.25% of the sale up to $7,500 and 2.35% above, plus $0.40 an order over
+//     $10 (eBay charges it on the total, including shipping and tax, which this leaves out).
+//   TCGplayer, Level 1–4 seller: 10.75% commission capped at $75 a product, plus 2.5% + $0.30 payment
+//     processing; the cap is reached at $697.67.
+export const MARKET_PRESETS=Object.freeze({
+ ebay:{name:'eBay',costs:{saleFeeRate:.1325,feeTiers:[{upTo:7500,rate:.1325},{upTo:null,rate:.0235}],saleFixedFee:.4},label:'eBay (no Store): 13.25% up to $7,500, 2.35% above, $0.40 an order'},
+ tcgplayer:{name:'TCGplayer',costs:{saleFeeRate:.1325,feeTiers:[{upTo:697.67,rate:.1325},{upTo:null,rate:.025}],saleFixedFee:.3},label:'TCGplayer (Level 1–4): 10.75% commission capped at $75, plus 2.5% + $0.30 processing'},
+});
 const IC_LIMITS={taxRate:[0,.3],shippingIn:[0,1000],saleFeeRate:[0,.5],saleFixedFee:[0,1000],shippingOut:[0,1000],holdingCost:[0,100000],hurdle:[-.5,5]};
 const icRound2=v=>Math.round(v*100)/100;
 
 // Validate user-supplied assumptions; unknown keys are ignored, bad values reported.
 export function normalizeCosts(input={},base=DEFAULT_COSTS){
+ // A marketplace preset replaces the default fees; other values still apply on top of it.
+ const preset=MARKET_PRESETS[input?.preset];
+ if(preset)base={...base,...preset.costs,preset:input.preset,label:preset.label};
  const costs={...base},errors=[];
  for(const [key,[lo,hi]] of Object.entries(IC_LIMITS)){
   if(input[key]==null||input[key]==='')continue;
@@ -33,7 +46,7 @@ export function normalizeCosts(input={},base=DEFAULT_COSTS){
   if(!Array.isArray(t)||t.length>6||t.some((x,i)=>!(x&&Number.isFinite(x.rate)&&x.rate>=0&&x.rate<=.5&&(x.upTo==null||Number.isFinite(x.upTo)&&x.upTo>0&&(i===0||x.upTo>t[i-1].upTo)))))errors.push('Fee tiers must be up to six {upTo, rate} steps in increasing order.');
   else costs.feeTiers=t.map(x=>({upTo:x.upTo??null,rate:x.rate}));
  }
- if(JSON.stringify(costs)!==JSON.stringify(base))costs.label='Custom assumptions';
+ if(JSON.stringify(costs)!==JSON.stringify(base))costs.label=preset?preset.label+', with your own shipping and tax':'Custom assumptions';
  return {costs,errors};
 }
 // Marketplace fees on a sale at gross price E: marginal tiers if given, else a flat rate, plus a fixed fee.
