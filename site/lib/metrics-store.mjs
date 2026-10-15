@@ -15,17 +15,17 @@ import {mergeMarket} from './sales.mjs';
 export const METRIC_TABLES=[
  'CREATE TABLE IF NOT EXISTS price_points (card_id TEXT NOT NULL, grade TEXT NOT NULL, day TEXT NOT NULL, price REAL NOT NULL, PRIMARY KEY (card_id, grade, day)) WITHOUT ROWID',
  'CREATE TABLE IF NOT EXISTS card_metrics (card_id TEXT NOT NULL, grade TEXT NOT NULL, lang TEXT NOT NULL, as_of TEXT NOT NULL, price REAL, sold REAL, ret_1d REAL, ret_7d REAL, ret_30d REAL, ret_90d REAL, ret_1y REAL, high_52w REAL, low_52w REAL, drawdown REAL, volatility REAL, sales_30d INTEGER, sales_90d INTEGER, value_90d REAL, days_since_sale INTEGER, spread_10_9 REAL, spread_10_raw REAL, pop_total INTEGER, pop_10 INTEGER, gem_rate REAL, pop_growth_90d REAL, lang_gap REAL, premium REAL, beta REAL, correl REAL, built TEXT, PRIMARY KEY (card_id, grade)) WITHOUT ROWID',
- 'CREATE TABLE IF NOT EXISTS index_metrics (index_id TEXT NOT NULL, grade TEXT NOT NULL, lang TEXT NOT NULL, kind TEXT NOT NULL, key TEXT NOT NULL, as_of TEXT NOT NULL, level REAL, ret_1d REAL, ret_7d REAL, ret_30d REAL, ret_90d REAL, ret_1y REAL, eq_ret_30d REAL, eq_ret_90d REAL, eq_ret_1y REAL, high_52w REAL, low_52w REAL, drawdown REAL, volatility REAL, members INTEGER, priced INTEGER, value REAL, top5_share REAL, up_30d INTEGER, down_30d INTEGER, breadth_30d REAL, sales_30d INTEGER, sales_90d INTEGER, value_90d REAL, premium REAL, premium_90d REAL, premium_1y REAL, gem_rate REAL, built TEXT, PRIMARY KEY (index_id, grade)) WITHOUT ROWID',
+ 'CREATE TABLE IF NOT EXISTS index_metrics (index_id TEXT NOT NULL, grade TEXT NOT NULL, lang TEXT NOT NULL, kind TEXT NOT NULL, key TEXT NOT NULL, as_of TEXT NOT NULL, level REAL, ret_1d REAL, ret_7d REAL, ret_30d REAL, ret_90d REAL, ret_1y REAL, eq_ret_30d REAL, eq_ret_90d REAL, eq_ret_1y REAL, high_52w REAL, low_52w REAL, drawdown REAL, volatility REAL, members INTEGER, priced INTEGER, value REAL, top5_share REAL, up_30d INTEGER, down_30d INTEGER, breadth_30d REAL, sales_30d INTEGER, sales_90d INTEGER, value_90d REAL, premium REAL, premium_90d REAL, premium_1y REAL, gem_rate REAL, pop_growth_90d REAL, built TEXT, PRIMARY KEY (index_id, grade)) WITHOUT ROWID',
  'CREATE INDEX IF NOT EXISTS index_metrics_kind ON index_metrics (lang, kind, grade)',
  'CREATE TABLE IF NOT EXISTS market_index (index_id TEXT NOT NULL, grade TEXT NOT NULL, day TEXT NOT NULL, level REAL, level_eq REAL, members INTEGER, value REAL, premium REAL, built TEXT, PRIMARY KEY (index_id, grade, day)) WITHOUT ROWID',
  'CREATE TABLE IF NOT EXISTS index_flows (index_id TEXT NOT NULL, grade TEXT NOT NULL, month TEXT NOT NULL, sales INTEGER, value REAL, covered INTEGER, built TEXT, PRIMARY KEY (index_id, grade, month)) WITHOUT ROWID',
  'CREATE TABLE IF NOT EXISTS metrics_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, started_at TEXT NOT NULL, finished_at TEXT, as_of TEXT, cards INTEGER, indices INTEGER, ms INTEGER, error TEXT)',
 ];
 export const CARD_COLUMNS=['card_id','grade','lang','as_of','price','sold','ret_1d','ret_7d','ret_30d','ret_90d','ret_1y','high_52w','low_52w','drawdown','volatility','sales_30d','sales_90d','value_90d','days_since_sale','spread_10_9','spread_10_raw','pop_total','pop_10','gem_rate','pop_growth_90d','lang_gap','premium','beta','correl'];
-export const INDEX_COLUMNS=['index_id','grade','lang','kind','key','as_of','level','ret_1d','ret_7d','ret_30d','ret_90d','ret_1y','eq_ret_30d','eq_ret_90d','eq_ret_1y','high_52w','low_52w','drawdown','volatility','members','priced','value','top5_share','up_30d','down_30d','breadth_30d','sales_30d','sales_90d','value_90d','premium','premium_90d','premium_1y','gem_rate'];
+export const INDEX_COLUMNS=['index_id','grade','lang','kind','key','as_of','level','ret_1d','ret_7d','ret_30d','ret_90d','ret_1y','eq_ret_30d','eq_ret_90d','eq_ret_1y','high_52w','low_52w','drawdown','volatility','members','priced','value','top5_share','up_30d','down_30d','breadth_30d','sales_30d','sales_90d','value_90d','premium','premium_90d','premium_1y','gem_rate','pop_growth_90d'];
 // Columns added after a table was first made. Metric tables are rebuilt in full, so a new column only
 // needs to exist; it fills on the next rebuild.
-const MET_ADDED={card_metrics:{beta:'REAL',correl:'REAL'}};
+const MET_ADDED={card_metrics:{beta:'REAL',correl:'REAL'},index_metrics:{pop_growth_90d:'REAL'}};
 export async function ensureMetricTables(db){
  for(const sql of METRIC_TABLES)await db.prepare(sql).run();
  for(const [table,cols] of Object.entries(MET_ADDED)){
@@ -216,4 +216,17 @@ export async function indexFlows(db,{lang,kind,grade}){
  const out={};
  for(const r of rows){const t=all.get(r.month);(out[r.index_id]||=[]).push([r.month,r.sales,r.value,t?.value>0?r.value/t.value:null]);}
  return {indices:out,market:[...all.values()].sort((a,b)=>a.month.localeCompare(b.month)).map(r=>[r.month,r.sales,r.value,r.covered])};
+}
+
+// Biggest card moves over a period, up and down, among cards worth at least `minPrice`. A thinly traded
+// card's guide can jump on one odd sale (a PSA 10 guide going from $239 to $8,600), so a move counts only
+// when matching sales back it: the sold median within 35% of the guide, or `minSales` sales in 90 days
+// and a change under `maxRet` (10 = +1,000%).
+export const MOVER_CHECKS={minPrice:20,minSales:2,maxRet:10,soldBand:.35};
+export async function cardMovers(db,{lang,grade,period,limit=10,rules=MOVER_CHECKS}){
+ const col={'1d':'ret_1d','7d':'ret_7d','30d':'ret_30d','90d':'ret_90d','1y':'ret_1y'}[period];if(!col)return null;
+ const rows=(await db.prepare(`SELECT card_id,price,sold,${col} AS ret,sales_90d,days_since_sale FROM card_metrics WHERE lang = ? AND grade = ? AND price >= ? AND ${col} IS NOT NULL AND ${col} != 0`).bind(lang,grade,rules.minPrice).all()).results||[];
+ const backed=r=>r.sold>0&&Math.abs(r.price/r.sold-1)<=rules.soldBand||(r.sales_90d>=rules.minSales&&r.ret<rules.maxRet);
+ const ok=rows.filter(backed);
+ return {up:ok.filter(r=>r.ret>0).sort((a,b)=>b.ret-a.ret).slice(0,limit),down:ok.filter(r=>r.ret<0).sort((a,b)=>a.ret-b.ret).slice(0,limit),unbacked:rows.length-ok.length,rules};
 }

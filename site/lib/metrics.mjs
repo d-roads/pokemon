@@ -119,8 +119,8 @@ function metVolatility(values,rules){const r=[];for(let k=0;k+1<values.length;k+
 export function cardFacts(card,market,daily,pops,today,rules=METRIC_RULES){
  const read=market?.research?.checkedAt?dayNum(market.research.checkedAt):null,out={};
  const psa=market?.pop?.psa,popTotal=Array.isArray(psa)?psa.reduce((a,b)=>a+(b||0),0):null;
- let popGrowth=null;
- if(popTotal&&pops?.length){const then=[...pops].reverse().find(([d])=>d<=today-90);if(then){const n=then[1].reduce((a,b)=>a+(b||0),0);if(n>0)popGrowth=popTotal/n-1;}}
+ let popGrowth=null,popThen=null;
+ if(popTotal&&pops?.length){const then=[...pops].reverse().find(([d])=>d<=today-90);if(then){const n=then[1].reduce((a,b)=>a+(b||0),0);if(n>0){popGrowth=popTotal/n-1;popThen=n;}}}
  for(const g of METRIC_GRADES){
   const series=buildSeries(market?.history?.[METRIC_GUIDE_KEY[g]],read,daily?.[g]),price=priceAt(series,today,rules);
   const a=market?analyze(market,g,15,today*MET_DAY+MET_DAY-1):null;
@@ -141,7 +141,7 @@ export function cardFacts(card,market,daily,pops,today,rules=METRIC_RULES){
    flows:metFlows(sales,today,rules),
   };
  }
- return {grades:out,popTotal,pop10:Array.isArray(psa)?psa[9]||0:null,gemRate:popTotal?(psa[9]||0)/popTotal:null,popGrowth};
+ return {grades:out,popTotal,pop10:Array.isArray(psa)?psa[9]||0:null,gemRate:popTotal?(psa[9]||0)/popTotal:null,popGrowth,popThen};
 }
 
 // Sales count and value per month for money flow. A card page lists only its most recent sales, so a long
@@ -256,7 +256,7 @@ export async function buildMetrics(catalog,facts,today,rules=METRIC_RULES,{pause
     up_30d:rets.filter(v=>v>0).length,down_30d:rets.filter(v=>v<0).length,breadth_30d:rets.length?rets.filter(v=>v>0).length/rets.length:null,
     sales_30d:sum('sales_30d'),sales_90d:sum('sales_90d'),value_90d:sum('value_90d'),
     premium:metFin(prem[last]),premium_90d:metFin(prem[at.get(today-90)]),premium_1y:metFin(prem[at.get(today-365)]),
-    gem_rate:popTotal?pops.reduce((a,f)=>a+(f.pop10||0),0)/popTotal:null});
+    gem_rate:popTotal?pops.reduce((a,f)=>a+(f.pop10||0),0)/popTotal:null,pop_growth_90d:metPopGrowth(list.map(c=>facts.get(c.id)))});
   }
   // How closely each card follows its era's typical card: beta and correlation of monthly changes.
   const ends=metMonthEnds(today,rules.trackMonths).reverse().map(t=>at.get(t)).filter(i=>i!=null);
@@ -268,6 +268,9 @@ export async function buildMetrics(catalog,facts,today,rules=METRIC_RULES,{pause
  return {cardRows,indexRows,historyRows,flowRows,dates:days};
 }
 const metRatio=(a,b)=>a>0&&b>0?a/b:null;
+// How fast a group is being graded: growth of PSA-graded copies over 90 days, among members with a
+// population reading from 90+ days ago (null until 3 such members exist).
+function metPopGrowth(list){let now=0,then=0,n=0;for(const f of list)if(f.popThen>0&&f.popTotal>0){now+=f.popTotal;then+=f.popThen;n++;}return n>=3?now/then-1:null;}
 // Beta and correlation of a card's month-to-month log changes against its index, over months where both
 // have a price at both ends. A card whose guide did not change for most months has no meaningful beta.
 export function metTracking(card,index,rules=METRIC_RULES){

@@ -1210,3 +1210,25 @@ html.intro-pending .brand-mark,html.intro-playing .brand-mark{visibility:hidden}
 .entry-card img{width:40px;height:56px;object-fit:cover;border-radius:4px}
 .entry-card span{display:flex;flex-direction:column;flex:1;min-width:0}
 .entry-card small{color:var(--muted);font-size:11px}
+/* Overview: combined movers and sales tape; set comparison */
+.movers-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;padding:0 18px 16px}
+.mover-col h3{font-size:13px;color:var(--muted);margin:0 0 6px;font-weight:600}
+.mover-col h3 small{font-weight:400}
+.mover-col .down-list{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.tape{display:flex;flex-direction:column}
+.tape-row{display:grid;grid-template-columns:90px 1fr auto 120px;gap:12px;align-items:center;padding:8px 18px;border:0;border-top:1px solid var(--line);background:none;color:inherit;text-align:left}
+.tape-row:hover{background:var(--panel-2)}
+.tape-date{color:var(--muted);font-size:12px}
+.tape-card{display:flex;flex-direction:column;min-width:0}
+.tape-card b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tape-card small{color:var(--muted);font-size:11px}
+.tape-vs{text-align:right;font-size:12px}
+.tape-vs small{color:var(--muted)}
+.set-compare{margin:4px 18px 12px}
+.set-compare th{text-align:left}
+@media (max-width:640px){.tape-row{grid-template-columns:1fr auto;padding:8px 12px}.tape-date{grid-column:1/-1}.tape-vs{grid-column:2}}
+.mover-col .tier-list{padding:0}
+.mover-col .tier-list button{grid-template-columns:minmax(0,1fr) 64px;grid-template-rows:auto auto;gap:0 8px;padding:6px 8px}
+.mover-col .tier-list button>span{grid-column:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mover-col .tier-list button>small{grid-column:1;grid-row:2;overflow:hidden;text-overflow:ellipsis;display:block}
+.mover-col .tier-list button>.pl{grid-column:2;grid-row:1/3}

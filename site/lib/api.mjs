@@ -19,7 +19,7 @@ import {investmentTable,investmentView,scoreMode,modelVersion,archiveScores,rese
 import {DEFAULT_COSTS,maxBuyPrice,netReturn,COST_PROFILE_VERSION} from './investment-costs.mjs';
 import {parseJapaneseListing,matchJapaneseListing,listingGuide,numberOnlyAllowed,JA_MAP_VERSION} from './japanese.mjs';
 import {METRIC_GRADES,indexKeysOf,dayNum,dayStr,tierOf,charactersOfCard,TIER_LABEL} from './metrics.mjs';
-import {ensureMetricTables,cardHistory,indexLevels,indexFlows,rebuildMetrics,rebuildState,lastRun,cardMetrics,indexList,indexDetail,indexName,cardMetricsFor,indexSparks,marketBreadth,setHistories,indexRowsFor} from './metrics-store.mjs';
+import {ensureMetricTables,cardHistory,indexLevels,indexFlows,cardMovers,rebuildMetrics,rebuildState,lastRun,cardMetrics,indexList,indexDetail,indexName,cardMetricsFor,indexSparks,marketBreadth,setHistories,indexRowsFor} from './metrics-store.mjs';
 const json=(v,status=200)=>new Response(JSON.stringify(v),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const cardById=new Map(cards.map(c=>[c.id,c]));
 const seriesIds=series.map(item=>item.id);
@@ -168,6 +168,7 @@ function ensureColumns(db){
   await db.prepare('CREATE TABLE IF NOT EXISTS set_sweeps (set_id TEXT PRIMARY KEY NOT NULL, swept_at TEXT NOT NULL, pages INTEGER, priced INTEGER, wanted INTEGER)').run();
   await db.prepare('CREATE TABLE IF NOT EXISTS nightly_runs (day TEXT PRIMARY KEY NOT NULL, started_at TEXT NOT NULL, finished_at TEXT, summary TEXT)').run();
   await ensureMetricTables(db);
+  await db.prepare('CREATE INDEX IF NOT EXISTS sales_observations_tape ON sales_observations (language, grade, event_at)').run();
   await db.prepare('CREATE TRIGGER IF NOT EXISTS market_cache_light AFTER UPDATE OF payload ON market_cache WHEN NEW.light_key IS OLD.light_key BEGIN UPDATE market_cache SET light = NULL, light_key = NULL WHERE card_id = NEW.card_id; END').run();
  })().catch(e=>{columnsReady.delete(db);throw e;}));
  return columnsReady.get(db);
@@ -688,6 +689,22 @@ export async function api(request,env,ctx){
    const size=rows=>rows.filter(r=>recent.includes(r[0])).reduce((n,r)=>n+r[2],0);
    const top=Object.entries(indices).map(([id,rows])=>({id,name:indexName(id,{sets,series}),recent:size(rows),rows})).filter(r=>r.recent>0).sort((a,b)=>b.recent-a.recent).slice(0,40);
    return json({lang,kind,grade,market,indices:top,run:await lastRun(db)});
+  }
+  if(path==='/api/card-movers'&&request.method==='GET'){
+   const lang=insightLanguage(url),grade=url.searchParams.get('grade')||'psa10',period=url.searchParams.get('period')||'30d';
+   const r=lang&&METRIC_GRADES.includes(grade)?await cardMovers(db,{lang,grade,period}):null;
+   if(!r)return json({error:'Choose a language, grade and period.'},400);
+   return json({lang,grade,period,...r});
+  }
+  if(path==='/api/tape'&&request.method==='GET'){
+   // The newest reported sales on card pages, against each card's guide for that grade.
+   const lang=insightLanguage(url),grade=url.searchParams.get('grade')||'psa10';
+   if(!lang||!METRIC_GRADES.includes(grade))return json({error:'Choose a language and grade.'},400);
+   const rows=(await db.prepare('SELECT card_id,condition,event_at,marketplace,price,listing_id FROM sales_observations WHERE language = ? AND grade = ? ORDER BY event_at DESC,id DESC LIMIT 300').bind(lang,grade).all()).results||[];
+   const seen=new Set(),sales=[];
+   for(const r of rows){const k=r.card_id+'|'+r.listing_id;if(seen.has(k)||!cardById.get(r.card_id)?.eligible)continue;seen.add(k);sales.push(r);if(sales.length>=60)break;}
+   const guides=await cardMetricsFor(db,[...new Set(sales.map(s=>s.card_id))],grade);
+   return json({lang,grade,sales:sales.map(({listing_id:_,...s})=>({...s,guide:guides[s.card_id]?.price??null,vs_guide:guides[s.card_id]?.price>0?s.price/guides[s.card_id].price-1:null}))});
   }
   if(path==='/api/undervalued'&&request.method==='GET'){
    const lang=insightLanguage(url),grade=url.searchParams.get('grade')||'psa10';

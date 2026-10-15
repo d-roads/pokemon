@@ -158,14 +158,17 @@ The **Market → Pokémon** tab and each Pokémon's index page.
 The **Market → Sets** tab and each set's index page.
 
 - [x] Set pages as "sectors": index, value, top-5 share, breadth, gem rate, sales, member cards.
-  [ ] How fast the set is being graded (needs population history).
+  [x] How fast the set is being graded (`index_metrics.pop_growth_90d`, the Grading 90D column): growth in
+  PSA-graded copies over 90 days among members with a reading from then. Blank until population readings
+  are 90 days old (from early January 2027 for cards read nightly since October).
 - [x] Set lifecycle curves: each set's index by months since release (rebased to 100 at its first month)
   against its era's median path, with how far above or below typical each set sits now.
   On the local-test data, Scarlet & Violet sets fall to ~56% of launch by month 7 and recover to ~90%
   by month 26.
-- [~] Set comparison: pick several sets on the lifecycle chart. [ ] A side-by-side table.
+- [x] Set comparison: pick several sets on the lifecycle chart; a side-by-side table below it (age, vs era
+  median, returns, drawdown, cards, value, top-5 share, breadth, gem rate, sales, grading pace).
 - [x] Rarity-tier trends across sets (Market → Rarity, and the overview's tier list).
-- [ ] Out-of-print effect (needs print status).
+- [ ] Out-of-print effect (blocked: needs print status, see Phase 1).
 
 ## Phase 5 — Market overview
 
@@ -173,10 +176,16 @@ The **Market → Overview** tab.
 
 - [x] Index cards with sparklines (all cards, top 100, each era); index pages with their members.
   Top 100 uses today's members, so its history flatters it.
-- [x] Heatmap of sets, sized by value and coloured by 1D / 7D / 30D / 1Y change. [ ] By Pokémon and tier.
+- [x] Heatmap of sets, sized by value and coloured by 1D / 7D / 30D / 1Y change. [x] By Pokémon (the 80 most
+  valuable) and rarity tier.
 - [x] Market breadth: up vs down over 30 days, 52-week highs and lows, sales in 30 days.
-- [~] Top movers by group: every Market table sorts by any return. [ ] A combined movers panel.
-- [ ] Sales tape.
+- [x] Top movers by group: every Market table sorts by any return. [x] A combined movers panel (Biggest moves):
+  sets, Pokémon, tiers and single cards up and down over the heatmap's period. A card counts only when
+  matching sales back its guide move (sold median within 35%, or 2+ sales in 90 days and under +1,000%;
+  `MOVER_CHECKS`): on the local-test data ~4,000 of ~9,400 PSA 10 guide moves are unbacked, e.g. a PSA 10
+  guide jumping from $239 to $8,600 on one sale.
+- [x] Sales tape (`/api/tape`): the newest sales recorded from card pages (`sales_observations`), one row per
+  listing, against the card's guide.
 
 ## Phase 6 — Screener, portfolio, alerts
 

@@ -553,3 +553,23 @@ test('Pokémon views: money flow, undervalued cards, English vs Japanese demand,
  assert.match(html,/Where the premium comes from/);assert.match(html,/Holo rare/);assert.match(html,/Entry point · cheapest with sales in 90 days/);
  assert.match(html,/data-card="base2-1"/);
 });
+test('Overview: heatmap by Pokémon, biggest moves across groups and cards, sales tape; Sets: comparison table',async()=>{
+ const ui=workspace();await ui.run('init()');
+ const run={as_of:'2026-10-14',finished_at:'2026-10-14T10:00:00Z'};
+ const row=(kind,key,name,r30,extra={})=>({index_id:'en:'+kind+':'+key,kind,key,name,grade:'psa10',lang:'en',level:120,ret_30d:r30,eq_ret_30d:r30,ret_1y:.2,eq_ret_1y:.2,priced:20,members:20,value:1e5,spark:[],...extra});
+ ui.responses['/api/market-overview']={run,breadth:{priced:10},indices:[row('all','all','All English cards',.01),row('tier','sir','Special illustration rare',-.05),row('tier','holo','Holo rare',.07)],sets:[row('set','sv3pt5','151',.2,{series:'SV',release:'2023-09-22'}),row('set','base1','Base Set',-.1,{series:'WOTC',release:'1999-01-09'})]};
+ ui.responses['/api/indices']={run,rows:[row('char','Gengar','Gengar',.3),row('char','Pidgey','Pidgey',-.2)]};
+ ui.responses['/api/card-movers']={up:[{card_id:'base1-4',price:9000,ret:.5,sales_90d:3}],down:[{card_id:'base1-2',price:500,ret:-.4,sales_90d:2}],unbacked:7};
+ ui.responses['/api/tape']={sales:[{card_id:'base1-4',event_at:'2026-10-12',price:9500,guide:9000,vs_guide:.0556,condition:null}]};
+ ui.e('#market-nav').onclick();for(let i=0;i<6;i++)await new Promise(r=>setImmediate(r));
+ let html=ui.e('#market-view').innerHTML;
+ assert.match(html,/Biggest moves · 30 days/);assert.match(html,/7 unbacked guide moves are left out/);
+ assert.ok(html.indexOf('data-index="en:set:sv3pt5"',html.indexOf('Biggest moves'))>0,'151 among the set gainers');
+ assert.match(html,/data-index="en:char:Gengar"/);assert.match(html,/\+50\.0%/,'card gainer');
+ assert.match(html,/Sales tape/);assert.match(html,/\$9,500\.00/);assert.match(html,/\+5\.6%/);
+ ui.run("state.market.heatBy='char';renderMarket()");html=ui.e('#market-view').innerHTML;assert.match(html,/Each box is a Pokémon/);
+ ui.responses['/api/indices']={run,rows:[row('set','sv3pt5','151',.2,{top5_share:.3,gem_rate:.4,pop_growth_90d:.05}),row('set','sv2','Paldea Evolved',.1)]};
+ ui.responses['/api/lifecycle']={curves:[{set_id:'sv3pt5',name:'151',start:0,points:[[0,100,100],[12,90,85]]},{set_id:'sv2',name:'Paldea Evolved',start:0,points:[[0,100,100],[12,70,70]]}],typical:[[0,100,10],[12,80,10]]};
+ ui.run("state.market.tab='set';renderMarket()");await ui.run("loadMarket('set')");for(let i=0;i<4;i++)await new Promise(r=>setImmediate(r));
+ html=ui.e('#market-view').innerHTML;assert.match(html,/set-compare/);assert.match(html,/vs era median/);assert.match(html,/Grading 90D/);assert.match(html,/\+5\.0%/);
+});

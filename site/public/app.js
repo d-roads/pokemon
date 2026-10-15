@@ -24,7 +24,7 @@ const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
 const JA_TEXT_KEY='futuresight-japanese-text';
 function savedJapaneseText(){try{return localStorage.getItem(JA_TEXT_KEY)==='on';}catch{return false;}}
 const state={showJapanese:savedJapaneseText(),sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],langs:['en','ja'],detailLang:null,detailAlt:null,detailGrade:null,marketLang:'en',filters:{min:null,max:null,activity:0,invest:0,research:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
- dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},cardMetrics:{},cardHistory:{},cardChart:{view:'price',grade:null,range:'1y',era:false},listings:{},grading:null,market:{tab:'overview',grade:'psa10',weight:'eq',data:{},error:null,index:null,period:'ret_30d',sorts:{},query:'',minCards:5,limit:100,memberLimit:100,memberSort:{key:'price',dir:-1},range:'1y',era:null,lifeSets:{},charView:'board'},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
+ dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},cardMetrics:{},cardHistory:{},cardChart:{view:'price',grade:null,range:'1y',era:false},listings:{},grading:null,market:{tab:'overview',grade:'psa10',weight:'eq',data:{},error:null,index:null,period:'ret_30d',sorts:{},query:'',minCards:5,limit:100,memberLimit:100,memberSort:{key:'price',dir:-1},range:'1y',era:null,lifeSets:{},charView:'board',heatBy:'set'},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
 // Crashes in the page are sent to the server, which forwards them to Sentry only when SENTRY_DSN is set. At most 5 per page load.
 let crashReports=0;
@@ -1087,6 +1087,9 @@ async function loadLifecycle(era){
 }
 // Extra Pokémon views, each loaded once per language and grade: money flow, undervalued cards, and the
 // other language's character indices for English vs Japanese demand.
+// Load another tab's data for the overview once, even if it fails (no retry loop on re-render).
+const marketTried=new Set();
+function ensureMarket(kind){const key=marketKey(kind);if(marketTried.has(key))return;marketTried.add(key);loadMarket(kind);}
 async function loadMarketExtra(name,path){
  const key=marketKey(name);if(state.market.data[key])return;state.market.data[key]={loading:true};
  try{const r=await request(path);r._at=Date.now();state.market.data[key]=r;}catch(e){state.market.data[key]={error:e.message,_at:Date.now()};}
@@ -1149,6 +1152,9 @@ function wireMarket(view){
  view.querySelectorAll('[data-m-weight]').forEach(b=>b.onclick=()=>{m.weight=b.dataset.mWeight;renderMarket();});
  view.querySelectorAll('[data-index]').forEach(b=>b.onclick=()=>openIndex(b.dataset.index));
  view.querySelectorAll('[data-m-period]').forEach(b=>b.onclick=()=>{m.period=b.dataset.mPeriod;renderMarket();});
+ view.querySelectorAll('[data-heat-by]').forEach(b=>b.onclick=()=>{m.heatBy=b.dataset.heatBy;renderMarket();});
+ view.querySelectorAll('.movers-panel [data-card],.tape [data-card]').forEach(b=>b.onclick=()=>openCard(b.dataset.card,m.grade));
+ if($('#tape-more'))$('#tape-more').onclick=()=>{m.tapeAll=true;renderMarket();};
  if($('#m-retry'))$('#m-retry').onclick=()=>{m.error=null;reload();};
  if($('#m-sweep'))$('#m-sweep').onclick=startSweep;
  if($('#m-back'))$('#m-back').onclick=()=>{m.index=null;renderMarket();loadMarket(m.tab);};
@@ -1161,12 +1167,35 @@ function overviewView(d){
  const total=(b.up_30d||0)+(b.down_30d||0),upShare=total?b.up_30d/total:0;
  const breadth=`<section class="panel breadth"><div class="panel-head"><div><h2>Market breadth</h2><p>${(b.priced||0).toLocaleString()} priced ${shortGrade(m.grade)} cards · guide prices</p></div></div><div class="breadth-body"><div class="breadth-bar" role="img" aria-label="${b.up_30d||0} cards up and ${b.down_30d||0} down over 30 days"><i class="up" style="width:${(upShare*100).toFixed(1)}%"></i><i class="down" style="width:${((1-upShare)*100).toFixed(1)}%"></i></div><div class="breadth-stats"><div><small>Up 30D</small><b class="pl up">${(b.up_30d||0).toLocaleString()}</b></div><div><small>Down 30D</small><b class="pl down">${(b.down_30d||0).toLocaleString()}</b></div><div><small>52-week highs</small><b>${(b.highs||0).toLocaleString()}</b></div><div><small>52-week lows</small><b>${(b.lows||0).toLocaleString()}</b></div><div><small>Sales, 30 days</small><b>${(b.sales_30d||0).toLocaleString()}</b></div></div></div></section>`;
  const periods=[['ret_1d','1D'],['ret_7d','7D'],['ret_30d','30D'],['ret_1y','1Y']],period=m.period||'ret_30d';
- const tiles=treemap(d.sets.map(s=>({...s,value:s.value})),1000,520);
- const heat=`<section class="panel heat-panel"><div class="panel-head"><div><h2>Sets heatmap</h2><p>Each box is a set, sized by the total guide value of its rare cards and coloured by its index change. Select a set to open it.</p></div><div class="segmented" role="group" aria-label="Period">${periods.map(([k,l])=>`<button data-m-period="${k}" class="${period===k?'active':''}" aria-pressed="${period===k}">${l}</button>`).join('')}</div></div>
+ const by=m.heatBy,chars=m.data[marketKey('char')];
+ if(by==='char'&&!chars)ensureMarket('char');
+ const groups={set:d.sets,tier:idx.filter(i=>i.kind==='tier'),char:(chars?.rows||[]).filter(r=>r.priced>=3).sort((a,b)=>b.value-a.value).slice(0,80)};
+ const tiles=treemap(groups[by].map(s=>({...s,value:s.value})),1000,520);
+ const what={set:'set',char:'Pokémon (the 80 most valuable, 3+ cards)',tier:'rarity tier'}[by];
+ const heat=`<section class="panel heat-panel"><div class="panel-head"><div><h2>Heatmap</h2><p>Each box is a ${what}, sized by the total guide value of its cards and coloured by its index change. Select one to open it.</p></div><div class="head-actions"><div class="segmented" role="group" aria-label="Group by">${[['set','Sets'],['char','Pokémon'],['tier','Rarity']].map(([k,l])=>`<button data-heat-by="${k}" class="${by===k?'active':''}" aria-pressed="${by===k}">${l}</button>`).join('')}</div><div class="segmented" role="group" aria-label="Period">${periods.map(([k,l])=>`<button data-m-period="${k}" class="${period===k?'active':''}" aria-pressed="${period===k}">${l}</button>`).join('')}</div></div></div>
   <div class="heatmap" role="list">${tiles.map(t=>{const v=retOf(t.item,period),big=t.w>70&&t.h>34;return `<button role="listitem" class="heat-tile" data-index="${esc(t.item.index_id)}" style="left:${(t.x/10).toFixed(3)}%;top:${(t.y/5.2).toFixed(3)}%;width:${(t.w/10).toFixed(3)}%;height:${(t.h/5.2).toFixed(3)}%;background:${heatColor(v)}" title="${esc(t.item.name)} · ${v==null?'no change data':pct(v)} · ${bigMoney(t.item.value)}">${big?`<span>${esc(t.item.name)}</span><b>${v==null?'—':pct(v)}</b>`:''}</button>`;}).join('')}</div></section>`;
  const tiers=idx.filter(i=>i.kind==='tier'),best=sortRows(tiers,{key:r=>retOf(r,'ret_1y'),dir:-1});
  const tierPanel=`<section class="panel"><div class="panel-head"><div><h2>Rarity tiers · 1 year</h2><p>Which kinds of card have done best.</p></div></div><ol class="tier-list">${best.map(i=>`<li><button data-index="${esc(i.index_id)}"><span>${esc(i.name)}</span><small>${i.priced.toLocaleString()} cards</small>${sparkSvg(i.spark)}${retCell(retOf(i,'ret_1y'))}</button></li>`).join('')}</ol></section>`;
- return `<div class="index-cards">${cards}</div><div class="market-grid">${breadth}${tierPanel}</div>${heat}<p class="sales-note">Guide prices are PriceCharting's (ungraded is mixed condition; Grade 9 includes other graders). Indices are chain-linked, so cards joining or leaving never move them. Past changes are not a forecast.</p>`;
+ return `<div class="index-cards">${cards}</div><div class="market-grid">${breadth}${tierPanel}</div>${heat}${moversPanel(d,period)}${tapePanel()}<p class="sales-note">Guide prices are PriceCharting's (ungraded is mixed condition; Grade 9 includes other graders). Indices are chain-linked, so cards joining or leaving never move them. Past changes are not a forecast.</p>`;
+}
+// Biggest moves over the heatmap's period: sets, Pokémon (5+ priced cards) and single cards ($20+), up and down.
+function moversPanel(d,period){
+ const m=state.market,p={ret_1d:'1d',ret_7d:'7d',ret_30d:'30d',ret_1y:'1y'}[period],key=marketKey('cardmovers',p),cm=m.data[key];
+ if(!cm)loadMarketExtra('cardmovers|'+p,'/api/card-movers?lang='+state.marketLang+'&grade='+m.grade+'&period='+p);
+ const chars=m.data[marketKey('char')];if(!chars)ensureMarket('char');
+ const top=(rows,dir)=>sortRows(rows.filter(r=>{const v=retOf(r,period);return v!=null&&(dir>0?v>0:v<0);}),{key:r=>retOf(r,period),dir:-dir}).slice(0,5);
+ const list=(rows,dir)=>rows.length?rows.map(r=>`<li><button data-index="${esc(r.index_id)}"><span>${esc(r.name)}</span><small>${r.priced} cards</small>${retCell(retOf(r,period))}</button></li>`).join(''):'<li class="sales-note">None</li>';
+ const col=(title,rows)=>`<div class="mover-col"><h3>${title}</h3><ol class="tier-list up-list">${list(top(rows,1),1)}</ol><ol class="tier-list down-list">${list(top(rows,-1),-1)}</ol></div>`;
+ const cardList=rows=>rows?.length?rows.slice(0,5).map(r=>{const c=cardById(r.card_id);return `<li><button data-card="${esc(r.card_id)}"><span>${esc(c?.name||r.card_id)}</span><small>${esc(c?.setName||'')} · ${money(r.price)}</small>${retCell(r.ret)}</button></li>`;}).join(''):'<li class="sales-note">None</li>';
+ const cardsCol=!cm||cm.loading?`<div class="mover-col"><h3>Cards</h3>${loadingBox('Loading…')}</div>`:cm.error?`<div class="mover-col"><h3>Cards</h3><p class="sales-note">${esc(cm.error)}</p></div>`:`<div class="mover-col"><h3>Cards <small>$20+</small></h3><ol class="tier-list up-list">${cardList(cm.up)}</ol><ol class="tier-list down-list">${cardList(cm.down)}</ol></div>`;
+ return `<section class="panel movers-panel"><div class="panel-head"><div><h2>Biggest moves · ${esc({ret_1d:'1 day',ret_7d:'7 days',ret_30d:'30 days',ret_1y:'1 year'}[period])}</h2><p>Gainers on top, decliners below, from guide prices; change the period on the heatmap. Cards count only when matching sales back the move (sold median near the guide, or 2+ sales in 90 days)${cm?.unbacked?`; ${cm.unbacked.toLocaleString()} unbacked guide moves are left out`:''}.</p></div></div><div class="movers-grid">${col('Sets',d.sets)}${col('Pokémon',(chars?.rows||[]).filter(r=>r.priced>=5))}${col('Rarity tiers',d.indices.filter(i=>i.kind==='tier'))}${cardsCol}</div></section>`;
+}
+// The newest reported sales across every card, against each card's guide.
+function tapePanel(){
+ const m=state.market,t=m.data[marketKey('tape')];
+ if(!t)loadMarketExtra('tape','/api/tape?lang='+state.marketLang+'&grade='+m.grade);
+ const body=!t||t.loading?loadingBox('Loading sales…'):t.error?`<p class="sales-note">${esc(t.error)}</p>`:t.sales?.length?`<div class="tape">${t.sales.slice(0,m.tapeAll?60:15).map(x=>{const c=cardById(x.card_id);return `<button class="tape-row" data-card="${esc(x.card_id)}"><span class="tape-date">${date(x.event_at)}</span><span class="tape-card"><b>${esc(c?.name||x.card_id)}</b><small>${esc(c?.setName||'')} · ${c?numberCaption(c):''}${x.condition&&m.grade==='raw'?' · '+esc(x.condition):''}</small></span><b class="tape-price">${money(x.price)}</b><span class="tape-vs">${x.vs_guide==null?'':retCell(x.vs_guide)+'<small> vs guide</small>'}</span></button>`;}).join('')}</div>${!m.tapeAll&&t.sales.length>15?'<button class="button show-more" id="tape-more">Show more</button>':''}`:'<p class="sales-note">No sales recorded yet.</p>';
+ return `<section class="panel"><div class="panel-head"><div><h2>Sales tape</h2><p>The newest ${shortGrade(m.grade)} sales found on card pages${m.grade==='raw'?' (any condition)':''}, against the card's guide. New sales appear as card pages are read.</p></div></div>${body}</section>`;
 }
 // Columns per kind. Pokémon add demand: the premium their cards sell at over same-era, same-rarity cards.
 function indexColumns(kind){
@@ -1174,7 +1203,7 @@ function indexColumns(kind){
  const ret=([k,l])=>[k,l,r=>retCell(retOf(r,k)),{num:true,sortKey:k}];
  const common=[ret(['ret_30d','30D']),ret(['ret_90d','90D']),ret(['ret_1y','1Y']),['spark','12 months',r=>sparkSvg(r.spark),{nosort:true}],['breadth_30d','Breadth',r=>share(r.breadth_30d),{num:true,title:'Share of its priced cards up over 30 days'}],['priced','Cards',r=>r.priced.toLocaleString(),{num:true}],['sales_90d','Sales 90D',r=>r.sales_90d==null?'—':r.sales_90d.toLocaleString(),{num:true,title:'Matching sales in the 90 days before each card was last read'}],['value','Value',r=>bigMoney(r.value),{num:true,title:'Total guide value of its priced cards'}]];
  if(kind==='char')return [name,['premium','Demand',r=>times(r.premium),{num:true,title:'How many times more its cards sell for than same-era, same-rarity cards (shrunk toward 1× for Pokémon with few cards)'}],['demand_change','Demand 1Y',r=>retCell(r.demand_change),{num:true,title:'Change in the demand premium over the last year'}],...common];
- if(kind==='set')return [name,...common,['top5_share','Top 5',r=>share(r.top5_share),{num:true,title:'Share of the set\'s value in its 5 most valuable cards'}],['gem_rate','Gem rate',r=>share(r.gem_rate),{num:true,title:'PSA 10s as a share of all PSA-graded copies'}]];
+ if(kind==='set')return [name,...common,['top5_share','Top 5',r=>share(r.top5_share),{num:true,title:'Share of the set\'s value in its 5 most valuable cards'}],['gem_rate','Gem rate',r=>share(r.gem_rate),{num:true,title:'PSA 10s as a share of all PSA-graded copies'}],['pop_growth_90d','Grading 90D',r=>r.pop_growth_90d==null?'—':pct(r.pop_growth_90d),{num:true,title:'Growth in PSA-graded copies over 90 days, among cards with a population reading from then (fills as card pages are read)'}]];
  return [name,...common];
 }
 function indexTableView(kind,d){
@@ -1241,6 +1270,14 @@ function langDemandView(d){
  const cols=[['name','Pokémon',r=>`<b>${esc(r.name)}</b>`],['en','English demand',r=>times(r.en),{num:true}],['ja','Japanese demand',r=>times(r.ja),{num:true}],['gap','Japanese ÷ English',r=>times(r.gap),{num:true,title:'Above 1×: Japanese collectors pay relatively more for this Pokémon'}],['en_cards','EN cards',r=>r.en_cards,{num:true}],['ja_cards','JA cards',r=>r.ja_cards,{num:true}]];
  return `<section class="panel"><div class="panel-head"><div><h2>English vs Japanese demand</h2><p>Each Pokémon's demand premium among English cards and among Japanese cards (${m.minCards}+ priced in each). Each language is measured against its own peers, so the two are comparable as multiples. A Pokémon in much higher demand in one language can be a signal for the other.</p></div><label>At least <select id="m-min">${[3,5,8,15,30].map(n=>`<option value="${n}" ${m.minCards===n?'selected':''}>${n} cards</option>`).join('')}</select></label></div>${rows.length?marketTable(sortRows(rows,sort).slice(0,m.limit),cols,sort,{id:'m-lang',rowAttr:r=>`data-open-index="${esc(r.index_id)}"`}):'<p class="sales-note">No Pokémon has enough priced cards in both languages.</p>'}</section>`;
 }
+// The sets picked on the lifecycle chart side by side.
+function setCompare(ids,curves,life,idx){
+ const rows=state.market.data[marketKey('set')]?.rows||[];if(!ids.length)return '';
+ const cell=(label,f)=>`<tr><th>${label}</th>${ids.map(id=>{const r=rows.find(x=>x.key===id),c=curves.find(x=>x.set_id===id);return `<td class="num">${f(r,c)}</td>`;}).join('')}</tr>`;
+ const vsTypical=c=>{if(!c)return null;const last=c.points.at(-1),typ=life.typical.find(t=>t[0]===last[0])?.[1];return typ?last[idx]/typ-1:null;};
+ return `<div class="table-wrap set-compare"><table class="market-table compact"><thead><tr><th></th>${ids.map(id=>`<th class="num"><button class="link-button" data-index="${esc(state.marketLang+':set:'+id)}">${esc(curves.find(c=>c.set_id===id)?.name||id)}</button></th>`).join('')}</tr></thead><tbody>
+  ${cell('Age',(r,c)=>c?c.points.at(-1)[0]+' mo':'—')}${cell('vs era median',(r,c)=>retCell(vsTypical(c)))}${cell('30D',r=>retCell(retOf(r,'ret_30d')))}${cell('1Y',r=>retCell(retOf(r,'ret_1y')))}${cell('From peak',r=>retCell(r?.drawdown))}${cell('Cards priced',r=>r?r.priced.toLocaleString():'—')}${cell('Value',r=>bigMoney(r?.value))}${cell('Top 5 share',r=>share(r?.top5_share))}${cell('Breadth 30D',r=>share(r?.breadth_30d))}${cell('Gem rate',r=>share(r?.gem_rate))}${cell('Sales 90D',r=>r?.sales_90d==null?'—':r.sales_90d.toLocaleString())}${cell('Grading 90D',r=>r?.pop_growth_90d==null?'—':pct(r.pop_growth_90d))}</tbody></table></div>`;
+}
 // Sets of one era on the same clock: each set's index by months since release, against the era's median path.
 function lifecycleView(){
  const m=state.market,era=m.era||state.series.at(-2)?.id||'SV',d=m.data[marketKey('life',era)];
@@ -1256,7 +1293,7 @@ function lifecycleView(){
   shown.forEach((id,n)=>{const c=curves.find(x=>x.set_id===id);series.push({label:c.name,color:palette[n%palette.length],dash:false,points:Array.from({length:months+1},(_,i)=>[String(i),c.points.find(p=>p[0]===i)?.[idx]??null,'Month '+i])});});
   chart=series.length?lineChart({series,height:260,width:820,label:'Set index by months since release',format:v=>v.toFixed(1),tick:v=>v.toFixed(0)}):'<div class="chart-empty">No set in this era has an index from its first months yet.</div>';
   // Where each set sits now against the era's median at the same age.
-  notes=`<div class="life-sets">${curves.map(c=>{const last=c.points.at(-1),typ=d.typical.find(t=>t[0]===last[0])?.[1],vs=typ?last[idx]/typ-1:null;return `<label class="life-set"><input type="checkbox" data-life="${c.set_id}" ${shown.includes(c.set_id)?'checked':''}><span>${esc(c.name)}<small>${last[0]} mo · ${last[idx].toFixed(0)}${vs!=null?' · '+(vs>=0?'above':'below')+' typical by '+Math.abs(Math.round(vs*100))+'%':''}</small></span></label>`;}).join('')}</div>`;
+  notes=setCompare(shown,curves,d,idx)+`<div class="life-sets">${curves.map(c=>{const last=c.points.at(-1),typ=d.typical.find(t=>t[0]===last[0])?.[1],vs=typ?last[idx]/typ-1:null;return `<label class="life-set"><input type="checkbox" data-life="${c.set_id}" ${shown.includes(c.set_id)?'checked':''}><span>${esc(c.name)}<small>${last[0]} mo · ${last[idx].toFixed(0)}${vs!=null?' · '+(vs>=0?'above':'below')+' typical by '+Math.abs(Math.round(vs*100))+'%':''}</small></span></label>`;}).join('')}</div>`;
  }
  return `<section class="panel lifecycle"><div class="panel-head"><div><h2>Set lifecycles</h2><p>Each set's index from its first month (=100), by months since release, with the era's median path. Shows whether a set is still in its post-release dip, recovering, or running ahead of its era.</p></div>${pick}</div><div class="life-chart">${chart}</div>${notes}</section>`;
 }

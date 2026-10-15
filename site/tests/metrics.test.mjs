@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
 import {buildSeries,priceAt,seriesReturn,tierOf,cardFacts,buildMetrics,indexDates,indexKeysOf,dayNum,dayStr,metTracking,flowMonths,METRIC_RULES} from '../lib/metrics.mjs';
-import {newPoint,rebuildMetrics} from '../lib/metrics-store.mjs';
+import {newPoint,rebuildMetrics,cardMovers} from '../lib/metrics-store.mjs';
 import {api} from '../lib/api.mjs';
 import {cards} from '../data/catalog.mjs';
 
@@ -62,6 +62,16 @@ test('Money flow counts sales per month, and a full sales list only from the mon
  assert.deepEqual(row('en:set:s1','2026-09').slice(3),[29,2870,2],'a\'s 28 September sales and b\'s one; c has no sales and covers nothing');
  assert.deepEqual(row('en:set:s1','2026-08').slice(3),[0,0,1],'a does not cover August: its list may be missing sales there');
  assert.deepEqual(row('en:set:s1','2026-05').slice(3),[1,50,1]);
+});
+
+test('A set\'s grading pace: growth in PSA-graded copies over 90 days among members read then',async()=>{
+ const base={series:'X',category:'Holo rare',rarity:'Rare Holo',eligible:true,setId:'s1',setName:'Set'};
+ const catalog=['a','b','c','d'].map(id=>({...base,id,name:'Mew'}));
+ const psa=n=>({psa:[0,0,0,0,0,0,0,0,0,n]}),then=[[today-120,[0,0,0,0,0,0,0,0,0,100]]];
+ const facts=new Map(catalog.map((c,i)=>[c.id,cardFacts(c,{pop:psa(i<3?110:500),history:{psa10:history(10,0,3)},research:{checkedAt:'2026-10-14T00:00:00Z'}},null,i<3?then:null,today)]));
+ const {indexRows}=await buildMetrics(catalog,facts,today);
+ const set=indexRows.find(r=>r.index_id==='en:set:s1'&&r.grade==='psa10');
+ assert.ok(Math.abs(set.pop_growth_90d-.1)<1e-9,'330 graded now against 300; d has no reading from then');
 });
 
 test('Rarity tiers group comparable cards across eras and languages',()=>{
@@ -157,5 +167,19 @@ test('A rebuild saves daily prices, card and index metrics, and the routes serve
  assert.equal((await api(req('/api/flows?kind=nope'),env)).status,400);
  const cheap=await(await api(req('/api/undervalued?grade=psa10'),env)).json();assert.ok(Array.isArray(cheap.rows));assert.equal(cheap.rules.maxShare,.5);
  assert.ok(cheap.rows.every(r=>r.ratio<=.5&&r.demand>=1.5));
+ // Card movers need matching sales behind a guide move.
+ sqlite.exec("DELETE FROM card_metrics");
+ const ins=sqlite.prepare("INSERT INTO card_metrics (card_id,grade,lang,as_of,price,sold,ret_30d,sales_90d) VALUES (?,?,?,?,?,?,?,?)");
+ ins.run('a','psa10','en','2026-10-14',8600,null,35,2);ins.run('b','psa10','en','2026-10-14',7700,7700,29,3);ins.run('c','psa10','en','2026-10-14',100,null,.5,0);ins.run('d','psa10','en','2026-10-14',100,95,.4,0);ins.run('e','psa10','en','2026-10-14',50,null,-.3,4);ins.run('f','psa10','en','2026-10-14',10,null,2,9);
+ const mv=await cardMovers(DB,{lang:'en',grade:'psa10',period:'30d'});
+ assert.deepEqual(mv.up.map(r=>r.card_id),['b','d'],'a: +3,500% on 2 sales is a guide jump; c: no sales; f: under $20');
+ assert.deepEqual(mv.down.map(r=>r.card_id),['e']);assert.equal(mv.unbacked,2);
+ assert.equal(await cardMovers(DB,{lang:'en',grade:'psa10',period:'2w'}),null);
+ sqlite.prepare("INSERT INTO sales_observations (card_id,language,grade,event_at,captured_at,listing_id,price,price_basis,parser_version,content_hash,recorded_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)").run('base1-4','en','psa10','2026-10-10','2026-10-11','L1',2100,'sold','t','h1','x');
+ sqlite.prepare("INSERT INTO sales_observations (card_id,language,grade,event_at,captured_at,listing_id,price,price_basis,parser_version,content_hash,recorded_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)").run('base1-4','en','psa10','2026-10-10','2026-10-12','L1',2100,'sold','t','h2','x');
+ sqlite.prepare("INSERT INTO sales_observations (card_id,language,grade,event_at,captured_at,listing_id,price,price_basis,parser_version,content_hash,recorded_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)").run('base1-2','en','psa10','2026-10-12','2026-10-12','L2',900,'sold','t','h3','x');
+ const tape=await(await api(req('/api/tape?grade=psa10'),env)).json();
+ assert.deepEqual(tape.sales.map(x=>[x.card_id,x.event_at]),[['base1-2','2026-10-12'],['base1-4','2026-10-10']],'newest first, one row per listing');
+ assert.equal((await api(req('/api/card-movers?period=nope'),env)).status,400);
  assert.equal(detail.tiers.holo,'Holo rare');assert.ok(detail.members.every(m=>typeof m.tier==='string'));
 });
