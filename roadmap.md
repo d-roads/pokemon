@@ -194,12 +194,17 @@ The **Market → Overview** tab.
   demand, demand change and index return, and its set's age and index return; eras and text search; four
   starting screens; the current screen is remembered in the browser; named screens are saved per account
   (`screens` table, `/api/screens`, up to 50); Export CSV writes every match (up to 20,000) with every field.
-- Portfolio analytics (Dex):
-  - Realized and unrealized profit and loss
-  - Allocation by era, grade, set and Pokémon
-  - Performance against the indices
-  - Risk and concentration, including exposure to a single Pokémon or set
-  - What-if: portfolio value if a set, Pokémon or grade index moves by a chosen %
+- [x] Portfolio analytics (Dex → Portfolio analytics, `lib/portfolio.mjs`, `/api/portfolio`):
+  - [x] Realized and unrealized profit and loss: a Dex entry can be marked sold (price each and date; new
+    `collection.sold_price`/`sold_date` columns). Sold entries leave the collection's value and count toward
+    realized P/L; the value chart holds them until the month sold.
+  - [x] Allocation by Pokémon, set, era, grade, rarity tier and language (a TAG TEAM splits its value).
+  - [x] Performance against the indices: the cards held now, at fixed quantities, against the same starting
+    amounts moving like their language and grade's market index (typical card), over 1 or 3 years.
+  - [x] Risk and concentration: largest holding, top 5, effective number of holdings, largest Pokémon and set,
+    value-weighted beta and volatility, share of value with no sales in 90 days.
+  - [x] What-if: a Pokémon, set, era, grade or tier moving by a chosen %, or the whole market with each card
+    scaled by its beta.
 - Alert types:
   - Price crosses a level
   - % move in a period

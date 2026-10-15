@@ -34,7 +34,7 @@ async function cachedMarketsFor(db,ids){
 }
 async function cachedMarket(db,id){const row=await db.prepare('SELECT payload FROM market_cache WHERE card_id = ?').bind(id).first();return row?JSON.parse(row.payload):null;}
 async function readWatch(db,user){const r=await db.prepare('SELECT card_id,grade,target,created_at FROM watchlist WHERE user_id = ? ORDER BY created_at DESC').bind(user).all();return r.results||[];}
-async function readCollection(db,user){const r=await db.prepare('SELECT id,card_id,grade,quantity,purchase_price,purchase_date,notes,created_at,updated_at FROM collection WHERE user_id = ? ORDER BY COALESCE(purchase_date,substr(created_at,1,10)) DESC,id DESC').bind(user).all();return r.results||[];}
+async function readCollection(db,user){const r=await db.prepare('SELECT id,card_id,grade,quantity,purchase_price,purchase_date,notes,sold_price,sold_date,created_at,updated_at FROM collection WHERE user_id = ? ORDER BY COALESCE(purchase_date,substr(created_at,1,10)) DESC,id DESC').bind(user).all();return r.results||[];}
 // Every capture is also appended to the observation log (best effort: a logging failure never blocks a refresh).
 async function logCapture(db,env,ctx,card,captured){try{await recordObservations(db,card,captured);}catch(e){console.error('Observation log:',e.message);ctx?.waitUntil?.(reportError(env,e,{source:'observations'}));}}
 // Japanese cards get their price source when their set is mapped (source_map). The mapping is
@@ -169,6 +169,9 @@ function ensureColumns(db){
   await db.prepare('CREATE TABLE IF NOT EXISTS set_sweeps (set_id TEXT PRIMARY KEY NOT NULL, swept_at TEXT NOT NULL, pages INTEGER, priced INTEGER, wanted INTEGER)').run();
   await db.prepare('CREATE TABLE IF NOT EXISTS nightly_runs (day TEXT PRIMARY KEY NOT NULL, started_at TEXT NOT NULL, finished_at TEXT, summary TEXT)').run();
   await ensureMetricTables(db);
+  // Dex entries can record a sale (realized P/L).
+  const dexCols=new Set(((await db.prepare('PRAGMA table_info(collection)').all()).results||[]).map(r=>r.name));
+  for(const [name,type] of [['sold_price','REAL'],['sold_date','TEXT']])if(!dexCols.has(name))await db.prepare(`ALTER TABLE collection ADD COLUMN ${name} ${type}`).run();
   await db.prepare('CREATE INDEX IF NOT EXISTS sales_observations_tape ON sales_observations (language, grade, event_at)').run();
   await db.prepare('CREATE TABLE IF NOT EXISTS screens (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, name TEXT NOT NULL, spec TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, UNIQUE (user_id, name))').run();
   await db.prepare('CREATE TRIGGER IF NOT EXISTS market_cache_light AFTER UPDATE OF payload ON market_cache WHEN NEW.light_key IS OLD.light_key BEGIN UPDATE market_cache SET light = NULL, light_key = NULL WHERE card_id = NEW.card_id; END').run();
@@ -465,7 +468,7 @@ async function undervalued(db,{lang,grade}){
 export const REFRESH_TIERS=[['daily',1,'Watched, owned, or worth $1,000+'],['weekly',7,'Worth $100–$1,000'],['monthly',30,'Under $100']];
 const NIGHTLY_PAGES=1500,TIER_SLACK_HOURS=4;
 async function tieredQueue(db,now=Date.now()){
- const keep=new Set([...((await db.prepare('SELECT DISTINCT card_id FROM watchlist').all()).results||[]),...((await db.prepare('SELECT DISTINCT card_id FROM collection').all()).results||[])].map(r=>r.card_id));
+ const keep=new Set([...((await db.prepare('SELECT DISTINCT card_id FROM watchlist').all()).results||[]),...((await db.prepare('SELECT DISTINCT card_id FROM collection WHERE sold_price IS NULL').all()).results||[])].map(r=>r.card_id));
  const values=new Map(((await db.prepare('SELECT card_id,MAX(price) AS value FROM card_metrics GROUP BY card_id').all()).results||[]).map(r=>[r.card_id,r.value]));
  const saved=new Map(((await db.prepare("SELECT card_id,json_extract(payload,'$.research.checkedAt') AS checked,json_extract(payload,'$.guide') AS guide FROM market_cache").all()).results||[]).map(r=>[r.card_id,r]));
  const tiers=Object.fromEntries(REFRESH_TIERS.map(([t])=>[t,{cards:0,due:0}])),rows=[];
@@ -552,8 +555,8 @@ export async function api(request,env,ctx){
     }
     const {errors,entry}=validateEntry(body,{cards,existingPurchaseDate:current?.purchase_date??null});if(errors.length)return json({error:errors[0],errors},400);
     const now=new Date().toISOString();
-    if(request.method==='POST')await db.prepare('INSERT INTO collection (user_id,card_id,grade,quantity,purchase_price,purchase_date,notes,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)').bind(user,entry.card_id,entry.grade,entry.quantity,entry.purchase_price,entry.purchase_date,entry.notes,now,now).run();
-    else await db.prepare('UPDATE collection SET card_id = ?, grade = ?, quantity = ?, purchase_price = ?, purchase_date = ?, notes = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind(entry.card_id,entry.grade,entry.quantity,entry.purchase_price,entry.purchase_date,entry.notes,now,id,user).run();
+    if(request.method==='POST')await db.prepare('INSERT INTO collection (user_id,card_id,grade,quantity,purchase_price,purchase_date,notes,sold_price,sold_date,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)').bind(user,entry.card_id,entry.grade,entry.quantity,entry.purchase_price,entry.purchase_date,entry.notes,entry.sold_price,entry.sold_date,now,now).run();
+    else await db.prepare('UPDATE collection SET card_id = ?, grade = ?, quantity = ?, purchase_price = ?, purchase_date = ?, notes = ?, sold_price = ?, sold_date = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind(entry.card_id,entry.grade,entry.quantity,entry.purchase_price,entry.purchase_date,entry.notes,entry.sold_price,entry.sold_date,now,id,user).run();
    }else if(request.method==='DELETE'){
     let body;try{body=await input(request);}catch{return json({error:'The Dex request was invalid.'},400);}
     await db.prepare('DELETE FROM collection WHERE id = ? AND user_id = ?').bind(Number(body.id),user).run();
@@ -561,6 +564,20 @@ export async function api(request,env,ctx){
    const collection=await readCollection(db,user),markets={};
    if(url.searchParams.get('markets')!=='0')for(const id of new Set(collection.map(e=>e.card_id)))markets[id]=await fullMarket(db,id);
    return json({collection,markets});
+  }
+  if(path==='/api/portfolio'&&request.method==='GET'){
+   // What the Dex analytics need beyond prices: each held card's groups, its metrics for its grade, and
+   // month-end levels of its language and grade's market index (typical card) as the benchmark.
+   if(!user)return json({error:'Sign in to view your Dex.'},401);
+   const entries=(await readCollection(db,user)).filter(e=>e.sold_price==null),meta={},metrics={},levels={};
+   for(const e of entries){
+    const c=cardById.get(e.card_id);if(!c)continue;
+    meta[c.id]??={lang:c.lang||'en',series:c.series,set:c.setId,setName:c.setName,tier:TIER_LABEL[tierOf(c)]||tierOf(c),chars:[...new Set(charactersOfCard(c))]};
+    const k=c.id+'|'+e.grade;if(!(k in metrics)){const r=await db.prepare('SELECT price,beta,correl,volatility,sales_90d,ret_1y,premium FROM card_metrics WHERE card_id = ? AND grade = ?').bind(c.id,e.grade).first();metrics[k]=r||null;}
+    const lk=(c.lang||'en')+'|'+e.grade;
+    if(!(lk in levels)){const all=(await indexLevels(db,(c.lang||'en')+':all:all'))[e.grade]||[];levels[lk]=all.filter(([d])=>new Date(Date.parse(d+'T00:00:00Z')+86400000).getUTCDate()===1).map(([d,v])=>[d.slice(0,7),v]);const last=all.at(-1);if(last&&levels[lk].at(-1)?.[0]!==last[0].slice(0,7))levels[lk].push([last[0].slice(0,7),last[1]]);}
+   }
+   return json({meta,metrics,levels,eras:Object.fromEntries(series.map(s=>[s.id,s.name]))});
   }
   if(path==='/api/alerts'){
    if(!user)return json({error:'Sign in to view alerts.'},401);

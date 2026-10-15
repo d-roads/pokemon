@@ -1,6 +1,6 @@
 import {manualSearchQuery,manualSearchUrl} from '/ebay-links.mjs';
 import {analyze as computeAnalysis,gradeNames,trendProjection} from '/analysis.mjs';
-import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE} from '/portfolio.mjs';
+import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,allocation,concentration,whatIf,versusMarket} from '/portfolio.mjs';
 import {normalizeCosts,costSummary,netReturn,maxBuyPrice,netProceeds,saleFee,DEFAULT_COSTS,MARKET_PRESETS} from '/investment-costs.mjs';
 const analysisCache=new WeakMap();
 const analyze=(market,grade)=>{if(!market)return computeAnalysis(market,grade);const day=Math.floor(Date.now()/86400000);let cache=analysisCache.get(market);if(!cache||cache.day!==day){cache={day,grades:{}};analysisCache.set(market,cache);}return cache.grades[grade]??=(computeAnalysis(market,grade));};
@@ -24,7 +24,7 @@ const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
 const JA_TEXT_KEY='futuresight-japanese-text';
 function savedJapaneseText(){try{return localStorage.getItem(JA_TEXT_KEY)==='on';}catch{return false;}}
 const state={showJapanese:savedJapaneseText(),sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],langs:['en','ja'],detailLang:null,detailAlt:null,detailGrade:null,marketLang:'en',filters:{min:null,max:null,activity:0,invest:0,research:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
- dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all'},alerts:{data:null,known:null,busy:false},cardMetrics:{},cardHistory:{},cardChart:{view:'price',grade:null,range:'1y',era:false},listings:{},grading:null,market:{tab:'overview',grade:'psa10',weight:'eq',data:{},error:null,index:null,period:'ret_30d',sorts:{},query:'',minCards:5,limit:100,memberLimit:100,memberSort:{key:'price',dir:-1},range:'1y',era:null,lifeSets:{},charView:'board',heatBy:'set'},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
+ dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all',tab:'alloc',alloc:'char',what:{dim:'market',key:'',move:-.2},vsRange:'1y',info:null},alerts:{data:null,known:null,busy:false},cardMetrics:{},cardHistory:{},cardChart:{view:'price',grade:null,range:'1y',era:false},listings:{},grading:null,market:{tab:'overview',grade:'psa10',weight:'eq',data:{},error:null,index:null,period:'ret_30d',sorts:{},query:'',minCards:5,limit:100,memberLimit:100,memberSort:{key:'price',dir:-1},range:'1y',era:null,lifeSets:{},charView:'board',heatBy:'set'},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
 // Crashes in the page are sent to the server, which forwards them to Sentry only when SENTRY_DSN is set. At most 5 per page load.
 let crashReports=0;
@@ -61,11 +61,11 @@ const LANGS=[{id:'en',label:'English'},{id:'ja',label:'Japanese'}];
 const langOf=c=>c.lang||'en';
 const inScope=c=>state.setId!=='all'&&!state.setId.startsWith('era:')?c.setId===state.setId:state.langs.includes(langOf(c))&&(state.setId==='all'?(!state.eras.length||state.eras.includes(c.series)):c.series===state.setId.slice(4));
 const scopedCards=()=>state.cards.filter(c=>inScope(c)&&(c.eligible||state.view==='watch'&&matchingWatch(c.id)));
-const owned=id=>state.dex.entries.filter(e=>e.card_id===id);
+const owned=id=>state.dex.entries.filter(e=>e.card_id===id&&e.sold_price==null);
 function stats(){
  const scope=scopedCards(),priced=scope.filter(c=>analyze(state.markets[c.id],state.grade).current!=null).length;
  $('#watch-count').textContent=state.watch.length;$('#summary-watch').innerHTML=state.watch.length+' <small>cards & grades saved</small>';
- $('#dex-count').textContent=state.dex.entries.reduce((n,e)=>n+(e.quantity||1),0);
+ $('#dex-count').textContent=state.dex.entries.filter(e=>e.sold_price==null).reduce((n,e)=>n+(e.quantity||1),0);
  const wide=state.setId==='all'||state.setId.startsWith('era:');
  $('#set-count').innerHTML=scope.length+' <small>'+(wide?new Set(scope.map(c=>c.setId)).size+' sets · rare cards':'EX, full art, secret & other rares')+'</small>';
  $('#set-count-label').textContent=wide?'Rare cards in view':'Rare cards in this set';
@@ -668,17 +668,20 @@ function renderDex(){
   <div class="dex-tile"><span>Collection value</span><strong>${money(s.value)}</strong><small>${s.cards} card${s.cards===1?'':'s'} · ${s.entries} entr${s.entries===1?'y':'ies'}${s.unpriced?' · '+s.unpriced+' unpriced':''}</small></div>
   <div class="dex-tile"><span>Cost basis</span><strong>${money(s.cost)}</strong><small>${s.noCost?s.noCost+' without a price paid':'What you paid'}</small></div>
   <div class="dex-tile"><span>Unrealized P/L</span><strong>${s.comparedCost?plText(s.pl,s.plPct):'—'}</strong><small>${s.comparedCost?'On '+money(s.comparedCost)+' of priced purchases':'Add prices paid to see P/L'}</small></div>
-  <div class="dex-tile"><span>Best performer</span><strong class="small">${(()=>{const b=s.rows.filter(r=>r.plPct!=null).sort((a,b)=>b.plPct-a.plPct)[0];return b?esc(cardById(b.card_id)?.name||b.card_id)+' '+plText(b.pl,b.plPct):'—';})()}</strong><small>By percentage return</small></div>
+  ${s.sold?`<div class="dex-tile"><span>Realized P/L</span><strong>${s.realizedCost?plText(s.realized,s.realizedPct):'—'}</strong><small>${s.sold} sold entr${s.sold===1?'y':'ies'} · ${money(s.proceeds)} received</small></div>`:''}
+  <div class="dex-tile"><span>Best performer</span><strong class="small">${(()=>{const b=s.rows.filter(r=>r.plPct!=null&&!r.sold).sort((a,b)=>b.plPct-a.plPct)[0];return b?esc(cardById(b.card_id)?.name||b.card_id)+' '+plText(b.pl,b.plPct):'—';})()}</strong><small>By percentage return</small></div>
  </div>
  <div class="dex-layout">
   <section class="panel dex-chart-panel" aria-label="Value and cost over time"><div class="panel-head"><div><h2>Value vs. cost</h2><p>Your collection's market value each month against what you paid.</p></div><div class="segmented" role="group" aria-label="Chart range">${Object.keys(ranges).map(k=>`<button data-range="${k}" aria-pressed="${state.dex.range===k}" class="${state.dex.range===k?'active':''}">${k==='all'?'All':k.toUpperCase()}</button>`).join('')}</div></div>
    ${empty?'<div class="chart-empty tall">Your chart appears once you add cards.</div>':lineChart({series:[{label:'Value',color:C.accent,area:true,points:shown.map(p=>[p.month,p.value,monthLabel(p.month)])},{label:'Cost',color:C.cost,dash:true,points:shown.map(p=>[p.month,p.cost,monthLabel(p.month)])}],height:230,label:'Collection value and cost basis by month'})}
    <p class="sales-note">Monthly values use each card's price history for its grade; the latest point uses today's reference price. Months before a price history exists use the price paid. Fees, shipping and tax are not included.</p></section>
   <section class="panel dex-holdings" aria-label="Cards in your Dex"><div class="panel-head"><div><h2>Your cards</h2><p>${empty?'Nothing here yet.':'Tap a card to edit it or see its own P/L.'}</p></div><div class="holdings-tools"><label class="sort-control"><span class="sr-only">Sort Dex</span><select id="dex-sort">${[['value','Highest value'],['pl','Best P/L'],['recent','Recently bought'],['set','Set order']].map(([v,l])=>`<option value="${v}" ${state.dex.sort===v?'selected':''}>${l}</option>`).join('')}</select></label><button class="button primary" id="dex-add">＋ Add a card</button></div></div>
-   ${empty?`<div class="empty-state"><strong>Start your Dex.</strong><p>Add cards you own with what you paid, and FutureSight keeps their value and profit up to date.</p><button class="button primary" id="dex-add-empty">Add your first card</button></div>`:`<div class="dex-grid">${rows.map(r=>{const c=cardById(r.card_id);if(!c)return '';return `<button class="dex-card" data-entry="${r.id}" aria-label="${esc(c.name)} ${gradeNames[r.grade]}, value ${money(r.value)}"><img src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span class="dex-card-body"><span class="dex-name">${esc(c.name)}</span><span class="dex-sub">${esc(c.setName)} · ${numberCaption(c)}</span><span class="dex-chips"><span class="grade-chip ${r.grade}">${gradeNames[r.grade].replace(' · near mint','')}</span>${r.quantity>1?`<span class="qty-chip">×${r.quantity}</span>`:''}</span><span class="dex-value">${money(r.value)}<small>${r.basis?esc(r.basis):'no price yet'}</small></span><span class="dex-pl">${r.cost!=null?plText(r.pl,r.plPct):'<span class="muted">Paid: not set</span>'}</span></span></button>`;}).join('')}</div>`}
+   ${empty?`<div class="empty-state"><strong>Start your Dex.</strong><p>Add cards you own with what you paid, and FutureSight keeps their value and profit up to date.</p><button class="button primary" id="dex-add-empty">Add your first card</button></div>`:`<div class="dex-grid">${rows.map(r=>{const c=cardById(r.card_id);if(!c)return '';return `<button class="dex-card" data-entry="${r.id}" aria-label="${esc(c.name)} ${gradeNames[r.grade]}, value ${money(r.value)}"><img src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span class="dex-card-body"><span class="dex-name">${esc(c.name)}</span><span class="dex-sub">${esc(c.setName)} · ${numberCaption(c)}</span><span class="dex-chips"><span class="grade-chip ${r.grade}">${gradeNames[r.grade].replace(' · near mint','')}</span>${r.quantity>1?`<span class="qty-chip">×${r.quantity}</span>`:''}${r.sold?'<span class="qty-chip sold-chip">Sold</span>':''}</span><span class="dex-value">${r.sold?money(r.proceeds)+`<small>sold ${date(r.sold_date)}</small>`:money(r.value)+`<small>${r.basis?esc(r.basis):'no price yet'}</small>`}</span><span class="dex-pl">${r.cost!=null?plText(r.pl,r.plPct)+(r.sold?' <small class="muted">realized</small>':''):'<span class="muted">Paid: not set</span>'}</span></span></button>`;}).join('')}</div>`}
   </section>
  </div>
+ ${empty?'':dexAnalytics(s)}
  ${empty?'':`<section class="panel binder-panel" aria-label="Set progress"><div class="panel-head"><div><h2>Binder progress</h2><p>Rare cards you own in each set you collect.</p></div></div><div class="binder-list">${binderProgress().map(b=>`<button class="binder-row" data-binder="${b.set.id}"><span class="binder-name"><b>${esc(b.set.name)}</b><small>${esc(state.series.find(x=>x.id===b.set.series)?.label||'')} · ${b.set.release.slice(0,4)}</small></span><span class="binder-bar" role="img" aria-label="${b.owned} of ${b.total} rare cards"><i style="width:${Math.max(2,Math.round(b.owned/b.total*100))}%"></i></span><span class="binder-count">${b.owned}<small>/ ${b.total}</small></span></button>`).join('')}</div></section>`}`;
+ wireDexAnalytics(view);
  view.querySelectorAll('[data-binder]').forEach(b=>b.onclick=()=>{state.view='browse';state.setId=b.dataset.binder;state.category='all';state.query='';$('#search').value='';updateView();});
  view.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{state.dex.range=b.dataset.range;renderDex();});
  const sort=view.querySelector('#dex-sort');if(sort)sort.onchange=e=>{state.dex.sort=e.target.value;renderDex();};
@@ -686,8 +689,61 @@ function renderDex(){
  view.querySelectorAll('[data-entry]').forEach(b=>b.onclick=()=>openDexDialog(state.dex.entries.find(e=>String(e.id)===b.dataset.entry)));
  wireImages();wireCharts(view);
 }
+// ---------- Dex analytics ----------
+// Allocation, risk and concentration, performance against the market index, and what-if moves, for the
+// cards held now. Groups and metrics come from /api/portfolio; values from the Dex's own prices.
+async function loadDexInfo(){
+ const d=state.dex;if(d.info)return;d.info={loading:true};
+ try{d.info=await request('/api/portfolio');}catch(e){d.info={error:e.message};}
+ if(state.view==='dex')renderDex();
+}
+const ALLOC_DIMS=[['char','Pokémon'],['setName','Set'],['series','Era'],['grade','Grade'],['tier','Rarity tier'],['lang','Language']];
+function allocName(dim,key){const i=state.dex.info;return dim==='grade'?gradeNames[key]||key:dim==='series'?i?.eras?.[key]||key:dim==='lang'?(LANGS.find(l=>l.id===key)?.label||key):key;}
+function barList(items,limit=10){const top=items.slice(0,limit),rest=items.slice(limit),other=rest.reduce((n,x)=>n+x.value,0),total=items.reduce((n,x)=>n+x.value,0);
+ return `<ol class="alloc-list">${[...top,...(other?[{name:'Everything else ('+rest.length+')',value:other,share:total?other/total:0}]:[])].map(x=>`<li><span class="alloc-name">${esc(x.name)}</span><span class="alloc-bar"><i style="width:${Math.max(1,x.share*100).toFixed(1)}%"></i></span><span class="alloc-share">${share(x.share)}</span><span class="alloc-value">${bigMoney(x.value)}</span></li>`).join('')}</ol>`;}
+function dexAnalytics(s){
+ const d=state.dex,info=d.info;if(!info)loadDexInfo();
+ const tabs=[['alloc','Allocation'],['risk','Risk'],['vs','vs Market'],['what','What-if']];
+ const head=`<div class="panel-head"><div><h2>Portfolio analytics</h2><p>The cards you hold now, at today's values.</p></div><div class="segmented" role="group" aria-label="Analytics">${tabs.map(([k,l])=>`<button data-dex-tab="${k}" class="${d.tab===k?'active':''}" aria-pressed="${d.tab===k}">${l}</button>`).join('')}</div></div>`;
+ if(!info||info.loading)return `<section class="panel dex-analytics">${head}${loadingBox('Loading…')}</section>`;
+ if(info.error)return `<section class="panel dex-analytics">${head}<p class="sales-note">${esc(info.error)}</p></section>`;
+ const meta=info.meta||{},metrics=info.metrics||{};let body='';
+ if(d.tab==='alloc'){
+  const items=allocation(s.rows,meta,d.alloc).map(x=>({...x,name:allocName(d.alloc,x.key)}));
+  body=`<div class="dex-tools"><div class="segmented" role="group" aria-label="Group by">${ALLOC_DIMS.map(([k,l])=>`<button data-dex-alloc="${k}" class="${d.alloc===k?'active':''}" aria-pressed="${d.alloc===k}">${l}</button>`).join('')}</div></div>${items.length?barList(items):'<p class="sales-note">No priced cards held.</p>'}${d.alloc==='char'?'<p class="sales-note">A card with several Pokémon splits its value between them. Trainers and items count as their own names.</p>':''}`;
+ }else if(d.tab==='risk'){
+  const c=concentration(s.rows,meta,metrics);
+  if(!c)body='<p class="sales-note">No priced cards held.</p>';
+  else{const top=cardById(c.top.card_id),cell=(l,v,t='')=>`<div${t?` title="${esc(t)}"`:''}><small>${l}</small><b>${v}</b></div>`;
+   body=`<div class="metric-grid risk-grid">${cell('Largest holding',share(c.top.share),top?top.name+' · '+gradeNames[c.top.grade]:'')}${cell('Top 5 holdings',share(c.top5))}${cell('Effective holdings',c.effective.toFixed(1),'How many equal-sized holdings would have the same concentration (1 ÷ sum of squared weights)')}${cell('Largest Pokémon',c.char?esc(c.char.key)+' · '+share(c.char.share):'—')}${cell('Largest set',c.set?esc(c.set.key)+' · '+share(c.set.share):'—')}${cell('Beta to era',c.beta==null?'—':c.beta.toFixed(2),'Value-weighted beta of the cards with one ('+share(c.betaCovered)+' of value)')}${cell('Volatility',c.volatility==null?'—':Math.round(c.volatility*100)+'%','Value-weighted annualised volatility of each card\'s guide (ignores diversification, so the collection\'s own is lower)')}${cell('No sales in 90 days',share(c.illiquid),'Share of value in cards with no matching sale in the 90 days before their last read: harder to sell quickly')}</div>
+    <p class="sales-note">${c.top.share>.25?'One card is over a quarter of your collection. ':''}${c.char&&c.char.share>.4?esc(c.char.key)+' is '+share(c.char.share)+' of your value, so its demand drives your results. ':''}Concentration is not bad in itself; it means fewer things decide how the collection does.</p>`;}
+ }else if(d.tab==='vs'){
+  const now=new Date(),months=[];for(let k=36;k>=0;k--)months.push(new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()-k,1)).toISOString().slice(0,7));
+  const n={'1y':13,'3y':37}[d.vsRange],r=versusMarket(s.rows,meta,marketFor,info.levels||{},months.slice(-n));
+  const ranges=`<div class="segmented" role="group" aria-label="Range">${[['1y','1Y'],['3y','3Y']].map(([k,l])=>`<button data-dex-vs="${k}" class="${d.vsRange===k?'active':''}" aria-pressed="${d.vsRange===k}">${l}</button>`).join('')}</div>`;
+  body=r?`<div class="dex-tools">${ranges}<span class="muted">Since ${monthLabel(r.start)}: your cards ${pct(r.mine)} · market ${pct(r.market)} · ${r.mine>=r.market?'ahead by':'behind by'} ${Math.abs(Math.round((r.mine-r.market)*1000)/10)} points</span></div>${lineChart({series:[{label:'Your cards',color:C.accent,area:true,points:r.points.map(p=>[p[0],p[1],monthLabel(p[0])])},{label:'Market',color:'var(--info)',dash:true,points:r.points.map(p=>[p[0],p[2],monthLabel(p[0])])}],height:220,width:720,label:'Your cards against the market index',format:v=>v.toFixed(1),tick:v=>v.toFixed(0)})}<p class="sales-note">Your current cards at fixed quantities, from their monthly guide, against the same starting amounts moving like their language and grade's market index (typical card). Starts at the first month every card has a price. Purchases, sales and fees are left out, so this measures what you hold, not your trading.</p>`
+   :`<div class="dex-tools">${ranges}</div><p class="sales-note">Needs a monthly guide price for every card you hold and market index history over the range. ${info.levels&&Object.values(info.levels).some(l=>l.length)?'One of your cards has no price that far back; try a shorter range.':'Market metrics have not been built yet.'}</p>`;
+ }else{
+  const w=d.what,dims=[['market','Whole market'],['char','Pokémon'],['setName','Set'],['series','Era'],['grade','Grade'],['tier','Rarity tier']];
+  const keys=w.dim==='market'?[]:allocation(s.rows,meta,w.dim).filter(x=>x.key!=='Other').map(x=>x.key);if(w.dim!=='market'&&!keys.includes(w.key))w.key=keys[0]||'';
+  const r=whatIf(s.rows,meta,metrics,w);
+  body=`<div class="whatif"><label>If<select id="dex-what-dim">${dims.map(([k,l])=>`<option value="${k}" ${w.dim===k?'selected':''}>${l}</option>`).join('')}</select></label>${w.dim==='market'?'':`<select id="dex-what-key" aria-label="Which">${keys.map(k=>`<option value="${esc(k)}" ${w.key===k?'selected':''}>${esc(allocName(w.dim,k))}</option>`).join('')}</select>`}<label>moves<span class="unit-input"><input id="dex-what-move" type="number" step="1" min="-100" max="500" value="${Math.round(w.move*100)}"><i>%</i></span></label></div>
+   <div class="metric-grid">${[['Value now',money(r.before)],['Value after',money(r.after)],['Change',`<span class="pl ${r.change>=0?'up':'down'}">${signed(r.change)}</span>`],[w.dim==='market'?'Collection move':'Affected value',w.dim==='market'?pct(r.changePct):money(r.affected)]].map(([l,v])=>`<div><small>${l}</small><b>${v}</b></div>`).join('')}</div>
+   <p class="sales-note">${w.dim==='market'?'Each card moves by its beta to its era (1 where unknown) times the market move.':'Cards in the group move by the chosen amount; a card shared by several Pokémon moves by its share.'} A scenario, not a forecast.</p>`;
+ }
+ return `<section class="panel dex-analytics">${head}<div class="dex-analytics-body">${body}</div></section>`;
+}
+function wireDexAnalytics(view){
+ const d=state.dex;
+ view.querySelectorAll('[data-dex-tab]').forEach(b=>b.onclick=()=>{d.tab=b.dataset.dexTab;renderDex();});
+ view.querySelectorAll('[data-dex-alloc]').forEach(b=>b.onclick=()=>{d.alloc=b.dataset.dexAlloc;renderDex();});
+ view.querySelectorAll('[data-dex-vs]').forEach(b=>b.onclick=()=>{d.vsRange=b.dataset.dexVs;renderDex();});
+ const dim=view.querySelector('#dex-what-dim');if(dim)dim.onchange=()=>{d.what={...d.what,dim:dim.value,key:''};renderDex();};
+ const key=view.querySelector('#dex-what-key');if(key)key.onchange=()=>{d.what.key=key.value;renderDex();};
+ const move=view.querySelector('#dex-what-move');if(move)move.onchange=()=>{const v=Number(move.value);if(Number.isFinite(v)&&v>=-100&&v<=500){d.what.move=v/100;renderDex();}};
+}
 function binderProgress(){
- const ownedIds=new Set(state.dex.entries.map(e=>e.card_id)),bySet=new Map();
+ const ownedIds=new Set(state.dex.entries.filter(e=>e.sold_price==null).map(e=>e.card_id)),bySet=new Map();
  for(const id of ownedIds){const c=cardById(id);if(c)bySet.set(c.setId,(bySet.get(c.setId)||new Set()).add(id));}
  return [...bySet].map(([setId,ids])=>{const set=state.sets.find(x=>x.id===setId),rares=state.cards.filter(c=>c.setId===setId&&c.eligible);return {set,owned:[...ids].filter(id=>rares.some(c=>c.id===id)).length,total:rares.length};}).filter(b=>b.set&&b.total).sort((a,b)=>b.owned/b.total-a.owned/a.total);
 }
@@ -705,11 +761,12 @@ function openDexDialog(entry){
    <div class="field-row"><label class="field">Grade<select id="dex-grade">${['raw','psa9','psa10'].map(g=>`<option value="${g}" ${grade===g?'selected':''}>${gradeNames[g]}</option>`).join('')}</select></label><label class="field">Quantity<input id="dex-qty" type="number" min="1" max="999" step="1" value="${entry.quantity||1}"></label></div>
    <div class="field-row"><label class="field">Price paid each (USD)<input id="dex-price" type="number" min="0" max="1000000" step="0.01" value="${entry.purchase_price??''}" placeholder="Optional"></label><div class="field date-field"><span>Date bought</span><div class="date-parts"><select id="dex-date-month" aria-label="Purchase month"><option value="">Month</option>${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((name,i)=>{const value=String(i+1).padStart(2,'0');return `<option value="${value}" ${dateDraft.month===value?'selected':''}>${name}</option>`;}).join('')}</select><select id="dex-date-day" aria-label="Purchase day"><option value="">Day</option>${Array.from({length:31},(_,i)=>{const value=String(i+1).padStart(2,'0');return `<option value="${value}" ${dateDraft.day===value?'selected':''}>${i+1}</option>`;}).join('')}</select><select id="dex-date-year" aria-label="Purchase year"><option value="">Year</option>${(()=>{const current=Number(today.slice(0,4)),minimum=Number(MIN_PURCHASE_DATE.slice(0,4)),years=Array.from({length:current-minimum+1},(_,i)=>String(current-i));if(dateDraft.year&&Number(dateDraft.year)<minimum)years.push(dateDraft.year);return years.map(year=>`<option value="${year}" ${dateDraft.year===year?'selected':''}>${year}${Number(year)<minimum?' · existing':''}</option>`).join('');})()}</select></div><div class="date-shortcuts"><button type="button" class="link-button" id="dex-date-today">Today</button><button type="button" class="link-button" id="dex-date-clear">Clear</button><small>Optional · 2010 or later</small></div></div></div>
    <label class="field">Notes<input id="dex-notes" type="text" maxlength="280" value="${esc(entry.notes||'')}" placeholder="Cert number, where you bought it…"></label>
+   <details class="dex-sold" ${entry.sold_price!=null?'open':''}><summary>${entry.sold_price!=null?'Sold':'Mark as sold'}</summary><div class="field-row"><label class="field">Sold for, each (USD)<input id="dex-sold-price" type="number" min="0" max="1000000" step="0.01" value="${entry.sold_price??''}" placeholder="Sale price"></label><label class="field">Date sold<input id="dex-sold-date" type="date" min="${MIN_PURCHASE_DATE}" max="${today}" value="${entry.sold_date||''}"></label></div><p class="field-hint">A sold entry leaves your collection's value and counts toward realized P/L. Clear both to hold it again.</p></details>
    ${card&&val?`<div class="dex-preview"><div><span>Value now</span><strong>${money(val.value)}</strong><small>${val.basis?esc(val.basis):'No price yet'}</small></div><div><span>P/L</span><strong>${val.cost!=null?plText(val.pl,val.plPct):'—'}</strong><small>${val.cost!=null?'vs '+money(val.cost)+' paid':'Add a price paid'}</small></div></div>${h.length>1?lineChart({series:[{label:gradeNames[grade],color:C.accent,area:true,points:h.map(([ym,v])=>[ym,v,monthLabel(ym)])}],height:180,width:480,label:'Price history for this card',reference:entry.purchase_price!=null?{value:entry.purchase_price,label:'Paid '+money(entry.purchase_price),color:C.cost,markIndex:paidIdx>=0?paidIdx:null}:null}):''}`:''}
    <p class="form-error" id="dex-error" role="alert" hidden></p>
    <div class="dialog-actions">${editing?'<button type="button" class="button danger" id="dex-delete">Remove</button>':''}<span></span><button type="button" class="button" id="dex-cancel">Cancel</button><button type="submit" class="button primary" id="dex-save">${editing?'Save changes':'Add to Dex'}</button></div>
   </div>`;
-  const sync=()=>{dateDraft={month:$('#dex-date-month').value,day:$('#dex-date-day').value,year:$('#dex-date-year').value};entry={...entry,grade:$('#dex-grade').value,quantity:Number($('#dex-qty').value)||1,purchase_price:$('#dex-price').value===''?null:Number($('#dex-price').value),purchase_date:readDate(),notes:$('#dex-notes').value};};
+  const sync=()=>{dateDraft={month:$('#dex-date-month').value,day:$('#dex-date-day').value,year:$('#dex-date-year').value};entry={...entry,grade:$('#dex-grade').value,quantity:Number($('#dex-qty').value)||1,purchase_price:$('#dex-price').value===''?null:Number($('#dex-price').value),purchase_date:readDate(),notes:$('#dex-notes').value,sold_price:$('#dex-sold-price')?.value===''||$('#dex-sold-price')==null?null:Number($('#dex-sold-price').value),sold_date:$('#dex-sold-date')?.value||null};};
   $('#dex-close').onclick=$('#dex-cancel').onclick=()=>dlg.close();
   $('#dex-grade').onchange=()=>{sync();draw();};$('#dex-price').onchange=()=>{sync();draw();};
   for(const id of ['#dex-date-month','#dex-date-day','#dex-date-year'])$(id).onchange=sync;
@@ -720,13 +777,13 @@ function openDexDialog(entry){
   if($('#dex-search')){const s=$('#dex-search');s.oninput=()=>{const res=cardSearch(s.value);$('#dex-results').innerHTML=res.map(c=>`<button type="button" role="option" data-pick="${c.id}"><img src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><b>${esc(c.name)}</b><small>${esc(c.setName)} · ${numberCaption(c)}</small></span></button>`).join('')||(s.value.trim().length>1?'<p class="field-hint">No cards match.</p>':'');$('#dex-results').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{sync();card=cardById(b.dataset.pick);entry.card_id=card.id;draw();});wireImages();};}
   if($('#dex-delete'))$('#dex-delete').onclick=async()=>{try{const r=await send('/api/collection','DELETE',{id:entry.id});applyDex(r);dlg.close();toast('Removed from your Dex.');}catch(e){$('#dex-error').textContent=e.message;$('#dex-error').hidden=false;}};
   form.onsubmit=async e=>{e.preventDefault();sync();if(!card){$('#dex-error').textContent='Choose a card first.';$('#dex-error').hidden=false;return;}if(entry.purchase_date==='invalid'){$('#dex-error').textContent='Choose a complete, valid purchase date from 2010 through today.';$('#dex-error').hidden=false;return;}
-   const body={card_id:card.id,grade:entry.grade,quantity:entry.quantity,purchase_price:entry.purchase_price,purchase_date:entry.purchase_date,notes:entry.notes,...(editing?{id:entry.id}:{})};
+   const body={card_id:card.id,grade:entry.grade,quantity:entry.quantity,purchase_price:entry.purchase_price,purchase_date:entry.purchase_date,notes:entry.notes,sold_price:entry.sold_price??null,sold_date:entry.sold_date??null,...(editing?{id:entry.id}:{})};
    $('#dex-save').disabled=true;try{const r=await send('/api/collection',editing?'PUT':'POST',body);applyDex(r);dlg.close();toast(editing?'Dex entry saved.':card.name+' added to your Dex.');}catch(err){$('#dex-error').textContent=err.message;$('#dex-error').hidden=false;$('#dex-save').disabled=false;}};
   wireImages();wireCharts(form);
  };
  entry={grade:state.grade,quantity:1,...entry};draw();if(!dlg.open)dlg.showModal();
 }
-function applyDex(r){state.dex.entries=r.collection;state.dex.markets={...state.dex.markets,...(r.markets||{})};state.dex.loaded=true;stats();if(state.view==='dex')renderDex();else{renderList();renderDetail();}}
+function applyDex(r){state.dex.info=null;state.dex.entries=r.collection;state.dex.markets={...state.dex.markets,...(r.markets||{})};state.dex.loaded=true;stats();if(state.view==='dex')renderDex();else{renderList();renderDetail();}}
 
 // ---------- Alerts ----------
 async function loadAlerts(quiet){try{const r=await request('/api/alerts');applyAlerts(r,quiet);}catch(e){if(!quiet)error(e.message);}}

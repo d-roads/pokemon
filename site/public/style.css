@@ -1246,3 +1246,21 @@ html.intro-pending .brand-mark,html.intro-playing .brand-mark{visibility:hidden}
 .screen-saved{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .screen-saved input{width:180px}
 .table-tools .button{margin-left:auto}
+/* Dex analytics and sales */
+.dex-analytics{margin-top:16px}
+.dex-analytics-body{padding:0 18px 16px}
+.dex-tools{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:10px}
+.alloc-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.alloc-list li{display:grid;grid-template-columns:minmax(120px,220px) 1fr 52px 70px;gap:10px;align-items:center;font-size:13px}
+.alloc-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.alloc-bar{height:8px;border-radius:4px;background:var(--panel-3);overflow:hidden}
+.alloc-bar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.alloc-share,.alloc-value{text-align:right;font:500 12px var(--mono)}
+.alloc-value{color:var(--muted)}
+.whatif{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+.whatif label{display:flex;align-items:center;gap:6px}
+.whatif input{width:80px}
+.sold-chip{background:var(--panel-3);color:var(--muted)}
+.dex-sold summary{cursor:pointer;color:var(--muted);font-size:13px;margin:4px 0}
+@media (max-width:640px){.alloc-list li{grid-template-columns:1fr 46px 62px}.alloc-bar{grid-column:1/-1;grid-row:2}}
+@media (min-width:981px){.dex-summary:has(> .dex-tile:nth-child(5)){grid-template-columns:repeat(5,minmax(0,1fr))}}

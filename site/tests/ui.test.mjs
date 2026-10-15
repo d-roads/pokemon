@@ -6,7 +6,7 @@ import vm from 'node:vm';
 import {cards,sets,series} from '../data/catalog.mjs';
 import {snapshots} from '../data/market.mjs';
 import {analyze,gradeNames,trendProjection} from '../lib/analysis.mjs';
-import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE} from '../lib/portfolio.mjs';
+import {summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,allocation,concentration,whatIf,versusMarket} from '../lib/portfolio.mjs';
 import {topMovers} from '../lib/movers.mjs';
 import {potentialInvestments} from '../lib/invest.mjs';
 import {investmentScores} from '../lib/score.mjs';
@@ -31,7 +31,7 @@ function workspace(){
  const document={querySelector:s=>elements.get(s)||null,querySelectorAll:s=>s==='[data-category]'?categories:[]};
  const responses={'/api/catalog':{cards,sets,series,markets:snapshots,local:true},'/api/watchlist':{watchlist:[]},'/api/movers':moverData,'/api/investments':investData,'/api/scores':{grades:scoreData.grades,scores:scoreData.scores},'/api/market':{market:null,score:null},'/api/collection':{collection:[],markets:{}},'/api/alerts':{alerts:[],unseen:0,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''}},searches:[],live:false}};
  const calls=[];
- const context=vm.createContext({document,manualSearchQuery,manualSearchUrl,normalizeCosts,costSummary,netReturn,maxBuyPrice,netProceeds,saleFee,DEFAULT_COSTS,MARKET_PRESETS,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,calls,fetch:async url=>{const path=url.split('?')[0];calls.push(url);let r=responses[path];if(typeof r==='function')r=r(url);if(r?.__response)return r.__response;const headers=new Headers({'Content-Type':'application/json'});if(r&&r.__status)return {ok:false,status:r.__status,headers,json:async()=>r.body};return {ok:true,status:200,headers,json:async()=>r||{}};}});
+ const context=vm.createContext({document,manualSearchQuery,manualSearchUrl,normalizeCosts,costSummary,netReturn,maxBuyPrice,netProceeds,saleFee,DEFAULT_COSTS,MARKET_PRESETS,analyze,computeAnalysis:analyze,gradeNames,trendProjection,summarize,portfolioSeries,priceHistory,entryValue,MIN_PURCHASE_DATE,allocation,concentration,whatIf,versusMarket,Intl,Date,AbortController,Object,setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,calls,fetch:async url=>{const path=url.split('?')[0];calls.push(url);let r=responses[path];if(typeof r==='function')r=r(url);if(r?.__response)return r.__response;const headers=new Headers({'Content-Type':'application/json'});if(r&&r.__status)return {ok:false,status:r.__status,headers,json:async()=>r.body};return {ok:true,status:200,headers,json:async()=>r||{}};}});
  const source=readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/^import .*;\s*$/gm,'').replace(/init\(\);\s*$/,'');
  vm.runInContext(source,context);
  return {context,responses,calls,e:s=>elements.get(s),run:s=>vm.runInContext(s,context)};
@@ -587,4 +587,20 @@ test('Market screener: presets, filters in percent, sorting, saved screens and C
  const calls=ui.calls.filter(u=>u==='/api/screen');assert.ok(calls.length>=2);
  assert.equal(ui.run("fromInput('ret','-25')"),-.25);assert.equal(ui.run("toInput('x',4)"),4);
  await ui.run('exportScreen()');assert.equal(ui.calls.filter(u=>u==='/api/screen').length,calls.length+1);
+});
+
+test('Dex: sold entries count as realized P/L, and analytics show allocation, risk, market comparison and what-if',async()=>{
+ const ui=workspace();await ui.run('init()');
+ const day=n=>new Date(Date.now()-n*86400000).toISOString().slice(0,10);
+ const sales=g=>[1,2,3].map(i=>({id:g+i,grade:g,date:day(i*3),price:g==='psa10'?1000:500,condition:'NM'}));
+ ui.responses['/api/collection']={collection:[{id:1,card_id:'base1-4',grade:'psa10',quantity:1,purchase_price:800,purchase_date:'2025-01-01'},{id:2,card_id:'base1-2',grade:'psa9',quantity:1,purchase_price:300,purchase_date:'2025-01-01',sold_price:450,sold_date:'2026-01-01'},{id:3,card_id:'base1-15',grade:'psa9',quantity:1,purchase_price:400}],markets:{'base1-4':{sales:sales('psa10')},'base1-2':{sales:sales('psa9')},'base1-15':{sales:sales('psa9')}}};
+ ui.responses['/api/portfolio']={meta:{'base1-4':{lang:'en',series:'WOTC',set:'base1',setName:'Base Set',tier:'Holo rare',chars:['Charizard']},'base1-15':{lang:'en',series:'WOTC',set:'base1',setName:'Base Set',tier:'Holo rare',chars:['Venusaur']}},metrics:{'base1-4|psa10':{beta:1.5,volatility:.4,sales_90d:3},'base1-15|psa9':{beta:.5,volatility:.2,sales_90d:2}},levels:{},eras:{WOTC:'Wizards of the Coast'}};
+ await ui.run('loadDex()');ui.run("state.view='dex';renderDex()");for(let i=0;i<4;i++)await new Promise(r=>setImmediate(r));
+ let html=ui.e('#dex-view').innerHTML;
+ assert.match(html,/Realized P\/L/);assert.match(html,/\+\$150\.00/);assert.match(html,/Sold/);assert.match(html,/\$1,500\.00/,'held value: 1,000 + 500');
+ assert.match(html,/Portfolio analytics/);assert.match(html,/Charizard/);assert.match(html,/67%/,'Charizard is two thirds of what is held');
+ ui.run("state.dex.tab='risk';renderDex()");html=ui.e('#dex-view').innerHTML;assert.match(html,/Effective holdings/);assert.match(html,/1\.8/,'1 ÷ (4/9 + 1/9)');assert.match(html,/1\.17/,'value-weighted beta');
+ ui.run("state.dex.tab='vs';renderDex()");assert.match(ui.e('#dex-view').innerHTML,/Market metrics have not been built yet/);
+ ui.run("state.dex.tab='what';state.dex.what={dim:'market',key:'',move:-.2};renderDex()");html=ui.e('#dex-view').innerHTML;
+ assert.match(html,/\$1,150\.00/,'1,000 × (1 − 0.3) + 500 × (1 − 0.1)');
 });

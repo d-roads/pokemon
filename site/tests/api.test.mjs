@@ -66,6 +66,13 @@ test('Dex entries are validated, scoped to their owner, and editable',async()=>{
  assert.equal((await(await api(req('/api/collection','GET',null,'someone-else'),env)).json()).collection.length,0);
  assert.equal((await api(req('/api/collection','PUT',{id,card_id:'xy5-151',grade:'psa9',quantity:1,purchase_price:1400},'someone-else'),env)).status,404);
  r=await(await api(req('/api/collection','PUT',{id,card_id:'xy5-151',grade:'psa10',quantity:1,purchase_price:3000,purchase_date:'2025-06-01'},'dex-user'),env)).json();assert.equal(r.collection[0].grade,'psa10');assert.equal(r.collection[0].purchase_price,3000);
+ r=await(await api(req('/api/collection','PUT',{id,card_id:'xy5-151',grade:'psa10',quantity:1,purchase_price:3000,purchase_date:'2025-06-01',sold_price:3600,sold_date:'2026-01-10'},'dex-user'),env)).json();
+ assert.equal(r.collection[0].sold_price,3600);assert.equal(r.collection[0].sold_date,'2026-01-10');
+ assert.equal((await api(req('/api/collection','PUT',{id,card_id:'xy5-151',grade:'psa10',quantity:1,purchase_price:3000,purchase_date:'2025-06-01',sold_price:3600},'dex-user'),env)).status,400,'a sale needs a date');
+ const folio=await(await api(req('/api/portfolio','GET',null,'dex-user'),env)).json();assert.deepEqual(folio.meta,{},'sold cards are not held');
+ r=await(await api(req('/api/collection','PUT',{id,card_id:'xy5-151',grade:'psa10',quantity:1,purchase_price:3000,purchase_date:'2025-06-01'},'dex-user'),env)).json();assert.equal(r.collection[0].sold_price,null,'held again');
+ const held=await(await api(req('/api/portfolio','GET',null,'dex-user'),env)).json();
+ assert.equal(held.meta['xy5-151'].setName,'Primal Clash');assert.deepEqual(held.meta['xy5-151'].chars,['Groudon']);assert.ok('xy5-151|psa10' in held.metrics);assert.ok(Array.isArray(held.levels['en|psa10']));
  r=await(await api(req('/api/collection','DELETE',{id},'dex-user'),env)).json();assert.equal(r.collection.length,0);
 });
 test('Alert settings keep secrets server-side and validate notification targets',async()=>{
