@@ -9,12 +9,12 @@ import {analyze} from './analysis.mjs';
 import {manualSearchUrl} from './ebay-links.mjs';
 
 export const EBAY_CATEGORY='183454';
-export const DEFAULT_SETTINGS={enabled:false,provider:'ebay',intervalMinutes:30,includeAuctions:false,useSuggested:true,ebay:{clientId:'',clientSecret:''},serpapi:{apiKey:''},notify:{ntfy:'',discord:''}};
+export const DEFAULT_SETTINGS={enabled:false,provider:'ebay',intervalMinutes:30,includeAuctions:false,useSuggested:true,useFair:false,fairDiscount:.15,ebay:{clientId:'',clientSecret:''},serpapi:{apiKey:''},notify:{ntfy:'',discord:''}};
 const GRADE_QUERY={raw:'',psa9:'PSA 9',psa10:'PSA 10'};
 
 export function normalizeSettings(raw){
  const s=raw&&typeof raw==='object'?raw:{};
- return {enabled:!!s.enabled,provider:s.provider==='serpapi'?'serpapi':'ebay',intervalMinutes:Math.min(720,Math.max(10,Math.round(Number(s.intervalMinutes)||DEFAULT_SETTINGS.intervalMinutes))),includeAuctions:!!s.includeAuctions,useSuggested:s.useSuggested!==false,
+ return {enabled:!!s.enabled,provider:s.provider==='serpapi'?'serpapi':'ebay',intervalMinutes:Math.min(720,Math.max(10,Math.round(Number(s.intervalMinutes)||DEFAULT_SETTINGS.intervalMinutes))),includeAuctions:!!s.includeAuctions,useSuggested:s.useSuggested!==false,useFair:!!s.useFair,fairDiscount:Number.isFinite(Number(s.fairDiscount))?Math.min(.5,Math.max(0,Number(s.fairDiscount))):DEFAULT_SETTINGS.fairDiscount,
   ebay:{clientId:String(s.ebay?.clientId||'').trim().slice(0,200),clientSecret:String(s.ebay?.clientSecret||'').trim().slice(0,200)},
   serpapi:{apiKey:String(s.serpapi?.apiKey||'').trim().slice(0,200)},
   notify:{ntfy:String(s.notify?.ntfy||'').trim().slice(0,300),discord:String(s.notify?.discord||'').trim().slice(0,300)}};
@@ -36,7 +36,7 @@ export const hasEbayKeys=s=>!!(s?.ebay?.clientId&&s?.ebay?.clientSecret);
 export const hasListingAccess=s=>s?.provider==='serpapi'?!!s?.serpapi?.apiKey:hasEbayKeys(s);
 export function publicSettings(s){
  const n=normalizeSettings(s),id=n.ebay.clientId;
- return {enabled:n.enabled,provider:n.provider,configured:hasListingAccess(n),serpapi:{configured:!!n.serpapi.apiKey,hasSecret:!!n.serpapi.apiKey},intervalMinutes:n.intervalMinutes,includeAuctions:n.includeAuctions,useSuggested:n.useSuggested,notify:n.notify,
+ return {enabled:n.enabled,provider:n.provider,configured:hasListingAccess(n),serpapi:{configured:!!n.serpapi.apiKey,hasSecret:!!n.serpapi.apiKey},intervalMinutes:n.intervalMinutes,includeAuctions:n.includeAuctions,useSuggested:n.useSuggested,useFair:n.useFair,fairDiscount:n.fairDiscount,notify:n.notify,
   ebay:{configured:hasEbayKeys(n),clientId:id?id.slice(0,6)+'…'+id.slice(-4):'',hasSecret:!!n.ebay.clientSecret}};
 }
 export function ntfyUrl(value){
@@ -86,7 +86,10 @@ export function listingMatches(title,card,grade){
 // The price an alert is measured against: the collector's own limit, else the suggested target.
 export function alertLimit(watch,market,settings,now=Date.now()){
  if(watch.target>0)return {limit:watch.target,source:'your limit'};
- if(normalizeSettings(settings).useSuggested){const a=analyze(market,watch.grade,15,now);if(a.target>0)return {limit:a.target,source:'suggested target'};}
+ const s=normalizeSettings(settings);
+ if(s.useSuggested){const a=analyze(market,watch.grade,15,now);if(a.target>0)return {limit:a.target,source:'suggested target'};}
+ // Too few sales for a suggested target: a set discount to fair value (the guide), when turned on.
+ if(s.useFair){const f=fairValue(market,watch.grade,now);if(f)return {limit:Math.floor(f.value*(1-s.fairDiscount)*100)/100,source:Math.round(s.fairDiscount*100)+'% below fair value ('+f.source+')'};}
  return null;
 }
 
@@ -228,12 +231,14 @@ export function alertMessage(a){
   body:a.set_name+' #'+a.number_label+' · '+money(a.total)+(a.shipping==null?' + shipping':' with shipping')+' · limit '+money(a.limit_price)+(below>0?' · '+below+'% under market':'')+'\n'+a.title};
 }
 export async function sendNotifications(found,settings,fetchImpl=fetch){
- const s=normalizeSettings(settings),jobs=[];
- for(const a of found.slice(0,10)){
-  const m=alertMessage(a);
-  const topic=ntfyUrl(s.notify.ntfy);
-  if(topic)jobs.push(fetchImpl(topic,{method:'POST',headers:{Title:m.title.replace(/[^\x20-\x7e]/g,''),Click:a.url,Tags:'moneybag'},body:m.body,signal:AbortSignal.timeout(10000)}));
-  if(s.notify.discord)jobs.push(fetchImpl(s.notify.discord,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:'FutureSight',embeds:[{title:m.title.slice(0,250),url:a.url,description:m.body.slice(0,1000),...(a.image?{thumbnail:{url:a.image}}:{})}]}),signal:AbortSignal.timeout(10000)}));
+ return sendMessages(found.slice(0,10).map(a=>({...alertMessage(a),url:a.url,image:a.image,tags:'moneybag'})),settings,fetchImpl);
+}
+// Any message ({title, body, url?, image?, tags?}) to the account's ntfy topic and Discord webhook.
+export async function sendMessages(messages,settings,fetchImpl=fetch){
+ const s=normalizeSettings(settings),jobs=[],topic=ntfyUrl(s.notify.ntfy);
+ for(const m of messages.slice(0,10)){
+  if(topic)jobs.push(fetchImpl(topic,{method:'POST',headers:{Title:m.title.replace(/[^\x20-\x7e]/g,''),...(m.url?{Click:m.url}:{}),Tags:m.tags||'chart_with_upwards_trend'},body:m.body||m.title,signal:AbortSignal.timeout(10000)}));
+  if(s.notify.discord)jobs.push(fetchImpl(s.notify.discord,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:'FutureSight',embeds:[{title:m.title.slice(0,250),...(m.url?{url:m.url}:{}),description:String(m.body||'').slice(0,1000),...(m.image?{thumbnail:{url:m.image}}:{})}]}),signal:AbortSignal.timeout(10000)}));
  }
  const results=await Promise.allSettled(jobs);
  return {sent:results.filter(r=>r.status==='fulfilled'&&r.value.ok).length,attempted:jobs.length};

@@ -1264,3 +1264,20 @@ html.intro-pending .brand-mark,html.intro-playing .brand-mark{visibility:hidden}
 .dex-sold summary{cursor:pointer;color:var(--muted);font-size:13px;margin:4px 0}
 @media (max-width:640px){.alloc-list li{grid-template-columns:1fr 46px 62px}.alloc-bar{grid-column:1/-1;grid-row:2}}
 @media (min-width:981px){.dex-summary:has(> .dex-tile:nth-child(5)){grid-template-columns:repeat(5,minmax(0,1fr))}}
+/* Market alerts */
+.signal-form{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.signal-form h4{margin:0 0 8px}
+.signal-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.signal-row .unit-input input{width:90px}
+.signal-rules{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.signal-rules li{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.signal-rules small{color:var(--muted)}
+.signal-rules.all li{padding:6px 0;border-top:1px solid var(--line)}
+.market-alerts .sub-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.signal-events{display:flex;flex-direction:column}
+.signal-event{display:grid;grid-template-columns:150px 1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+.signal-event.unseen .link-button{font-weight:650}
+.signal-kind{font:500 11px var(--mono);color:var(--muted);text-transform:uppercase}
+.signal-event .link-button{text-align:left}
+.signal-event small{color:var(--muted)}
+@media (max-width:640px){.signal-event{grid-template-columns:1fr auto}.signal-kind{grid-column:1/-1}}

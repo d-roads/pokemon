@@ -24,7 +24,7 @@ const GRADE_FROM={0:'raw',9:'psa9',10:'psa10'};
 const JA_TEXT_KEY='futuresight-japanese-text';
 function savedJapaneseText(){try{return localStorage.getItem(JA_TEXT_KEY)==='on';}catch{return false;}}
 const state={showJapanese:savedJapaneseText(),sets:[],series:[],marketSeries:[],setId:'all',cards:[],markets:{},full:{},watch:[],grade:'psa9',category:'all',query:'',sort:'featured',view:'browse',selected:null,limit:18,expanded:false,focus:false,eras:[],langs:['en','ja'],detailLang:null,detailAlt:null,detailGrade:null,marketLang:'en',filters:{min:null,max:null,activity:0,invest:0,research:0},filtersOpen:false,scores:null,scoreDetail:{},scoreError:null,research:null,investDetail:{},asks:{},costs:savedCosts(),ticker:null,appearance:savedAppearance(),
- dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all',tab:'alloc',alloc:'char',what:{dim:'market',key:'',move:-.2},vsRange:'1y',info:null},alerts:{data:null,known:null,busy:false},cardMetrics:{},cardHistory:{},cardChart:{view:'price',grade:null,range:'1y',era:false},listings:{},grading:null,market:{tab:'overview',grade:'psa10',weight:'eq',data:{},error:null,index:null,period:'ret_30d',sorts:{},query:'',minCards:5,limit:100,memberLimit:100,memberSort:{key:'price',dir:-1},range:'1y',era:null,lifeSets:{},charView:'board',heatBy:'set'},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
+ dex:{entries:[],markets:{},loaded:false,sort:'value',range:'all',tab:'alloc',alloc:'char',what:{dim:'market',key:'',move:-.2},vsRange:'1y',info:null},alerts:{data:null,known:null,busy:false},signals:null,cardMetrics:{},cardHistory:{},cardChart:{view:'price',grade:null,range:'1y',era:false},listings:{},grading:null,market:{tab:'overview',grade:'psa10',weight:'eq',data:{},error:null,index:null,period:'ret_30d',sorts:{},query:'',minCards:5,limit:100,memberLimit:100,memberSort:{key:'price',dir:-1},range:'1y',era:null,lifeSets:{},charView:'board',heatBy:'set'},movers:{period:'week',grade:'psa10',data:{},error:null},invest:{grade:'psa10',data:{},error:null}};
 let toastTimer,selectionController;
 // Crashes in the page are sent to the server, which forwards them to Sentry only when SENTRY_DSN is set. At most 5 per page load.
 let crashReports=0;
@@ -411,7 +411,7 @@ function marketSection(c,m){
  // Selling today: the sold median (or guide) less the fees and shipping set in Price check's cost assumptions.
  const sale=analyze(m,g).fair??x.price,costs=userCosts(),net=netProceeds(sale,costs);
  const sell=sale>0?`<div class="sell-side"><h4>If you sold today</h4><p><span>${money(sale)} ${analyze(m,g).fair?'sold median':'guide'}</span><span>− ${money(saleFee(sale,costs)+(costs.shippingOut||0)+(costs.holdingCost||0))} fees &amp; shipping</span><b>= ${money(net)} to you</b></p>${presetPicker()}<p class="score-note">${esc(costs.label)}${costs.preset?'':'. Fees vary by marketplace'}. Shipping and other costs are under Price check's cost assumptions.</p></div>`:'';
- return `<div class="detail-section card-metrics"><div class="section-heading"><h3>Market metrics</h3><small>${shortGrade(g)} · guide prices · ${date(x.as_of)}</small></div>${rets}${range}${stats}${context}${sell}${g==='raw'?gradingView(c,m,d.grades):''}</div>`;
+ return `<div class="detail-section card-metrics"><div class="section-heading"><h3>Market metrics</h3><small>${shortGrade(g)} · guide prices · ${date(x.as_of)}</small></div>${rets}${range}${stats}${context}${sell}${g==='raw'?gradingView(c,m,d.grades):''}${c.eligible?signalForm(c.id,g,CARD_SIGNALS,'card'):''}</div>`;
 }
 // Live listings: how many copies are for sale now and the cheapest against fair value (sold median, or the
 // guide). Checked on request because each check is one eBay or SerpApi call.
@@ -434,7 +434,8 @@ async function checkListings(c,force=false){
 function wireCardMetrics(){
  const box=$('#detail');if(!box?.querySelectorAll)return;
  box.querySelectorAll('[data-open-market]').forEach(b=>b.onclick=()=>{const id=b.dataset.openMarket;state.view='market';state.market.tab=({char:'char',set:'set',tier:'tier',artist:'artist'})[id.split(':')[1]]||'overview';state.market.grade=viewGrade();state.marketLang=id.split(':')[0];state.market.index=id;updateView();openIndex(id);});
- wirePresets(box);
+ wirePresets(box);wireSignalForms(box);
+ if(!state.signals)loadSignals(true);
  const c=shownCard(),chk=box.querySelector('#check-listings');if(chk&&c)chk.onclick=()=>checkListings(c,!!state.listings[c.id+'|'+viewGrade()]?.data);
  const setup=box.querySelector('#listings-setup');if(setup)setup.onclick=()=>{state.view='alerts';updateView();};
  box.querySelectorAll('[data-grading]').forEach(input=>input.onchange=()=>{const v=Number(input.value);if(!(v>=0&&v<=10000))return;state.grading={...(state.grading||savedGrading()),[input.dataset.grading]:v};try{localStorage.setItem(GRADING_KEY,JSON.stringify(state.grading));}catch{}renderDetail();});
@@ -786,10 +787,60 @@ function openDexDialog(entry){
 function applyDex(r){state.dex.info=null;state.dex.entries=r.collection;state.dex.markets={...state.dex.markets,...(r.markets||{})};state.dex.loaded=true;stats();if(state.view==='dex')renderDex();else{renderList();renderDetail();}}
 
 // ---------- Alerts ----------
-async function loadAlerts(quiet){try{const r=await request('/api/alerts');applyAlerts(r,quiet);}catch(e){if(!quiet)error(e.message);}}
+async function loadAlerts(quiet){try{const r=await request('/api/alerts');applyAlerts(r,quiet);}catch(e){if(!quiet)error(e.message);}loadSignals(quiet);}
+// The Alerts page's market alerts: what fired, and every rule.
+function marketAlertsPanel(){
+ const sig=state.signals;if(!sig)return `<div class="panel-sub"><h3>Market alerts</h3>${loadingBox('Loading…')}</div>`;
+ const open=t=>/^(?:en|ja):/.test(t)?`data-sig-index="${esc(t)}"`:`data-sig-card="${esc(t)}"`;
+ const events=sig.events.length?`<div class="signal-events">${sig.events.slice(0,30).map(e=>`<article class="signal-event ${e.seen?'':'unseen'}"><span class="signal-kind">${esc(SIGNAL_TEXT[e.kind]||e.kind)}</span><button class="link-button" ${open(e.target)} data-sig-grade="${e.grade}" data-sig-seen="${e.id}">${esc(e.title)}</button><small>${ago(e.fired_at)}</small><button class="icon-button" data-sig-dismiss="${e.id}" aria-label="Dismiss">×</button></article>`).join('')}</div>`:'<p class="sales-note">Nothing has fired yet.</p>';
+ const rules=sig.rules.length?`<ul class="signal-rules all">${sig.rules.map(r=>`<li><button class="link-button" ${open(r.target)} data-sig-grade="${r.grade}">${esc(r.name)}</button><span class="muted">${/^(?:en|ja):/.test(r.target)?'':gradeNames[r.grade]+' · '}${esc(ruleText(r))}</span>${r.fired_at?`<small>fired ${ago(r.fired_at)}</small>`:''}<button class="link-button" data-signal-remove="${r.id}">Remove</button></li>`).join('')}</ul>`:'<p class="sales-note">Add market alerts from a card\'s Market metrics or an index page: price levels, % moves, new 52-week highs and lows, population jumps, unusual sales volume, spread widening, index moves and Pokémon demand rank.</p>';
+ return `<div class="panel-sub market-alerts"><div class="sub-head"><h3>Market alerts${sig.unseen?` <span class="new-chip">${sig.unseen} new</span>`:''}</h3><div class="inline-actions"><button class="button" id="sig-seen" ${sig.unseen?'':'disabled'}>Mark seen</button><button class="button" id="sig-check">Check now</button></div></div>${events}<h4>Your market alerts (${sig.rules.length})</h4>${rules}</div>`;
+}
+function wireMarketAlerts(view){
+ const go=b=>{const g=b.dataset.sigGrade;if(b.dataset.sigSeen)send('/api/signals','PATCH',{id:Number(b.dataset.sigSeen)}).then(r=>{state.signals=sigShape(r);alertBadge();}).catch(()=>{});
+  if(b.dataset.sigIndex){const id=b.dataset.sigIndex;state.view='market';state.market.grade=g;state.marketLang=id.split(':')[0];state.market.tab=({char:'char',set:'set',tier:'tier',artist:'artist'})[id.split(':')[1]]||'overview';updateView();openIndex(id);}
+  else openCard(b.dataset.sigCard,g);};
+ view.querySelectorAll('[data-sig-card],[data-sig-index]').forEach(b=>b.onclick=()=>go(b));
+ view.querySelectorAll('[data-sig-dismiss]').forEach(b=>b.onclick=()=>signalAction('PATCH',{id:Number(b.dataset.sigDismiss),dismissed:true}));
+ view.querySelectorAll('.market-alerts [data-signal-remove]').forEach(b=>b.onclick=()=>signalAction('DELETE',{id:Number(b.dataset.signalRemove)}));
+ const seen=view.querySelector('#sig-seen');if(seen)seen.onclick=()=>signalAction('PATCH',{all:'seen'});
+ const check=view.querySelector('#sig-check');if(check)check.onclick=async()=>{const before=state.signals?.events.length||0;try{state.signals=sigShape(await send('/api/signals/check','POST',{}));alertBadge();renderAlerts();const n=state.signals.events.length-before;toast(n>0?n+' market alert'+(n===1?'':'s')+' fired.':'Checked. Nothing new.');}catch(e){error(e.message);}};
+}
+// ---------- Market alerts ----------
+// Rules on a card's or index's metrics (/api/signals), checked by the server after every metrics rebuild.
+const SIGNAL_TEXT={price:'Price level',move:'Price move',pop:'Population jump',volume:'Unusual volume',spread:'Spread widening',extreme:'52-week high or low',rank:'Demand rank'};
+async function loadSignals(quiet){
+ const before=new Set((state.signals?.events||[]).map(e=>e.id)),had=!!state.signals;
+ try{state.signals=sigShape(await request('/api/signals'));}catch(e){state.signals??={rules:[],events:[],unseen:0,failed:true};if(!quiet)error(e.message);return;}
+ if(had&&quiet){const fresh=state.signals.events.filter(e=>!before.has(e.id)&&!e.seen);if(fresh.length)toast(fresh.length>1?fresh.length+' market alerts':fresh[0].title);}
+ alertBadge();if(state.view==='alerts')renderAlerts();else if(state.selected)renderDetail();
+}
+function alertBadge(){const n=(state.alerts.data?.unseen||0)+(state.signals?.unseen||0),badge=$('#alert-count');if(!badge)return;badge.textContent=n;badge.hidden=!n;}
+const sigShape=r=>({...r,rules:r?.rules||[],events:r?.events||[],unseen:r?.unseen||0});
+async function signalAction(method,body){try{state.signals=sigShape(await send('/api/signals',method,body));alertBadge();if(state.view==='alerts')renderAlerts();else if(state.view==='market')renderMarket();else renderDetail();return true;}catch(e){error(e.message);return false;}}
+const ruleText=r=>{const p=r.params;return r.kind==='price'?`Guide ${p.dir} ${money(p.level)}`:r.kind==='move'?`${p.dir==='up'?'Up':p.dir==='down'?'Down':'Up or down'} ${Math.round(p.pct*100)}% over ${p.period==='7d'?'7':'30'} days`:r.kind==='pop'?`PSA population +${Math.round(p.pct*100)}%`:r.kind==='volume'?`Sales ${p.mult}× a usual month`:r.kind==='spread'?`PSA 10 / 9 spread +${Math.round(p.pct*100)}%`:r.kind==='extreme'?'New 52-week high or low':`Demand rank moves ${p.places} places`;};
+// The card panel's alert form: kind, one number, and this card's rules for the shown grade.
+const CARD_SIGNALS=[['price-above','Price rises above','$',null],['price-below','Price falls below','$',null],['move-30d','Moves over 30 days','%',20],['move-7d','Moves over 7 days','%',10],['extreme','New 52-week high or low','',null],['pop','PSA population grows','%',10],['volume','Sales reach × a usual month','×',2],['spread','PSA 10 / 9 spread widens','%',20]];
+function signalForm(target,grade,kinds,id){
+ const sig=state.signals;if(!sig)return '';
+ const mine=sig.rules.filter(r=>r.target===target&&r.grade===grade),pick=state.signalPick?.[id]||kinds[0][0],k=kinds.find(x=>x[0]===pick)||kinds[0];
+ return `<div class="signal-form" data-signal-form="${id}" data-target="${esc(target)}" data-grade="${grade}"><h4>Market alerts</h4><div class="signal-row"><select data-signal-kind aria-label="Alert type">${kinds.map(([v,l])=>`<option value="${v}" ${v===k[0]?'selected':''}>${esc(l)}</option>`).join('')}</select>${k[2]?`<span class="unit-input">${k[2]==='$'?'<i>$</i>':''}<input type="number" step="any" min="0" data-signal-value value="${k[3]??''}" aria-label="Value"${k[2]==='$'?' placeholder="Price"':''}>${k[2]!=='$'?`<i>${k[2]}</i>`:''}</span>`:''}<button class="button" data-signal-add>Add alert</button></div>${mine.length?`<ul class="signal-rules">${mine.map(r=>`<li><span>${esc(ruleText(r))}</span>${r.fired_at?`<small>last fired ${ago(r.fired_at)}</small>`:''}<button class="link-button" data-signal-remove="${r.id}" aria-label="Remove alert">Remove</button></li>`).join('')}</ul>`:''}<p class="score-note">Checked after each metrics rebuild (nightly); sent to your ntfy topic or Discord webhook from Alert settings.</p></div>`;
+}
+function wireSignalForms(root){
+ root.querySelectorAll?.('[data-signal-form]').forEach(f=>{
+  const id=f.dataset.signalForm,kind=f.querySelector('[data-signal-kind]'),value=f.querySelector('[data-signal-value]');
+  kind.onchange=()=>{(state.signalPick||={})[id]=kind.value;state.view==='market'?renderMarket():renderDetail();};
+  f.querySelector('[data-signal-add]').onclick=()=>{
+   const k=kind.value,v=value?Number(value.value):null;if(value&&!(v>0)){toast('Enter a number first.');return;}
+   const [type,arg]=k.split('-'),params=type==='price'?{level:v,dir:arg}:type==='move'?{pct:v/100,period:arg||'30d',dir:'either'}:type==='pop'||type==='spread'?{pct:v/100}:type==='volume'?{mult:v}:type==='rank'?{places:v}:{};
+   signalAction('POST',{kind:type,target:f.dataset.target,grade:f.dataset.grade,params}).then(ok=>{if(ok)toast('Alert added.');});
+  };
+  f.querySelectorAll('[data-signal-remove]').forEach(b=>b.onclick=()=>signalAction('DELETE',{id:Number(b.dataset.signalRemove)}));
+ });
+}
 function applyAlerts(r,quiet){
  const before=state.alerts.known;r.affiliate=r.affiliate||state.alerts.data?.affiliate;r.searches=r.searches||state.alerts.data?.searches||[];state.alerts.data=r;state.alerts.known=new Set(r.alerts.map(a=>a.id));
- const badge=$('#alert-count');badge.textContent=r.unseen;badge.hidden=!r.unseen;
+ alertBadge();
  if(before&&quiet){const fresh=r.alerts.filter(a=>!before.has(a.id)&&!a.seen);if(fresh.length){const a=fresh[0],c=cardById(a.card_id);toast((fresh.length>1?fresh.length+' new alerts: ':'New alert: ')+(c?.name||'')+' '+money(a.total));
   if(typeof Notification!=='undefined'&&Notification.permission==='granted')for(const x of fresh.slice(0,3)){const cc=cardById(x.card_id);const n=new Notification((cc?.name||'Watched card')+' · '+gradeNames[x.grade]+' at '+money(x.total),{body:x.title,icon:cc?.image});n.onclick=()=>window.open(x.url,'_blank','noopener');}}}
  if(state.view==='alerts')renderAlerts();
@@ -838,6 +889,7 @@ function renderAlerts(){
  <section class="panel alerts-main" aria-label="Listings at or under your limit"><div class="panel-head"><div><h2>Listings at your price</h2><p class="status-line">${status}${run?.error?` <span class="warn">· ${esc(run.error)}</span>`:''}</p></div><div class="holdings-tools"><button class="button" id="alerts-seen" ${d.unseen?'':'disabled'}>Mark all seen</button><button class="button primary" id="alerts-scan" ${configured?'':'disabled'}>${state.alerts.busy?'Scanning…':'Scan now'}</button></div></div>
   ${d.alerts.length?`<div class="alert-list">${d.alerts.map(a=>{const c=cardById(a.card_id),under=a.market_price>0?(1-a.total/a.market_price):null;return `<article class="alert-row ${a.seen?'':'unseen'}"><img src="${esc(a.image||c?.image||'')}" alt="" loading="lazy"><div class="alert-body"><div class="alert-top"><strong>${esc(c?.name||a.card_id)}</strong><span class="grade-chip ${a.grade}">${gradeNames[a.grade].replace(' · near mint','')}</span>${a.seen?'':'<span class="new-chip">New</span>'}</div><p class="alert-title">${esc(a.title)}</p><p class="alert-meta">${esc(c?.setName||'')} · #${esc(c?.numberLabel||'')} · ${esc(a.buying_option||'')}${a.seller?' · '+esc(a.seller):''} · found ${ago(a.found_at)}</p></div><div class="alert-price"><strong>${money(a.total)}</strong><small>${a.shipping==null?'+ shipping':a.shipping>0?'incl. '+money(a.shipping)+' shipping':'free shipping'}</small><small>Limit ${money(a.limit_price)}${under>0?` · <b class="pl up">${Math.round(under*100)}% under market</b>`:''}</small><div class="alert-actions"><a class="button primary" href="${esc(a.url)}" target="_blank" rel="noopener noreferrer" data-open-alert="${a.id}">View listing</a><button class="button" data-dismiss="${a.id}" aria-label="Dismiss alert for ${esc(a.title)}">Dismiss</button></div></div></article>`;}).join('')}</div>`
   :`<div class="empty-state"><strong>${configured?'No listings at your price yet.':'Alerts are ready when you are.'}</strong><p>${configured?'New listings of your watched cards at or under your limit will appear here.':'Choose SerpApi in settings if your eBay developer registration is unavailable. Add your own provider key to scan live listings.'}</p></div>`}
+  ${marketAlertsPanel()}
   <div class="panel-sub" id="manual-search-panel"></div>
   <div class="panel-sub"><h3>Your watched searches</h3><p class="sales-note">Search the exact card and grade, or use your limit as an item-price filter. Best Match and Buy It Now are the defaults. Manual searches use no SerpApi credits. Check shipping and the card photos before buying.</p>
   ${d.searches.length?`<div class="search-list">${d.searches.map(x=>{const c=cardById(x.card_id);return c?`<div class="search-row"><img src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><b>${esc(c.name)}</b><small>${esc(c.setName)} · ${numberCaption(c)} · ${gradeNames[x.grade]}</small><button type="button" class="link-button" data-edit-search="${c.id}" data-search-grade="${x.grade}">Edit search</button></span><span class="search-limit">${x.limit!=null?money(x.limit)+'<small>'+esc(x.limit_source)+'</small>':'<small>No limit yet</small>'}</span><a class="button" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer${d.affiliate?.enabled?' sponsored':''}">Search eBay</a>${x.limitedUrl?`<a class="link-button search-at-limit" href="${esc(x.limitedUrl)}" target="_blank" rel="noopener noreferrer${d.affiliate?.enabled?' sponsored':''}">At my limit</a>`:''}</div>`:'';}).join('')}</div>`:'<p class="sales-note">Star a card in Browse to watch it.</p>'}${d.affiliate?.enabled?'<p class="sales-note">Affiliate links: we may earn a commission from qualifying purchases.</p>':''}</div>
@@ -849,6 +901,8 @@ function renderAlerts(){
    <label class="toggle"><input type="checkbox" id="al-enabled" ${s.enabled?'checked':''}><span>Scan for new listings automatically</span></label>
    <label class="field">Check every<select id="al-interval">${[15,30,60,120,240].map(v=>`<option value="${v}" ${s.intervalMinutes===v?'selected':''}>${v<60?v+' minutes':v/60+' hour'+(v>60?'s':'')}</option>`).join('')}</select></label>
    <label class="toggle"><input type="checkbox" id="al-suggested" ${s.useSuggested?'checked':''}><span>Use the suggested target when I haven't set a limit</span></label>
+   <label class="toggle"><input type="checkbox" id="al-fair" ${s.useFair?'checked':''}><span>Too few sales for a target? Alert at a discount to fair value (the guide)</span></label>
+   <label class="field">Discount to fair value<span class="unit-input"><input id="al-fair-discount" type="number" min="0" max="50" step="1" value="${Math.round((s.fairDiscount??.15)*100)}"><i>%</i></span></label>
    <label class="toggle"><input type="checkbox" id="al-auctions" ${s.includeAuctions?'checked':''}><span>Include auctions (current bid)</span></label>
    <fieldset><legend>eBay API keys ${s.ebay.configured?'<span class="ok-chip">Saved</span>':''}</legend><p class="field-hint">Create a free keyset at <a href="https://developer.ebay.com/my/keys" target="_blank" rel="noopener noreferrer">developer.ebay.com</a> and paste the Production App ID and Cert ID. They stay in your local database.</p>
     <label class="field">Client ID (App ID)<input id="al-client" type="text" autocomplete="off" spellcheck="false" placeholder="${s.ebay.clientId?esc(s.ebay.clientId):'YourName-PrimalWa-PRD-…'}"></label>
@@ -865,7 +919,7 @@ function renderAlerts(){
  renderManualSearch();
  view.querySelectorAll('[data-edit-search]').forEach(b=>b.onclick=()=>chooseManualCard(b.dataset.editSearch,b.dataset.searchGrade));
  const fail=t=>{const e=$('#al-error');e.textContent=t;e.hidden=!t;};
- $('#alert-settings').onsubmit=async e=>{e.preventDefault();fail('');const body={provider:$('#al-provider').value||s.provider||'ebay',enabled:$('#al-enabled').checked,intervalMinutes:Number($('#al-interval').value),useSuggested:$('#al-suggested').checked,includeAuctions:$('#al-auctions').checked,notify:{ntfy:$('#al-ntfy').value.trim(),discord:$('#al-discord').value.trim()}};
+ $('#alert-settings').onsubmit=async e=>{e.preventDefault();fail('');const body={provider:$('#al-provider').value||s.provider||'ebay',enabled:$('#al-enabled').checked,intervalMinutes:Number($('#al-interval').value),useSuggested:$('#al-suggested').checked,useFair:$('#al-fair').checked,fairDiscount:Math.min(50,Math.max(0,Number($('#al-fair-discount').value)||0))/100,includeAuctions:$('#al-auctions').checked,notify:{ntfy:$('#al-ntfy').value.trim(),discord:$('#al-discord').value.trim()}};
   const serpKey=$('#al-serpapi').value.trim();if(serpKey)body.serpapi={apiKey:serpKey};
   const id=$('#al-client').value.trim(),secret=$('#al-secret').value.trim();if(id||secret)body.ebay={clientId:id||undefined,clientSecret:secret};if(id&&!secret&&!s.ebay.hasSecret)return fail('Add the Client Secret too.');if(!id&&secret&&!s.ebay.clientId)return fail('Add the Client ID too.');
   if(body.ebay&&!body.ebay.clientId)delete body.ebay.clientId;
@@ -878,6 +932,7 @@ function renderAlerts(){
  $('#alerts-seen').onclick=async()=>{try{applyAlerts(await send('/api/alerts','PATCH',{all:'seen'}));}catch(err){toast(err.message);}};
  view.querySelectorAll('[data-dismiss]').forEach(b=>b.onclick=async()=>{try{applyAlerts(await send('/api/alerts','PATCH',{id:Number(b.dataset.dismiss),dismissed:true}));}catch(err){toast(err.message);}});
  view.querySelectorAll('[data-open-alert]').forEach(a=>a.addEventListener('click',()=>send('/api/alerts','PATCH',{id:Number(a.dataset.openAlert)}).then(r=>applyAlerts(r)).catch(()=>{})));
+ wireMarketAlerts(view);
  wireImages();
 }
 
@@ -1472,12 +1527,13 @@ function renderIndexPage(view){
  const sort=m.memberSort,cols=[['name','Card',r=>{const c=cardById(r.card_id);return c?`<span class="member-card"><img src="${c.image}"${c.imageAlt?` data-alt="${c.imageAlt}"`:''} alt="" loading="lazy"><span><b>${esc(c.name)}</b><small>${esc(c.setName)} · ${numberCaption(c)}</small></span></span>`:esc(r.card_id);}],['price','Price',r=>money(r.price),{num:true}],['ret_30d','30D',r=>retCell(r.ret_30d),{num:true}],['ret_1y','1Y',r=>retCell(r.ret_1y),{num:true}],['premium','vs peers',r=>times(r.premium),{num:true,title:'Price over the median of same-era, same-rarity cards'}],['sales_90d','Sales 90D',r=>r.sales_90d??'—',{num:true}],['days_since_sale','Last sale',r=>r.days_since_sale==null?'—':r.days_since_sale+' d',{num:true}]];
  const members=sortRows(d.members.map(r=>({...r,name:cardById(r.card_id)?.name||r.card_id})),sort);
  const carry=kind==='char'||kind==='artist'?premiumSources(d):'';
- view.innerHTML=marketHead()+back+`<section class="panel index-page"><div class="panel-head"><div><span class="index-kind">${esc(KIND_LABEL[kind]||kind)} · ${shortGrade(m.grade)}</span><h2>${esc(d.name)}</h2><p>Level ${x.level.toFixed(1)} (value-weighted, from 100 at its start) · as of ${date(x.as_of)}</p></div>${ranges}</div>${stats}<div class="panel-sub index-chart">${chart}</div>${premChart}</section>${carry}
+ view.innerHTML=marketHead()+back+`<section class="panel index-page"><div class="panel-head"><div><span class="index-kind">${esc(KIND_LABEL[kind]||kind)} · ${shortGrade(m.grade)}</span><h2>${esc(d.name)}</h2><p>Level ${x.level.toFixed(1)} (value-weighted, from 100 at its start) · as of ${date(x.as_of)}</p></div>${ranges}</div>${stats}<div class="panel-sub index-chart">${chart}</div>${premChart}${state.signals?`<div class="panel-sub">${signalForm(id,m.grade,[['move-30d','Index moves over 30 days','%',10],['move-7d','Index moves over 7 days','%',5],...(kind==='char'?[['rank','Demand rank moves','places',5]]:[])],'index')}</div>`:''}</section>${carry}
   <section class="panel"><div class="panel-head"><div><h2>Cards</h2><p>${members.length.toLocaleString()} cards · select one to open it.</p></div></div>${marketTable(members.slice(0,m.memberLimit),cols,sort,{id:'m-members',rowAttr:r=>`data-card="${esc(r.card_id)}"`})}${members.length>m.memberLimit?`<button class="button show-more" id="m-more-members">Show more</button>`:''}</section>`;
  wireMarket(view);
  view.querySelectorAll('[data-m-range]').forEach(b=>b.onclick=()=>{m.range=b.dataset.mRange;renderMarket();});
  wireTable(view,'m-members',sort,renderMarket,tr=>openCard(tr.dataset.card,m.grade));
  view.querySelectorAll('.entry-card').forEach(b=>b.onclick=()=>openCard(b.dataset.card,m.grade));
+ wireSignalForms(view);if(!state.signals)loadSignals(true);
  const more=view.querySelector('#m-more-members');if(more)more.onclick=()=>{m.memberLimit+=100;renderMarket();};
 }
 // For a Pokémon (or artist): which eras, sets and rarity tiers carry its premium, and the cheapest way in.

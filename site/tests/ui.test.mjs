@@ -604,3 +604,19 @@ test('Dex: sold entries count as realized P/L, and analytics show allocation, ri
  ui.run("state.dex.tab='what';state.dex.what={dim:'market',key:'',move:-.2};renderDex()");html=ui.e('#dex-view').innerHTML;
  assert.match(html,/\$1,150\.00/,'1,000 × (1 − 0.3) + 500 × (1 − 0.1)');
 });
+test('Market alerts: added from the card panel, listed with what fired on the Alerts page, counted in the badge',async()=>{
+ const ui=workspace();
+ const sig={rules:[{id:3,kind:'price',target:'base1-4',grade:'psa10',params:{level:30000,dir:'above'},name:'Charizard (Base Set 4/102)',fired_at:new Date().toISOString()}],events:[{id:9,kind:'price',target:'base1-4',grade:'psa10',title:'Charizard (Base Set 4/102) · PSA 10: Guide $31,000.00, above your $30,000.00 level',fired_at:new Date().toISOString(),seen:0}],unseen:1};
+ const posted=[];ui.responses['/api/signals']=()=>sig;
+ ui.responses['/api/alerts']={alerts:[],unseen:2,settings:{enabled:false,intervalMinutes:30,ebay:{configured:false},notify:{ntfy:'',discord:''},useFair:true,fairDiscount:.2},searches:[],live:false};
+ await ui.run('init()');for(let i=0;i<4;i++)await new Promise(r=>setImmediate(r));
+ assert.equal(ui.e('#alert-count').textContent,3,'two listing alerts and one market alert');
+ ui.responses['/api/metrics']={card_id:'base1-4',run:{as_of:'2026-10-14'},grades:{psa10:{price:24000,as_of:'2026-10-14'}},indices:[]};
+ ui.run("state.grade='psa10';state.selected='base1-4';renderDetail()");for(let i=0;i<3;i++)await new Promise(r=>setImmediate(r));
+ let html=ui.e('#detail').innerHTML;assert.match(html,/Market alerts/);assert.match(html,/Guide above \$30,000\.00/);assert.match(html,/Price rises above/);
+ ui.run("state.view='alerts';renderAlerts()");html=ui.e('#alerts-view').innerHTML;
+ assert.match(html,/Market alerts/);assert.match(html,/1 new/);assert.match(html,/above your \$30,000\.00 level/);assert.match(html,/Your market alerts \(1\)/);
+ assert.match(html,/id="al-fair" checked/);assert.match(html,/id="al-fair-discount"[^>]*value="20"/);
+ assert.equal(ui.run("ruleText({kind:'move',params:{pct:.1,period:'7d',dir:'either'}})"),'Up or down 10% over 7 days');
+ await ui.run("signalAction('POST',{kind:'extreme',target:'base1-4',grade:'psa10',params:{}})");assert.ok(ui.calls.filter(u=>u==='/api/signals').length>=2);
+});

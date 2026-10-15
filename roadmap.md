@@ -205,15 +205,19 @@ The **Market → Overview** tab.
     value-weighted beta and volatility, share of value with no sales in 90 days.
   - [x] What-if: a Pokémon, set, era, grade or tier moving by a chosen %, or the whole market with each card
     scaled by its beta.
-- Alert types:
-  - Price crosses a level
-  - % move in a period
-  - Population jump
-  - Unusual sales volume
-  - PSA 10 / PSA 9 spread widening
-  - New 52-week high or low
-  - A Pokémon's or set's index moves by a chosen % or its demand rank jumps
-  - A live listing appears below fair value (not only below a manual buy limit)
+- [x] Alert types (market alerts, `lib/signals.mjs`, `/api/signals`; set from a card's Market metrics or an index
+  page, listed with what fired on the Alerts page). Checked after every metrics rebuild (so nightly once the
+  update hour is set) and sent to the account's ntfy topic / Discord webhook. Each rule keeps a baseline or
+  an armed flag, so it fires once per crossing, never on the reading it was set at.
+  - [x] Price crosses a level
+  - [x] % move in a period (7 or 30 days; up, down or either)
+  - [x] Population jump (since set or last fired)
+  - [x] Unusual sales volume (30-day sales at a multiple of the 90-day monthly average, 3+ sales)
+  - [x] PSA 10 / PSA 9 spread widening
+  - [x] New 52-week high or low
+  - [x] A Pokémon's or set's index moves by a chosen % (typical card), or a Pokémon's demand rank moves N places
+  - [x] A live listing below fair value: with too few sales for a suggested target, live listing alerts can use
+    a set discount to fair value (the guide); off by default (Alert settings).
 
 ## Later (needs new data sources)
 

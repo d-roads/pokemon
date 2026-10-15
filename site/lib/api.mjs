@@ -9,7 +9,8 @@ import {topMovers,PERIODS} from './movers.mjs';
 import {potentialInvestments} from './invest.mjs';
 import {investmentScores} from './score.mjs';
 import {validateEntry} from './portfolio.mjs';
-import {DEFAULT_SETTINGS,normalizeSettings,updateSettings,publicSettings,hasListingAccess,runScan,sendNotifications,ebaySearchUrl,alertLimit,liveListings} from './alerts.mjs';
+import {DEFAULT_SETTINGS,normalizeSettings,updateSettings,publicSettings,hasListingAccess,runScan,sendNotifications,ebaySearchUrl,alertLimit,liveListings,sendMessages} from './alerts.mjs';
+import {normalizeRule,createRule,listRules,listEvents,checkSignals,ensureSignalTables} from './signals.mjs';
 import {isPlainObject,oneOf,optionalPrice,boundedText,optionalText,shapeError} from './schema.mjs';
 import {reportError} from './report.mjs';
 import {analyze} from './analysis.mjs';
@@ -398,7 +399,12 @@ export function queueRebuild(env){
  if(!env.BACKGROUND_JOBS)return null;
  const db=database(env);
  if(rebuildState().running){rebuildAgain=true;return null;}
- const p=ensureColumns(db).then(()=>rebuildMetrics(db,{cards,snapshots,log:m=>console.log(m)}));
+ const p=ensureColumns(db).then(()=>rebuildMetrics(db,{cards,snapshots,log:m=>console.log(m)})).then(async r=>{
+  // Market alerts are checked against the new metrics, and each account is notified of what fired.
+  try{const fired=await checkSignals(db,{name:targetName});for(const [user,list] of fired){if(!env.NETWORK_DISABLED)await sendMessages(list.map(e=>({title:e.title,body:e.body})),await readSettings(db,user),env.fetch||fetch).catch(()=>{});}if(fired.size)console.log(`Market alerts: ${[...fired.values()].flat().length} fired.`);}
+  catch(e){console.error('Market alerts:',e.message);reportError(env,e,{source:'signals'});}
+  return r;
+ });
  p.then(r=>console.log(`Metrics rebuilt: ${r.cards} cards, ${r.indices} indices, ${r.points} new daily prices, in ${Math.round(r.ms/1000)} s.`),e=>{console.error('Metrics:',e.message);reportError(env,e,{source:'metrics'});})
   .finally(()=>{if(rebuildAgain){rebuildAgain=false;queueRebuild(env);}});
  return p;
@@ -434,6 +440,8 @@ async function screenData(db,lang,grade){
  return {rows:screenMemo.get(key),run};
 }
 const readScreens=async(db,user)=>((await db.prepare('SELECT id,name,spec,updated_at FROM screens WHERE user_id = ? ORDER BY name').bind(user).all()).results||[]).map(r=>({id:r.id,name:r.name,updated_at:r.updated_at,screen:JSON.parse(r.spec)}));
+// A display name for a card or index id.
+function targetName(id){if(/^(?:en|ja):[a-z0-9]+:/.test(id))return indexName(id,{sets,series});const c=cardById.get(id);return c?c.name+' ('+c.setName+' '+c.numberLabel+')':id;}
 // Every index's member cards, worked out once from the catalog.
 let memberMap=null;
 function membersOf(id){
@@ -564,6 +572,28 @@ export async function api(request,env,ctx){
    const collection=await readCollection(db,user),markets={};
    if(url.searchParams.get('markets')!=='0')for(const id of new Set(collection.map(e=>e.card_id)))markets[id]=await fullMarket(db,id);
    return json({collection,markets});
+  }
+  if(path==='/api/signals'||path==='/api/signals/check'){
+   // Market alerts: rules on card and index metrics, and the events they fired.
+   if(!user)return json({error:'Sign in to use alerts.'},401);
+   await ensureSignalTables(db);
+   if(path==='/api/signals/check'){if(request.method!=='POST')return json({error:'Method not allowed.'},405);await checkSignals(db,{user,name:targetName});}
+   else if(request.method==='POST'){
+    let body;try{body=await input(request);}catch{return json({error:'The alert was invalid.'},400);}
+    const {rule,errors}=normalizeRule(body,{cardOk:id=>!!cardById.get(id)?.eligible,indexOk:id=>/^(?:en|ja):(?:all|top100|era|set|char|tier|artist):.{1,120}$/.test(id)});
+    if(errors.length)return json({error:errors[0],errors},400);
+    const r=await createRule(db,user,rule);if(r.error)return json({error:r.error},400);
+   }else if(request.method==='DELETE'){
+    let body;try{body=await input(request);}catch{return json({error:'The request was invalid.'},400);}
+    await db.prepare('DELETE FROM metric_alerts WHERE id = ? AND user_id = ?').bind(Number(body.id),user).run();
+   }else if(request.method==='PATCH'){
+    let body;try{body=await input(request);}catch{return json({error:'The request was invalid.'},400);}
+    if(body.all==='seen')await db.prepare('UPDATE metric_events SET seen = 1 WHERE user_id = ?').bind(user).run();
+    else if(Number.isInteger(body.id))await db.prepare(`UPDATE metric_events SET seen = 1${body.dismissed?', dismissed = 1':''} WHERE id = ? AND user_id = ?`).bind(body.id,user).run();
+    else return json({error:'Choose an alert.'},400);
+   }else if(request.method!=='GET')return json({error:'Method not allowed.'},405);
+   const rules=(await listRules(db,user)).map(r=>({...r,name:targetName(r.target)}));
+   return json({rules,...await listEvents(db,user)});
   }
   if(path==='/api/portfolio'&&request.method==='GET'){
    // What the Dex analytics need beyond prices: each held card's groups, its metrics for its grade, and
